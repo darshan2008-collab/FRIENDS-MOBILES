@@ -4287,5 +4287,96 @@ img {
   margin-bottom: 0 !important;
 }
 
+/* =========================================================
+   PRODUCT CARD TOUCH & TAP ANIMATIONS (Mobile & Desktop)
+   ========================================================= */
+
+/* Product Cards Touch & Hover Transition Base */
+.product-card,
+.shop-product-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  will-change: transform, box-shadow;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Hover State (Desktop / Touch Release) */
+.product-card:hover,
+.shop-product-card:hover {
+  transform: translateY(-5px) scale(1.01) !important;
+  box-shadow: 0 12px 30px rgba(255, 85, 0, 0.15) !important;
+  border-color: rgba(255, 85, 0, 0.35) !important;
+}
+
+/* Active Touch / Tap State (Instant Feedback on Mobile Screen Tap) */
+.product-card:active,
+.shop-product-card:active {
+  transform: scale(0.96) translateY(2px) !important;
+  box-shadow: 0 4px 15px rgba(255, 85, 0, 0.25) !important;
+  border-color: #FF5500 !important;
+  transition-duration: 0.1s !important;
+}
+
+/* Product Image Zoom on Touch & Hover */
+.prod-img-wrap img,
+.card-image-box img {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  will-change: transform;
+}
+
+.product-card:hover .prod-img-wrap img,
+.shop-product-card:hover .card-image-box img {
+  transform: scale(1.08) rotate(1deg) !important;
+}
+
+.product-card:active .prod-img-wrap img,
+.shop-product-card:active .card-image-box img {
+  transform: scale(1.04) !important;
+}
+
+/* Action Buttons Tap Micro-Animations */
+.wishlist-icon-btn,
+.add-cart-btn,
+.wishlist-btn,
+.btn-add-cart-sm {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.2s ease,
+              box-shadow 0.2s ease !important;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wishlist-icon-btn:hover,
+.add-cart-btn:hover,
+.wishlist-btn:hover,
+.btn-add-cart-sm:hover {
+  transform: scale(1.12) !important;
+}
+
+.wishlist-icon-btn:active,
+.add-cart-btn:active,
+.wishlist-btn:active,
+.btn-add-cart-sm:active {
+  transform: scale(0.85) !important;
+  transition-duration: 0.08s !important;
+}
+
+/* Ripple Pulse Keyframes for Touch Confirmation */
+@keyframes touchPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 85, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(255, 85, 0, 0);
+  }
+}
+
+.add-cart-btn:active,
+.btn-add-cart-sm:active {
+  animation: touchPulse 0.4s ease-out;
+}
+
 
 
