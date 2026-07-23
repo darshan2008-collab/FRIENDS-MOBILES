@@ -245,18 +245,22 @@ export default function AdminModal({
       'Total Amount (INR)', 'Order Status'
     ];
 
-    const rows = orders.map(o => [
-      `"${o.orderId || ''}"`,
-      `"${o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : ''}"`,
-      `"${(o.customer?.name || '').replace(/"/g, '""')}"`,
-      `"${o.customer?.phone || ''}"`,
-      `"${o.customer?.pincode || ''}"`,
-      `"${(o.customer?.address || '').replace(/"/g, '""')}"`,
-      `"${o.paymentMethod || 'COD'}"`,
-      o.items ? o.items.length : 0,
-      o.totalAmount || 0,
-      `"${o.status || 'Order Placed'}"`
-    ]);
+    const rows = orders.map(o => {
+      const custName = (o.customer?.name || '').split('"').join('""');
+      const custAddr = (o.customer?.address || '').split('"').join('""');
+      return [
+        '"' + (o.orderId || '') + '"',
+        '"' + (o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : '') + '"',
+        '"' + custName + '"',
+        '"' + (o.customer?.phone || '') + '"',
+        '"' + (o.customer?.pincode || '') + '"',
+        '"' + custAddr + '"',
+        '"' + (o.paymentMethod || 'COD') + '"',
+        o.items ? o.items.length : 0,
+        o.totalAmount || 0,
+        '"' + (o.status || 'Order Placed') + '"'
+      ];
+    });
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
