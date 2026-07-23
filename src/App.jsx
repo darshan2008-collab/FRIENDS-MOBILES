@@ -239,12 +239,14 @@ export default function App() {
     };
 
     const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -20px 0px'
+      threshold: 0.08,
+      rootMargin: '0px 0px -15px 0px'
     };
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
-    const animElements = document.querySelectorAll('.section-title, .section-header h2, .footer-title, .promo-card');
+    const animElements = document.querySelectorAll(
+      '.section-title, .section-header, .section-header h2, .category-card, .promo-card, .product-card, .service-card, .showroom-card, .footer-column, .footer-title, .scroll-reveal'
+    );
 
     animElements.forEach((el) => observer.observe(el));
 
