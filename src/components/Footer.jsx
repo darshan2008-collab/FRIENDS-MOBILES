@@ -261,12 +261,12 @@ export default function Footer() {
         {/* Footer Bottom Bar - Amazon / Flipkart Style */}
         <div className="footer-bottom" style={{
           borderTop: '1px solid var(--border-color)',
-          paddingTop: '24px',
-          paddingBottom: '24px',
+          paddingTop: '16px',
+          paddingBottom: '12px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '20px',
+          gap: '12px',
           textAlign: 'center'
         }}>
           {/* COMPACT ULTRA-SLEEK PAYMENT BAR */}
