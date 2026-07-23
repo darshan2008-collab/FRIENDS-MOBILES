@@ -94,9 +94,10 @@ export default function Hero({ theme, slides }) {
 
           <p className="hero-desc" style={{ 
             fontWeight: '500', 
-            fontSize: '1.05rem', 
-            lineHeight: '1.6', 
-            marginBottom: '32px'
+            fontSize: 'clamp(0.78rem, 2vw, 0.88rem)', 
+            lineHeight: '1.45', 
+            marginBottom: '20px',
+            color: 'var(--text-secondary)'
           }}>
             {activeSlide.desc || "Premium Accessories, Custom Covers & Wall Photo Frames Crafted for Your Style."}
           </p>
