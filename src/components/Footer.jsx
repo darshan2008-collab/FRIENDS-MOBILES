@@ -124,20 +124,23 @@ export default function Footer() {
               </div>
             </a>
 
-            <p className="footer-desc" style={{ fontSize: '0.88rem', lineHeight: '1.65', color: 'var(--text-secondary)', marginBottom: '20px' }}>
+            <p className="footer-desc" style={{ fontSize: '0.86rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '22px', fontWeight: '500' }}>
               Karur's premier destination for original smartphones, luxury mobile accessories, 100% custom-printed back covers, and premium designer photo frames.
             </p>
 
             {/* Showroom Assurance Tags */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
-              <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CheckCircle2 size={16} color="#22c55e" /> 100% Original Brand Guarantee
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
+              <div style={{ fontSize: '0.84rem', fontWeight: '750', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px', lineHeight: '1.3' }}>
+                <CheckCircle2 size={17} color="#22c55e" style={{ flexShrink: 0 }} />
+                <span>100% Original Brand Guarantee</span>
               </div>
-              <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CheckCircle2 size={16} color="#22c55e" /> Real-time 3D Phone Case Studio
+              <div style={{ fontSize: '0.84rem', fontWeight: '750', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px', lineHeight: '1.3' }}>
+                <CheckCircle2 size={17} color="#22c55e" style={{ flexShrink: 0 }} />
+                <span>Real-time 3D Phone Case Studio</span>
               </div>
-              <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CheckCircle2 size={16} color="#22c55e" /> Pan-India Express Delivery
+              <div style={{ fontSize: '0.84rem', fontWeight: '750', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px', lineHeight: '1.3' }}>
+                <CheckCircle2 size={17} color="#22c55e" style={{ flexShrink: 0 }} />
+                <span>Pan-India Express Delivery</span>
               </div>
             </div>
 
@@ -168,7 +171,7 @@ export default function Footer() {
 
           {/* Col 2: Showroom Categories */}
           <div className="footer-col">
-            <h4 className="footer-title" style={{ fontSize: '0.92rem', fontWeight: '850', color: 'var(--text-primary)', letterSpacing: '1px', marginBottom: '20px', textTransform: 'uppercase', borderBottom: '2px solid #FF5500', display: 'inline-block', paddingBottom: '4px' }}>
+            <h4 className="footer-title">
               SHOWROOM COLLECTION
             </h4>
             <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -205,24 +208,9 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Col 3: Customer Care & Services */}
-          <div className="footer-col">
-            <h4 className="footer-title" style={{ fontSize: '0.92rem', fontWeight: '850', color: 'var(--text-primary)', letterSpacing: '1px', marginBottom: '20px', textTransform: 'uppercase', borderBottom: '2px solid #FF5500', display: 'inline-block', paddingBottom: '4px' }}>
-              CUSTOMER CARE
-            </h4>
-            <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '16px' }}>
-              <li><a href="#" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '600' }}>Help Center &amp; FAQs</a></li>
-              <li><a href="#" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '600' }}>Store Pickup &amp; Express Delivery</a></li>
-              <li><a href="#" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '600' }}>Returns &amp; Replacement Policy</a></li>
-              <li><a href="#" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '600' }}>Privacy Policy</a></li>
-              <li><a href="#" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '600' }}>Terms &amp; Conditions</a></li>
-              <li><a href="#" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '600' }}>Cancellation &amp; Refunds</a></li>
-            </ul>
-          </div>
-
-          {/* Col 4: Showroom Contact & Live Address Card */}
+          {/* Col 3: Showroom Contact & Live Address Card */}
           <div className="footer-col contact-col">
-            <h4 className="footer-title" style={{ fontSize: '0.92rem', fontWeight: '850', color: 'var(--text-primary)', letterSpacing: '1px', marginBottom: '20px', textTransform: 'uppercase', borderBottom: '2px solid #FF5500', display: 'inline-block', paddingBottom: '4px' }}>
+            <h4 className="footer-title">
               SHOWROOM LOCATION
             </h4>
 
@@ -282,8 +270,8 @@ export default function Footer() {
         {/* Footer Bottom Bar */}
         <div className="footer-bottom" style={{
           borderTop: '1px solid var(--border-color)',
-          paddingTop: '24px',
-          paddingBottom: '24px',
+          paddingTop: '16px',
+          paddingBottom: '12px',
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'center',

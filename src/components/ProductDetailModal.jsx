@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api';
 
@@ -19,6 +19,14 @@ export default function ProductDetailModal({
   const [zoomPhoto, setZoomPhoto] = useState(null);
 
   const [selectedImage, setSelectedImage] = useState('');
+  const horizontalScrollRef = useRef(null);
+
+  const scrollHorizontal = (direction) => {
+    if (horizontalScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -240 : 240;
+      horizontalScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     if (!product) return;
@@ -31,9 +39,7 @@ export default function ProductDetailModal({
   if (!product) return null;
 
   const isLiked = wishlist.includes(product.id);
-  const similarProducts = (products || []).filter(
-    p => p.category === product.category && p.id !== product.id
-  ).slice(0, 4);
+  const exploreProducts = (products || []).filter(p => p.id !== product.id);
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
@@ -91,16 +97,19 @@ export default function ProductDetailModal({
   };
 
   return (
-    <div className="cart-drawer-overlay" style={{ zIndex: 10008 }} onClick={onClose}>
+    <div className="cart-drawer-overlay" style={{ zIndex: 10008, padding: 0 }} onClick={onClose}>
       <div 
         className="cart-drawer-content" 
         onClick={(e) => e.stopPropagation()}
         style={{
-          maxWidth: '820px', /* Wide detail view layout */
-          width: '100%',
+          maxWidth: '100vw',
+          width: '100vw',
+          height: '100vh',
+          maxHeight: '100vh',
+          borderRadius: 0,
+          border: 'none',
           display: 'flex',
           flexDirection: 'column',
-          height: '100%',
           overflow: 'hidden'
         }}
       >
@@ -128,7 +137,7 @@ export default function ProductDetailModal({
         </header>
 
         {/* Scrollable Details Body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '32px', maxWidth: '1100px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
           
           {/* Main Detail Row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
@@ -403,63 +412,171 @@ export default function ProductDetailModal({
             </div>
           </div>
 
-          {/* Similar Products Section */}
-          {similarProducts.length > 0 && (
-            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px' }}>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 650, letterSpacing: '-0.02em', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Smartphone size={16} /> Similar Products You May Like
-              </h3>
-              
-              <div style={{ 
-                display: 'flex', 
-                gap: '14px', 
-                overflowX: 'auto', 
-                paddingBottom: '12px',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none'
-              }} className="similar-products-swipe">
-                {similarProducts.map((simProd) => (
-                  <div 
-                    key={simProd.id}
-                    onClick={() => {
-                      if (onSelectProduct) onSelectProduct(simProd);
-                    }}
+          {/* Explore Other Products & Category Related Storefront Section */}
+          {exploreProducts.length > 0 && (
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px', marginTop: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', gap: '8px' }}>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                  <Smartphone size={18} color="#FF5500" /> Explore Other Products
+                </h3>
+
+                {/* Horizontal Navigation & Controls */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button 
+                    type="button" 
+                    onClick={() => scrollHorizontal('left')}
+                    aria-label="Scroll left"
                     style={{
                       background: 'var(--bg-card)',
                       border: '1px solid var(--border-color)',
-                      borderRadius: '14px',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      color: 'var(--text-primary)',
+                      boxShadow: 'var(--shadow-sm)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.borderColor = '#FF5500'}
+                    onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => scrollHorizontal('right')}
+                    aria-label="Scroll right"
+                    style={{
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      color: 'var(--text-primary)',
+                      boxShadow: 'var(--shadow-sm)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.borderColor = '#FF5500'}
+                    onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              </div>
+              
+              <div 
+                ref={horizontalScrollRef}
+                className="horizontal-product-scroll"
+                style={{ 
+                  display: 'flex', 
+                  overflowX: 'auto',
+                  overflowY: 'hidden',
+                  gap: '14px', 
+                  padding: '4px 4px 14px 4px',
+                  scrollSnapType: 'x mandatory',
+                  WebkitOverflowScrolling: 'touch',
+                  scrollBehavior: 'smooth'
+                }}
+              >
+                {exploreProducts.map((otherProd) => (
+                  <div 
+                    key={otherProd.id}
+                    onClick={() => {
+                      if (onSelectProduct) onSelectProduct(otherProd);
+                    }}
+                    style={{
+                      flex: '0 0 170px',
+                      minWidth: '170px',
+                      maxWidth: '170px',
+                      scrollSnapAlign: 'start',
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '16px',
                       padding: '12px',
                       cursor: 'pointer',
                       transition: 'all 0.25s ease',
-                      textAlign: 'center',
+                      display: 'flex',
+                      flexDirection: 'column',
                       position: 'relative',
-                      flex: '0 0 140px',
-                      width: '140px'
+                      boxShadow: 'var(--shadow-sm)'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--primary-orange)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.borderColor = '#FF5500';
+                      e.currentTarget.style.transform = 'translateY(-3px)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.borderColor = 'var(--border-color)';
                       e.currentTarget.style.transform = 'none';
                     }}
                   >
-                    <div style={{ width: '100%', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                    {otherProd.discount && (
+                      <span className="badge-discount" style={{ position: 'absolute', top: '10px', left: '10px', fontSize: '0.68rem', padding: '2px 6px' }}>
+                        {otherProd.discount}
+                      </span>
+                    )}
+
+                    <div style={{ width: '100%', height: '110px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px', padding: '6px' }}>
                       <img 
-                        src={simProd.img} 
-                        alt={simProd.title} 
-                        style={{ maxHeight: '100%', objectFit: 'contain' }}
+                        src={otherProd.img} 
+                        alt={otherProd.title} 
+                        style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=600&auto=format&fit=crop';
                         }}
                       />
                     </div>
-                    <h4 style={{ fontSize: '0.72rem', fontWeight: 600, height: '2.6em', overflow: 'hidden', color: 'var(--text-primary)', marginBottom: '6px', lineHeight: 1.2 }}>
-                      {simProd.title.slice(0, 32)}...
+
+                    <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#FF5500', textTransform: 'uppercase', marginBottom: '2px' }}>
+                      {otherProd.category || 'Product'}
+                    </span>
+
+                    <h4 style={{ fontSize: '0.78rem', fontWeight: 700, height: '2.8em', overflow: 'hidden', color: 'var(--text-primary)', marginBottom: '8px', lineHeight: 1.35 }}>
+                      {otherProd.title}
                     </h4>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary-orange)' }}>₹{simProd.price.toLocaleString('en-IN')}</span>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', gap: '4px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.92rem', fontWeight: 850, color: 'var(--text-primary)' }}>
+                          ₹{(otherProd.price || 0).toLocaleString('en-IN')}
+                        </span>
+                        {otherProd.originalPrice && (
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textDecoration: 'line-through' }}>
+                            ₹{otherProd.originalPrice.toLocaleString('en-IN')}
+                          </span>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onAddToCart) onAddToCart(otherProd);
+                        }}
+                        style={{
+                          background: '#FF5500',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '6px 10px',
+                          fontSize: '0.74rem',
+                          fontWeight: '800',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <ShoppingBag size={13} /> Add
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

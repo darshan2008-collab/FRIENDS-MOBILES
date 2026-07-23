@@ -1074,6 +1074,7 @@ img {
   color: var(--text-white);
   letter-spacing: 0.5px;
   margin-bottom: 18px;
+  white-space: nowrap;
 }
 
 .footer-links li {

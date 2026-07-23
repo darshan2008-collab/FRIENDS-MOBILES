@@ -12,6 +12,8 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
   const [customText, setCustomText] = useState('');
   const [uploadedPhoto, setUploadedPhoto] = useState(null);
   const [uploadedFileInfo, setUploadedFileInfo] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [customModelInput, setCustomModelInput] = useState('');
 
   // Sync default model when brand changes
   useEffect(() => {
@@ -955,13 +957,13 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
         width: '100vw',
         height: '100vh',
         zIndex: 10008,
-        background: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(8px)',
+        background: 'var(--bg-page)',
         color: 'var(--text-primary)',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px 14px'
+        alignItems: 'stretch',
+        justifyContent: 'stretch',
+        padding: 0,
+        overflow: 'hidden'
       }}
       onClick={onClose}
     >
@@ -969,13 +971,14 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
         className="customizer-modal-dialog"
         onClick={(e) => e.stopPropagation()}
         style={{
-          maxWidth: '680px',
-          width: '100%',
-          maxHeight: '90vh',
+          width: '100vw',
+          maxWidth: '100vw',
+          height: '100vh',
+          maxHeight: '100vh',
           background: 'var(--bg-card)',
-          borderRadius: '20px',
-          border: '1px solid var(--border-color)',
-          boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+          borderRadius: '0px',
+          border: 'none',
+          boxShadow: 'none',
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column'
@@ -1059,6 +1062,8 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
         <div style={{
           padding: '24px 20px',
           width: '100%',
+          maxWidth: '900px',
+          margin: '0 auto',
           boxSizing: 'border-box'
         }}>
 

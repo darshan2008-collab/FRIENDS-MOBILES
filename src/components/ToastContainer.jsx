@@ -1,11 +1,11 @@
 import React from 'react';
 import { 
   AlertTriangle, CheckCircle, XCircle, Info, Tag, MapPin, 
-  Truck, ShoppingBag, Trash2, Mail, Heart, Edit, Lock, Package, Bell 
+  Truck, ShoppingBag, Trash2, Mail, Heart, Edit, Lock, Package, Bell, X 
 } from 'lucide-react';
 
 const getToastIcon = (icon) => {
-  if (!icon) return <Bell size={18} color="#FF5500" />;
+  if (!icon) return <Bell size={18} color="#FF5500" style={{ flexShrink: 0 }} />;
   
   switch (icon) {
     case 'warning':
@@ -64,13 +64,71 @@ const getToastIcon = (icon) => {
   }
 };
 
-export default function ToastContainer({ toasts }) {
+export default function ToastContainer({ toasts = [], onRemoveToast }) {
+  const safeToasts = Array.isArray(toasts) ? toasts : [];
+  if (safeToasts.length === 0) return null;
+
   return (
-    <div className="toast-container" style={{ zIndex: 99999 }}>
-      {toasts.map(t => (
-        <div key={t.id} className="toast" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {getToastIcon(t.icon)}
-          <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>{t.message}</span>
+    <div 
+      className="toast-container" 
+      style={{ 
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        zIndex: 100099,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        maxWidth: '380px',
+        width: 'calc(100vw - 32px)',
+        pointerEvents: 'none'
+      }}
+    >
+      {safeToasts.map(t => (
+        <div 
+          key={t.id || Math.random()} 
+          className="toast-item"
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid #FF5500',
+            color: 'var(--text-primary)',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+            fontSize: '0.86rem',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            pointerEvents: 'auto',
+            backdropFilter: 'blur(10px)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+            {getToastIcon(t.icon)}
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {t.message || ''}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => onRemoveToast && onRemoveToast(t.id)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2px',
+              borderRadius: '4px',
+              flexShrink: 0
+            }}
+          >
+            <X size={14} />
+          </button>
         </div>
       ))}
     </div>

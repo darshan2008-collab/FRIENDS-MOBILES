@@ -3,6 +3,8 @@ import { X, User, LogOut, ShoppingBag } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
 export default function MobileDrawer({ isOpen, onClose, currentUser, onOpenAuth, onOpenUserAccount, onLogout }) {
+  if (!isOpen) return null;
+
   return (
     <>
       <div 

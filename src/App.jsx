@@ -18,6 +18,7 @@ import MobileBottomBar from './components/MobileBottomBar';
 import CartModal from './components/CartModal';
 import ProductDetailModal from './components/ProductDetailModal';
 import BrandMarquee from './components/BrandMarquee';
+import ShoppingPortal from './components/ShoppingPortal';
 
 import './styles/theme.css';
 
@@ -110,8 +111,15 @@ export default function App() {
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isCustomCoverOpen, setIsCustomCoverOpen] = useState(false);
   const [isCustomFrameOpen, setIsCustomFrameOpen] = useState(false);
+  const [isShopOpen, setIsShopOpen] = useState(false);
+  const [shopCategory, setShopCategory] = useState('All');
   const [authRedirectMessage, setAuthRedirectMessage] = useState('');
   const [openCartAfterLogin, setOpenCartAfterLogin] = useState(false);
+
+  const handleOpenShop = (category = 'All') => {
+    setShopCategory(category);
+    setIsShopOpen(true);
+  };
 
   // Logged-in user state
   const [currentUser, setCurrentUser] = useState(() => {
@@ -254,12 +262,17 @@ export default function App() {
     setTheme(nextTheme);
   };
 
+  const handleRemoveToast = (id) => {
+    setToasts((prev) => (Array.isArray(prev) ? prev.filter(t => t.id !== id) : []));
+  };
+
   const addToast = (message, icon = '✨') => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, icon }]);
+    if (!message) return;
+    const id = Date.now() + '-' + Math.random().toString(36).substr(2, 6);
+    setToasts((prev) => [...(Array.isArray(prev) ? prev : []), { id, message, icon }]);
     setTimeout(() => {
-      setToasts((prev) => prev.filter(t => t.id !== id));
-    }, 2500);
+      handleRemoveToast(id);
+    }, 3000);
   };
 
   const handleAddToCart = (product) => {
@@ -526,6 +539,7 @@ export default function App() {
         onOpenUserAccount={() => setIsAccountOpen(true)}
         onOpenCart={handleOpenCartClick}
         onLogout={handleLogout}
+        onOpenShop={handleOpenShop}
       />
 
       <MobileDrawer 
@@ -542,7 +556,7 @@ export default function App() {
 
       <main>
         <Hero theme={theme} slides={heroSlides} />
-        <CategoryGrid />
+        <CategoryGrid onOpenShop={handleOpenShop} />
         <TrustBadges shippingSettings={shippingSettings} />
         <PromoBanners 
           onOpenCustomCover={() => setIsCustomCoverOpen(true)}
@@ -556,6 +570,7 @@ export default function App() {
           onAddToCart={handleAddToCart}
           searchQuery={searchQuery}
           onSelectProduct={setSelectedProduct}
+          onOpenShop={handleOpenShop}
         />
         <ServicesSection />
       </main>
@@ -568,6 +583,19 @@ export default function App() {
         onToggleWishlist={handleToggleWishlist}
         onAddToCart={handleAddToCart}
         onSelectProduct={setSelectedProduct}
+      />
+
+      <ShoppingPortal 
+        isOpen={isShopOpen}
+        onClose={() => setIsShopOpen(false)}
+        products={products}
+        onAddToCart={handleAddToCart}
+        wishlist={wishlist}
+        onToggleWishlist={handleToggleWishlist}
+        onSelectProduct={setSelectedProduct}
+        initialCategory={shopCategory}
+        cartCount={cartCount}
+        onOpenCart={handleOpenCartClick}
       />
 
       <Footer />
@@ -648,7 +676,7 @@ export default function App() {
         onOpenCart={handleOpenCartClick}
       />
 
-      <ToastContainer toasts={toasts} />
+      <ToastContainer toasts={toasts} onRemoveToast={handleRemoveToast} />
     </div>
   );
 }
