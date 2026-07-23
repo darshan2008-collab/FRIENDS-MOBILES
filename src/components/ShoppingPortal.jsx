@@ -136,14 +136,7 @@ export default function ShoppingPortal({
   };
 
   const handleImgError = (e, fallbackSrc) => {
-    const current = e.target.src;
-    if (current.includes('images/') && !current.startsWith('http://localhost:5000')) {
-      e.target.src = `http://localhost:5000/${current.slice(current.indexOf('images/'))}`;
-    } else if (fallbackSrc) {
-      e.target.src = fallbackSrc;
-    } else {
-      e.target.src = 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=600&auto=format&fit=crop';
-    }
+    e.target.src = fallbackSrc || 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=600&auto=format&fit=crop';
   };
 
   const handleResetAllFilters = () => {
