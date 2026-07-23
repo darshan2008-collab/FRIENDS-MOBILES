@@ -48,12 +48,17 @@ export default function Header({ theme, toggleTheme, cartCount, wishlistCount, o
                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
               </button>
 
-              <a href="#wishlist" className="action-btn mobile-hide-action" title="Wishlist">
+              <button 
+                className="action-btn mobile-hide-action" 
+                title="Wishlist"
+                onClick={() => onOpenShop && onOpenShop('Wishlist')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+              >
                 <div className="icon-wrap">
-                  <Heart size={20} />
+                  <Heart size={20} color={wishlistCount > 0 ? '#FF5500' : 'currentColor'} fill={wishlistCount > 0 ? '#FF5500' : 'none'} />
                   {wishlistCount > 0 && <span className="badge">{wishlistCount}</span>}
                 </div>
-              </a>
+              </button>
 
               <button 
                 className="action-btn header-cart-btn" 

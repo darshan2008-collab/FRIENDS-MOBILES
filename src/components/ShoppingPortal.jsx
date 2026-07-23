@@ -53,7 +53,7 @@ export default function ShoppingPortal({
 
   // Merge categories while maintaining uniqueness
   const categoryList = Array.from(
-    new Set(['All', ...standardCategories.slice(1), ...dynamicCategories])
+    new Set(['All', 'Wishlist', ...standardCategories.slice(1), ...dynamicCategories])
   );
 
   // Helper matcher for categories
@@ -75,8 +75,14 @@ export default function ShoppingPortal({
 
   // Filter products by category, search, price range, and stock
   const filteredProducts = products.filter(product => {
-    // 1. Category Filter
-    const matchesCategory = matchesCategoryFilter(product.category, selectedCategory);
+    // 0. Wishlist Category Filter
+    if (selectedCategory === 'Wishlist') {
+      if (!wishlist.includes(product.id)) return false;
+    } else {
+      // 1. Standard Category Filter
+      const matchesCategory = matchesCategoryFilter(product.category, selectedCategory);
+      if (!matchesCategory) return false;
+    }
 
     // 2. Search Query Filter
     let matchesSearch = true;
@@ -99,7 +105,7 @@ export default function ShoppingPortal({
     // 4. In Stock Filter
     const matchesStock = !inStockOnly || product.inStock;
 
-    return matchesCategory && matchesSearch && matchesPrice && matchesStock;
+    return matchesSearch && matchesPrice && matchesStock;
   });
 
   // Sort products
