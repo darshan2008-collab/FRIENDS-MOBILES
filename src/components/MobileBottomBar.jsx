@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Home, Grid, Paintbrush, ShoppingBag, User, Smartphone, Frame, Sparkles } from 'lucide-react';
+import { Home, Heart, Paintbrush, ShoppingBag, User, Smartphone, Frame, Sparkles } from 'lucide-react';
 
 export default function MobileBottomBar({ 
   cartCount, 
+  wishlistCount = 0,
   currentUser, 
   onOpenAuth, 
   onOpenUserAccount, 
   onOpenCustomCover, 
   onOpenCustomFrame,
-  onOpenCategories,
+  onOpenWishlist,
   onOpenCart
 }) {
   const [showCustomMenu, setShowCustomMenu] = useState(false);
@@ -18,14 +19,13 @@ export default function MobileBottomBar({
     setShowCustomMenu(false);
   };
 
-  const handleCategoriesClick = () => {
+  const handleWishlistClick = () => {
     setShowCustomMenu(false);
-    const catElement = document.getElementById('categories') || document.querySelector('.categories-section');
-    if (catElement) {
-      catElement.scrollIntoView({ behavior: 'smooth' });
-    } else if (onOpenCategories) {
-      onOpenCategories();
+    const wishlistElement = document.getElementById('wishlist') || document.querySelector('#products');
+    if (wishlistElement) {
+      wishlistElement.scrollIntoView({ behavior: 'smooth' });
     }
+    if (onOpenWishlist) onOpenWishlist();
   };
 
   const handleAccountClick = () => {
@@ -98,9 +98,12 @@ export default function MobileBottomBar({
           <span>Home</span>
         </button>
 
-        <button className="bottom-nav-item" onClick={handleCategoriesClick}>
-          <Grid size={20} />
-          <span>Categories</span>
+        <button className="bottom-nav-item" onClick={handleWishlistClick}>
+          <div className="nav-icon-badge-wrap">
+            <Heart size={20} color={wishlistCount > 0 ? '#FF5500' : 'currentColor'} fill={wishlistCount > 0 ? '#FF5500' : 'none'} />
+            {wishlistCount > 0 && <span className="nav-badge">{wishlistCount}</span>}
+          </div>
+          <span>Wishlist</span>
         </button>
 
         <button 

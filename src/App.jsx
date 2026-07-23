@@ -693,6 +693,7 @@ export default function App() {
 
       <MobileBottomBar 
         cartCount={cartCount}
+        wishlistCount={wishlist.length}
         currentUser={currentUser}
         onOpenAuth={() => {
           setAuthRedirectMessage('');
@@ -701,7 +702,10 @@ export default function App() {
         onOpenUserAccount={() => setIsAccountOpen(true)}
         onOpenCustomCover={() => setIsCustomCoverOpen(true)}
         onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
-        onOpenCategories={() => setIsDrawerOpen(true)}
+        onOpenWishlist={() => {
+          const productsElement = document.getElementById('products');
+          if (productsElement) productsElement.scrollIntoView({ behavior: 'smooth' });
+        }}
         onOpenCart={handleOpenCartClick}
       />
 
