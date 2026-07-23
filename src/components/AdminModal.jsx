@@ -827,25 +827,6 @@ export default function AdminModal({
                 UNLOCK ADMIN PANEL <ArrowRight size={18} />
               </button>
             </form>
-
-            <button 
-              type="button" 
-              onClick={handleDemoFill}
-              style={{
-                width: '100%',
-                marginTop: '16px',
-                padding: '10px',
-                borderRadius: '8px',
-                border: '1px dashed #FF5500',
-                background: 'var(--orange-light)',
-                color: '#FF5500',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                fontSize: '0.82rem'
-              }}
-            >
-              Auto-Fill Credentials (Friendsmobile / fm@1234)
-            </button>
           </div>
         </div>
       ) : (
