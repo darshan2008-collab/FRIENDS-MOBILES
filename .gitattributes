@@ -1,0 +1,8 @@
+# Enforce LF line endings for all text files across Windows, Linux, and Vercel
+* text=auto eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.md text eol=lf
