@@ -741,7 +741,7 @@ export default function AdminModal({
                 setIsAdminSidebarOpen(false);
               }}
             >
-              <ShoppingBag size={16} /> Orders ({totalOrders})
+              <Clock size={16} /> Order History ({totalOrders})
             </button>
 
             <button 
@@ -1617,7 +1617,7 @@ export default function AdminModal({
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px 20px', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <MapPin size={18} color="#FF5500" /> Customer Order History &amp; Fulfillment Portal
+                    <Clock size={18} color="#FF5500" /> Store Order History &amp; Fulfillment Log
                   </h3>
                   <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                     Total {totalOrders} customer orders recorded. Search by Order Number (e.g. FM-ORD-876371), Customer Name or Phone.
