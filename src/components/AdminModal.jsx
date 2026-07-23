@@ -1804,23 +1804,23 @@ export default function AdminModal({
               </div>
 
               {/* Executive Order History KPI Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
-                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '14px' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700' }}>TOTAL ORDERS LOGGED</span>
-                  <h4 style={{ fontSize: '1.4rem', color: '#FF5500', margin: '4px 0 0 0', fontWeight: '900' }}>{totalOrders} Orders</h4>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'nowrap', overflowX: 'auto' }}>
+                <div style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '12px 14px', borderRadius: '12px', minWidth: '120px' }}>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.3px' }}>TOTAL ORDERS</span>
+                  <h4 style={{ fontSize: '1.1rem', color: '#FF5500', margin: '2px 0 0 0', fontWeight: '900' }}>{totalOrders}</h4>
                 </div>
 
-                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '14px' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700' }}>TOTAL REVENUE VALUE</span>
-                  <h4 style={{ fontSize: '1.4rem', color: '#22c55e', margin: '4px 0 0 0', fontWeight: '900' }}>
+                <div style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '12px 14px', borderRadius: '12px', minWidth: '120px' }}>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.3px' }}>REVENUE</span>
+                  <h4 style={{ fontSize: '1.1rem', color: '#22c55e', margin: '2px 0 0 0', fontWeight: '900' }}>
                     ₹{orders ? orders.reduce((sum, o) => sum + (parseFloat(o.totalAmount) || 0), 0).toLocaleString('en-IN') : 0}
                   </h4>
                 </div>
 
-                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '14px' }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700' }}>PENDING FULFILLMENT</span>
-                  <h4 style={{ fontSize: '1.4rem', color: '#3b82f6', margin: '4px 0 0 0', fontWeight: '900' }}>
-                    {orders ? orders.filter(o => !o.status || o.status === 'Order Placed' || o.status === 'Processing').length : 0} Pending
+                <div style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '12px 14px', borderRadius: '12px', minWidth: '120px' }}>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.3px' }}>PENDING</span>
+                  <h4 style={{ fontSize: '1.1rem', color: '#3b82f6', margin: '2px 0 0 0', fontWeight: '900' }}>
+                    {orders ? orders.filter(o => !o.status || o.status === 'Order Placed' || o.status === 'Processing').length : 0}
                   </h4>
                 </div>
               </div>
