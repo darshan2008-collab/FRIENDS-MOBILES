@@ -157,7 +157,7 @@ export default function App() {
   const [orders, setOrders] = useState([]);
 
   const [heroSlides, setHeroSlides] = useState(() => {
-    const saved = localStorage.getItem('friends_mobile_hero_slides');
+    const saved = localStorage.getItem('friends_mobile_hero_slides_v2');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -171,7 +171,7 @@ export default function App() {
         tag: 'WELCOME TO FRIENDS MOBILE',
         titleWhite: 'Your One Stop',
         titleGradient: 'Mobile Destination',
-        desc: 'Premium mobile accessories, customized phone cases, designer photo frames and professional services.',
+        desc: 'Premium mobile accessories, custom cases & photo frames.',
         imgSrc: '/images/hero_devices_light.png',
         btnText: 'SHOP NOW',
         btnLink: '#products'
@@ -181,7 +181,7 @@ export default function App() {
         tag: 'CUSTOM 3D COVERS',
         titleWhite: 'Your Style.',
         titleGradient: 'Your Cover.',
-        desc: 'Design high-resolution custom printed back covers with premium scratch-resistant coatings for all models.',
+        desc: 'High-definition custom printed back covers for all models.',
         imgSrc: '/images/banner_backcover.png',
         btnText: 'CUSTOMIZE COVER',
         btnLink: '#customized-covers'
@@ -191,7 +191,7 @@ export default function App() {
         tag: 'DESIGNER PHOTO FRAMES',
         titleWhite: 'For Every',
         titleGradient: 'Special Memory',
-        desc: 'Handcrafted custom wood and collage frames to turn your beautiful moments into home wall art.',
+        desc: 'Handcrafted custom wood frames for your special memories.',
         imgSrc: '/images/banner_photoframe.png',
         btnText: 'CREATE FRAME',
         btnLink: '#photo-frames'
@@ -201,7 +201,7 @@ export default function App() {
         tag: 'EXCLUSIVE ACCESSORY DEALS',
         titleWhite: 'Up to 40% Off',
         titleGradient: 'Premium Gear',
-        desc: 'Grab top-tier wireless earbuds, fast chargers, smartwatches, and tempered glasses at Karur\'s lowest prices.',
+        desc: 'Get up to 40% off chargers, earbuds & smartwatches.',
         imgSrc: '/images/banner_accessories.png',
         btnText: 'EXPLORE OFFERS',
         btnLink: '#products'
