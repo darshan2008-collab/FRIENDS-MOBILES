@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Grid, Paintbrush, ShoppingBag, User } from 'lucide-react';
+import { Home, Grid, Paintbrush, ShoppingBag, User, Smartphone, Frame, Sparkles } from 'lucide-react';
 
 export default function MobileBottomBar({ 
   cartCount, 
@@ -52,7 +52,9 @@ export default function MobileBottomBar({
         >
           <div className="custom-quick-popup" onClick={(e) => e.stopPropagation()}>
             <div className="popup-handle"></div>
-            <h4 className="popup-title">✨ Customize & Personalize</h4>
+            <h4 className="popup-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              <Sparkles size={18} color="#FF5500" /> Customize &amp; Personalize
+            </h4>
             <div className="popup-buttons">
               <button 
                 className="popup-opt-btn cover-opt"
@@ -61,7 +63,9 @@ export default function MobileBottomBar({
                   onOpenCustomCover();
                 }}
               >
-                <div className="opt-icon">📱</div>
+                <div className="opt-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Smartphone size={24} color="#FF5500" />
+                </div>
                 <div className="opt-text">
                   <strong>3D Back Cover Studio</strong>
                   <span>Personalized Phone Case</span>
@@ -74,10 +78,12 @@ export default function MobileBottomBar({
                   onOpenCustomFrame();
                 }}
               >
-                <div className="opt-icon">🖼️</div>
+                <div className="opt-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Frame size={24} color="#FF5500" />
+                </div>
                 <div className="opt-text">
                   <strong>Custom Photo Frame</strong>
-                  <span>Memorable Wall & Desk Frames</span>
+                  <span>Memorable Wall &amp; Desk Frames</span>
                 </div>
               </button>
             </div>

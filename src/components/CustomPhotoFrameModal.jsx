@@ -19,7 +19,7 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
   ];
 
   const getSelectedPrice = () => {
-    const found = frameSizes.find(s => s.label.includes(frameSize.split(' ')[0]));
+    const found = frameSizes.find(s => s.label === frameSize);
     return found ? found.price : 449;
   };
 
@@ -90,186 +90,125 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
   };
 
   return (
-    <div className="full-page-customizer-portal" style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      width: '100vw',
-      height: '100vh',
-      zIndex: 10000,
-      background: 'var(--bg-page)',
-      color: 'var(--text-primary)',
-      overflowY: 'auto',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      {/* Top Header */}
-      <header className="modal-header-responsive" style={{
-        background: 'var(--bg-card)',
-        borderBottom: '1px solid var(--border-color)',
-        padding: '12px 16px',
+    <div 
+      className="cart-drawer-overlay" 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 10008,
+        background: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(8px)',
+        color: 'var(--text-primary)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        gap: '12px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
-          <div className="modal-header-logo-badge" style={{ 
-            background: '#FF5500', 
-            padding: '8px', 
-            borderRadius: '10px', 
-            display: 'flex', 
-            flexShrink: 0,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <ImageIcon className="modal-header-icon" size={20} color="#ffffff" />
-          </div>
-          <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <h2 className="modal-header-title" style={{ 
-              margin: 0, 
-              fontSize: '1rem', 
-              fontWeight: '800', 
-              lineHeight: 1.15,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}>
-              CUSTOM PHOTO FRAME STUDIO
-            </h2>
-            <span className="modal-header-subtitle" style={{ 
-              fontSize: '0.74rem', 
-              color: 'var(--text-muted)',
-              lineHeight: 1.2,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}>
-              Craft personalized photo frames
-            </span>
-          </div>
-        </div>
-
-        <button 
-          onClick={onClose}
-          className="modal-header-close-btn"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            padding: '8px 14px',
-            borderRadius: '8px',
-            border: 'none',
-            background: '#FF5500',
-            color: '#ffffff',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            fontSize: '0.82rem',
-            flexShrink: 0,
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <X size={18} /> <span className="close-btn-label">Close</span>
-        </button>
-      </header>
-
-      {/* Main Studio Workspace */}
-      <div className="customizer-studio-grid" style={{
-        flex: 1,
-        padding: '20px 14px',
-        maxWidth: '1200px',
-        width: '100%',
-        margin: '0 auto',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '24px',
-        alignItems: 'start',
-        boxSizing: 'border-box'
-      }}>
-        
-        {/* Left Side: Live Photo Frame Mockup Preview */}
-        <div className="studio-preview-card" style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '20px',
-          padding: '30px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
+        justifyContent: 'center',
+        padding: '20px 14px'
+      }}
+      onClick={onClose}
+    >
+      <div 
+        className="customizer-modal-dialog"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: '680px',
           width: '100%',
-          boxSizing: 'border-box'
+          maxHeight: '90vh',
+          background: 'var(--bg-card)',
+          borderRadius: '20px',
+          border: '1px solid var(--border-color)',
+          boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        {/* Top Header */}
+        <header className="modal-header-responsive" style={{
+          background: 'var(--bg-card)',
+          borderBottom: '1px solid var(--border-color)',
+          padding: '16px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+          gap: '12px'
         }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 'bold', color: '#FF5500', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '20px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <ImageIcon size={15} /> LIVE PHOTO FRAME MOCKUP
-          </span>
-
-          {/* Wooden / Glass Outer Frame Container */}
-          <div className="photo-frame-canvas" style={{
-            position: 'relative',
-            width: orientation.includes('Portrait') ? '260px' : '340px',
-            maxWidth: '100%',
-            height: orientation.includes('Portrait') ? '340px' : '260px',
-            maxHeight: '340px',
-            background: getFrameColorHex(),
-            borderRadius: '16px',
-            padding: '20px',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
-            transition: 'all 0.3s ease',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            overflow: 'hidden'
-          }}>
-            {/* Inner Mat Border */}
-            <div style={{
-              width: '100%',
-              height: '100%',
-              background: '#FFFFFF',
-              borderRadius: '4px',
-              padding: '14px',
-              display: 'flex',
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+            <div className="modal-header-logo-badge" style={{ 
+              background: '#FF5500', 
+              padding: '8px', 
+              borderRadius: '10px', 
+              display: 'flex', 
+              flexShrink: 0,
               alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: 'inset 0 0 10px rgba(0,0,0,0.1)',
-              overflow: 'hidden'
+              justifyContent: 'center'
             }}>
-              {uploadedPhoto ? (
-                <img 
-                  src={uploadedPhoto} 
-                  alt="Custom Photo Frame" 
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    borderRadius: '2px',
-                    pointerEvents: 'none'
-                  }} 
-                />
-              ) : (
-                <div style={{ textAlign: 'center', color: '#64748B', padding: '10px' }}>
-                  <Upload size={36} color="#FF5500" style={{ marginBottom: '8px' }} />
-                  <p style={{ fontSize: '0.85rem', margin: 0, fontWeight: 'bold', color: '#1E293B' }}>Upload Family / Memory Photo</p>
-                  <span style={{ fontSize: '0.72rem', color: '#64748B' }}>All File Formats Supported</span>
-                </div>
-              )}
+              <ImageIcon className="modal-header-icon" size={20} color="#ffffff" />
+            </div>
+            <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <h2 className="modal-header-title" style={{ 
+                margin: 0, 
+                fontSize: '1rem', 
+                fontWeight: '800', 
+                lineHeight: 1.15,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
+                CUSTOM PHOTO FRAME STUDIO
+              </h2>
+              <span className="modal-header-subtitle" style={{ 
+                fontSize: '0.74rem', 
+                color: 'var(--text-muted)',
+                lineHeight: 1.2,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
+                Craft personalized photo frames
+              </span>
             </div>
           </div>
 
-          <div style={{ marginTop: '24px', textAlign: 'center' }}>
-            <strong style={{ display: 'block', fontSize: '1.1rem' }}>{frameColor}</strong>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{frameSize} • {orientation}</span>
-          </div>
-        </div>
+          <button 
+            onClick={onClose}
+            className="modal-header-close-btn"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              border: 'none',
+              background: '#FF5500',
+              color: '#ffffff',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              fontSize: '0.82rem',
+              flexShrink: 0,
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <X size={18} /> <span className="close-btn-label">Close</span>
+          </button>
+        </header>
 
-        {/* Right Side: Photo Frame Controls */}
+        {/* Main Studio Workspace */}
+        <div style={{
+          padding: '24px 20px',
+          width: '100%',
+          boxSizing: 'border-box'
+        }}>
+        
+        {/* Photo Frame Controls */}
         <div style={{
           background: 'var(--bg-card)',
           border: '1px solid var(--border-color)',
@@ -327,9 +266,9 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
                     style={{
                       padding: '12px 16px',
                       borderRadius: '10px',
-                      border: frameSize.includes(sizeObj.label.split(' ')[0]) ? '2px solid #FF5500' : '1px solid var(--border-color)',
-                      background: frameSize.includes(sizeObj.label.split(' ')[0]) ? 'var(--orange-light)' : 'var(--bg-input)',
-                      color: frameSize.includes(sizeObj.label.split(' ')[0]) ? '#FF5500' : 'var(--text-primary)',
+                      border: frameSize === sizeObj.label ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                      background: frameSize === sizeObj.label ? 'var(--orange-light)' : 'var(--bg-input)',
+                      color: frameSize === sizeObj.label ? '#FF5500' : 'var(--text-primary)',
                       fontWeight: 'bold',
                       cursor: 'pointer',
                       fontSize: '0.9rem',
@@ -436,8 +375,8 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
 
           </form>
         </div>
-
       </div>
     </div>
-  );
+  </div>
+);
 }
