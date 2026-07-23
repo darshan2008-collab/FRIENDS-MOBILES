@@ -689,6 +689,20 @@ export default function App() {
         onOrderPlaced={handleOrderPlaced}
       />
 
+      <MobileBottomBar 
+        cartCount={cartCount}
+        currentUser={currentUser}
+        onOpenAuth={() => {
+          setAuthRedirectMessage('');
+          setIsAuthOpen(true);
+        }}
+        onOpenUserAccount={() => setIsAccountOpen(true)}
+        onOpenCustomCover={() => setIsCustomCoverOpen(true)}
+        onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+        onOpenCategories={() => setIsDrawerOpen(true)}
+        onOpenCart={handleOpenCartClick}
+      />
+
       <ToastContainer toasts={toasts} onRemoveToast={handleRemoveToast} />
     </div>
   );
