@@ -1,0 +1,8 @@
+[
+  { "id": 1, "title": "Mobile Repair", "desc": "Quick & Reliable", "icon": "Wrench" },
+  { "id": 2, "title": "Screen Replacement", "desc": "Best Quality", "icon": "Smartphone" },
+  { "id": 3, "title": "Software Update", "desc": "All Brands", "icon": "RefreshCw" },
+  { "id": 4, "title": "Photo Frame Making", "desc": "Custom Frames", "icon": "Image" },
+  { "id": 5, "title": "Back Cover Printing", "desc": "Your Design", "icon": "Printer" },
+  { "id": 6, "title": "Visit Our Store", "desc": "Find Nearest Store", "icon": "MapPin" }
+]

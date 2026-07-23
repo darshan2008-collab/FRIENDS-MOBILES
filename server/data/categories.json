@@ -1,0 +1,12 @@
+[
+  { "id": "mobile-phones", "name": "Mobile Phones", "icon": "Smartphone" },
+  { "id": "chargers-cables", "name": "Chargers & Cables", "icon": "Cable" },
+  { "id": "earphones", "name": "Earphones", "icon": "Headphones" },
+  { "id": "smart-watches", "name": "Smart Watches", "icon": "Watch" },
+  { "id": "power-banks", "name": "Power Banks", "icon": "BatteryCharging" },
+  { "id": "speakers", "name": "Speakers", "icon": "Speaker" },
+  { "id": "photo-frames", "name": "Photo Frames", "icon": "Image" },
+  { "id": "back-covers", "name": "Back Covers", "icon": "Smartphone" },
+  { "id": "tempered-glass", "name": "Tempered Glass", "icon": "Shield" },
+  { "id": "more", "name": "More", "icon": "Grid" }
+]
