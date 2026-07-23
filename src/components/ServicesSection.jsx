@@ -27,7 +27,7 @@ export default function ServicesSection() {
     let halfWidth = container.scrollWidth / 2;
     let accumulatedScroll = halfWidth;
 
-    const scrollSpeed = 35; // Pixels per second (smooth slow sliding forward)
+    const scrollSpeed = 40; // Pixels per second (matched to company brand marquee speed)
 
     const autoScroll = (timestamp) => {
       if (!container) return;
