@@ -173,7 +173,7 @@ export default function Footer() {
             </div>
 
             {/* Social Media Badges */}
-            <div className="social-links" style={{ display: 'flex', gap: '10px' }}>
+            <div className="social-links" style={{ display: 'flex', gap: '10px', marginBottom: '28px' }}>
               <a href="#" className="social-icon" aria-label="Facebook" style={{
                 width: '38px', height: '38px', borderRadius: '10px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease'
               }}>
