@@ -260,8 +260,8 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
             
             {/* File Upload Input */}
             <div>
-              <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <ImageIcon size={15} /> Upload Photo or Document for Frame (HD Image / PDF / DOC / PSD / AI)
+              <label className="option-section-title">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><ImageIcon size={15} color="#FF5500" /> Upload Photo or Document for Frame (HD Image / PDF / DOC / PSD / AI)</span>
               </label>
               <input 
                 type="file" 
@@ -505,8 +505,8 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
 
             {/* Frame Material / Color */}
             <div>
-              <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <Palette size={15} /> Frame Wood &amp; Color Style
+              <label className="option-section-title">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Palette size={15} color="#FF5500" /> Frame Wood &amp; Color Style</span>
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {['Classic Walnut Wood', 'Matte Black', 'Pure White', 'Royal Gold'].map(col => (
@@ -533,8 +533,8 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
 
             {/* Frame Orientation */}
             <div>
-              <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <RotateCw size={15} /> Frame Orientation
+              <label className="option-section-title">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><RotateCw size={15} color="#FF5500" /> Frame Orientation</span>
               </label>
               <div style={{ display: 'flex', gap: '12px' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem' }}>
@@ -548,8 +548,8 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
 
             {/* Glass Protection */}
             <div>
-              <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <Shield size={15} /> Front Glass Protection
+              <label className="option-section-title">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Shield size={15} color="#FF5500" /> Front Glass Protection</span>
               </label>
               <select 
                 value={glassType} 

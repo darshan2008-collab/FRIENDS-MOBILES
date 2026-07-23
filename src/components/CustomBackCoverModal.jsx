@@ -1085,8 +1085,8 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
             
             {/* Photo Upload Input */}
             <div>
-              <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <Image size={15} /> Upload Photo or Document (HD Image / PDF / DOC / PSD / AI)
+              <label className="option-section-title">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Image size={15} color="#FF5500" /> Upload Photo or Document (HD Image / PDF / DOC / PSD / AI)</span>
               </label>
               <input 
                 ref={fileInputRef}
@@ -1202,8 +1202,8 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
             {/* Manual Smartphone Model Input */}
             <div>
               <div style={{ marginBottom: '8px' }}>
-                <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Smartphone size={15} /> Enter Your Phone Model
+                <label className="option-section-title">
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Smartphone size={15} color="#FF5500" /> Enter Your Phone Model</span>
                 </label>
               </div>
 
@@ -1233,8 +1233,8 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
 
             {/* Case Type: Full 3D or Soft Back */}
             <div>
-              <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <Shield size={15} /> Case Coverage &amp; Type
+              <label className="option-section-title">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Shield size={15} color="#FF5500" /> Case Coverage &amp; Type</span>
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <button 
@@ -1275,8 +1275,8 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
 
             {/* Case Finish */}
             <div>
-              <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <Sparkles size={15} /> Surface Finish
+              <label className="option-section-title">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Sparkles size={15} color="#FF5500" /> Surface Finish</span>
               </label>
               <div style={{ display: 'flex', gap: '12px' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem' }}>
@@ -1290,8 +1290,8 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
 
             {/* Remarks / Special Instructions */}
             <div>
-              <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <MessageSquare size={15} /> Remarks / Special Instructions (Optional)
+              <label className="option-section-title">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MessageSquare size={15} color="#FF5500" /> Remarks / Special Instructions (Optional)</span>
               </label>
               <input 
                 type="text" 
