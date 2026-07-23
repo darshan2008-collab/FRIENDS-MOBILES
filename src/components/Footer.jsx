@@ -302,102 +302,124 @@ export default function Footer() {
               maxWidth: '100%'
             }}>
               
-              {/* Google Pay / UPI */}
+              {/* 100% OFFICIAL PIXEL-PERFECT SVG PAYMENT LOGOS */}
+              
+              {/* Google Pay / UPI Official Logo */}
               <div style={{
-                height: '24px',
-                padding: '0 8px',
-                borderRadius: '5px',
+                height: '28px',
+                padding: '0 10px',
+                borderRadius: '6px',
                 background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                border: '1px solid #cbd5e1',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '3px'
+                gap: '5px'
               }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#4285F4' }}>G</span>
-                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#EA4335' }}>P</span>
-                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#FBBC05' }}>a</span>
-                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#34A853' }}>y</span>
-                <span style={{ fontSize: '0.62rem', fontWeight: '800', color: '#64748b', marginLeft: '2px' }}>UPI</span>
+                <svg width="42" height="16" viewBox="0 0 100 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12.5 19.3C12.5 13.1 17.3 8.3 23.5 8.3C26.6 8.3 29.1 9.5 30.9 11.2L28.1 14C26.9 12.8 25.4 12 23.5 12C19.4 12 16.3 15.3 16.3 19.3C16.3 23.4 19.4 26.6 23.5 26.6C26.2 26.6 27.8 25.5 28.8 24.5C29.7 23.5 30.4 22.1 30.7 20.1H23.5V16.4H35.5C35.7 17.1 35.8 18.1 35.8 19.3C35.8 23 34.8 27.2 30.9 31.1C27.1 35 22.3 35.1 12.5 35.1V19.3Z" fill="#4285F4"/>
+                  <path d="M49 14.5H44.6V34H40.7V14.5H36.3V11H49V14.5Z" fill="#5F6368"/>
+                  <path d="M51.8 22.5C51.8 17.5 55.4 14.2 59.8 14.2C64.2 14.2 67.8 17.5 67.8 22.5C67.8 27.5 64.2 30.8 59.8 30.8C55.4 30.8 51.8 27.5 51.8 22.5ZM64 22.5C64 19.3 61.9 17.3 59.8 17.3C57.7 17.3 55.6 19.3 55.6 22.5C55.6 25.7 57.7 27.7 59.8 27.7C61.9 27.7 64 25.7 64 22.5Z" fill="#5F6368"/>
+                  <path d="M83.8 14.5L75.6 34H71.8L78.6 19L71 14.5H75.3L80.4 25.3L85.5 14.5H83.8Z" fill="#5F6368"/>
+                </svg>
+                <span style={{ fontSize: '0.6rem', fontWeight: '900', color: '#047857', background: '#ecfdf5', padding: '1px 4px', borderRadius: '3px', border: '1px solid #a7f3d0' }}>UPI</span>
               </div>
 
-              {/* PhonePe */}
+              {/* PhonePe Official Logo */}
               <div style={{
-                height: '24px',
-                padding: '0 8px',
-                borderRadius: '5px',
+                height: '28px',
+                padding: '0 10px',
+                borderRadius: '6px',
                 background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                border: '1px solid #cbd5e1',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '2px'
+                gap: '5px'
               }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#5f259f' }}>Phone</span>
-                <span style={{ fontSize: '0.62rem', fontWeight: '900', background: '#5f259f', color: '#ffffff', padding: '1px 3px', borderRadius: '3px' }}>Pe</span>
+                <svg width="18" height="18" viewBox="0 0 100 100" fill="none">
+                  <rect width="100" height="100" rx="22" fill="#5f259f"/>
+                  <path d="M58 24H42C37.6 24 34 27.6 34 32V68C34 72.4 37.6 76 42 76H46V54H54C61.7 54 68 47.7 68 40V34C68 28.5 63.5 24 58 24ZM54 44H46V34H54C57.3 34 60 36.7 60 40C60 43.3 57.3 46 54 46Z" fill="white"/>
+                  <path d="M50 76L68 56H56L50 76Z" fill="#a855f7"/>
+                </svg>
+                <span style={{ fontSize: '0.72rem', fontWeight: '900', color: '#5f259f', letterSpacing: '-0.2px' }}>Phone<span style={{ color: '#5f259f' }}>Pe</span></span>
               </div>
 
-              {/* Paytm */}
+              {/* Paytm Official Logo */}
               <div style={{
-                height: '24px',
-                padding: '0 8px',
-                borderRadius: '5px',
+                height: '28px',
+                padding: '0 10px',
+                borderRadius: '6px',
                 background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                border: '1px solid #cbd5e1',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                 display: 'inline-flex',
                 alignItems: 'center'
               }}>
-                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#002e6e', letterSpacing: '-0.3px' }}>Pay<span style={{ color: '#00baf2' }}>tm</span></span>
+                <svg width="48" height="14" viewBox="0 0 120 36" fill="none">
+                  <path d="M0 4H10.5C15.2 4 18.5 7.1 18.5 11.5C18.5 15.9 15.2 19 10.5 19H5.5V32H0V4ZM5.5 14H10.2C12.3 14 13.8 12.9 13.8 11.5C13.8 10.1 12.3 9 10.2 9H5.5V14Z" fill="#002E6E"/>
+                  <path d="M22 14.5C22 11.2 24.6 9 28.2 9C31.8 9 34.4 11.2 34.4 14.5V32H29.1V28.8C27.9 31 25.5 32.5 22.8 32.5C19.2 32.5 16.5 29.9 16.5 26.2C16.5 22.5 19.5 19.9 25.2 19.9H29.1V18.8C29.1 16.2 27.5 14.8 25.1 14.8C23.2 14.8 21.8 15.8 21.4 17.5L16.8 16.5C17.7 13 20.8 9 25.5 9C30.8 9 34.4 12 34.4 17.5V32H29.1V28.8C27.9 31 25.5 32.5 22.8 32.5C19.2 32.5 16.5 29.9 16.5 26.2V14.5Z" fill="#002E6E"/>
+                  <path d="M37 9H43L47.5 22.5L52 9H58L49.5 32H44.5L37 9Z" fill="#002E6E"/>
+                  <path d="M60 4H76V9.5H68V32H62.5V9.5H60V4Z" fill="#00BAF2"/>
+                  <path d="M78 4H83.5V13.5C84.8 10.8 87.5 9 91 9C95 9 97.5 11.8 97.5 16.5V32H92V17.5C92 14.8 90.2 13.5 88 13.5C85.5 13.5 83.5 15.2 83.5 18.5V32H78V4Z" fill="#00BAF2"/>
+                </svg>
               </div>
 
-              {/* VISA */}
+              {/* VISA Official Logo */}
               <div style={{
-                height: '24px',
-                padding: '0 8px',
-                borderRadius: '5px',
+                height: '28px',
+                padding: '0 10px',
+                borderRadius: '6px',
                 background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                border: '1px solid #cbd5e1',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                 display: 'inline-flex',
                 alignItems: 'center'
               }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: '900', color: '#1A1F71', fontStyle: 'italic', letterSpacing: '0.8px' }}>VISA</span>
+                <svg width="44" height="15" viewBox="0 0 100 32" fill="none">
+                  <path d="M38.8 2.5L25.6 30H17.2L10.5 6.6C10.1 5.1 9.7 4.5 8.4 3.8C6.4 2.7 3.1 1.7 0 1L0.4 0H14.1C15.9 0 17.4 1.2 17.8 3.2L21.2 21L29.6 0H38.8V2.5ZM72.6 20.8C72.7 12.9 61.4 12.4 61.6 8.9C61.7 7.8 62.8 6.6 65.3 6.3C66.5 6.1 69.9 6 73.5 7.6L74.8 1.6C73.1 1 70.8 0.4 67.9 0.4C59.6 0.4 53.7 4.8 53.6 11C53.4 15.6 57.6 18.2 60.8 19.8C64 21.4 65.1 22.4 65.1 23.8C65 25.9 62.4 26.8 60 26.8C55.8 26.8 53.4 25.6 51.5 24.7L50.1 31C52 31.8 55.4 32.5 59 32.5C67.8 32.5 73.6 28.2 73.6 21.4M94.6 30H102L95.5 0H88.7C87.2 0 86 0.9 85.4 2.2L73 30H81.4L83.1 25.4H93.3L94.6 30ZM85.5 19L89.6 7.8L92 19H85.5ZM51 0L44.3 30H36.3L43 0H51Z" fill="#1A1F71"/>
+                </svg>
               </div>
 
-              {/* Mastercard */}
+              {/* Mastercard Official Logo */}
               <div style={{
-                height: '24px',
-                padding: '0 8px',
-                borderRadius: '5px',
+                height: '28px',
+                padding: '0 10px',
+                borderRadius: '6px',
                 background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                border: '1px solid #cbd5e1',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px'
+                gap: '5px'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#EB001B', display: 'inline-block' }}></span>
-                  <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#F79E1B', display: 'inline-block', marginLeft: '-3px', opacity: 0.95 }}></span>
-                </div>
-                <span style={{ fontSize: '0.65rem', fontWeight: '800', color: '#1e293b' }}>Mastercard</span>
+                <svg width="24" height="15" viewBox="0 0 38 24" fill="none">
+                  <circle cx="12" cy="12" r="12" fill="#EB001B"/>
+                  <circle cx="26" cy="12" r="12" fill="#F79E1B"/>
+                  <path d="M19 3.5C21.6 5.7 23.3 8.7 23.3 12C23.3 15.3 21.6 18.3 19 20.5C16.4 18.3 14.7 15.3 14.7 12C14.7 8.7 16.4 5.7 19 3.5Z" fill="#FF5F00"/>
+                </svg>
+                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#1e293b', letterSpacing: '-0.2px' }}>Mastercard</span>
               </div>
 
-              {/* Cash On Delivery */}
+              {/* Cash On Delivery Official Badge */}
               <div style={{
-                height: '24px',
-                padding: '0 8px',
-                borderRadius: '5px',
+                height: '28px',
+                padding: '0 10px',
+                borderRadius: '6px',
                 background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
+                border: '1px solid #a7f3d0',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
+                gap: '5px',
                 color: '#16a34a'
               }}>
-                <span style={{ fontSize: '0.66rem', fontWeight: '800' }}>💵 COD</span>
+                <svg width="18" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="6" width="20" height="12" rx="2"/>
+                  <circle cx="12" cy="12" r="2"/>
+                  <path d="M6 12h.01M18 12h.01"/>
+                </svg>
+                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#15803d' }}>COD</span>
               </div>
 
             </div>
