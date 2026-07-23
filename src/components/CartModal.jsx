@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, CheckCircle2, CreditCard } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' 
+  ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? `${window.location.protocol}//${window.location.hostname}:5000/api` 
+      : `${window.location.protocol}//${window.location.host}/api`) 
+  : '/api');
 
 export default function CartModal({ 
   isOpen, 

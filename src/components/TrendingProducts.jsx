@@ -15,12 +15,7 @@ export default function TrendingProducts({ products, wishlist, onToggleWishlist,
   );
 
   const handleProductImgError = (e, prod) => {
-    const current = e.target.src;
-    if (current.includes('images/') && !current.startsWith('http://localhost:5000')) {
-      e.target.src = `http://localhost:5000/${current.slice(current.indexOf('images/'))}`;
-    } else {
-      e.target.src = defaultUnsplashMap[prod.id] || 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=600&auto=format&fit=crop';
-    }
+    e.target.src = defaultUnsplashMap[prod?.id] || 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=600&auto=format&fit=crop';
   };
 
   return (

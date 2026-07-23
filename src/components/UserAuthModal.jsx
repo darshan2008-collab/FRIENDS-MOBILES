@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' 
+  ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? `${window.location.protocol}//${window.location.hostname}:5000/api` 
+      : `${window.location.protocol}//${window.location.host}/api`) 
+  : '/api');
 
 export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToast, redirectMessage }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'signup' | 'forgot'

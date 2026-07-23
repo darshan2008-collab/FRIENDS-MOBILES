@@ -6,12 +6,7 @@ export default function PromoBanners({ onOpenCustomCover, onOpenCustomFrame }) {
   const unsplashFrame = 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=600&auto=format&fit=crop';
 
   const handleImgError = (e, fallbackUnsplash) => {
-    const current = e.target.src;
-    if (current.includes('images/') && !current.startsWith('http://localhost:5000')) {
-      e.target.src = `http://localhost:5000/${current.slice(current.indexOf('images/'))}`;
-    } else {
-      e.target.src = fallbackUnsplash;
-    }
+    e.target.src = fallbackUnsplash;
   };
 
   return (
