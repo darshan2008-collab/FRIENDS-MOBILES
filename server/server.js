@@ -87,11 +87,19 @@ app.use((req, res, next) => {
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5000', 'http://localhost:8080'],
+  origin: true, // Allow production Vercel frontend & local development origins
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+
+// Ensure Database Connection on Serverless Invocations
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+  } catch (_) {}
+  next();
+});
 
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
