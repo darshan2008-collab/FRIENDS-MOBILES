@@ -4339,5 +4339,52 @@ img {
   animation: touchPulse 0.4s ease-out;
 }
 
+/* =========================================================
+   60FPS GPU HARDWARE-ACCELERATED SCROLL REVEAL ANIMATIONS
+   ========================================================= */
+
+.scroll-reveal,
+.section-title,
+.section-header,
+.category-card,
+.promo-card,
+.product-card,
+.service-card,
+.showroom-card,
+.footer-column {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  will-change: opacity, transform;
+}
+
+.heading-in-view,
+.scroll-reveal.in-view,
+.section-title.heading-in-view,
+.section-header.heading-in-view,
+.category-card.heading-in-view,
+.promo-card.heading-in-view,
+.product-card.heading-in-view,
+.service-card.heading-in-view,
+.showroom-card.heading-in-view,
+.footer-column.heading-in-view {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+/* Staggered Cascade Delays for Cards */
+.category-card:nth-child(2) { transition-delay: 0.06s !important; }
+.category-card:nth-child(3) { transition-delay: 0.12s !important; }
+.category-card:nth-child(4) { transition-delay: 0.18s !important; }
+.category-card:nth-child(5) { transition-delay: 0.24s !important; }
+
+.product-card:nth-child(2) { transition-delay: 0.05s !important; }
+.product-card:nth-child(3) { transition-delay: 0.10s !important; }
+.product-card:nth-child(4) { transition-delay: 0.15s !important; }
+.product-card:nth-child(5) { transition-delay: 0.20s !important; }
+.product-card:nth-child(6) { transition-delay: 0.25s !important; }
+
+
 
 
