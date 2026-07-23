@@ -181,7 +181,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#customized-covers" style={{ color: '#FF5500', fontWeight: '800' }}>
+                <a href="#customized-covers">
                   <Palette size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Customized 3D Back Covers
                 </a>
               </li>
