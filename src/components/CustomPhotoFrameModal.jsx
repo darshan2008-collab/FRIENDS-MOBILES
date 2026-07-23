@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield, Rulers, Maximize2 } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield, Ruler, Maximize2 } from 'lucide-react';
 
 export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, addToast }) {
   const [frameSize, setFrameSize] = useState('6 x 8 inches'); // 4x6 | 6x8 | 8x10 | 12x18 | 18x24 | Custom / Manual
@@ -317,7 +317,7 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
                         }}
                       >
                         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {isCustomOption && <Rulers size={16} />}
+                          {isCustomOption && <Ruler size={16} />}
                           {sizeObj.label}
                         </span>
                         <span>{isCustomOption ? `From ₹${getCustomPrice()}` : `₹${sizeObj.price}`}</span>
