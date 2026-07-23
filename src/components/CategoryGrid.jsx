@@ -28,9 +28,10 @@ export default function CategoryGrid({ onOpenShop }) {
     let animationFrameId;
     let lastTime = performance.now();
     let isHovered = false;
-    let accumulatedScroll = container.scrollLeft;
+    let halfWidth = container.scrollWidth / 2;
+    let accumulatedScroll = halfWidth;
 
-    const scrollSpeed = 40; // Pixels per second (corresponds to ~0.7px per frame at 60fps)
+    const scrollSpeed = 40; // Pixels per second (smooth forward sliding)
 
     const autoScroll = (timestamp) => {
       if (!container) return;
@@ -39,11 +40,11 @@ export default function CategoryGrid({ onOpenShop }) {
         const elapsed = timestamp - lastTime;
         if (elapsed > 0) {
           const delta = (scrollSpeed * elapsed) / 1000;
-          const halfWidth = container.scrollWidth / 2;
+          halfWidth = container.scrollWidth / 2 || 1;
 
-          accumulatedScroll += delta;
-          if (accumulatedScroll >= halfWidth) {
-            accumulatedScroll = 0;
+          accumulatedScroll -= delta;
+          if (accumulatedScroll <= 0) {
+            accumulatedScroll = halfWidth;
           }
           container.scrollLeft = Math.round(accumulatedScroll);
         }
