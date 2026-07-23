@@ -152,10 +152,6 @@ export default function Footer() {
               </div>
             </a>
 
-            <p className="footer-desc" style={{ fontSize: '0.86rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '22px', fontWeight: '500' }}>
-              Karur's premier destination for original smartphones, luxury mobile accessories, 100% custom-printed back covers, and premium designer photo frames.
-            </p>
-
             {/* Showroom Assurance Tags */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
               <div style={{ fontSize: '0.84rem', fontWeight: '750', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px', lineHeight: '1.3' }}>
