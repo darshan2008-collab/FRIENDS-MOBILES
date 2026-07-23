@@ -28,6 +28,8 @@ export default function AdminModal({
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'products' | 'orders' | 'shipping' | 'slides'
   const [isAdminSidebarOpen, setIsAdminSidebarOpen] = useState(false);
+  const [isManualCategory, setIsManualCategory] = useState(false);
+  const [isEditManualCategory, setIsEditManualCategory] = useState(false);
 
   // Order Search, Filter & Manual Creation State
   const [orderSearchTerm, setOrderSearchTerm] = useState('');
@@ -1007,26 +1009,63 @@ export default function AdminModal({
                       />
                     </div>
 
-                    {/* Category + MRP row */}
+                    {/* Category + MRP row with Manual Entry Toggle */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Category *</label>
-                        <select 
-                          value={newProduct.category} 
-                          onChange={e => setNewProduct({...newProduct, category: e.target.value})}
-                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.8rem' }}
-                        >
-                          <option value="Mobile Phones">Mobile Phones</option>
-                          <option value="Chargers & Cables">Chargers &amp; Cables</option>
-                          <option value="Power Banks">Power Banks</option>
-                          <option value="Earphones">Earphones &amp; Audio</option>
-                          <option value="Smartwatches">Smartwatches &amp; Bands</option>
-                          <option value="OTG & Adapters">OTG &amp; Adapters</option>
-                          <option value="Back Covers">Back Covers &amp; Cases</option>
-                          <option value="Photo Frames">Photo Frames</option>
-                          <option value="Screen Protectors">Screen Protectors &amp; Glass</option>
-                          <option value="Accessories">General Accessories</option>
-                        </select>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '0.74rem', fontWeight: '700' }}>Category *</label>
+                          <button
+                            type="button"
+                            onClick={() => setIsManualCategory(!isManualCategory)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#FF5500',
+                              fontSize: '0.68rem',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              padding: 0
+                            }}
+                          >
+                            {isManualCategory ? '📋 Select List' : '✏️ Manual Entry'}
+                          </button>
+                        </div>
+
+                        {isManualCategory ? (
+                          <input 
+                            type="text" 
+                            placeholder="Type custom category..."
+                            value={newProduct.category}
+                            onChange={e => setNewProduct({...newProduct, category: e.target.value})}
+                            required
+                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #FF5500', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 'bold', boxSizing: 'border-box' }} 
+                          />
+                        ) : (
+                          <select 
+                            value={newProduct.category} 
+                            onChange={e => {
+                              if (e.target.value === 'CUSTOM_MANUAL_ENTRY') {
+                                setIsManualCategory(true);
+                                setNewProduct({...newProduct, category: ''});
+                              } else {
+                                setNewProduct({...newProduct, category: e.target.value});
+                              }
+                            }}
+                            style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.8rem' }}
+                          >
+                            <option value="Mobile Phones">Mobile Phones</option>
+                            <option value="Chargers & Cables">Chargers &amp; Cables</option>
+                            <option value="Power Banks">Power Banks</option>
+                            <option value="Earphones">Earphones &amp; Audio</option>
+                            <option value="Smartwatches">Smartwatches &amp; Bands</option>
+                            <option value="OTG & Adapters">OTG &amp; Adapters</option>
+                            <option value="Back Covers">Back Covers &amp; Cases</option>
+                            <option value="Photo Frames">Photo Frames</option>
+                            <option value="Screen Protectors">Screen Protectors &amp; Glass</option>
+                            <option value="Accessories">General Accessories</option>
+                            <option value="CUSTOM_MANUAL_ENTRY">✏️ Custom / Manual Entry...</option>
+                          </select>
+                        )}
                       </div>
                       <div>
                         <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Original MRP (₹)</label>
@@ -1240,23 +1279,60 @@ export default function AdminModal({
                     {/* Category + MRP */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Category</label>
-                        <select 
-                          value={editProductForm.category || 'Accessories'} 
-                          onChange={e => setEditProductForm({...editProductForm, category: e.target.value})}
-                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.8rem' }}
-                        >
-                          <option value="Mobile Phones">Mobile Phones</option>
-                          <option value="Chargers & Cables">Chargers &amp; Cables</option>
-                          <option value="Power Banks">Power Banks</option>
-                          <option value="Earphones">Earphones &amp; Audio</option>
-                          <option value="Smartwatches">Smartwatches &amp; Bands</option>
-                          <option value="OTG & Adapters">OTG &amp; Adapters</option>
-                          <option value="Back Covers">Back Covers &amp; Cases</option>
-                          <option value="Photo Frames">Photo Frames</option>
-                          <option value="Screen Protectors">Screen Protectors &amp; Glass</option>
-                          <option value="Accessories">General Accessories</option>
-                        </select>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '0.74rem', fontWeight: '700' }}>Category</label>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditManualCategory(!isEditManualCategory)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#3b82f6',
+                              fontSize: '0.68rem',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              padding: 0
+                            }}
+                          >
+                            {isEditManualCategory ? '📋 Select List' : '✏️ Manual Entry'}
+                          </button>
+                        </div>
+
+                        {isEditManualCategory ? (
+                          <input 
+                            type="text" 
+                            placeholder="Type custom category..."
+                            value={editProductForm.category || ''}
+                            onChange={e => setEditProductForm({...editProductForm, category: e.target.value})}
+                            required
+                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #3b82f6', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 'bold', boxSizing: 'border-box' }} 
+                          />
+                        ) : (
+                          <select 
+                            value={editProductForm.category || 'Accessories'} 
+                            onChange={e => {
+                              if (e.target.value === 'CUSTOM_MANUAL_ENTRY') {
+                                setIsEditManualCategory(true);
+                                setEditProductForm({...editProductForm, category: ''});
+                              } else {
+                                setEditProductForm({...editProductForm, category: e.target.value});
+                              }
+                            }}
+                            style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.8rem' }}
+                          >
+                            <option value="Mobile Phones">Mobile Phones</option>
+                            <option value="Chargers & Cables">Chargers &amp; Cables</option>
+                            <option value="Power Banks">Power Banks</option>
+                            <option value="Earphones">Earphones &amp; Audio</option>
+                            <option value="Smartwatches">Smartwatches &amp; Bands</option>
+                            <option value="OTG & Adapters">OTG &amp; Adapters</option>
+                            <option value="Back Covers">Back Covers &amp; Cases</option>
+                            <option value="Photo Frames">Photo Frames</option>
+                            <option value="Screen Protectors">Screen Protectors &amp; Glass</option>
+                            <option value="Accessories">General Accessories</option>
+                            <option value="CUSTOM_MANUAL_ENTRY">✏️ Custom / Manual Entry...</option>
+                          </select>
+                        )}
                       </div>
                       <div>
                         <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Original MRP (₹)</label>
