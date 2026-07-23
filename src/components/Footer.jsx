@@ -197,44 +197,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Col 2: Showroom Categories */}
-          <div className="footer-col">
-            <h4 className="footer-title">
-              SHOWROOM COLLECTION
-            </h4>
-            <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <li>
-                <a href="#products">
-                  <Smartphone size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Flagship Smartphones
-                </a>
-              </li>
-              <li>
-                <a href="#customized-covers">
-                  <Palette size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Customized 3D Back Covers
-                </a>
-              </li>
-              <li>
-                <a href="#photo-frames">
-                  <Frame size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Designer Photo Frames
-                </a>
-              </li>
-              <li>
-                <a href="#products">
-                  <Watch size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Smart Watches &amp; Bands
-                </a>
-              </li>
-              <li>
-                <a href="#products">
-                  <Headphones size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Wireless Earbuds &amp; Audio
-                </a>
-              </li>
-              <li>
-                <a href="#products">
-                  <Zap size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Fast Chargers &amp; Accessories
-                </a>
-              </li>
-            </ul>
-          </div>
+
 
           {/* Col 3: Showroom Contact & Live Address Card */}
           <div className="footer-col contact-col">
