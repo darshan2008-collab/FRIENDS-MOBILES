@@ -219,6 +219,29 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // Scroll-triggered heading animations (mobile & desktop compatible)
+  useEffect(() => {
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('heading-in-view');
+        }
+      });
+    };
+
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -30px 0px'
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    const headings = document.querySelectorAll('.section-title, .section-header h2, .footer-title, .category-card h3, .promo-info h3');
+
+    headings.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [products]);
+
   // Save current user to localStorage
   useEffect(() => {
     if (currentUser) {
@@ -664,20 +687,6 @@ export default function App() {
         onTriggerAuth={triggerCompulsoryAuth}
         addToast={addToast}
         onOrderPlaced={handleOrderPlaced}
-      />
-
-      <MobileBottomBar 
-        cartCount={cartCount}
-        currentUser={currentUser}
-        onOpenAuth={() => {
-          setAuthRedirectMessage('');
-          setIsAuthOpen(true);
-        }}
-        onOpenUserAccount={() => setIsAccountOpen(true)}
-        onOpenCustomCover={() => setIsCustomCoverOpen(true)}
-        onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
-        onOpenCategories={() => setIsDrawerOpen(true)}
-        onOpenCart={handleOpenCartClick}
       />
 
       <ToastContainer toasts={toasts} onRemoveToast={handleRemoveToast} />

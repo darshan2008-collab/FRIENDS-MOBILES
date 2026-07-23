@@ -4234,5 +4234,48 @@ img {
   transform: translateX(4px);
 }
 
+/* High-Performance Mobile-Optimized Heading Scroll Animations */
+.section-title,
+.section-header h2,
+.footer-title,
+.category-card h3,
+.promo-info h3 {
+  opacity: 0;
+  transform: translateY(24px) scale(0.98);
+  filter: blur(4px);
+  will-change: opacity, transform, filter;
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.section-title.heading-in-view,
+.section-header h2.heading-in-view,
+.footer-title.heading-in-view,
+.category-card h3.heading-in-view,
+.promo-info h3.heading-in-view {
+  opacity: 1 !important;
+  transform: translateY(0) scale(1) !important;
+  filter: blur(0px) !important;
+}
+
+/* Accent Line Expansion Effect on Scroll Reveal */
+.section-title::after,
+.footer-title::after {
+  content: '';
+  display: block;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, #FF5500, #ff8800);
+  border-radius: 2px;
+  margin-top: 6px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+
+.section-title.heading-in-view::after,
+.footer-title.heading-in-view::after {
+  width: 48px;
+}
+
 
 
