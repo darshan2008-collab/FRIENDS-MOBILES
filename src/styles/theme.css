@@ -4208,74 +4208,23 @@ img {
 /* Showroom Collection Footer Title & Link Styles */
 .footer-title {
   font-size: 1.05rem !important;
-  font-weight: 900 !important;
+  font-weight: 850 !important;
   color: var(--text-primary) !important;
-  letter-spacing: 0.8px !important;
+  letter-spacing: 0.6px !important;
   text-transform: uppercase !important;
   margin-bottom: 16px !important;
-  position: relative !important;
-}
-
-.footer-links li a {
-  color: var(--text-primary) !important;
+  border: none !important;
+  border-bottom: none !important;
   text-decoration: none !important;
-  font-size: 0.92rem !important;
-  font-weight: 600 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  transition: all 0.2s ease !important;
 }
 
-.footer-links li a:hover {
-  color: #FF5500 !important;
-  transform: translateX(4px);
-}
-
-/* High-Performance 60FPS GPU Scroll Animations */
-.section-title,
-.section-header h2,
-.footer-title,
-.promo-card {
-  opacity: 0;
-  transform: translate3d(0, 20px, 0);
-  will-change: opacity, transform;
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  backface-visibility: hidden;
-}
-
-.section-title.heading-in-view,
-.section-header h2.heading-in-view,
-.footer-title.heading-in-view,
-.promo-card.heading-in-view {
-  opacity: 1 !important;
-  transform: translate3d(0, 0, 0) !important;
-}
-
-/* GPU-Accelerated Infinite Marquee Scroll */
-.gpu-marquee-track {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  width: max-content;
-  will-change: transform;
-  animation: gpuMarqueeScroll 28s linear infinite;
-  backface-visibility: hidden;
-}
-
-@keyframes gpuMarqueeScroll {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
-}
-
-.gpu-marquee-track:hover {
-  animation-play-state: paused;
+.footer-title::after {
+  display: none !important;
+  content: none !important;
 }
 
 /* Accent Line Expansion Effect on Scroll Reveal */
-.section-title::after,
-.footer-title::after {
+.section-title::after {
   content: '';
   display: block;
   width: 0%;
@@ -4286,8 +4235,7 @@ img {
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
 }
 
-.section-title.heading-in-view::after,
-.footer-title.heading-in-view::after {
+.section-title.heading-in-view::after {
   width: 48px;
 }
 
