@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield, Ruler, Maximize2, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield, Ruler, Maximize2, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
 
 export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, addToast }) {
+  const fileInputRef = useRef(null);
   const [frameSize, setFrameSize] = useState('6 x 8 inches (Standard Desk / Wall)'); // 4x6 | 6x8 | 8x10 | 12x18 | 18x24 | Custom / Manual
   const [isSizeMenuOpen, setIsSizeMenuOpen] = useState(false); // Open/Close toggle for frame sizes guide
   const [customWidth, setCustomWidth] = useState(10);
@@ -258,30 +259,127 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
 
           <form onSubmit={handleAddToCartSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
-            {/* File Upload Input */}
+            {/* High-End Photo Upload Dropzone */}
             <div>
               <label className="option-section-title">
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><ImageIcon size={15} color="#FF5500" /> Upload Photo or Document for Frame (HD Image / PDF / DOC / PSD / AI)</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><ImageIcon size={15} color="#FF5500" /> Upload Photo or Document for Frame</span>
               </label>
+
               <input 
+                ref={fileInputRef}
                 type="file" 
                 accept="image/*,application/pdf,.pdf,.doc,.docx,.psd,.ai"
                 onChange={handleFileUpload}
+                style={{ display: 'none' }}
+              />
+
+              <div 
+                onClick={() => fileInputRef.current && fileInputRef.current.click()}
                 style={{
                   width: '100%',
-                  padding: '12px',
-                  borderRadius: '10px',
-                  border: '2px dashed #FF5500',
+                  padding: '24px 16px',
+                  borderRadius: '16px',
+                  border: '2px dashed rgba(255, 85, 0, 0.4)',
                   background: 'var(--orange-light)',
-                  color: 'var(--text-primary)',
                   cursor: 'pointer',
-                  fontSize: '0.88rem'
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '10px',
+                  transition: 'all 0.25s ease',
+                  boxSizing: 'border-box'
                 }}
-              />
+              >
+                <div style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(135deg, #FF5500, #ff7700)',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 6px 16px rgba(255, 85, 0, 0.35)'
+                }}>
+                  <Upload size={22} />
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '0.92rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '2px' }}>
+                    Click or Drag to Upload HD Photo / Document
+                  </div>
+                  <div style={{ fontSize: '0.76rem', color: 'var(--text-secondary)' }}>
+                    Supports Ultra HD Photos (JPG, PNG, WEBP), PDF, PSD, AI &amp; Word Docs
+                  </div>
+                </div>
+
+                <button 
+                  type="button"
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: '10px',
+                    background: '#FF5500',
+                    color: '#ffffff',
+                    fontWeight: '800',
+                    fontSize: '0.82rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(255, 85, 0, 0.25)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    marginTop: '4px'
+                  }}
+                >
+                  <Sparkles size={14} /> Select File from Device
+                </button>
+              </div>
+
               {uploadedFileInfo && (
-                <div style={{ marginTop: '8px', padding: '6px 10px', background: 'var(--bg-input)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.78rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📄 {uploadedFileInfo.name} ({uploadedFileInfo.size})</span>
-                  <span style={{ color: '#22c55e', fontWeight: '800' }}>Ready HD</span>
+                <div style={{
+                  marginTop: '12px',
+                  padding: '10px 14px',
+                  background: 'var(--bg-card)',
+                  borderRadius: '12px',
+                  border: '1.5px solid #22c55e',
+                  fontSize: '0.82rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '10px',
+                  boxShadow: '0 4px 14px rgba(34, 197, 94, 0.12)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                    <CheckCircle2 size={18} color="#22c55e" style={{ flexShrink: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                      <span style={{ fontWeight: '800', color: 'var(--text-primary)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {uploadedFileInfo.name}
+                      </span>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                        {uploadedFileInfo.size} • 4K Print Ready
+                      </span>
+                    </div>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setUploadedPhoto(null);
+                      setUploadedFileInfo(null);
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#ef4444',
+                      fontSize: '0.76rem',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      flexShrink: 0
+                    }}
+                  >
+                    Change File
+                  </button>
                 </div>
               )}
             </div>
