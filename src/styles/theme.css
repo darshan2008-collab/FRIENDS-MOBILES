@@ -4277,5 +4277,15 @@ img {
   width: 48px;
 }
 
+/* Zero Bottom Gap Fix */
+.main-footer {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.footer-bottom {
+  margin-bottom: 0 !important;
+}
+
 
 
