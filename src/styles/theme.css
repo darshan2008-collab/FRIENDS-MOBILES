@@ -4217,9 +4217,8 @@ img {
   text-decoration: none !important;
 }
 
-/* Short 48px Orange Accent Line Under Headings (Like Image 1) */
-.section-title::after,
-.footer-title::after {
+/* Short 48px Orange Accent Line Under Section Titles */
+.section-title::after {
   content: '';
   display: block;
   width: 48px;
