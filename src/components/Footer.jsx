@@ -201,9 +201,10 @@ export default function Footer() {
 
           {/* Col 3: Showroom Contact & Live Address Card */}
           <div className="footer-col contact-col">
-            <h4 className="footer-title">
+            <h4 className="footer-title" style={{ margin: 0, padding: 0 }}>
               SHOWROOM LOCATION
             </h4>
+            <div style={{ width: '48px', height: '3.5px', background: 'linear-gradient(90deg, #FF5500, #ff8800)', borderRadius: '2px', marginTop: '6px', marginBottom: '18px' }} />
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
