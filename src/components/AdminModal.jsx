@@ -230,6 +230,139 @@ export default function AdminModal({
     setAdminPassword('Friendsmobile@123');
   };
 
+  // --- Executive Order History Report (CSV Export) ---
+  const handleExportCSV = () => {
+    if (!orders || orders.length === 0) {
+      if (addToast) addToast('No order history available to export!', '⚠️');
+      return;
+    }
+
+    const headers = [
+      'Order ID', 'Date & Time', 'Customer Name', 'Phone Number', 
+      'Pincode', 'Delivery Address', 'Payment Method', 'Items Count', 
+      'Total Amount (INR)', 'Order Status'
+    ];
+
+    const rows = orders.map(o => [
+      `"${o.orderId || ''}"`,
+      `"${o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : ''}"`,
+      `"${(o.customer?.name || '').replace(/"/g, '""')}"`,
+      `"${o.customer?.phone || ''}"`,
+      `"${o.customer?.pincode || ''}"`,
+      `"${(o.customer?.address || '').replace(/"/g, '""')}"`,
+      `"${o.paymentMethod || 'COD'}"`,
+      o.items ? o.items.length : 0,
+      o.totalAmount || 0,
+      `"${o.status || 'Order Placed'}"`
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `FriendsMobile_Order_History_Report_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    if (addToast) addToast('Order History Report (CSV) downloaded successfully!', '📥');
+  };
+
+  // --- Printable Official Tax Invoice ---
+  const handlePrintOrderInvoice = (order) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const itemsHtml = (order.items || []).map(item => `
+      <tr>
+        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">
+          <strong style="color: #0f172a;">${item.title}</strong>
+          ${item.selectedColor ? `<br><small style="color: #64748b;">Color: ${item.selectedColor}</small>` : ''}
+          ${item.selectedStorage ? `<br><small style="color: #64748b;">Storage: ${item.selectedStorage}</small>` : ''}
+        </td>
+        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: bold;">${item.quantity || 1}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: bold;">₹${item.price}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: bold; color: #FF5500;">₹${((item.price) * (item.quantity || 1)).toLocaleString('en-IN')}</td>
+      </tr>
+    `).join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Invoice #${order.orderId} - FRIENDS MOBILE</title>
+          <style>
+            body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 40px; color: #1e293b; max-width: 800px; margin: 0 auto; line-height: 1.5; }
+            .invoice-header { display: flex; justify-content: space-between; border-bottom: 3px solid #FF5500; padding-bottom: 20px; margin-bottom: 25px; }
+            .logo { font-size: 26px; font-weight: 900; color: #FF5500; letter-spacing: 1px; }
+            .info-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            .info-table th { background: #f8fafc; text-align: left; padding: 10px; font-size: 12px; color: #64748b; font-weight: 800; }
+            .total-box { margin-top: 25px; text-align: right; font-size: 20px; font-weight: 900; color: #FF5500; border-top: 2px solid #e2e8f0; padding-top: 15px; }
+            .badge { background: #ecfdf5; color: #16a34a; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: bold; border: 1px solid #a7f3d0; }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-header">
+            <div>
+              <div class="logo">FRIENDS MOBILE</div>
+              <div style="font-size: 12px; color: #64748b; margin-top: 4px; font-weight: 600;">Double Tank, South Gandhigramam, Karur - 639004</div>
+              <div style="font-size: 12px; color: #64748b;">Phone: +91 74485 78507 | Email: support@friendsmobile.in</div>
+            </div>
+            <div style="text-align: right;">
+              <h2 style="margin: 0; color: #0f172a; font-size: 22px;">OFFICIAL TAX INVOICE</h2>
+              <div style="font-size: 14px; font-weight: bold; margin-top: 6px; color: #FF5500;">${order.orderId}</div>
+              <div style="font-size: 12px; color: #64748b;">Date: ${new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; margin-bottom: 25px; background: #f8fafc; padding: 16px; border-radius: 8px;">
+            <div>
+              <h4 style="margin: 0 0 6px 0; color: #64748b; font-size: 11px; letter-spacing: 0.5px;">BILLED &amp; SHIPPED TO:</h4>
+              <strong style="font-size: 15px; color: #0f172a;">${order.customer?.name || 'Customer'}</strong><br/>
+              <span style="font-size: 13px; color: #334155;">${order.customer?.address || ''}</span><br/>
+              <span style="font-size: 13px; color: #334155;">PIN Code: <strong>${order.customer?.pincode || ''}</strong></span><br/>
+              <span style="font-size: 13px; color: #334155;">Mobile: <strong>${order.customer?.phone || ''}</strong></span>
+            </div>
+            <div style="text-align: right;">
+              <h4 style="margin: 0 0 6px 0; color: #64748b; font-size: 11px; letter-spacing: 0.5px;">PAYMENT DETAILS:</h4>
+              <span class="badge">${order.paymentMethod || 'Cash On Delivery (COD)'}</span>
+              <div style="margin-top: 10px; font-size: 13px;">Status: <strong style="color: #2563eb;">${order.status || 'Order Placed'}</strong></div>
+            </div>
+          </div>
+
+          <table class="info-table">
+            <thead>
+              <tr>
+                <th>ITEM DESCRIPTION</th>
+                <th style="text-align: center;">QTY</th>
+                <th style="text-align: right;">UNIT PRICE</th>
+                <th style="text-align: right;">TOTAL AMOUNT</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+
+          <div class="total-box">
+            NET AMOUNT PAID: ₹${(order.totalAmount || 0).toLocaleString('en-IN')}
+          </div>
+
+          <div style="margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 15px; text-align: center; font-size: 12px; color: #94a3b8;">
+            This is a computer-generated tax invoice from Friends Mobile Flagship Store. No signature required.
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   // --- Real-time Auto Discount & Price Calculators ---
   const handleNewMrpDiscountCalc = (mrpInput, pctInput) => {
     const mrp = parseFloat(mrpInput) || 0;
@@ -1624,26 +1757,70 @@ export default function AdminModal({
                   </span>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setIsCreateOrderModalOpen(true)}
-                  style={{
-                    padding: '10px 18px',
-                    borderRadius: '10px',
-                    fontSize: '0.85rem',
-                    fontWeight: 'bold',
-                    background: '#FF5500',
-                    color: '#ffffff',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    boxShadow: '0 4px 12px rgba(255,85,0,0.3)'
-                  }}
-                >
-                  <Plus size={16} /> Create Manual Order
-                </button>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={handleExportCSV}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '10px',
+                      fontSize: '0.85rem',
+                      fontWeight: 'bold',
+                      background: 'var(--bg-input)',
+                      color: 'var(--text-primary)',
+                      border: '1px solid var(--border-color)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Upload size={16} color="#FF5500" /> Export Report (CSV)
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsCreateOrderModalOpen(true)}
+                    style={{
+                      padding: '10px 18px',
+                      borderRadius: '10px',
+                      fontSize: '0.85rem',
+                      fontWeight: 'bold',
+                      background: '#FF5500',
+                      color: '#ffffff',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      boxShadow: '0 4px 12px rgba(255,85,0,0.3)'
+                    }}
+                  >
+                    <Plus size={16} /> Create Manual Order
+                  </button>
+                </div>
+              </div>
+
+              {/* Executive Order History KPI Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700' }}>TOTAL ORDERS LOGGED</span>
+                  <h4 style={{ fontSize: '1.4rem', color: '#FF5500', margin: '4px 0 0 0', fontWeight: '900' }}>{totalOrders} Orders</h4>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700' }}>TOTAL REVENUE VALUE</span>
+                  <h4 style={{ fontSize: '1.4rem', color: '#22c55e', margin: '4px 0 0 0', fontWeight: '900' }}>
+                    ₹{orders ? orders.reduce((sum, o) => sum + (parseFloat(o.totalAmount) || 0), 0).toLocaleString('en-IN') : 0}
+                  </h4>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700' }}>PENDING FULFILLMENT</span>
+                  <h4 style={{ fontSize: '1.4rem', color: '#3b82f6', margin: '4px 0 0 0', fontWeight: '900' }}>
+                    {orders ? orders.filter(o => !o.status || o.status === 'Order Placed' || o.status === 'Processing').length : 0} Pending
+                  </h4>
+                </div>
               </div>
 
               {/* Order Search & Filter Controls */}
@@ -1737,6 +1914,25 @@ export default function AdminModal({
                             style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '2px 8px', fontSize: '0.72rem', fontWeight: 'bold', cursor: 'pointer', color: 'var(--text-muted)' }}
                           >
                             Copy ID
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handlePrintOrderInvoice(order)}
+                            style={{
+                              background: 'var(--orange-light)',
+                              border: '1px solid #FF5500',
+                              borderRadius: '6px',
+                              padding: '2px 8px',
+                              fontSize: '0.72rem',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              color: '#FF5500',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            🖨️ Tax Invoice
                           </button>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                             ({new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })})
