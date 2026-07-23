@@ -4212,10 +4212,8 @@ img {
   color: var(--text-primary) !important;
   letter-spacing: 0.8px !important;
   text-transform: uppercase !important;
-  border-bottom: 2.5px solid #FF5500 !important;
-  display: inline-block !important;
-  padding-bottom: 6px !important;
-  margin-bottom: 20px !important;
+  margin-bottom: 16px !important;
+  position: relative !important;
 }
 
 .footer-links li a {
