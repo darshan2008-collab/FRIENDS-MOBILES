@@ -1009,6 +1009,18 @@ export default function AdminModal({
                       />
                     </div>
 
+                    {/* Product Description */}
+                    <div>
+                      <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Product Description</label>
+                      <textarea 
+                        placeholder="Enter detailed product specifications, features, and description..."
+                        value={newProduct.description || ''}
+                        onChange={e => setNewProduct({...newProduct, description: e.target.value})}
+                        rows={2}
+                        style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }} 
+                      />
+                    </div>
+
                     {/* Category + MRP row with Manual Entry Toggle */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
@@ -1273,6 +1285,18 @@ export default function AdminModal({
                         onChange={e => setEditProductForm({...editProductForm, title: e.target.value})}
                         required 
                         style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', boxSizing: 'border-box' }} 
+                      />
+                    </div>
+
+                    {/* Product Description */}
+                    <div>
+                      <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Product Description</label>
+                      <textarea 
+                        placeholder="Enter detailed product specifications, features, and description..."
+                        value={editProductForm.description || ''}
+                        onChange={e => setEditProductForm({...editProductForm, description: e.target.value})}
+                        rows={2}
+                        style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }} 
                       />
                     </div>
 
