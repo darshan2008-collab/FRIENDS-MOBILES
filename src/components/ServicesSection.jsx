@@ -24,9 +24,10 @@ export default function ServicesSection() {
     let animationFrameId;
     let lastTime = performance.now();
     let isHovered = false;
-    let accumulatedScroll = container.scrollLeft;
+    let halfWidth = container.scrollWidth / 2;
+    let accumulatedScroll = halfWidth;
 
-    const scrollSpeed = 35; // Pixels per second (smooth slow sliding)
+    const scrollSpeed = 35; // Pixels per second (smooth slow sliding forward)
 
     const autoScroll = (timestamp) => {
       if (!container) return;
@@ -35,11 +36,11 @@ export default function ServicesSection() {
         const elapsed = timestamp - lastTime;
         if (elapsed > 0) {
           const delta = (scrollSpeed * elapsed) / 1000;
-          const halfWidth = container.scrollWidth / 2;
+          halfWidth = container.scrollWidth / 2 || 1;
 
-          accumulatedScroll += delta;
-          if (accumulatedScroll >= halfWidth) {
-            accumulatedScroll = 0;
+          accumulatedScroll -= delta;
+          if (accumulatedScroll <= 0) {
+            accumulatedScroll = halfWidth;
           }
           container.scrollLeft = Math.round(accumulatedScroll);
         }
