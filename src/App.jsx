@@ -156,71 +156,71 @@ export default function App() {
   });
   const [orders, setOrders] = useState([]);
 
-  const BANNER_STORAGE_KEY = 'friends_mobile_hero_slides_v4';
-
-  const [heroSlides, setHeroSlides] = useState(() => {
-    // Clean up old legacy keys that caused slide persistence bugs
-    try {
-      localStorage.removeItem('friends_mobile_hero_slides');
-      localStorage.removeItem('friends_mobile_hero_slides_v2');
-      localStorage.removeItem('friends_mobile_hero_slides_v3');
-    } catch (e) {}
-
-    const saved = localStorage.getItem(BANNER_STORAGE_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Error loading saved slides", e);
-      }
+  const DEFAULT_SLIDES = [
+    {
+      id: 1,
+      tag: 'WELCOME TO FRIENDS MOBILE',
+      titleWhite: 'Your One Stop',
+      titleGradient: 'Mobile Destination',
+      desc: 'Premium mobile accessories, custom cases & photo frames.',
+      imgSrc: '/images/hero_devices_light.png',
+      btnText: 'SHOP NOW',
+      btnLink: '#products'
+    },
+    {
+      id: 2,
+      tag: 'CUSTOM 3D COVERS',
+      titleWhite: 'Your Style.',
+      titleGradient: 'Your Cover.',
+      desc: 'High-definition custom printed back covers for all models.',
+      imgSrc: '/images/banner_backcover.png',
+      btnText: 'CUSTOMIZE COVER',
+      btnLink: '#customized-covers'
+    },
+    {
+      id: 3,
+      tag: 'DESIGNER PHOTO FRAMES',
+      titleWhite: 'For Every',
+      titleGradient: 'Special Memory',
+      desc: 'Handcrafted custom wood frames for your special memories.',
+      imgSrc: '/images/banner_photoframe.png',
+      btnText: 'CREATE FRAME',
+      btnLink: '#photo-frames'
+    },
+    {
+      id: 4,
+      tag: 'EXCLUSIVE ACCESSORY DEALS',
+      titleWhite: 'Up to 40% Off',
+      titleGradient: 'Premium Gear',
+      desc: 'Get up to 40% off chargers, earbuds & smartwatches.',
+      imgSrc: '/images/banner_accessories.png',
+      btnText: 'EXPLORE OFFERS',
+      btnLink: '#products'
     }
-    return [
-      {
-        id: 1,
-        tag: 'WELCOME TO FRIENDS MOBILE',
-        titleWhite: 'Your One Stop',
-        titleGradient: 'Mobile Destination',
-        desc: 'Premium mobile accessories, custom cases & photo frames.',
-        imgSrc: '/images/hero_devices_light.png',
-        btnText: 'SHOP NOW',
-        btnLink: '#products'
-      },
-      {
-        id: 2,
-        tag: 'CUSTOM 3D COVERS',
-        titleWhite: 'Your Style.',
-        titleGradient: 'Your Cover.',
-        desc: 'High-definition custom printed back covers for all models.',
-        imgSrc: '/images/banner_backcover.png',
-        btnText: 'CUSTOMIZE COVER',
-        btnLink: '#customized-covers'
-      },
-      {
-        id: 3,
-        tag: 'DESIGNER PHOTO FRAMES',
-        titleWhite: 'For Every',
-        titleGradient: 'Special Memory',
-        desc: 'Handcrafted custom wood frames for your special memories.',
-        imgSrc: '/images/banner_photoframe.png',
-        btnText: 'CREATE FRAME',
-        btnLink: '#photo-frames'
-      },
-      {
-        id: 4,
-        tag: 'EXCLUSIVE ACCESSORY DEALS',
-        titleWhite: 'Up to 40% Off',
-        titleGradient: 'Premium Gear',
-        desc: 'Get up to 40% off chargers, earbuds & smartwatches.',
-        imgSrc: '/images/banner_accessories.png',
-        btnText: 'EXPLORE OFFERS',
-        btnLink: '#products'
-      }
-    ];
-  });
+  ];
+
+  const [heroSlides, setHeroSlides] = useState(DEFAULT_SLIDES);
+
+  // Fetch banners from database on mount
+  useEffect(() => {
+    fetch(`${API_BASE}/banners`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.slides && data.slides.length > 0) {
+          setHeroSlides(data.slides);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleUpdateSlides = (newSlides) => {
     setHeroSlides(newSlides);
-    localStorage.setItem(BANNER_STORAGE_KEY, JSON.stringify(newSlides));
+    // Save to database via API
+    fetch(`${API_BASE}/banners`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slides: newSlides })
+    }).catch(() => {});
   };
 
   // Set html data-theme attribute whenever theme state changes

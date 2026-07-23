@@ -2188,10 +2188,6 @@ export default function AdminModal({
                   <button
                     type="button"
                     onClick={() => {
-                      localStorage.removeItem('friends_mobile_hero_slides');
-                      localStorage.removeItem('friends_mobile_hero_slides_v2');
-                      localStorage.removeItem('friends_mobile_hero_slides_v3');
-                      localStorage.removeItem('friends_mobile_hero_slides_v4');
                       if (onUpdateSlides) onUpdateSlides(null);
                       window.location.reload();
                     }}
