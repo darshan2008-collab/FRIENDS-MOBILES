@@ -269,134 +269,134 @@ export default function Footer() {
           gap: '20px',
           textAlign: 'center'
         }}>
-          {/* AMAZON & FLIPKART STYLE PAYMENT SECTION */}
+          {/* COMPACT ULTRA-SLEEK PAYMENT BAR */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '12px',
+            gap: '8px',
             width: '100%'
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.78rem',
+              gap: '5px',
+              fontSize: '0.7rem',
               fontWeight: '850',
-              color: 'var(--text-secondary)',
-              letterSpacing: '1px',
+              color: 'var(--text-muted)',
+              letterSpacing: '0.8px',
               textTransform: 'uppercase'
             }}>
-              <ShieldCheck size={16} color="#22c55e" />
+              <ShieldCheck size={14} color="#22c55e" />
               100% SECURE &amp; TRUSTED PAYMENTS
             </div>
 
-            {/* Single Horizontal Row of Flipkart/Amazon Style Badges */}
+            {/* Compact Micro-Sized Single Row Payment Badges */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '10px',
+              gap: '6px',
               flexWrap: 'wrap',
               maxWidth: '100%'
             }}>
               
               {/* Google Pay / UPI */}
               <div style={{
-                height: '34px',
-                padding: '0 14px',
-                borderRadius: '6px',
+                height: '24px',
+                padding: '0 8px',
+                borderRadius: '5px',
                 background: '#ffffff',
                 border: '1px solid #e2e8f0',
-                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#4285F4' }}>G</span>
-                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#EA4335' }}>P</span>
-                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#FBBC05' }}>a</span>
-                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#34A853' }}>y</span>
-                <span style={{ fontSize: '0.7rem', fontWeight: '800', color: '#64748b', marginLeft: '3px' }}>UPI</span>
-              </div>
-
-              {/* PhonePe */}
-              <div style={{
-                height: '34px',
-                padding: '0 14px',
-                borderRadius: '6px',
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '3px'
               }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#5f259f' }}>Phone</span>
-                <span style={{ fontSize: '0.72rem', fontWeight: '900', background: '#5f259f', color: '#ffffff', padding: '1px 5px', borderRadius: '4px' }}>Pe</span>
+                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#4285F4' }}>G</span>
+                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#EA4335' }}>P</span>
+                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#FBBC05' }}>a</span>
+                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#34A853' }}>y</span>
+                <span style={{ fontSize: '0.62rem', fontWeight: '800', color: '#64748b', marginLeft: '2px' }}>UPI</span>
+              </div>
+
+              {/* PhonePe */}
+              <div style={{
+                height: '24px',
+                padding: '0 8px',
+                borderRadius: '5px',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '2px'
+              }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#5f259f' }}>Phone</span>
+                <span style={{ fontSize: '0.62rem', fontWeight: '900', background: '#5f259f', color: '#ffffff', padding: '1px 3px', borderRadius: '3px' }}>Pe</span>
               </div>
 
               {/* Paytm */}
               <div style={{
-                height: '34px',
-                padding: '0 14px',
-                borderRadius: '6px',
+                height: '24px',
+                padding: '0 8px',
+                borderRadius: '5px',
                 background: '#ffffff',
                 border: '1px solid #e2e8f0',
-                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
                 display: 'inline-flex',
                 alignItems: 'center'
               }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#002e6e', letterSpacing: '-0.3px' }}>Pay<span style={{ color: '#00baf2' }}>tm</span></span>
+                <span style={{ fontSize: '0.68rem', fontWeight: '900', color: '#002e6e', letterSpacing: '-0.3px' }}>Pay<span style={{ color: '#00baf2' }}>tm</span></span>
               </div>
 
               {/* VISA */}
               <div style={{
-                height: '34px',
-                padding: '0 14px',
-                borderRadius: '6px',
+                height: '24px',
+                padding: '0 8px',
+                borderRadius: '5px',
                 background: '#ffffff',
                 border: '1px solid #e2e8f0',
-                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
                 display: 'inline-flex',
                 alignItems: 'center'
               }}>
-                <span style={{ fontSize: '0.88rem', fontWeight: '900', color: '#1A1F71', fontStyle: 'italic', letterSpacing: '1px' }}>VISA</span>
+                <span style={{ fontSize: '0.72rem', fontWeight: '900', color: '#1A1F71', fontStyle: 'italic', letterSpacing: '0.8px' }}>VISA</span>
               </div>
 
               {/* Mastercard */}
               <div style={{
-                height: '34px',
-                padding: '0 14px',
-                borderRadius: '6px',
+                height: '24px',
+                padding: '0 8px',
+                borderRadius: '5px',
                 background: '#ffffff',
                 border: '1px solid #e2e8f0',
-                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '4px'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#EB001B', display: 'inline-block' }}></span>
-                  <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#F79E1B', display: 'inline-block', marginLeft: '-4px', opacity: 0.95 }}></span>
+                  <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#EB001B', display: 'inline-block' }}></span>
+                  <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#F79E1B', display: 'inline-block', marginLeft: '-3px', opacity: 0.95 }}></span>
                 </div>
-                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#1e293b' }}>Mastercard</span>
+                <span style={{ fontSize: '0.65rem', fontWeight: '800', color: '#1e293b' }}>Mastercard</span>
               </div>
 
               {/* Cash On Delivery */}
               <div style={{
-                height: '34px',
-                padding: '0 14px',
-                borderRadius: '6px',
+                height: '24px',
+                padding: '0 8px',
+                borderRadius: '5px',
                 background: '#f0fdf4',
                 border: '1px solid #bbf7d0',
-                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.03)',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '4px',
                 color: '#16a34a'
               }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: '800' }}>🚚 Cash on Delivery</span>
+                <span style={{ fontSize: '0.66rem', fontWeight: '800' }}>💵 COD</span>
               </div>
 
             </div>
