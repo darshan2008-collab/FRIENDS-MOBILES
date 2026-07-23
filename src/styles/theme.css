@@ -4205,5 +4205,34 @@ img {
   background: var(--primary-orange-hover, #ff6a1a);
 }
 
+/* Showroom Collection Footer Title & Link Styles */
+.footer-title {
+  font-size: 1.05rem !important;
+  font-weight: 900 !important;
+  color: var(--text-primary) !important;
+  letter-spacing: 0.8px !important;
+  text-transform: uppercase !important;
+  border-bottom: 2.5px solid #FF5500 !important;
+  display: inline-block !important;
+  padding-bottom: 6px !important;
+  margin-bottom: 20px !important;
+}
+
+.footer-links li a {
+  color: var(--text-primary) !important;
+  text-decoration: none !important;
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.footer-links li a:hover {
+  color: #FF5500 !important;
+  transform: translateX(4px);
+}
+
 
 

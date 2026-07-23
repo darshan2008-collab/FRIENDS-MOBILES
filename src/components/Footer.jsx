@@ -174,35 +174,35 @@ export default function Footer() {
             <h4 className="footer-title">
               SHOWROOM COLLECTION
             </h4>
-            <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <ul className="footer-links" style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <li>
-                <a href="#products" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s ease' }}>
-                  <Smartphone size={16} color="#FF5500" /> Flagship Smartphones
+                <a href="#products">
+                  <Smartphone size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Flagship Smartphones
                 </a>
               </li>
               <li>
-                <a href="#customized-covers" style={{ color: '#FF5500', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s ease' }}>
-                  <Palette size={16} color="#FF5500" /> Customized 3D Back Covers
+                <a href="#customized-covers" style={{ color: '#FF5500', fontWeight: '800' }}>
+                  <Palette size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Customized 3D Back Covers
                 </a>
               </li>
               <li>
-                <a href="#photo-frames" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s ease' }}>
-                  <Frame size={16} color="#FF5500" /> Designer Photo Frames
+                <a href="#photo-frames">
+                  <Frame size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Designer Photo Frames
                 </a>
               </li>
               <li>
-                <a href="#products" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s ease' }}>
-                  <Watch size={16} color="#FF5500" /> Smart Watches &amp; Bands
+                <a href="#products">
+                  <Watch size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Smart Watches &amp; Bands
                 </a>
               </li>
               <li>
-                <a href="#products" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s ease' }}>
-                  <Headphones size={16} color="#FF5500" /> Wireless Earbuds &amp; Audio
+                <a href="#products">
+                  <Headphones size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Wireless Earbuds &amp; Audio
                 </a>
               </li>
               <li>
-                <a href="#products" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.88rem', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'color 0.2s ease' }}>
-                  <Zap size={16} color="#FF5500" /> Fast Chargers &amp; Accessories
+                <a href="#products">
+                  <Zap size={18} color="#FF5500" style={{ flexShrink: 0 }} /> Fast Chargers &amp; Accessories
                 </a>
               </li>
             </ul>
