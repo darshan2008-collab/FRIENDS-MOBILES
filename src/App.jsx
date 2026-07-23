@@ -219,25 +219,27 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Scroll-triggered heading animations (mobile & desktop compatible)
+  // Continuous Scroll-Triggered Animations (re-triggers on scroll down and scroll up)
   useEffect(() => {
     const observerCallback = (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('heading-in-view');
+        } else {
+          entry.target.classList.remove('heading-in-view');
         }
       });
     };
 
     const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -30px 0px'
+      threshold: 0.12,
+      rootMargin: '0px 0px -20px 0px'
     };
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
-    const headings = document.querySelectorAll('.section-title, .section-header h2, .footer-title, .category-card h3, .promo-info h3');
+    const animElements = document.querySelectorAll('.section-title, .section-header h2, .footer-title, .category-card, .product-card, .promo-card');
 
-    headings.forEach((el) => observer.observe(el));
+    animElements.forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
   }, [products]);
