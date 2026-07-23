@@ -61,6 +61,7 @@ const customCoverRouter = require('./routes/customCover');
 const adminRouter = require('./routes/admin');
 const authRouter = require('./routes/auth');
 const paymentsRouter = require('./routes/payments');
+const bannersRouter = require('./routes/banners');
 
 // ─── App Initialization ────────────────────────────────────────────────────────
 const app = express();
@@ -143,6 +144,7 @@ app.use('/api/custom-cover', customCoverRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/payments', paymentsRouter);
+app.use('/api/banners', bannersRouter);
 
 // ─── Health Check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
