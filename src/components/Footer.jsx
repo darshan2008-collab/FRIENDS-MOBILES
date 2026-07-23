@@ -267,55 +267,152 @@ export default function Footer() {
 
         </div>
 
-        {/* Footer Bottom Bar */}
+        {/* Footer Bottom Bar - Amazon / Flipkart Style */}
         <div className="footer-bottom" style={{
           borderTop: '1px solid var(--border-color)',
-          paddingTop: '20px',
-          paddingBottom: '16px',
+          paddingTop: '24px',
+          paddingBottom: '24px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '16px',
+          gap: '20px',
           textAlign: 'center'
         }}>
-          {/* SECURE PAYMENTS SECTION (TOP) */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: '900', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.8px', marginRight: '4px' }}>SECURE PAYMENTS:</span>
-            
-            {/* Google Pay / UPI Badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 14px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
-              <span style={{ fontSize: '0.78rem', fontWeight: '900', color: '#4285F4' }}>G</span>
-              <span style={{ fontSize: '0.78rem', fontWeight: '900', color: '#EA4335' }}>P</span>
-              <span style={{ fontSize: '0.78rem', fontWeight: '900', color: '#FBBC05' }}>a</span>
-              <span style={{ fontSize: '0.78rem', fontWeight: '900', color: '#34A853' }}>y</span>
-              <span style={{ fontSize: '0.72rem', fontWeight: '800', color: 'var(--text-muted)', marginLeft: '2px' }}>/ UPI</span>
+          {/* AMAZON & FLIPKART STYLE PAYMENT SECTION */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '12px',
+            width: '100%'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.78rem',
+              fontWeight: '850',
+              color: 'var(--text-secondary)',
+              letterSpacing: '1px',
+              textTransform: 'uppercase'
+            }}>
+              <ShieldCheck size={16} color="#22c55e" />
+              100% SECURE &amp; TRUSTED PAYMENTS
             </div>
 
-            {/* PhonePe Badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', padding: '6px 14px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
-              <span style={{ fontSize: '0.78rem', fontWeight: '900', color: '#5f259f' }}>Phone</span>
-              <span style={{ fontSize: '0.74rem', fontWeight: '900', background: '#5f259f', color: '#ffffff', padding: '1px 5px', borderRadius: '4px' }}>Pe</span>
-            </div>
-
-            {/* VISA Badge */}
-            <div style={{ padding: '6px 14px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
-              <span style={{ fontSize: '0.84rem', fontWeight: '900', color: '#1A1F71', fontStyle: 'italic', letterSpacing: '1px' }}>VISA</span>
-            </div>
-
-            {/* Mastercard Badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#EB001B', display: 'inline-block' }}></span>
-                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#F79E1B', display: 'inline-block', marginLeft: '-4px', opacity: 0.95 }}></span>
+            {/* Single Horizontal Row of Flipkart/Amazon Style Badges */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              flexWrap: 'wrap',
+              maxWidth: '100%'
+            }}>
+              
+              {/* Google Pay / UPI */}
+              <div style={{
+                height: '34px',
+                padding: '0 14px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#4285F4' }}>G</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#EA4335' }}>P</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#FBBC05' }}>a</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#34A853' }}>y</span>
+                <span style={{ fontSize: '0.7rem', fontWeight: '800', color: '#64748b', marginLeft: '3px' }}>UPI</span>
               </div>
-              <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-primary)' }}>Mastercard</span>
-            </div>
 
-            {/* Cash On Delivery Badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: '8px', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#16a34a' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: '900' }}>💵 Cash on Delivery</span>
+              {/* PhonePe */}
+              <div style={{
+                height: '34px',
+                padding: '0 14px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#5f259f' }}>Phone</span>
+                <span style={{ fontSize: '0.72rem', fontWeight: '900', background: '#5f259f', color: '#ffffff', padding: '1px 5px', borderRadius: '4px' }}>Pe</span>
+              </div>
+
+              {/* Paytm */}
+              <div style={{
+                height: '34px',
+                padding: '0 14px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+                display: 'inline-flex',
+                alignItems: 'center'
+              }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#002e6e', letterSpacing: '-0.3px' }}>Pay<span style={{ color: '#00baf2' }}>tm</span></span>
+              </div>
+
+              {/* VISA */}
+              <div style={{
+                height: '34px',
+                padding: '0 14px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+                display: 'inline-flex',
+                alignItems: 'center'
+              }}>
+                <span style={{ fontSize: '0.88rem', fontWeight: '900', color: '#1A1F71', fontStyle: 'italic', letterSpacing: '1px' }}>VISA</span>
+              </div>
+
+              {/* Mastercard */}
+              <div style={{
+                height: '34px',
+                padding: '0 14px',
+                borderRadius: '6px',
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#EB001B', display: 'inline-block' }}></span>
+                  <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#F79E1B', display: 'inline-block', marginLeft: '-4px', opacity: 0.95 }}></span>
+                </div>
+                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#1e293b' }}>Mastercard</span>
+              </div>
+
+              {/* Cash On Delivery */}
+              <div style={{
+                height: '34px',
+                padding: '0 14px',
+                borderRadius: '6px',
+                background: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.03)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                color: '#16a34a'
+              }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: '800' }}>🚚 Cash on Delivery</span>
+              </div>
+
             </div>
           </div>
+
+          {/* Separator line */}
+          <div style={{ width: '100%', height: '1px', background: 'var(--border-color)', opacity: 0.6 }} />
 
           {/* COPYRIGHT LINE (BOTTOM) */}
           <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
