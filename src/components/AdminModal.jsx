@@ -214,9 +214,11 @@ export default function AdminModal({
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
+    const u = adminUsername.trim().toLowerCase();
+    const p = adminPassword.trim();
     if (
-      (adminUsername.trim() === 'FriendsMobile' && adminPassword === 'Friendsmobile@123') ||
-      (adminUsername.trim() === 'admin' && adminPassword === '1234')
+      (u === 'friendsmobile' && (p === 'fm@1234' || p === 'Friendsmobile@123' || p === 'fm1234')) ||
+      (u === 'admin' && (p === 'fm@1234' || p === '1234'))
     ) {
       setIsAuthenticated(true);
       if (addToast) addToast('Admin Access Granted. Welcome, Super Admin!', '🔐');
@@ -226,8 +228,8 @@ export default function AdminModal({
   };
 
   const handleDemoFill = () => {
-    setAdminUsername('FriendsMobile');
-    setAdminPassword('Friendsmobile@123');
+    setAdminUsername('Friendsmobile');
+    setAdminPassword('fm@1234');
   };
 
   // --- Executive Order History Report (CSV Export) ---
@@ -838,7 +840,7 @@ export default function AdminModal({
                 fontSize: '0.82rem'
               }}
             >
-              Auto-Fill Credentials (FriendsMobile / Friendsmobile@123)
+              Auto-Fill Credentials (Friendsmobile / fm@1234)
             </button>
           </div>
         </div>
