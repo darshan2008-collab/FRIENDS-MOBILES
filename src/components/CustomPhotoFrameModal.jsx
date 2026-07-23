@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield, Ruler, Maximize2 } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield, Ruler, Maximize2, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, addToast }) {
-  const [frameSize, setFrameSize] = useState('6 x 8 inches'); // 4x6 | 6x8 | 8x10 | 12x18 | 18x24 | Custom / Manual
+  const [frameSize, setFrameSize] = useState('6 x 8 inches (Standard Desk / Wall)'); // 4x6 | 6x8 | 8x10 | 12x18 | 18x24 | Custom / Manual
+  const [isSizeMenuOpen, setIsSizeMenuOpen] = useState(false); // Open/Close toggle for frame sizes guide
   const [customWidth, setCustomWidth] = useState(10);
   const [customHeight, setCustomHeight] = useState(12);
   const [customUnit, setCustomUnit] = useState('inches'); // 'inches' | 'cm'
@@ -285,12 +286,48 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
               )}
             </div>
 
-            {/* Frame Size Selector */}
+            {/* Frame Size Selector (Expandable Open/Close Accordion) */}
             <div>
-              <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                <Frame size={15} /> Select Frame Dimensions &amp; Size
-              </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div 
+                onClick={() => setIsSizeMenuOpen(!isSizeMenuOpen)}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'space-between',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  border: '1.5px solid #FF5500',
+                  background: 'var(--orange-light)',
+                  cursor: 'pointer',
+                  marginBottom: isSizeMenuOpen ? '10px' : '0'
+                }}
+              >
+                <div>
+                  <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: '#FF5500' }}>
+                    <Frame size={16} /> Frame Size: {frameSize.split('(')[0]} ({frameSize.startsWith('Custom') ? `₹${getCustomPrice()}` : `₹${getSelectedPrice()}`})
+                  </label>
+                  <span style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', display: 'block', marginTop: '2px' }}>
+                    {isSizeMenuOpen ? 'Tap to Close Size Menu ▲' : 'Tap to Open All Sizes & Price Guide ▼'}
+                  </span>
+                </div>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#FF5500',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  {isSizeMenuOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </div>
+              </div>
+
+              {/* Expandable Size Options List */}
+              {isSizeMenuOpen && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
                 {frameSizes.map(sizeObj => {
                   const isSelected = frameSize === sizeObj.label;
                   const isCustomOption = sizeObj.label.startsWith('Custom');
@@ -463,6 +500,7 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
                   );
                 })}
               </div>
+              )}
             </div>
 
             {/* Frame Material / Color */}
