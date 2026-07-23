@@ -1998,9 +1998,37 @@ export default function AdminModal({
           {activeTab === 'slides' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '24px', borderRadius: '18px' }}>
-                <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Sparkles size={20} color="#FF5500" /> Manage Home Banner Slides
-                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '8px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Sparkles size={20} color="#FF5500" /> Manage Home Banner Slides
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      localStorage.removeItem('friends_mobile_hero_slides');
+                      localStorage.removeItem('friends_mobile_hero_slides_v2');
+                      localStorage.removeItem('friends_mobile_hero_slides_v3');
+                      localStorage.removeItem('friends_mobile_hero_slides_v4');
+                      if (onUpdateSlides) onUpdateSlides(null);
+                      window.location.reload();
+                    }}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #FF5500',
+                      background: 'var(--orange-light)',
+                      color: '#FF5500',
+                      fontWeight: '800',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <RefreshCw size={12} /> Clear Cache &amp; Reset Default Banners
+                  </button>
+                </div>
                 <p style={{ margin: '0 0 20px 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                   Delete existing banner images/slides, or upload custom back cover/photo frame banners.
                 </p>

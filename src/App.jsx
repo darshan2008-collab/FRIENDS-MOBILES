@@ -156,8 +156,17 @@ export default function App() {
   });
   const [orders, setOrders] = useState([]);
 
+  const BANNER_STORAGE_KEY = 'friends_mobile_hero_slides_v4';
+
   const [heroSlides, setHeroSlides] = useState(() => {
-    const saved = localStorage.getItem('friends_mobile_hero_slides_v2');
+    // Clean up old legacy keys that caused slide persistence bugs
+    try {
+      localStorage.removeItem('friends_mobile_hero_slides');
+      localStorage.removeItem('friends_mobile_hero_slides_v2');
+      localStorage.removeItem('friends_mobile_hero_slides_v3');
+    } catch (e) {}
+
+    const saved = localStorage.getItem(BANNER_STORAGE_KEY);
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -211,7 +220,7 @@ export default function App() {
 
   const handleUpdateSlides = (newSlides) => {
     setHeroSlides(newSlides);
-    localStorage.setItem('friends_mobile_hero_slides', JSON.stringify(newSlides));
+    localStorage.setItem(BANNER_STORAGE_KEY, JSON.stringify(newSlides));
   };
 
   // Set html data-theme attribute whenever theme state changes
