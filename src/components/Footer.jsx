@@ -25,83 +25,111 @@ export default function Footer() {
 
       <div className="container">
         
-        {/* Showroom Announcement Banner */}
+        {/* Showroom Announcement Banner - Ultra-Premium Glassmorphic Design */}
         <div style={{
-          background: 'var(--orange-light)',
-          border: '1.5px solid rgba(255, 85, 0, 0.3)',
-          borderRadius: '16px',
-          padding: '18px 24px',
+          background: 'var(--bg-card)',
+          border: '1px solid rgba(255, 85, 0, 0.25)',
+          borderRadius: '20px',
+          padding: '24px 28px',
           marginBottom: '48px',
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '16px',
-          boxShadow: '0 8px 30px rgba(255, 85, 0, 0.08)'
+          gap: '20px',
+          boxShadow: '0 12px 35px rgba(0, 0, 0, 0.05), 0 0 20px rgba(255, 85, 0, 0.06)',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          {/* Subtle Top Gradient Accent Bar */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '3px',
+            background: 'linear-gradient(90deg, #FF5500, #ff8800, #22c55e)'
+          }} />
+
+          {/* Left Info Group */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: '1 1 300px' }}>
             <div style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '12px',
-              background: '#FF5500',
+              width: '48px',
+              height: '48px',
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, #FF5500, #ff7700)',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(255, 85, 0, 0.3)',
+              boxShadow: '0 6px 18px rgba(255, 85, 0, 0.35)',
               flexShrink: 0
             }}>
-              <Award size={22} />
+              <Award size={24} />
             </div>
             <div>
-              <div style={{ fontSize: '0.92rem', fontWeight: '850', color: 'var(--text-primary)', letterSpacing: '0.3px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                KARUR'S #1 PREMIUM MULTI-BRAND MOBILE SHOWROOM
+              <div style={{ fontSize: '0.96rem', fontWeight: '900', color: 'var(--text-primary)', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                <span>KARUR'S #1 MULTI-BRAND MOBILE SHOWROOM</span>
                 <span style={{ 
                   fontSize: '0.72rem', 
-                  background: '#16a34a', 
-                  color: '#ffffff', 
+                  background: 'rgba(34, 197, 94, 0.12)', 
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  color: '#16a34a', 
                   padding: '3px 10px', 
-                  borderRadius: '12px', 
+                  borderRadius: '20px', 
                   fontWeight: '800',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '5px'
+                  gap: '6px'
                 }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ffffff', display: 'inline-block' }} />
+                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 8px #22c55e' }} />
                   OPEN TODAY
                 </span>
               </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', fontWeight: '500', lineHeight: '1.4' }}>
                 Visit our Flagship Store or Order Online for Express 30-Min Custom Case Printing!
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Clock size={14} color="#FF5500" /> 9:00 AM – 10:00 PM
-            </span>
+          {/* Right Action Group */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              background: 'var(--bg-input)', 
+              padding: '8px 14px', 
+              borderRadius: '10px', 
+              border: '1px solid var(--border-color)',
+              fontSize: '0.82rem', 
+              fontWeight: '750', 
+              color: 'var(--text-primary)' 
+            }}>
+              <Clock size={16} color="#FF5500" />
+              <span>9:00 AM – 10:00 PM</span>
+            </div>
+
             <a 
               href="https://wa.me/917448578507" 
               target="_blank" 
               rel="noreferrer"
               style={{
-                background: '#FF5500',
+                background: 'linear-gradient(135deg, #FF5500, #ff7700)',
                 color: '#ffffff',
-                padding: '8px 16px',
-                borderRadius: '10px',
-                fontWeight: 'bold',
-                fontSize: '0.82rem',
+                padding: '10px 20px',
+                borderRadius: '12px',
+                fontWeight: '800',
+                fontSize: '0.86rem',
                 textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
-                boxShadow: '0 4px 15px rgba(255, 85, 0, 0.3)',
-                transition: 'transform 0.2s ease'
+                gap: '8px',
+                boxShadow: '0 6px 20px rgba(255, 85, 0, 0.3)',
+                transition: 'all 0.2s ease'
               }}
             >
-              <MessageSquare size={14} /> Connect With Showroom
+              <MessageSquare size={16} /> Connect With Showroom
             </a>
           </div>
         </div>
