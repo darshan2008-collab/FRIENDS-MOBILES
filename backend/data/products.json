@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "title": "boAt Airdopes 141 Bluetooth Earbuds",
+    "category": "Earphones",
+    "discount": "-20%",
+    "price": 1199,
+    "originalPrice": 1499,
+    "rating": 0,
+    "reviews": 0,
+    "inStock": true,
+    "img": "images/prod_airdopes.png",
+    "fallback": "http://localhost:5000/images/prod_airdopes.png",
+    "description": "True Wireless Earbuds with up to 42H Playtime, Beast Mode for Low Latency Gaming, and ENx Technology for crystal clear calls."
+  },
+  {
+    "id": 2,
+    "title": "Mi 20000mAh Power Bank 3i",
+    "category": "Power Banks",
+    "discount": "-15%",
+    "price": 1699,
+    "originalPrice": 1999,
+    "rating": 0,
+    "reviews": 0,
+    "inStock": true,
+    "img": "images/prod_powerbank.png",
+    "fallback": "http://localhost:5000/images/prod_powerbank.png",
+    "description": "High capacity 20000mAh lithium polymer battery with 18W fast charging and triple port output."
+  },
+  {
+    "id": 3,
+    "title": "Portronics 20W Fast Charger",
+    "category": "Chargers & Cables",
+    "discount": "-25%",
+    "price": 599,
+    "originalPrice": 799,
+    "rating": 0,
+    "reviews": 0,
+    "inStock": true,
+    "img": "images/prod_charger.png",
+    "fallback": "http://localhost:5000/images/prod_charger.png",
+    "description": "Ultra fast 20W Type-C Power Delivery wall charger compatible with iPhone, Samsung, and Android devices."
+  },
+  {
+    "id": 4,
+    "title": "Realme Wireless 2S Neckband",
+    "category": "Earphones",
+    "discount": "-10%",
+    "price": 1349,
+    "originalPrice": 1499,
+    "rating": 0,
+    "reviews": 0,
+    "inStock": true,
+    "img": "images/prod_neckband.png",
+    "fallback": "http://localhost:5000/images/prod_neckband.png",
+    "description": "Flexible neckband earphones with 11.2mm dynamic bass boost drivers, magnetic instant connect, and fast charging."
+  },
+  {
+    "id": 5,
+    "title": "Customized Back Cover",
+    "category": "Back Covers",
+    "discount": "-15%",
+    "price": 399,
+    "originalPrice": 499,
+    "rating": 0,
+    "reviews": 0,
+    "inStock": true,
+    "img": "images/prod_custom_cover.png",
+    "fallback": "http://localhost:5000/images/prod_custom_cover.png",
+    "description": "High resolution custom printed back cover with scratch-resistant coating for all mobile phone models."
+  }
+]

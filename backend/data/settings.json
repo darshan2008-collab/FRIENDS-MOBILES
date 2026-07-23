@@ -1,0 +1,10 @@
+{
+  "standardShippingFee": 49,
+  "freeShippingThreshold": 499,
+  "expressShippingFee": 99,
+  "storeName": "FRIENDS MOBILE",
+  "supportPhone": "+91 74485 78507",
+  "supportEmail": "friendsmobile@gmail.com",
+  "currency": "INR",
+  "taxRatePercent": 0
+}

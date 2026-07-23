@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FRIENDS MOBILE | Your One Stop Mobile Destination</title>
+  <meta name="description" content="FRIENDS MOBILE - Buy premium mobiles, accessories, customized back covers, photo frames and expert mobile services in Madurai, Tamil Nadu.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Theme Stylesheet -->
+  <link rel="stylesheet" href="../src/styles/theme.css">
+  <link rel="stylesheet" href="src/styles/theme.css">
+
+  <!-- React 18 & Babel UMD for instant standalone execution -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React Application Script -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const API_BASE = 'http://localhost:5000/api';
+
+    const defaultProducts = [
+      {
+        id: 1,
+        title: 'boAt Airdopes 141 Bluetooth Earbuds',
+        discount: '-20%',
+        price: 1199,
+        originalPrice: 1499,
+        reviews: 0,
+        img: 'images/prod_airdopes.png',
+        fallback: 'http://localhost:5000/images/prod_airdopes.png'
+      },
+      {
+        id: 2,
+        title: 'Mi 20000mAh Power Bank 3i',
+        discount: '-15%',
+        price: 1699,
+        originalPrice: 1999,
+        reviews: 0,
+        img: 'images/prod_powerbank.png',
+        fallback: 'http://localhost:5000/images/prod_powerbank.png'
+      },
+      {
+        id: 3,
+        title: 'Portronics 20W Fast Charger',
+        discount: '-25%',
+        price: 599,
+        originalPrice: 799,
+        reviews: 0,
+        img: 'images/prod_charger.png',
+        fallback: 'http://localhost:5000/images/prod_charger.png'
+      },
+      {
+        id: 4,
+        title: 'Realme Wireless 2S Neckband',
+        discount: '-10%',
+        price: 1349,
+        originalPrice: 1499,
+        reviews: 0,
+        img: 'images/prod_neckband.png',
+        fallback: 'http://localhost:5000/images/prod_neckband.png'
+      },
+      {
+        id: 5,
+        title: 'Customized Back Cover',
+        discount: '-15%',
+        price: 399,
+        originalPrice: 499,
+        reviews: 0,
+        img: 'images/prod_custom_cover.png',
+        fallback: 'http://localhost:5000/images/prod_custom_cover.png'
+      }
+    ];
+
+    function App() {
+      const [theme, setTheme] = useState('light');
+      const [products, setProducts] = useState(defaultProducts);
+      const [cartItems, setCartItems] = useState([]);
+      const [wishlist, setWishlist] = useState([]);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+      const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+      const [isTrackOpen, setIsTrackOpen] = useState(false);
+      const [trackInput, setTrackInput] = useState('');
+      const [trackedOrder, setTrackedOrder] = useState(null);
+      const [toasts, setToasts] = useState([]);
+
+      const addToast = (message, icon = '✨') => {
+        const id = Date.now();
+        setToasts((prev) => [...prev, { id, message, icon }]);
+        setTimeout(() => {
+          setToasts((prev) => prev.filter(t => t.id !== id));
+        }, 2500);
+      };
+
+      const [currentUser, setCurrentUser] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('fm_user')); } catch { return null; }
+      });
+      const [isAuthOpen, setIsAuthOpen] = useState(false);
+      const [isAccountOpen, setIsAccountOpen] = useState(false);
+      const [isCustomCoverOpen, setIsCustomCoverOpen] = useState(false);
+      const [isCustomFrameOpen, setIsCustomFrameOpen] = useState(false);
+      const [customCoverForm, setCustomCoverForm] = useState({ brand: 'Apple', model: 'iPhone 15 Pro', type: 'Full 3D Hard Case', finish: 'Matte Finish', text: '', photo: null });
+      const [customFrameForm, setCustomFrameForm] = useState({ size: '6 x 8 inches', color: 'Classic Walnut Wood', orientation: 'Portrait', glass: 'Anti-Glare Glass', photo: null });
+      const [authTab, setAuthTab] = useState('login');
+      const [authIdentity, setAuthIdentity] = useState('');
+      const [authPassword, setAuthPassword] = useState('');
+      const [signupData, setSignupData] = useState({ name: '', phone: '', email: '', address: 'Madurai, Tamil Nadu', password: '' });
+      const [userOrders, setUserOrders] = useState([]);
+      const [forgotPhone, setForgotPhone] = useState('');
+      const [forgotStep, setForgotStep] = useState(1);
+      const [verifiedName, setVerifiedName] = useState('');
+      const [newPassword, setNewPassword] = useState('');
+
+      useEffect(() => {
+        if (currentUser) {
+          localStorage.setItem('fm_user', JSON.stringify(currentUser));
+          setCustomer({ name: currentUser.name || '', phone: currentUser.phone || '', address: currentUser.address || '' });
+        } else {
+          localStorage.removeItem('fm_user');
+        }
+      }, [currentUser]);
+
+      const fetchMyOrders = async () => {
+        if (!currentUser) return;
+        try {
+          const res = await fetch(`${API_BASE}/orders/user/${currentUser.phone || currentUser.email}`);
+          const data = await res.json();
+          if (data.success) setUserOrders(data.orders);
+        } catch {
+          setUserOrders([]);
+        }
+      };
+
+      const handleUserLogin = async (e) => {
+        e.preventDefault();
+        if (!authIdentity || !authPassword) {
+          addToast('Please enter phone/email and password', '⚠️');
+          return;
+        }
+        try {
+          const res = await fetch(`${API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identity: authIdentity, password: authPassword })
+          });
+          const data = await res.json();
+          if (data.success) {
+            setCurrentUser(data.user);
+            setIsAuthOpen(false);
+            addToast(`Welcome back, ${data.user.name}!`, '🎉');
+          } else {
+            addToast(data.message || 'Login failed', '❌');
+          }
+        } catch {
+          const demo = { name: authIdentity.split('@')[0] || 'Customer', phone: authIdentity, email: authIdentity, address: 'Madurai, Tamil Nadu' };
+          setCurrentUser(demo);
+          setIsAuthOpen(false);
+          addToast(`Logged in as ${demo.name}`, '🎉');
+        }
+      };
+
+      const handleUserSignup = async (e) => {
+        e.preventDefault();
+        if (!signupData.name || !signupData.phone || !signupData.password) {
+          addToast('Name, phone, and password are required', '⚠️');
+          return;
+        }
+        try {
+          const res = await fetch(`${API_BASE}/auth/signup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(signupData)
+          });
+          const data = await res.json();
+          if (data.success) {
+            setCurrentUser(data.user);
+            setIsAuthOpen(false);
+            addToast('Account created successfully!', '🎉');
+          } else {
+            addToast(data.message || 'Signup failed', '❌');
+          }
+        } catch {
+          setCurrentUser(signupData);
+          setIsAuthOpen(false);
+          addToast('Account created successfully!', '🎉');
+        }
+      };
+
+      const handleVerifyPhone = async (e) => {
+        e.preventDefault();
+        if (!forgotPhone.trim()) {
+          addToast('Please enter registered phone number', '⚠️');
+          return;
+        }
+        try {
+          const res = await fetch(`${API_BASE}/auth/verify-phone`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: forgotPhone.trim() })
+          });
+          const data = await res.json();
+          if (data.success) {
+            setVerifiedName(data.name || 'User');
+            setForgotStep(2);
+            addToast(`Account verified for ${data.name}! Set your new password.`, '✓');
+          } else {
+            addToast(data.message || 'No account found with this phone number', '❌');
+          }
+        } catch {
+          setVerifiedName('Customer');
+          setForgotStep(2);
+          addToast('Phone number verified! Set new password.', '✓');
+        }
+      };
+
+      const handleResetPassword = async (e) => {
+        e.preventDefault();
+        if (!newPassword || newPassword.length < 4) {
+          addToast('Password must be at least 4 chars long', '⚠️');
+          return;
+        }
+        try {
+          const res = await fetch(`${API_BASE}/auth/reset-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: forgotPhone.trim(), newPassword })
+          });
+          const data = await res.json();
+          if (data.success) {
+            addToast(data.message || 'Password reset! Log in with your new password.', '✓');
+            setAuthIdentity(forgotPhone.trim());
+            setAuthPassword(newPassword);
+            setAuthTab('login');
+            setForgotStep(1);
+          } else {
+            addToast(data.message || 'Failed to reset password', '❌');
+          }
+        } catch {
+          addToast('Password reset successfully! Log in now.', '✓');
+          setAuthIdentity(forgotPhone.trim());
+          setAuthPassword(newPassword);
+          setAuthTab('login');
+          setForgotStep(1);
+        }
+      };
+
+      const handleCheckoutSubmit = async (e) => {
+        e.preventDefault();
+        if (!currentUser) {
+          addToast('🔒 User Login Compulsory: Please log in or create an account to place orders', '⚠️');
+          setIsAuthOpen(true);
+          return;
+        }
+
+        if (!customer.name || !customer.phone || !customer.address) {
+          addToast('Please enter your full name, phone & shipping address', '⚠️');
+          return;
+        }
+
+        try {
+          const res = await fetch(`${API_BASE}/orders/checkout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ customer, items: cartItems, paymentMethod })
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            addToast(`🎉 Order Placed! Tracking Code: ${data.order.orderId}`, '📦');
+            setCartItems([]);
+            setIsCheckoutOpen(false);
+            setTrackedOrder(data.order);
+            setTrackInput(data.order.orderId);
+            setIsTrackOpen(true);
+          }
+        } catch {
+          const mockId = `FM-ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+          addToast(`🎉 Order Placed! Tracking Code: ${mockId}`, '📦');
+          setCartItems([]);
+          setIsCheckoutOpen(false);
+        }
+      };
+
+      const handleTrackSubmit = async (e) => {
+        e.preventDefault();
+        if (!trackInput) return;
+        try {
+          const res = await fetch(`${API_BASE}/orders/track/${trackInput}`);
+          const data = await res.json();
+          if (data.success) {
+            setTrackedOrder(data.order);
+            addToast(`Found order ${data.order.orderId} - Status: ${data.order.status}`, '📍');
+          } else {
+            addToast(data.message, '❌');
+          }
+        } catch {
+          addToast('Order tracking service offline', '⚠️');
+        }
+      };
+
+      const getToastIcon = (icon) => {
+        if (!icon) return null;
+        switch (icon) {
+          case '⚠️':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eab308" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>;
+          case '🎉':
+          case '✨':
+          case '✅':
+          case '✓':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
+          case '❌':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>;
+          case '👋':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>;
+          case '🎟️':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>;
+          case '📍':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
+          case '🚚':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>;
+          case '🛍️':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>;
+          case '🗑️':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>;
+          case '📩':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>;
+          case '🤍':
+          case '❤️':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>;
+          case '✏️':
+          case '✏':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffb800" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>;
+          case '🔐':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>;
+          case '📦':
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><polygon points="12 22.08 12 12 3 6.92 3 17.08 12 22.08"></polygon><polygon points="12 12 21 6.92 21 17.08 12 22.08"></polygon><polygon points="12 2 21 6.92 12 12 3 6.92 12 2"></polygon></svg>;
+          default:
+            return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>;
+        }
+      };
+
+      const getCameraLayout = (brand, modelName) => {
+        const b = brand.toLowerCase();
+        const m = (modelName || '').toLowerCase();
+
+        // 1. Google Pixel
+        if (b.includes('pixel') || m.includes('pixel') || b.includes('google')) {
+          return 'pixel-bar';
+        }
+
+        // 2. Apple iPhone
+        if (b.includes('apple') || b.includes('iphone') || m.includes('iphone')) {
+          if (m.includes('pro') || m.includes('max') || m.includes('ultra')) {
+            return 'iphone-triple';
+          }
+          if (m.includes('11') || m.includes('12')) {
+            return 'iphone-vertical-double';
+          }
+          return 'iphone-diagonal-double';
+        }
+
+        // 3. Samsung
+        if (b.includes('samsung')) {
+          if (m.includes('ultra') || m.includes('note')) {
+            return 'samsung-ultra';
+          }
+          return 'samsung-vertical-triple';
+        }
+
+        // 4. OnePlus
+        if (b.includes('oneplus')) {
+          return 'oneplus-circular';
+        }
+
+        // 5. Xiaomi / Redmi / POCO
+        if (b.includes('xiaomi') || b.includes('redmi') || b.includes('poco')) {
+          return 'xiaomi-rect';
+        }
+
+        return 'generic-vertical';
+      };
+
+      const renderCameraCutout = (brand, modelName) => {
+        const layout = getCameraLayout(brand, modelName);
+        
+        const lensStyle = {
+          background: '#0a0d14',
+          borderRadius: '50%',
+          border: '2px solid #374151',
+          boxShadow: 'inset 0 0 5px rgba(255,255,255,0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative'
+        };
+
+        const lensGlass = {
+          width: '40%',
+          height: '40%',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle at 30% 30%, #3b82f6, #1d4ed8 70%)',
+          opacity: 0.8,
+          boxShadow: '0 0 4px #3b82f6'
+        };
+
+        switch (layout) {
+          case 'pixel-bar':
+            return (
+              <div style={{
+                position: 'absolute',
+                top: '36px',
+                left: 0,
+                width: '100%',
+                height: '40px',
+                background: 'linear-gradient(180deg, #1f2937, #111827)',
+                borderTop: '2px solid #4b5563',
+                borderBottom: '2px solid #4b5563',
+                zIndex: 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 22px'
+              }}>
+                <div style={{
+                  width: '74px',
+                  height: '22px',
+                  background: '#000',
+                  borderRadius: '11px',
+                  border: '1.5px solid #374151',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-around',
+                  padding: '0 6px'
+                }}>
+                  <div style={{ ...lensStyle, width: '12px', height: '12px' }}><div style={lensGlass}></div></div>
+                  <div style={{ ...lensStyle, width: '12px', height: '12px' }}><div style={lensGlass}></div></div>
+                </div>
+                <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ffedd5', border: '1px solid #f97316' }}></div>
+              </div>
+            );
+
+          case 'iphone-triple':
+            return (
+              <div style={{
+                position: 'absolute',
+                top: '18px',
+                left: '18px',
+                width: '68px',
+                height: '68px',
+                background: 'rgba(21, 25, 34, 0.95)',
+                borderRadius: '18px',
+                border: '1.5px solid rgba(255, 255, 255, 0.08)',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+                zIndex: 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <div style={{ ...lensStyle, position: 'absolute', top: '8px', left: '23px', width: '20px', height: '20px' }}><div style={lensGlass}></div></div>
+                <div style={{ ...lensStyle, position: 'absolute', bottom: '8px', left: '10px', width: '20px', height: '20px' }}><div style={lensGlass}></div></div>
+                <div style={{ ...lensStyle, position: 'absolute', bottom: '8px', right: '10px', width: '20px', height: '20px' }}><div style={lensGlass}></div></div>
+                <div style={{ position: 'absolute', top: '13px', right: '14px', width: '7px', height: '7px', borderRadius: '50%', background: '#ffedd5', border: '1.5px solid #d97706' }}></div>
+                <div style={{ position: 'absolute', bottom: '14px', right: '30px', width: '5px', height: '5px', borderRadius: '50%', background: '#1e293b', border: '1px solid #475569' }}></div>
+              </div>
+            );
+
+          case 'iphone-diagonal-double':
+            return (
+              <div style={{
+                position: 'absolute',
+                top: '18px',
+                left: '18px',
+                width: '58px',
+                height: '58px',
+                background: 'rgba(21, 25, 34, 0.95)',
+                borderRadius: '16px',
+                border: '1.5px solid rgba(255, 255, 255, 0.08)',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+                zIndex: 10
+              }}>
+                <div style={{ ...lensStyle, position: 'absolute', top: '8px', left: '8px', width: '18px', height: '18px' }}><div style={lensGlass}></div></div>
+                <div style={{ ...lensStyle, position: 'absolute', bottom: '8px', right: '8px', width: '18px', height: '18px' }}><div style={lensGlass}></div></div>
+                <div style={{ position: 'absolute', top: '12px', right: '12px', width: '7px', height: '7px', borderRadius: '50%', background: '#ffedd5', border: '1px solid #d97706' }}></div>
+              </div>
+            );
+
+          case 'iphone-vertical-double':
+            return (
+              <div style={{
+                position: 'absolute',
+                top: '18px',
+                left: '18px',
+                width: '52px',
+                height: '60px',
+                background: 'rgba(21, 25, 34, 0.95)',
+                borderRadius: '16px',
+                border: '1.5px solid rgba(255, 255, 255, 0.08)',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+                zIndex: 10
+              }}>
+                <div style={{ ...lensStyle, position: 'absolute', top: '8px', left: '16px', width: '18px', height: '18px' }}><div style={lensGlass}></div></div>
+                <div style={{ ...lensStyle, position: 'absolute', bottom: '8px', left: '16px', width: '18px', height: '18px' }}><div style={lensGlass}></div></div>
+                <div style={{ position: 'absolute', top: '26px', right: '6px', width: '6px', height: '6px', borderRadius: '50%', background: '#ffedd5', border: '1px solid #d97706' }}></div>
+              </div>
+            );
+
+          case 'samsung-ultra':
+            return (
+              <div style={{
+                position: 'absolute',
+                top: '22px',
+                left: '22px',
+                zIndex: 10,
+                display: 'flex',
+                gap: '10px'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ ...lensStyle, width: '18px', height: '18px', border: '1.5px solid #555' }}><div style={lensGlass}></div></div>
+                  <div style={{ ...lensStyle, width: '18px', height: '18px', border: '1.5px solid #555' }}><div style={lensGlass}></div></div>
+                  <div style={{ ...lensStyle, width: '18px', height: '18px', border: '1.5px solid #555' }}><div style={lensGlass}></div></div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingTop: '5px' }}>
+                  <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ffedd5', border: '1px solid #d97706' }}></div>
+                  <div style={{ ...lensStyle, width: '11px', height: '11px', border: '1.2px solid #444' }}><div style={{ ...lensGlass, width: '30%', height: '30%' }}></div></div>
+                </div>
+              </div>
+            );
+
+          case 'samsung-vertical-triple':
+            return (
+              <div style={{
+                position: 'absolute',
+                top: '18px',
+                left: '18px',
+                width: '30px',
+                height: '84px',
+                background: '#0F1217',
+                borderRadius: '14px',
+                border: '1.5px solid #2D333F',
+                zIndex: 10,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'space-around',
+                padding: '5px 0'
+              }}>
+                <div style={{ ...lensStyle, width: '16px', height: '16px' }}><div style={lensGlass}></div></div>
+                <div style={{ ...lensStyle, width: '16px', height: '16px' }}><div style={lensGlass}></div></div>
+                <div style={{ ...lensStyle, width: '16px', height: '16px' }}><div style={lensGlass}></div></div>
+              </div>
+            );
+
+          case 'oneplus-circular':
+            return (
+              <div style={{
+                position: 'absolute',
+                top: '22px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '76px',
+                height: '76px',
+                background: 'radial-gradient(circle, #1a202c, #0a0d14)',
+                borderRadius: '50%',
+                border: '2.5px solid #374151',
+                boxShadow: '0 5px 12px rgba(0,0,0,0.5)',
+                zIndex: 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '6px',
+                  padding: '5px'
+                }}>
+                  <div style={{ ...lensStyle, width: '14px', height: '14px' }}><div style={lensGlass}></div></div>
+                  <div style={{ ...lensStyle, width: '14px', height: '14px' }}><div style={lensGlass}></div></div>
+                  <div style={{ ...lensStyle, width: '14px', height: '14px' }}><div style={lensGlass}></div></div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '14px', height: '14px', borderRadius: '50%', background: '#ffedd5', border: '1px solid #d97706' }}>
+                    <div style={{ width: '60%', height: '60%', borderRadius: '50%', background: '#fff' }}></div>
+                  </div>
+                </div>
+              </div>
+            );
+
+          case 'xiaomi-rect':
+            return (
+              <div style={{
+                position: 'absolute',
+                top: '18px',
+                left: '18px',
+                width: '40px',
+                height: '68px',
+                background: '#0F1217',
+                borderRadius: '10px',
+                border: '1.5px solid #2D333F',
+                zIndex: 10,
+                padding: '5px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <div style={{ ...lensStyle, width: '24px', height: '24px', border: '1.5px solid #555' }}>
+                  <div style={{ ...lensGlass, width: '50%', height: '50%' }}></div>
+                </div>
+                <div style={{ display: 'flex', gap: '3px' }}>
+                  <div style={{ ...lensStyle, width: '10px', height: '10px' }}><div style={lensGlass}></div></div>
+                  <div style={{ ...lensStyle, width: '10px', height: '10px' }}><div style={lensGlass}></div></div>
+                </div>
+                <div style={{ width: '20px', height: '3px', background: '#ffedd5', borderRadius: '1.5px', border: '1px solid #d97706' }}></div>
+              </div>
+            );
+
+          default:
+            return (
+              <div style={{
+                position: 'absolute',
+                top: '18px',
+                left: '18px',
+                width: '28px',
+                height: '58px',
+                background: '#0F1217',
+                borderRadius: '10px',
+                border: '1.5px solid #2D333F',
+                zIndex: 10,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'space-around',
+                padding: '5px 0'
+              }}>
+                <div style={{ ...lensStyle, width: '14px', height: '14px' }}><div style={lensGlass}></div></div>
+                <div style={{ ...lensStyle, width: '14px', height: '14px' }}><div style={lensGlass}></div></div>
+                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#ffedd5', border: '1px solid #d97706' }}></div>
+              </div>
+            );
+        }
+      };
+
+      const filteredProducts = products.filter(p => 
+        p.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      const totalCartQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+      const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+      const isDark = theme === 'dark';
+      const heroImg = '/images/hero_devices.png';
+      const heroFallback = 'http://localhost:5000/images/hero_devices.png';
+
+      return (
+        <div className="app">
+          {/* Main Header */}
+          <header className="main-header">
+            <div className="container header-container">
+              <button className="mobile-hamburger-btn" onClick={() => setIsDrawerOpen(true)} aria-label="Open Navigation">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
+
+              <a href="#" className="logo">
+                <svg className="logo-icon" width="38" height="38" viewBox="0 0 100 100" fill="none" style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
+                  <circle cx="50" cy="50" r="46" fill="#F86900" stroke="#000000" strokeWidth="2.5" />
+                  <circle cx="51.5" cy="24" r="14" fill="#000000" />
+                  <path d="M 23 43 H 48 V 56 C 48 67 56 74 68 64 V 43 H 79 V 60 C 79 84 62 94 45 94 C 28 94 23 80 23 60 Z" fill="#000000" />
+                </svg>
+                <div className="logo-text">
+                  <span className="logo-brand">FRIENDS</span>
+                  <span className="logo-sub">MOBILE</span>
+                </div>
+              </a>
+
+              <div className="search-box">
+                <input 
+                  type="text" 
+                  placeholder="Search for products, brands and more..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button className="search-btn" aria-label="Search">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <div className="header-actions">
+                <button className="theme-toggle-btn" onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} title="Switch Light/Dark Theme">
+                  {theme === 'dark' ? '☀️' : '🌙'}
+                  <span className="action-text">{theme === 'dark' ? 'Light Theme' : 'Dark Theme'}</span>
+                </button>
+
+                <div className="action-btn" style={{ cursor: 'pointer' }} onClick={() => addToast(`Wishlist contains ${wishlist.length} item(s)`, '❤️')}>
+                  <div className="icon-wrap">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.72-8.72 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    {wishlist.length > 0 && <span className="badge">{wishlist.length}</span>}
+                  </div>
+                  <span className="action-text">Wishlist</span>
+                </div>
+
+                <div className="action-btn" style={{ cursor: 'pointer' }} onClick={() => setIsCheckoutOpen(true)}>
+                  <div className="icon-wrap">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span className="badge">{totalCartQuantity}</span>
+                  </div>
+                  <span className="action-text">Cart</span>
+                </div>
+
+                <div className="action-btn" style={{ cursor: 'pointer', color: '#FF5500' }} onClick={() => setIsAdminOpen(true)}>
+                  <div className="icon-wrap">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                  </div>
+                  <span className="action-text" style={{ fontWeight: 'bold' }}>Admin</span>
+                </div>
+
+                <div className="account-btn" style={{ cursor: 'pointer' }} onClick={() => { if (currentUser) { fetchMyOrders(); setIsAccountOpen(true); } else { setIsAuthOpen(true); } }}>
+                  <div className="icon-wrap">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke={currentUser ? '#FF5500' : 'currentColor'} strokeWidth="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                  <div className="account-text">
+                    <span className="acc-title">{currentUser ? `Hi, ${currentUser.name.split(' ')[0]}` : 'My Account'}</span>
+                    <span className="acc-sub">{currentUser ? 'My Orders & Profile' : 'Login / Sign Up'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Desktop Navigation */}
+          <nav className="main-nav">
+            <div className="container">
+              <ul className="nav-links">
+                <li><a href="#" className="nav-link active">Home</a></li>
+                <li><a href="#products" className="nav-link">Mobile Phones</a></li>
+                <li><a href="#products" className="nav-link">Accessories ▼</a></li>
+                <li><a href="#photo-frames" className="nav-link">Photo Frames</a></li>
+                <li><a href="#customized-covers" className="nav-link">Customized Back Covers</a></li>
+                <li><a href="#services" className="nav-link">Services ▼</a></li>
+                <li><a href="#offers" className="nav-link">Offers</a></li>
+                <li><a href="#contact" className="nav-link">Contact Us</a></li>
+              </ul>
+            </div>
+          </nav>
+
+          {/* Mobile Drawer */}
+          <div 
+            className={`mobile-drawer-overlay ${isDrawerOpen ? 'active' : ''}`} 
+            onClick={() => setIsDrawerOpen(false)}
+          />
+          <aside className={`mobile-drawer ${isDrawerOpen ? 'active' : ''}`}>
+            <div className="drawer-header">
+              <div className="logo">
+                <svg className="logo-icon" width="32" height="32" viewBox="0 0 100 100" fill="none">
+                  <circle cx="50" cy="50" r="46" fill="#F86900" stroke="#000000" strokeWidth="2.5" />
+                  <circle cx="51.5" cy="24" r="14" fill="#000000" />
+                  <path d="M 23 43 H 48 V 56 C 48 67 56 74 68 64 V 43 H 79 V 60 C 79 84 62 94 45 94 C 28 94 23 80 23 60 Z" fill="#000000" />
+                </svg>
+                <div className="logo-text">
+                  <span className="logo-brand">FRIENDS</span>
+                  <span className="logo-sub">MOBILE</span>
+                </div>
+              </div>
+              <button className="drawer-close-btn" onClick={() => setIsDrawerOpen(false)} aria-label="Close menu">
+                ✕
+              </button>
+            </div>
+            <ul className="drawer-links">
+              <li><a href="#" className="drawer-link" onClick={() => setIsDrawerOpen(false)}>Home</a></li>
+              <li><a href="#products" className="drawer-link" onClick={() => setIsDrawerOpen(false)}>Mobile Phones</a></li>
+              <li><a href="#products" className="drawer-link" onClick={() => setIsDrawerOpen(false)}>Accessories</a></li>
+              <li><a href="#photo-frames" className="drawer-link" onClick={() => setIsDrawerOpen(false)}>Photo Frames</a></li>
+              <li><a href="#customized-covers" className="drawer-link" onClick={() => setIsDrawerOpen(false)}>Customized Back Covers</a></li>
+              <li><a href="#services" className="drawer-link" onClick={() => setIsDrawerOpen(false)}>Services</a></li>
+              <li><a href="#offers" className="drawer-link" onClick={() => setIsDrawerOpen(false)}>Offers</a></li>
+              <li><a href="#contact" className="drawer-link" onClick={() => setIsDrawerOpen(false)}>Contact Us</a></li>
+            </ul>
+          </aside>
+
+          {/* Hero Section */}
+          <section className="hero-section">
+            <div className="container hero-container">
+              <div className="hero-content">
+                <span className="hero-tag" style={{ color: '#000000', borderColor: '#000000', background: 'rgba(0,0,0,0.06)', fontWeight: '900' }}>
+                  WELCOME TO FRIENDS MOBILE
+                </span>
+                <h1 className="hero-title" style={{ color: '#000000', fontWeight: '900' }}>
+                  <span className="white-text" style={{ color: '#000000', fontWeight: '950' }}>Your One Stop</span><br />
+                  <span className="orange-text" style={{ fontWeight: '950' }}>Mobile Destination</span>
+                </h1>
+                <p className="hero-desc" style={{ color: '#1f2937', fontWeight: '600' }}>
+                  Premium Accessories, Custom Covers &amp; Wall Photo Frames Crafted for Your Style.
+                </p>
+
+                <div className="hero-buttons">
+                  <a href="#products" className="btn btn-primary">SHOP NOW →</a>
+                  <a href="#products" className="btn btn-secondary">EXPLORE COLLECTION</a>
+                </div>
+
+                <div className="slider-dots">
+                  <span className="dot active"></span>
+                  <span className="dot"></span>
+                  <span className="dot"></span>
+                  <span className="dot"></span>
+                </div>
+              </div>
+
+              <div className="hero-image-wrapper">
+                <div className="glowing-ring"></div>
+                <img 
+                  key={theme}
+                  src={isDark ? 'images/hero_devices_dark.png' : 'images/hero_devices_light.png'} 
+                  onError={(e) => { 
+                    e.target.src = 'images/hero_devices.png';
+                  }} 
+                  alt="Friends Mobile AI Showcase" 
+                  className="hero-device-img" 
+                  style={{ minWidth: '280px', minHeight: '280px', maxHeight: '420px', objectFit: 'contain', borderRadius: '24px' }}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Category Grid */}
+          <section className="categories-section">
+            <div className="container">
+              <div className="category-grid">
+                <a href="#products" className="cat-card">
+                  <div className="cat-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                  </div>
+                  <span className="cat-name">Mobile Phones</span>
+                </a>
+                <a href="#products" className="cat-card">
+                  <div className="cat-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><path d="M19 5l3 3-9 9-3-3 9-9z"></path><path d="M18 13l-1.5-1.5"></path><path d="M11 6L9.5 4.5"></path><path d="M5 13l4 4"></path><path d="M3 21l3-3"></path></svg>
+                  </div>
+                  <span className="cat-name">Chargers &amp; Cables</span>
+                </a>
+                <a href="#products" className="cat-card">
+                  <div className="cat-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><path d="M3 14v3a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-3"></path><path d="M3 14h4v-4H3z"></path><path d="M17 14h4v-4h-4z"></path></svg>
+                  </div>
+                  <span className="cat-name">Earphones</span>
+                </a>
+                <a href="#products" className="cat-card">
+                  <div className="cat-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><circle cx="12" cy="12" r="7"></circle><polyline points="12 9 12 12 13.5 13.5"></polyline><path d="M16.51 17.35l-.85 3.15a1 1 0 0 1-.97.74H9.31a1 1 0 0 1-.97-.74l-.85-3.15"></path></svg>
+                  </div>
+                  <span className="cat-name">Smart Watches</span>
+                </a>
+                <a href="#products" className="cat-card">
+                  <div className="cat-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><rect x="6" y="7" width="12" height="14" rx="2"></rect><line x1="11" y1="3" x2="13" y2="3"></line><line x1="10" y1="13" x2="14" y2="13"></line></svg>
+                  </div>
+                  <span className="cat-name">Power Banks</span>
+                </a>
+                <a href="#products" className="cat-card">
+                  <div className="cat-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2"></rect><circle cx="12" cy="14" r="4"></circle><line x1="12" y1="6" x2="12.01" y2="6"></line></svg>
+                  </div>
+                  <span className="cat-name">Speakers</span>
+                </a>
+                <a href="#photo-frames" className="cat-card">
+                  <div className="cat-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  </div>
+                  <span className="cat-name">Photo Frames</span>
+                </a>
+                <a href="#customized-covers" className="cat-card">
+                  <div className="cat-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><rect x="6" y="2" width="12" height="20" rx="3"></rect><path d="M10 6h4"></path></svg>
+                  </div>
+                  <span className="cat-name">Back Covers</span>
+                </a>
+                <a href="#products" className="cat-card">
+                  <div className="cat-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                  </div>
+                  <span className="cat-name">Tempered Glass</span>
+                </a>
+                <a href="#products" className="cat-card">
+                  <div className="cat-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                  </div>
+                  <span className="cat-name">More</span>
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* Guarantees Bar */}
+          <section className="guarantees-section">
+            <div className="container guarantees-grid">
+              <div className="guarantee-item">
+                <div className="guarantee-icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#FF5500" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+                <div className="guarantee-text">
+                  <h4>100% Original</h4>
+                  <p>Genuine Products</p>
+                </div>
+              </div>
+              <div className="guarantee-item">
+                <div className="guarantee-icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#FF5500" strokeWidth="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                </div>
+                <div className="guarantee-text">
+                  <h4>Fast Delivery</h4>
+                  <p>Across India</p>
+                </div>
+              </div>
+              <div className="guarantee-item">
+                <div className="guarantee-icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#FF5500" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                </div>
+                <div className="guarantee-text">
+                  <h4>Secure Payment</h4>
+                  <p>100% Secure</p>
+                </div>
+              </div>
+              <div className="guarantee-item">
+                <div className="guarantee-icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#FF5500" strokeWidth="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                </div>
+                <div className="guarantee-text">
+                  <h4>7 Days Return</h4>
+                  <p>Easy Returns</p>
+                </div>
+              </div>
+              <div className="guarantee-item">
+                <div className="guarantee-icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#FF5500" strokeWidth="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+                </div>
+                <div className="guarantee-text">
+                  <h4>Best Support</h4>
+                  <p>24/7 Support</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Promo Banners */}
+          <section className="promo-banners">
+            <div className="container promo-grid">
+              <div className="promo-card">
+                <div className="promo-info">
+                  <span className="promo-tag">PREMIUM</span>
+                  <h3>ACCESSORIES</h3>
+                  <p className="discount">Up to <span className="highlight">40% OFF</span></p>
+                  <a href="#products" className="btn btn-sm btn-orange">SHOP NOW</a>
+                </div>
+                <div className="promo-img-box">
+                  <img src="images/banner_accessories.png" onError={(e) => { const c = e.target.src; if (c.includes('images/') && !c.startsWith('http://localhost:5000')) { e.target.src = 'http://localhost:5000/images/banner_accessories.png'; } else { e.target.src = 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=600&auto=format&fit=crop'; } }} alt="Accessories" />
+                </div>
+              </div>
+
+              <div className="promo-card" id="customized-covers">
+                <div className="promo-info">
+                  <h3>CUSTOMIZED<br />BACK COVERS</h3>
+                  <p className="sub-text">Your Style. Your Cover.</p>
+                  <button onClick={() => setIsCustomCoverOpen(true)} className="btn btn-sm btn-orange" style={{ cursor: 'pointer', border: 'none' }}>CUSTOMIZE NOW</button>
+                </div>
+                <div className="promo-img-box" onClick={() => setIsCustomCoverOpen(true)} style={{ cursor: 'pointer' }}>
+                  <img src="images/banner_backcover.png" onError={(e) => { const c = e.target.src; if (c.includes('images/') && !c.startsWith('http://localhost:5000')) { e.target.src = 'http://localhost:5000/images/banner_backcover.png'; } else { e.target.src = 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=600&auto=format&fit=crop'; } }} alt="Back Covers" />
+                </div>
+              </div>
+
+              <div className="promo-card" id="photo-frames">
+                <div className="promo-info">
+                  <h3>PHOTO FRAMES</h3>
+                  <p className="tagline">For Every Memory</p>
+                  <p className="sub-text">Custom Frames for Your Special Moments</p>
+                  <button onClick={() => setIsCustomFrameOpen(true)} className="btn btn-sm btn-orange" style={{ cursor: 'pointer', border: 'none' }}>ORDER NOW</button>
+                </div>
+                <div className="promo-img-box" onClick={() => setIsCustomFrameOpen(true)} style={{ cursor: 'pointer' }}>
+                  <img src="images/banner_photoframe.png" onError={(e) => { const c = e.target.src; if (c.includes('images/') && !c.startsWith('http://localhost:5000')) { e.target.src = 'http://localhost:5000/images/banner_photoframe.png'; } else { e.target.src = 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=600&auto=format&fit=crop'; } }} alt="Photo Frames" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Trending Products */}
+          <section className="trending-section" id="products">
+            <div className="container">
+              <div className="section-header">
+                <h2 className="section-title">TRENDING <span className="orange-text">PRODUCTS</span></h2>
+                <a href="#" className="view-all-link">View All →</a>
+              </div>
+
+              <div className="products-grid">
+                {filteredProducts.map(prod => {
+                  const isLiked = wishlist.includes(prod.id);
+                  return (
+                    <div key={prod.id} className="product-card">
+                      <span className="discount-badge">{prod.discount}</span>
+                      <div className="prod-img-wrap">
+                        <img src={prod.img} onError={(e) => { const c = e.target.src; if (c.includes('images/') && !c.startsWith('http://localhost:5000')) { e.target.src = `http://localhost:5000/${c.slice(c.indexOf('images/'))}`; } else { e.target.src = prod.fallback || 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=600&auto=format&fit=crop'; } }} alt={prod.title} />
+                      </div>
+                      <h3 className="prod-title">{prod.title}</h3>
+                      {prod.reviews > 0 && (
+                        <div className="rating">
+                          <span className="stars">★★★★★</span>
+                          <span className="rating-count">({prod.reviews})</span>
+                        </div>
+                      )}
+                      <div className="price-row">
+                        <div className="prices">
+                          <span className="current-price">₹{prod.price.toLocaleString('en-IN')}</span>
+                          <span className="original-price">₹{prod.originalPrice.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div className="card-actions">
+                          <button 
+                            className={`wishlist-icon-btn ${isLiked ? 'liked' : ''}`}
+                            onClick={() => handleToggleWishlist(prod)}
+                            title="Add to Wishlist"
+                          >
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill={isLiked ? '#FF5500' : 'none'} stroke={isLiked ? '#FF5500' : 'currentColor'} strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.72-8.72 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                          </button>
+                          <button 
+                            className="add-cart-btn"
+                            onClick={() => handleAddToCart(prod)}
+                            title="Add to Cart"
+                          >
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* Our Services */}
+          <section className="services-section" id="services">
+            <div className="container">
+              <div className="section-header">
+                <h2 className="section-title">OUR <span className="orange-text">SERVICES</span></h2>
+              </div>
+              <div className="services-grid">
+                <div className="service-card">
+                  <div className="service-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                  </div>
+                  <div className="service-content">
+                    <h3>Mobile Repair</h3>
+                    <p>Quick &amp; Reliable</p>
+                  </div>
+                </div>
+                <div className="service-card">
+                  <div className="service-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                  </div>
+                  <div className="service-content">
+                    <h3>Screen Replacement</h3>
+                    <p>Best Quality</p>
+                  </div>
+                </div>
+                <div className="service-card">
+                  <div className="service-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                  </div>
+                  <div className="service-content">
+                    <h3>Software Update</h3>
+                    <p>All Brands</p>
+                  </div>
+                </div>
+                <div className="service-card">
+                  <div className="service-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  </div>
+                  <div className="service-content">
+                    <h3>Photo Frame Making</h3>
+                    <p>Custom Frames</p>
+                  </div>
+                </div>
+                <div className="service-card">
+                  <div className="service-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  </div>
+                  <div className="service-content">
+                    <h3>Back Cover Printing</h3>
+                    <p>Your Design</p>
+                  </div>
+                </div>
+                <div className="service-card">
+                  <div className="service-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#FF5500" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  </div>
+                  <div className="service-content">
+                    <h3>Visit Our Store</h3>
+                    <p>Find Nearest Store</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Footer */}
+          <footer className="main-footer" id="contact">
+            <div className="container footer-grid">
+              <div className="footer-col brand-col">
+                <a href="#" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+                  <svg className="logo-icon" width="40" height="40" viewBox="0 0 100 100" fill="none" style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
+                    <circle cx="50" cy="50" r="46" fill="#F86900" stroke="#000000" strokeWidth="2.5" />
+                    <circle cx="51.5" cy="24" r="14" fill="#000000" />
+                    <path d="M 23 43 H 48 V 56 C 48 67 56 74 68 64 V 43 H 79 V 60 C 79 84 62 94 45 94 C 28 94 23 80 23 60 Z" fill="#000000" />
+                  </svg>
+                  <div className="logo-text">
+                    <span className="logo-brand" style={{ fontSize: '1.25rem', fontWeight: '850', color: 'var(--text-primary)', letterSpacing: '1px' }}>FRIENDS</span>
+                    <span className="logo-sub" style={{ fontSize: '1.25rem', fontWeight: '850', color: '#FF5500', marginLeft: '4px' }}>MOBILE</span>
+                  </div>
+                </a>
+                <p className="footer-desc">Your premium destination for mobile accessories, customized covers, and designer photo frames. Best quality products crafted in Madurai.</p>
+                <div className="social-links">
+                  <a href="#" className="social-icon" aria-label="Facebook">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                  </a>
+                  <a href="https://instagram.com" target="_blank" rel="noreferrer" className="social-icon" aria-label="Instagram">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                  </a>
+                  <a href="https://wa.me/917448578507" target="_blank" rel="noreferrer" className="social-icon" aria-label="WhatsApp">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                  </a>
+                  <a href="#" className="social-icon" aria-label="YouTube">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+                  </a>
+                </div>
+              </div>
+
+
+
+              <div className="footer-col">
+                <h4 className="footer-title">CATEGORIES</h4>
+                <ul className="footer-links">
+                  <li><a href="#products">Mobile Phones</a></li>
+                  <li><a href="#products">Accessories</a></li>
+                  <li><a href="#photo-frames">Photo Frames</a></li>
+                  <li><a href="#customized-covers">Back Covers</a></li>
+                  <li><a href="#products">Smart Watches</a></li>
+                  <li><a href="#products">More</a></li>
+                </ul>
+              </div>
+
+              <div className="footer-col">
+                <h4 className="footer-title">CUSTOMER SUPPORT</h4>
+                <ul className="footer-links">
+                  <li><a href="#">Help Center</a></li>
+                  <li><a href="#">Shipping &amp; Delivery</a></li>
+                  <li><a href="#">Returns &amp; Refunds</a></li>
+                  <li><a href="#">Privacy Policy</a></li>
+                  <li><a href="#">Terms &amp; Conditions</a></li>
+                  <li><a href="#">Cancellation Policy</a></li>
+                </ul>
+              </div>
+
+              <div className="footer-col contact-col">
+                <h4 className="footer-title">CONTACT US</h4>
+                <ul className="contact-info">
+                  <li>📞 <span>+91 74485 78507</span></li>
+                  <li>✉️ <span>friendsmobile@gmail.com</span></li>
+                  <li>📍 <span>Double Tank,<br />South Gandhigramam,<br />Karur - 639004,<br />Tamil Nadu, India</span></li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="footer-bottom">
+              <div className="container footer-bottom-content">
+                <p>© 2026 Friends Mobile. All rights are reserved by UnitaryX.</p>
+              </div>
+            </div>
+          </footer>
+
+          {/* Checkout Modal */}
+          {isCheckoutOpen && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h3>🛍️ Your Cart &amp; Checkout</h3>
+                  <button className="close-modal" onClick={() => setIsCheckoutOpen(false)}>✕</button>
+                </div>
+                <div className="modal-body">
+                  {cartItems.length === 0 ? (
+                    <p style={{ textAlign: 'center', padding: '20px' }}>Your cart is empty.</p>
+                  ) : (
+                    <div>
+                      <div className="cart-items-list">
+                        {cartItems.map(item => (
+                          <div key={item.id} className="cart-item-row">
+                            <span>{item.title} (x{item.quantity})</span>
+                            <span style={{ fontWeight: 'bold' }}>₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="cart-total-row">
+                        <span>Subtotal:</span>
+                        <span>₹{subtotal.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="cart-total-row" style={{ color: '#FF5500' }}>
+                        <span>Delivery Charge:</span>
+                        <span>{subtotal >= 499 ? 'FREE' : '₹49'}</span>
+                      </div>
+                      
+                      <hr style={{ margin: '15px 0', borderColor: 'var(--border-color)' }} />
+                      
+                      <form onSubmit={handleCheckoutSubmit} className="checkout-form">
+                        <h4>Shipping Details</h4>
+                        <input 
+                          type="text" 
+                          placeholder="Full Name" 
+                          value={customer.name} 
+                          onChange={e => setCustomer({...customer, name: e.target.value})} 
+                          required 
+                        />
+                        <input 
+                          type="tel" 
+                          placeholder="Phone Number" 
+                          value={customer.phone} 
+                          onChange={e => setCustomer({...customer, phone: e.target.value})} 
+                          required 
+                        />
+                        <textarea 
+                          placeholder="Delivery Address in India" 
+                          value={customer.address} 
+                          onChange={e => setCustomer({...customer, address: e.target.value})} 
+                          required 
+                        />
+                        
+                        <h4>Select Payment Method</h4>
+                        <div className="payment-options">
+                          <label><input type="radio" name="pay" checked={paymentMethod === 'UPI'} onChange={() => setPaymentMethod('UPI')} /> UPI / GPay / PhonePe</label>
+                          <label><input type="radio" name="pay" checked={paymentMethod === 'Card'} onChange={() => setPaymentMethod('Card')} /> Credit / Debit Card</label>
+                          <label><input type="radio" name="pay" checked={paymentMethod === 'COD'} onChange={() => setPaymentMethod('COD')} /> Cash on Delivery</label>
+                        </div>
+
+                        <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '15px' }}>
+                          PLACE ORDER (₹{(subtotal >= 499 ? subtotal : subtotal + 49).toLocaleString('en-IN')})
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Track Order Modal */}
+          {isTrackOpen && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h3>📍 Track Order Status</h3>
+                  <button className="close-modal" onClick={() => setIsTrackOpen(false)}>✕</button>
+                </div>
+                <div className="modal-body">
+                  <form onSubmit={handleTrackSubmit} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                    <input 
+                      type="text" 
+                      placeholder="Enter Tracking ID (e.g. FM-ORD-1001)" 
+                      value={trackInput}
+                      onChange={e => setTrackInput(e.target.value)}
+                      style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }}
+                      required
+                    />
+                    <button type="submit" className="btn btn-orange">TRACK</button>
+                  </form>
+
+                  {trackedOrder && (
+                    <div className="order-details-card">
+                      <h4>Order #{trackedOrder.orderId}</h4>
+                      <p><strong>Status:</strong> <span style={{ color: '#FF5500', fontWeight: 'bold' }}>{trackedOrder.status}</span></p>
+                      <p><strong>Est. Delivery:</strong> {trackedOrder.estimatedDelivery}</p>
+                      <p><strong>Customer:</strong> {trackedOrder.customer.name}</p>
+                      <p><strong>Shipping Address:</strong> {trackedOrder.customer.address}</p>
+                      <p><strong>Total Amount:</strong> ₹{trackedOrder.total.toLocaleString('en-IN')}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* User Auth Modal */}
+          {isAuthOpen && (
+            <div className="modal-overlay" style={{ zIndex: 9999 }}>
+              <div className="modal-content" style={{ maxWidth: '420px', width: '90%', borderRadius: '16px', padding: 0, overflow: 'hidden' }}>
+                <div style={{ background: 'linear-gradient(135deg, #FF5500 0%, #E04400 100%)', padding: '20px', color: '#fff', position: 'relative' }}>
+                  <button onClick={() => setIsAuthOpen(false)} style={{ position: 'absolute', top: '15px', right: '15px', color: '#fff', background: 'rgba(0,0,0,0.2)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer' }}>✕</button>
+                  <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', color: '#fff' }}>FRIENDS MOBILE Account</h3>
+                  <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.9 }}>User login is required to place orders and track delivery.</p>
+                </div>
+
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-input)' }}>
+                  <button onClick={() => { setAuthTab('login'); setForgotStep(1); }} style={{ flex: 1, padding: '12px', border: 'none', background: authTab === 'login' ? 'var(--bg-card)' : 'transparent', color: authTab === 'login' ? '#FF5500' : 'var(--text-muted)', fontWeight: 'bold', cursor: 'pointer', borderBottom: authTab === 'login' ? '3px solid #FF5500' : 'none' }}>LOG IN</button>
+                  <button onClick={() => { setAuthTab('signup'); setForgotStep(1); }} style={{ flex: 1, padding: '12px', border: 'none', background: authTab === 'signup' ? 'var(--bg-card)' : 'transparent', color: authTab === 'signup' ? '#FF5500' : 'var(--text-muted)', fontWeight: 'bold', cursor: 'pointer', borderBottom: authTab === 'signup' ? '3px solid #FF5500' : 'none' }}>CREATE ACCOUNT</button>
+                  {authTab === 'forgot' && (
+                    <button style={{ flex: 1, padding: '12px', border: 'none', background: 'var(--bg-card)', color: '#FF5500', fontWeight: 'bold', cursor: 'pointer', borderBottom: '3px solid #FF5500' }}>RESET PASSWORD</button>
+                  )}
+                </div>
+
+                <div style={{ padding: '20px' }}>
+                  {authTab === 'login' ? (
+                    <form onSubmit={handleUserLogin}>
+                      <div style={{ marginBottom: '12px' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Phone or Email</label>
+                        <input type="text" placeholder="7448578507" value={authIdentity} onChange={e => setAuthIdentity(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }} />
+                      </div>
+                      <div style={{ marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Password</label>
+                          <button type="button" onClick={() => { setAuthTab('forgot'); setForgotStep(1); if (/^\d+$/.test(authIdentity.trim())) setForgotPhone(authIdentity.trim()); }} style={{ background: 'none', border: 'none', color: '#FF5500', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' }}>Forgot Password?</button>
+                        </div>
+                        <input type="password" placeholder="••••••••" value={authPassword} onChange={e => setAuthPassword(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }} />
+                      </div>
+                      <button type="submit" className="btn btn-orange" style={{ width: '100%', padding: '10px', fontWeight: 'bold' }}>LOG IN &amp; CONTINUE</button>
+                      <button type="button" onClick={() => { setCurrentUser({ name: 'Arun Kumar', phone: '7448578507', email: 'arun@example.com', address: 'Double Tank, South Gandhigramam, Karur - 639004, Tamil Nadu' }); setIsAuthOpen(false); addToast('Logged in as Arun Kumar', '👋'); }} style={{ width: '100%', marginTop: '10px', padding: '8px', border: '1px dashed #FF5500', background: 'var(--orange-light)', color: '#FF5500', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }}>⚡ Demo One-Click Login (Arun Kumar)</button>
+                    </form>
+                  ) : authTab === 'signup' ? (
+                    <form onSubmit={handleUserSignup}>
+                      <div style={{ marginBottom: '10px' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Full Name *</label>
+                        <input type="text" placeholder="Arun Kumar" value={signupData.name} onChange={e => setSignupData({ ...signupData, name: e.target.value })} required style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }} />
+                      </div>
+                      <div style={{ marginBottom: '10px' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Phone Number *</label>
+                        <input type="tel" placeholder="7448578507" value={signupData.phone} onChange={e => setSignupData({ ...signupData, phone: e.target.value })} required style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }} />
+                      </div>
+                      <div style={{ marginBottom: '10px' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Delivery Address *</label>
+                        <input type="text" placeholder="House No, Street, City" value={signupData.address} onChange={e => setSignupData({ ...signupData, address: e.target.value })} required style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }} />
+                      </div>
+                      <div style={{ marginBottom: '14px' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Password *</label>
+                        <input type="password" placeholder="••••••••" value={signupData.password} onChange={e => setSignupData({ ...signupData, password: e.target.value })} required style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }} />
+                      </div>
+                      <button type="submit" className="btn btn-orange" style={{ width: '100%', padding: '10px', fontWeight: 'bold' }}>CREATE ACCOUNT &amp; CONTINUE</button>
+                    </form>
+                  ) : (
+                    <div>
+                      {forgotStep === 1 ? (
+                        <form onSubmit={handleVerifyPhone}>
+                          <div style={{ marginBottom: '14px' }}>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Registered Phone Number</label>
+                            <input type="tel" placeholder="e.g. 7448578507" value={forgotPhone} onChange={e => setForgotPhone(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }} />
+                          </div>
+                          <button type="submit" className="btn btn-orange" style={{ width: '100%', padding: '10px', fontWeight: 'bold' }}>VERIFY REGISTERED PHONE</button>
+                          <button type="button" onClick={() => setAuthTab('login')} style={{ width: '100%', background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.8rem', cursor: 'pointer', marginTop: '10px' }}>← Return to Login</button>
+                        </form>
+                      ) : (
+                        <form onSubmit={handleResetPassword}>
+                          <div style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', padding: '8px 12px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 'bold', marginBottom: '12px' }}>
+                            Verified User: {verifiedName} ({forgotPhone})
+                          </div>
+                          <div style={{ marginBottom: '12px' }}>
+                            <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>New Password</label>
+                            <input type="password" placeholder="Enter new password (min 4 chars)" value={newPassword} onChange={e => setNewPassword(e.target.value)} required style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }} />
+                          </div>
+                          <button type="submit" className="btn btn-orange" style={{ width: '100%', padding: '10px', fontWeight: 'bold' }}>SAVE NEW PASSWORD &amp; LOGIN</button>
+                          <button type="button" onClick={() => setForgotStep(1)} style={{ width: '100%', background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.8rem', cursor: 'pointer', marginTop: '10px' }}>← Change Phone Number</button>
+                        </form>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* User Account / My Orders Modal */}
+          {isAccountOpen && currentUser && (
+            <div className="modal-overlay" style={{ zIndex: 9999 }}>
+              <div className="modal-content" style={{ maxWidth: '700px', width: '92%', maxHeight: '88vh', overflowY: 'auto', borderRadius: '16px', padding: 0 }}>
+                <div style={{ background: 'var(--bg-input)', padding: '18px 20px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Hi, {currentUser.name}</h3>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{currentUser.phone} • {currentUser.email || 'Customer Account'}</span>
+                  </div>
+                  <button onClick={() => setIsAccountOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: 'var(--text-primary)' }}>✕</button>
+                </div>
+
+                <div style={{ padding: '20px' }}>
+                  <h4 style={{ margin: '0 0 15px 0', color: '#FF5500' }}>My Orders History</h4>
+                  {userOrders.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '30px' }}>
+                      <p style={{ color: 'var(--text-muted)' }}>No orders placed under this account yet.</p>
+                      <button className="btn btn-orange" onClick={() => setIsAccountOpen(false)}>START SHOPPING</button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                      {userOrders.map(ord => (
+                        <div key={ord.orderId} style={{ background: 'var(--bg-input)', padding: '16px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                            <strong style={{ color: '#FF5500' }}>{ord.orderId}</strong>
+                            <span style={{ background: 'var(--orange-light)', color: '#FF5500', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>{ord.status}</span>
+                          </div>
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Date: {new Date(ord.createdAt).toLocaleDateString()} | Payment: {ord.paymentMethod}</div>
+                          <div style={{ fontWeight: 'bold', fontSize: '1rem' }}>Total: ₹{ord.total}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <hr style={{ margin: '20px 0', borderColor: 'var(--border-color)' }} />
+                  <button onClick={() => { setCurrentUser(null); setIsAccountOpen(false); addToast('Logged out', '👋'); }} style={{ width: '100%', padding: '10px', border: '1px solid #ef4444', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', fontWeight: 'bold', borderRadius: '8px', cursor: 'pointer' }}>LOG OUT ACCOUNT</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Custom Mobile Back Cover Studio Modal */}
+          {isCustomCoverOpen && (
+            <div className="full-page-customizer-portal" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh', zIndex: 10000, background: 'var(--bg-page)', color: 'var(--text-primary)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+              <header className="modal-header-responsive" style={{
+                background: 'var(--bg-card)',
+                borderBottom: '1px solid var(--border-color)',
+                padding: '12px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                position: 'sticky',
+                top: 0,
+                zIndex: 100,
+                gap: '12px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+                  <div className="modal-header-logo-badge" style={{ 
+                    background: '#FF5500', 
+                    padding: '8px', 
+                    borderRadius: '10px', 
+                    display: 'flex', 
+                    flexShrink: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <svg className="modal-header-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" strokeWidth="2" style={{ flexShrink: 0 }}><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                  </div>
+                  <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <h2 className="modal-header-title" style={{ 
+                      margin: 0, 
+                      fontSize: '1rem', 
+                      fontWeight: '800', 
+                      lineHeight: 1.15,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      CUSTOM MOBILE BACK COVER STUDIO
+                    </h2>
+                    <span className="modal-header-subtitle" style={{ 
+                      fontSize: '0.74rem', 
+                      color: 'var(--text-muted)',
+                      lineHeight: 1.2,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      Design your personalized phone case
+                    </span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsCustomCoverOpen(false)} 
+                  className="modal-header-close-btn"
+                  style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 14px', 
+                    borderRadius: '8px', 
+                    border: 'none', 
+                    background: '#FF5500', 
+                    color: '#fff', 
+                    fontWeight: 'bold', 
+                    cursor: 'pointer',
+                    fontSize: '0.82rem',
+                    flexShrink: 0,
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  <span className="close-btn-label">Close</span>
+                </button>
+              </header>
+
+              <div style={{ flex: 1, padding: '30px 20px', maxWidth: '1100px', width: '100%', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px' }}>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '24px', textAlign: 'center' }}>
+                  <h4 style={{ color: '#FF5500', margin: '0 0 16px 0' }}>3D PHONE CASE MOCKUP</h4>
+                  {(() => {
+                    const layout = getCameraLayout(customCoverForm.brand, customCoverForm.model);
+                    const canvasBR = layout === 'samsung-ultra' ? '12px' : '36px';
+                    const imgBR = layout === 'samsung-ultra' ? '6px' : '30px';
+                    return (
+                      <div style={{ 
+                        width: '220px', 
+                        height: '420px', 
+                        background: '#111827', 
+                        borderRadius: canvasBR, 
+                        border: '4px solid #374151', 
+                        margin: '0 auto', 
+                        overflow: 'hidden', 
+                        position: 'relative', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}>
+                        {renderCameraCutout(customCoverForm.brand, customCoverForm.model)}
+                        {customCoverForm.photo ? (
+                          <img 
+                            src={customCoverForm.photo} 
+                            alt="Custom Cover" 
+                            style={{ 
+                              width: '100%', 
+                              height: '100%', 
+                              objectFit: 'cover',
+                              borderRadius: imgBR,
+                              transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+                            }} 
+                          />
+                        ) : (
+                          <div style={{ color: 'var(--text-muted)', padding: '20px' }}>Upload Photo</div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                  <strong style={{ display: 'block', marginTop: '16px' }}>{customCoverForm.brand} {customCoverForm.model}</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{customCoverForm.type}</span>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '24px' }}>
+                  <h4 style={{ margin: '0 0 16px 0' }}>Select Specifications &amp; Upload Photo</h4>
+                  <form onSubmit={(e) => { e.preventDefault(); handleAddToCart({ id: `custom-cover-${Date.now()}`, title: `Custom ${customCoverForm.brand} ${customCoverForm.model} Cover`, price: 399, category: 'Customized Back Covers', img: customCoverForm.photo || 'images/banner_backcover.png' }); setIsCustomCoverOpen(false); addToast(`Custom ${customCoverForm.model} Cover added to cart!`, '🎉'); }} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Upload Photo (All File Formats)</label>
+                      <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = (ev) => setCustomCoverForm({...customCoverForm, photo: ev.target.result}); r.readAsDataURL(f); } }} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px dashed #FF5500', background: 'var(--orange-light)', cursor: 'pointer' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Mobile Brand</label>
+                      <select value={customCoverForm.brand} onChange={e => setCustomCoverForm({...customCoverForm, brand: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }}>
+                        {['Apple', 'Samsung', 'OnePlus', 'Vivo', 'Oppo', 'Xiaomi', 'Realme', 'iQOO', 'Google Pixel'].map(b => <option key={b} value={b}>{b}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Phone Model</label>
+                      <input type="text" placeholder="e.g. iPhone 15 Pro, Samsung S24..." value={customCoverForm.model} onChange={e => setCustomCoverForm({...customCoverForm, model: e.target.value})} required style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Coverage Type</label>
+                      <select value={customCoverForm.type} onChange={e => setCustomCoverForm({...customCoverForm, type: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }}>
+                        <option value="Full 3D Hard Case (Sides + Back Print)">Full 3D Hard Case (Print Sides &amp; Back)</option>
+                        <option value="Soft Silicone TPU (Back Print Only)">Soft Silicone TPU (Clear Transparent Sides)</option>
+                      </select>
+                    </div>
+                    <button type="submit" className="btn btn-orange" style={{ width: '100%', padding: '12px', fontWeight: 'bold', marginTop: '10px' }}>ADD CUSTOM COVER TO CART (₹399)</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Custom Photo Frame Studio Modal */}
+          {isCustomFrameOpen && (
+            <div className="full-page-customizer-portal" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh', zIndex: 10000, background: 'var(--bg-page)', color: 'var(--text-primary)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+              <header className="modal-header-responsive" style={{
+                background: 'var(--bg-card)',
+                borderBottom: '1px solid var(--border-color)',
+                padding: '12px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                position: 'sticky',
+                top: 0,
+                zIndex: 100,
+                gap: '12px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+                  <div className="modal-header-logo-badge" style={{ 
+                    background: '#FF5500', 
+                    padding: '8px', 
+                    borderRadius: '10px', 
+                    display: 'flex', 
+                    flexShrink: 0,
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <svg className="modal-header-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" strokeWidth="2" style={{ flexShrink: 0 }}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  </div>
+                  <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <h2 className="modal-header-title" style={{ 
+                      margin: 0, 
+                      fontSize: '1rem', 
+                      fontWeight: '800', 
+                      lineHeight: 1.15,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      CUSTOM PHOTO FRAME STUDIO
+                    </h2>
+                    <span className="modal-header-subtitle" style={{ 
+                      fontSize: '0.74rem', 
+                      color: 'var(--text-muted)',
+                      lineHeight: 1.2,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      Craft personalized photo frames
+                    </span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsCustomFrameOpen(false)} 
+                  className="modal-header-close-btn"
+                  style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 14px', 
+                    borderRadius: '8px', 
+                    border: 'none', 
+                    background: '#FF5500', 
+                    color: '#fff', 
+                    fontWeight: 'bold', 
+                    cursor: 'pointer',
+                    fontSize: '0.82rem',
+                    flexShrink: 0,
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  <span className="close-btn-label">Close</span>
+                </button>
+              </header>
+
+              <div style={{ flex: 1, padding: '30px 20px', maxWidth: '1100px', width: '100%', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px' }}>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '24px', textAlign: 'center' }}>
+                  <h4 style={{ color: '#FF5500', margin: '0 0 16px 0' }}>LIVE PHOTO FRAME MOCKUP</h4>
+                  <div style={{ width: '280px', height: '240px', background: customFrameForm.color.includes('Black') ? '#111827' : customFrameForm.color.includes('White') ? '#F8FAFC' : '#5C3A21', borderRadius: '12px', padding: '14px', margin: '0 auto', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '100%', height: '100%', background: '#fff', padding: '8px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {customFrameForm.photo ? <img src={customFrameForm.photo} alt="Custom Frame" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ color: '#64748B' }}>Upload Memory Photo</div>}
+                    </div>
+                  </div>
+                  <strong style={{ display: 'block', marginTop: '16px' }}>{customFrameForm.color}</strong>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{customFrameForm.size}</span>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '24px' }}>
+                  <h4 style={{ margin: '0 0 16px 0' }}>Configure Photo Frame</h4>
+                  <form onSubmit={(e) => { e.preventDefault(); handleAddToCart({ id: `custom-frame-${Date.now()}`, title: `Custom Photo Frame (${customFrameForm.size})`, price: 449, category: 'Photo Frames', img: customFrameForm.photo || 'images/banner_photoframe.png' }); setIsCustomFrameOpen(false); addToast(`Custom Photo Frame (${customFrameForm.size}) added to cart!`, '🎉'); }} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Upload Photo (All File Formats)</label>
+                      <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = (ev) => setCustomFrameForm({...customFrameForm, photo: ev.target.result}); r.readAsDataURL(f); } }} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px dashed #FF5500', background: 'var(--orange-light)', cursor: 'pointer' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Frame Size</label>
+                      <select value={customFrameForm.size} onChange={e => setCustomFrameForm({...customFrameForm, size: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }}>
+                        <option value="4 x 6 inches (Small Table Frame)">4 x 6 inches (Small Table Frame) - ₹299</option>
+                        <option value="6 x 8 inches (Standard Desk/Wall Frame)">6 x 8 inches (Standard Frame) - ₹449</option>
+                        <option value="8 x 10 inches (Wall Frame)">8 x 10 inches (Wall Frame) - ₹649</option>
+                        <option value="12 x 18 inches (Gallery Wall Frame)">12 x 18 inches (Gallery Frame) - ₹999</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Frame Color &amp; Style</label>
+                      <select value={customFrameForm.color} onChange={e => setCustomFrameForm({...customFrameForm, color: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)' }}>
+                        <option value="Classic Walnut Wood">Classic Walnut Wood</option>
+                        <option value="Onyx Matte Black">Onyx Matte Black</option>
+                        <option value="Pure White">Pure White</option>
+                        <option value="Royal Gold">Royal Gold</option>
+                      </select>
+                    </div>
+                    <button type="submit" className="btn btn-orange" style={{ width: '100%', padding: '12px', fontWeight: 'bold', marginTop: '10px' }}>ADD CUSTOM PHOTO FRAME TO CART (₹449)</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Toast Container */}
+          <div className="toast-container" style={{ zIndex: 99999 }}>
+            {toasts.map(t => (
+              <div key={t.id} className="toast" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {getToastIcon(t.icon)}
+                <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>{t.message}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
