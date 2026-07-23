@@ -270,55 +270,57 @@ export default function Footer() {
         {/* Footer Bottom Bar */}
         <div className="footer-bottom" style={{
           borderTop: '1px solid var(--border-color)',
-          paddingTop: '16px',
-          paddingBottom: '12px',
+          paddingTop: '20px',
+          paddingBottom: '16px',
           display: 'flex',
-          flexWrap: 'wrap',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px'
+          gap: '16px',
+          textAlign: 'center'
         }}>
-          <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-            © 2026 <strong style={{ color: 'var(--text-primary)' }}>Friends Mobile</strong>. All rights reserved by <strong style={{ color: 'var(--text-primary)' }}>UnitaryX</strong>.
-          </p>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.76rem', fontWeight: '900', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.8px', marginRight: '4px' }}>SECURE PAYMENTS:</span>
+          {/* SECURE PAYMENTS SECTION (TOP) */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: '900', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.8px', marginRight: '4px' }}>SECURE PAYMENTS:</span>
             
             {/* Google Pay / UPI Badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '5px 12px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: '900', color: '#4285F4' }}>G</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: '900', color: '#EA4335' }}>P</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: '900', color: '#FBBC05' }}>a</span>
-              <span style={{ fontSize: '0.75rem', fontWeight: '900', color: '#34A853' }}>y</span>
-              <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', marginLeft: '2px' }}>/ UPI</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 14px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: '900', color: '#4285F4' }}>G</span>
+              <span style={{ fontSize: '0.78rem', fontWeight: '900', color: '#EA4335' }}>P</span>
+              <span style={{ fontSize: '0.78rem', fontWeight: '900', color: '#FBBC05' }}>a</span>
+              <span style={{ fontSize: '0.78rem', fontWeight: '900', color: '#34A853' }}>y</span>
+              <span style={{ fontSize: '0.72rem', fontWeight: '800', color: 'var(--text-muted)', marginLeft: '2px' }}>/ UPI</span>
             </div>
 
             {/* PhonePe Badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', padding: '5px 12px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
-              <span style={{ fontSize: '0.76rem', fontWeight: '900', color: '#5f259f' }}>Phone</span>
-              <span style={{ fontSize: '0.72rem', fontWeight: '900', background: '#5f259f', color: '#ffffff', padding: '1px 5px', borderRadius: '4px' }}>Pe</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', padding: '6px 14px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: '900', color: '#5f259f' }}>Phone</span>
+              <span style={{ fontSize: '0.74rem', fontWeight: '900', background: '#5f259f', color: '#ffffff', padding: '1px 5px', borderRadius: '4px' }}>Pe</span>
             </div>
 
             {/* VISA Badge */}
-            <div style={{ padding: '5px 12px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: '900', color: '#1A1F71', fontStyle: 'italic', letterSpacing: '1px' }}>VISA</span>
+            <div style={{ padding: '6px 14px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
+              <span style={{ fontSize: '0.84rem', fontWeight: '900', color: '#1A1F71', fontStyle: 'italic', letterSpacing: '1px' }}>VISA</span>
             </div>
 
             {/* Mastercard Badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ width: '11px', height: '11px', borderRadius: '50%', background: '#EB001B', display: 'inline-block' }}></span>
-                <span style={{ width: '11px', height: '11px', borderRadius: '50%', background: '#F79E1B', display: 'inline-block', marginLeft: '-4px', opacity: 0.95 }}></span>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#EB001B', display: 'inline-block' }}></span>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#F79E1B', display: 'inline-block', marginLeft: '-4px', opacity: 0.95 }}></span>
               </div>
-              <span style={{ fontSize: '0.72rem', fontWeight: '800', color: 'var(--text-primary)' }}>Mastercard</span>
+              <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-primary)' }}>Mastercard</span>
             </div>
 
             {/* Cash On Delivery Badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '8px', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#16a34a' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: '900' }}>💵 Cash on Delivery</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: '8px', background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#16a34a' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: '900' }}>💵 Cash on Delivery</span>
             </div>
           </div>
+
+          {/* COPYRIGHT LINE (BOTTOM) */}
+          <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
+            © 2026 <strong style={{ color: 'var(--text-primary)' }}>Friends Mobile</strong>. All rights reserved by <strong style={{ color: 'var(--text-primary)' }}>UnitaryX</strong>.
+          </p>
         </div>
 
       </div>
