@@ -22,6 +22,8 @@ services:
       - PORT=5000
       - MONGODB_URI=mongodb://mongodb:27017/friends_mobile
     volumes:
+      - ./server:/app
+      - /app/node_modules
       - ./server/data:/app/data
       - ./public/images:/app/public/images
       - ./images:/app/images
@@ -39,6 +41,9 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - VITE_HOST=0.0.0.0
       - PORT=3000
+    volumes:
+      - .:/app
+      - /app/node_modules
     depends_on:
       - backend
 

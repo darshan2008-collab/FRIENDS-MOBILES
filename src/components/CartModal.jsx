@@ -211,7 +211,6 @@ export default function CartModal({
         // Auto launch WhatsApp Notification
         try {
           const whatsappMsg = `*New Order Placed - Friends Mobile Portal*\n\n` +
-            `*Order ID:* ${newOrder.orderId}\n` +
             `*Customer Name:* ${newOrder.customer.name}\n` +
             `*Phone Number:* ${newOrder.customer.phone}\n` +
             `*Address:* ${newOrder.customer.address}\n\n` +
@@ -242,14 +241,19 @@ export default function CartModal({
   };
 
   return (
-    <div className="cart-drawer-overlay" onClick={onClose}>
+    <div className="cart-drawer-overlay" style={{ padding: 0 }} onClick={onClose}>
       <div 
         className="cart-drawer-content" 
         onClick={(e) => e.stopPropagation()}
         style={{
           display: 'flex',
           flexDirection: 'column',
-          height: '100%',
+          width: '100vw',
+          maxWidth: '100vw',
+          height: '100vh',
+          maxHeight: '100vh',
+          borderRadius: 0,
+          border: 'none',
           overflow: 'hidden'
         }}
       >
@@ -275,8 +279,8 @@ export default function CartModal({
                 {checkoutStep === 'checkout' && 'DELIVERY & CHECKOUT'}
                 {checkoutStep === 'success' && 'ORDER CONFIRMED'}
               </h3>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                {checkoutStep === 'cart' && 'Review your items and proceed'}
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                {checkoutStep === 'cart' && 'Review items & proceed to checkout'}
                 {checkoutStep === 'checkout' && 'Enter address and select payment method'}
                 {checkoutStep === 'success' && 'Thank you for shopping with Friends Mobile!'}
               </span>
@@ -299,7 +303,7 @@ export default function CartModal({
         </header>
 
         {/* Modal Body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', maxWidth: '900px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
           
           {/* STEP 1: CART ITEMS VIEW */}
           {checkoutStep === 'cart' && (
@@ -613,12 +617,9 @@ export default function CartModal({
                 <CheckCircle2 size={36} />
               </div>
 
-              <h4 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', fontWeight: '900', color: '#22c55e' }}>
+              <h4 style={{ margin: '0 0 16px 0', fontSize: '1.2rem', fontWeight: '900', color: '#22c55e' }}>
                 Order Successfully Placed!
               </h4>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '16px' }}>
-                Order ID: <strong style={{ color: 'var(--text-primary)' }}>{placedOrderDetails.orderId}</strong>
-              </span>
 
               <div style={{
                 background: 'var(--bg-input)',

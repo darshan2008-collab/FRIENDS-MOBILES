@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Smartphone, Cable, Headphones, Watch, BatteryCharging, Speaker, Image, Shield, Grid, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function CategoryGrid() {
+export default function CategoryGrid({ onOpenShop }) {
   const scrollContainerRef = useRef(null);
 
   const categories = [
@@ -165,9 +165,9 @@ export default function CategoryGrid() {
           {displayCategories.map((cat, index) => {
             const Icon = cat.icon;
             return (
-              <a 
+              <div 
                 key={index} 
-                href={cat.href} 
+                onClick={() => onOpenShop && onOpenShop(cat.name === 'More Categories' ? 'All' : cat.name)} 
                 className="category-slide-card"
                 style={{
                   flex: '0 0 auto',
@@ -182,7 +182,8 @@ export default function CategoryGrid() {
                   alignItems: 'center',
                   textDecoration: 'none',
                   transition: 'all 0.25s ease',
-                  boxShadow: 'var(--shadow-sm)'
+                  boxShadow: 'var(--shadow-sm)',
+                  cursor: 'pointer'
                 }}
               >
                 <div style={{
@@ -215,7 +216,7 @@ export default function CategoryGrid() {
                 }}>
                   {cat.count}
                 </span>
-              </a>
+              </div>
             );
           })}
         </div>

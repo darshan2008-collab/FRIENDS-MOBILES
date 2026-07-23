@@ -318,8 +318,8 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800' }}>Order History &amp; Live Tracking</h3>
-                      <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Track packages and review past purchases</span>
+                      <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800' }}>Order History</h3>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Review your past purchases</span>
                     </div>
                     <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#FF5500', background: 'var(--orange-light)', padding: '6px 14px', borderRadius: '20px' }}>
                       {userOrders.length} Orders Placed
@@ -343,19 +343,20 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                      {userOrders.map(order => {
-                        const step = getStatusStep(order.status);
+                      {userOrders.map((order, idx) => {
                         return (
-                          <div key={order.orderId} style={{ background: 'var(--bg-input)', borderRadius: '18px', border: '1px solid var(--border-color)', padding: '24px' }}>
+                          <div key={order.orderId || idx} style={{ background: 'var(--bg-input)', borderRadius: '18px', border: '1px solid var(--border-color)', padding: '24px' }}>
                             
                             {/* Order Header */}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', paddingBottom: '16px', borderBottom: '1px solid var(--border-color)' }}>
                               <div>
-                                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Order Reference</span>
+                                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Purchase Date</span>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
-                                  <strong style={{ color: '#FF5500', fontSize: '1.15rem' }}>{order.orderId}</strong>
-                                  <span style={{ fontSize: '0.75rem', background: 'var(--bg-card)', padding: '3px 10px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                                  <strong style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>
                                     {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                  </strong>
+                                  <span style={{ fontSize: '0.75rem', background: 'var(--orange-light)', color: '#FF5500', padding: '3px 10px', borderRadius: '12px', fontWeight: '800' }}>
+                                    {order.status || 'Order Placed'}
                                   </span>
                                 </div>
                               </div>
@@ -366,65 +367,6 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                 <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.12)', color: '#10b981', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
                                   {order.paymentMethod || 'UPI Paid'}
                                 </span>
-                              </div>
-                            </div>
-
-                            {/* Status Progress Tracker */}
-                            <div style={{ margin: '24px 0 24px 0', padding: '0 4px' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
-                                {/* Connector Line Background */}
-                                <div style={{
-                                  position: 'absolute',
-                                  top: '14px',
-                                  left: '10%',
-                                  right: '10%',
-                                  height: '3px',
-                                  background: 'var(--border-color)',
-                                  zIndex: 1
-                                }} />
-                                {/* Connector Line Progress */}
-                                <div style={{
-                                  position: 'absolute',
-                                  top: '14px',
-                                  left: '10%',
-                                  width: `${(step / 4) * 80}%`,
-                                  height: '3px',
-                                  background: '#FF5500',
-                                  zIndex: 1,
-                                  transition: 'width 0.3s ease'
-                                }} />
-
-                                {['Order Placed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'].map((st, i) => (
-                                  <div key={i} style={{ textAlign: 'center', flex: 1, zIndex: 2, minWidth: 0, padding: '0 2px' }}>
-                                    <div style={{
-                                      width: '28px',
-                                      height: '28px',
-                                      borderRadius: '50%',
-                                      background: i <= step ? '#FF5500' : 'var(--bg-card)',
-                                      border: `2px solid ${i <= step ? '#FF5500' : 'var(--border-color)'}`,
-                                      color: i <= step ? '#fff' : 'var(--text-muted)',
-                                      margin: '0 auto 6px auto',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      fontSize: '0.72rem',
-                                      fontWeight: 'bold',
-                                      boxShadow: i <= step ? '0 2px 6px rgba(255, 85, 0, 0.3)' : 'none'
-                                    }}>
-                                      {i <= step ? '✓' : i + 1}
-                                    </div>
-                                    <span style={{
-                                      fontSize: 'clamp(0.62rem, 2.2vw, 0.72rem)',
-                                      fontWeight: i <= step ? '800' : '500',
-                                      color: i <= step ? '#FF5500' : 'var(--text-muted)',
-                                      display: 'block',
-                                      lineHeight: '1.2',
-                                      wordBreak: 'break-word'
-                                    }}>
-                                      {st}
-                                    </span>
-                                  </div>
-                                ))}
                               </div>
                             </div>
 

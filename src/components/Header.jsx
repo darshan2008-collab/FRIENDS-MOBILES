@@ -2,7 +2,7 @@ import React from 'react';
 import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
-export default function Header({ theme, toggleTheme, cartCount, wishlistCount, onOpenDrawer, searchQuery, setSearchQuery, onOpenAdmin, currentUser, onOpenAuth, onOpenUserAccount, onOpenCart, onLogout }) {
+export default function Header({ theme, toggleTheme, cartCount, wishlistCount, onOpenDrawer, searchQuery, setSearchQuery, onOpenAdmin, currentUser, onOpenAuth, onOpenUserAccount, onOpenCart, onLogout, onOpenShop }) {
   return (
     <>
       {/* Main Header */}
@@ -33,7 +33,11 @@ export default function Header({ theme, toggleTheme, cartCount, wishlistCount, o
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button className="search-btn" aria-label="Search">
+              <button 
+                className="search-btn" 
+                aria-label="Search"
+                onClick={() => onOpenShop && onOpenShop('All')}
+              >
                 <Search size={18} />
               </button>
             </div>
@@ -127,7 +131,11 @@ export default function Header({ theme, toggleTheme, cartCount, wishlistCount, o
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <button className="search-btn" aria-label="Search">
+            <button 
+              className="search-btn" 
+              aria-label="Search"
+              onClick={() => onOpenShop && onOpenShop('All')}
+            >
               <Search size={18} />
             </button>
           </div>
@@ -140,11 +148,38 @@ export default function Header({ theme, toggleTheme, cartCount, wishlistCount, o
         <div className="container">
           <ul className="nav-links">
             <li><a href="#" className="nav-link active">Home</a></li>
-            <li><a href="#products" className="nav-link">Mobile Phones</a></li>
-            <li><a href="#products" className="nav-link">Accessories ▼</a></li>
+            <li>
+              <button 
+                type="button"
+                onClick={() => onOpenShop && onOpenShop('Mobile Phones')}
+                className="nav-link"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Mobile Phones
+              </button>
+            </li>
+            <li>
+              <button 
+                type="button"
+                onClick={() => onOpenShop && onOpenShop('Chargers & Cables')}
+                className="nav-link"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Chargers &amp; Accessories
+              </button>
+            </li>
             <li><a href="#photo-frames" className="nav-link">Photo Frames</a></li>
             <li><a href="#customized-covers" className="nav-link">Customized Back Covers</a></li>
-            <li><a href="#services" className="nav-link">Services ▼</a></li>
+            <li>
+              <button 
+                type="button"
+                onClick={() => onOpenShop && onOpenShop('All')}
+                className="nav-link"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Shop All Store
+              </button>
+            </li>
             <li><a href="#offers" className="nav-link">Offers</a></li>
             <li><a href="#contact" className="nav-link">Contact Us</a></li>
           </ul>

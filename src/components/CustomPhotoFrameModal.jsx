@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield, Rulers, Maximize2 } from 'lucide-react';
 
 export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, addToast }) {
-  const [frameSize, setFrameSize] = useState('6 x 8 inches'); // 4x6 | 6x8 | 8x10 | 12x18 | 18x24
+  const [frameSize, setFrameSize] = useState('6 x 8 inches'); // 4x6 | 6x8 | 8x10 | 12x18 | 18x24 | Custom / Manual
+  const [customWidth, setCustomWidth] = useState(10);
+  const [customHeight, setCustomHeight] = useState(12);
+  const [customUnit, setCustomUnit] = useState('inches'); // 'inches' | 'cm'
   const [frameColor, setFrameColor] = useState('Classic Walnut Wood'); // 'Classic Walnut Wood' | 'Matte Black' | 'Pure White' | 'Royal Gold'
   const [orientation, setOrientation] = useState('Portrait (Vertical)'); // 'Portrait (Vertical)' | 'Landscape (Horizontal)'
   const [glassType, setGlassType] = useState('Anti-Glare Premium Glass'); // 'Anti-Glare Premium Glass' | 'Crystal Acrylic'
   const [uploadedPhoto, setUploadedPhoto] = useState(null);
+  const [uploadedFileInfo, setUploadedFileInfo] = useState(null);
 
   if (!isOpen) return null;
 
@@ -15,15 +19,30 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
     { label: '6 x 8 inches (Standard Desk / Wall)', price: 449 },
     { label: '8 x 10 inches (Wall Frame)', price: 649 },
     { label: '12 x 18 inches (Gallery Wall Frame)', price: 999 },
-    { label: '18 x 24 inches (Masterpiece Wall Frame)', price: 1499 }
+    { label: '18 x 24 inches (Masterpiece Wall Frame)', price: 1499 },
+    { label: 'Custom / Manual Dimension (Enter Custom Size)', price: null }
   ];
 
+  const getCustomPrice = () => {
+    let w = parseFloat(customWidth) || 0;
+    let h = parseFloat(customHeight) || 0;
+    if (customUnit === 'cm') {
+      w = w / 2.54;
+      h = h / 2.54;
+    }
+    const sqInches = w * h;
+    if (sqInches <= 0) return 299;
+    const calculated = Math.round(150 + sqInches * 3.1);
+    return Math.max(299, Math.min(9999, calculated));
+  };
+
   const getSelectedPrice = () => {
+    if (frameSize.startsWith('Custom')) {
+      return getCustomPrice();
+    }
     const found = frameSizes.find(s => s.label === frameSize);
     return found ? found.price : 449;
   };
-
-  const [uploadedFileInfo, setUploadedFileInfo] = useState(null);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -54,23 +73,34 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
   const handleAddToCartSubmit = (e) => {
     e.preventDefault();
     const finalPrice = getSelectedPrice();
+    const isCustom = frameSize.startsWith('Custom');
+    const displaySize = isCustom 
+      ? `${customWidth} x ${customHeight} ${customUnit} (Custom Manual)`
+      : frameSize;
+
+    const sizeTitlePart = isCustom
+      ? `${customWidth}x${customHeight}${customUnit}`
+      : `${frameSize.split(' ')[0]} ${frameSize.split(' ')[1]} ${frameSize.split(' ')[2]}`;
 
     const customFrameProduct = {
       id: `custom-frame-${Date.now()}`,
-      title: `Custom Photo Frame (${frameSize.split(' ')[0]} ${frameSize.split(' ')[1]} ${frameSize.split(' ')[2]})`,
+      title: `Custom Photo Frame (${sizeTitlePart})`,
       price: finalPrice,
       originalPrice: Math.round(finalPrice * 1.3),
       category: 'Photo Frames',
       img: uploadedPhoto && !uploadedFileInfo?.isDoc ? uploadedPhoto : 'images/banner_photoframe.png',
       discount: '-25%',
       customizationDetails: {
-        size: frameSize,
+        size: displaySize,
+        customWidth: isCustom ? customWidth : null,
+        customHeight: isCustom ? customHeight : null,
+        customUnit: isCustom ? customUnit : null,
         color: frameColor,
         orientation,
         glass: glassType,
         userPhoto: uploadedPhoto ? (uploadedFileInfo?.isDoc ? `Document (${uploadedFileInfo.name})` : 'Custom Photo Included') : 'Default Design',
         uploadedFile: uploadedPhoto,
-        fileName: uploadedFileInfo ? uploadedFileInfo.name : `custom_frame_${frameSize}.png`,
+        fileName: uploadedFileInfo ? uploadedFileInfo.name : `custom_frame_${sizeTitlePart}.png`,
         fileType: uploadedFileInfo ? uploadedFileInfo.type : 'image/png',
         fileSize: uploadedFileInfo ? uploadedFileInfo.size : '',
         isDocument: uploadedFileInfo ? uploadedFileInfo.isDoc : false
@@ -78,7 +108,7 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
     };
 
     onAddToCart(customFrameProduct);
-    if (addToast) addToast(`Customized Photo Frame (${frameSize}) added to cart!`, '✓');
+    if (addToast) addToast(`Customized Photo Frame (${displaySize}) added to cart!`, '✓');
     onClose();
   };
 
@@ -101,13 +131,13 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
         width: '100vw',
         height: '100vh',
         zIndex: 10008,
-        background: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(8px)',
+        background: 'var(--bg-page)',
         color: 'var(--text-primary)',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px 14px'
+        alignItems: 'stretch',
+        justifyContent: 'stretch',
+        padding: 0,
+        overflow: 'hidden'
       }}
       onClick={onClose}
     >
@@ -115,13 +145,14 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
         className="customizer-modal-dialog"
         onClick={(e) => e.stopPropagation()}
         style={{
-          maxWidth: '680px',
-          width: '100%',
-          maxHeight: '90vh',
+          width: '100vw',
+          maxWidth: '100vw',
+          height: '100vh',
+          maxHeight: '100vh',
           background: 'var(--bg-card)',
-          borderRadius: '20px',
-          border: '1px solid var(--border-color)',
-          boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+          borderRadius: '0px',
+          border: 'none',
+          boxShadow: 'none',
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column'
@@ -205,6 +236,8 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
         <div style={{
           padding: '24px 20px',
           width: '100%',
+          maxWidth: '900px',
+          margin: '0 auto',
           boxSizing: 'border-box'
         }}>
         
@@ -258,29 +291,177 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
                 <Frame size={15} /> Select Frame Dimensions &amp; Size
               </label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {frameSizes.map(sizeObj => (
-                  <button 
-                    type="button"
-                    key={sizeObj.label}
-                    onClick={() => setFrameSize(sizeObj.label)}
-                    style={{
-                      padding: '12px 16px',
-                      borderRadius: '10px',
-                      border: frameSize === sizeObj.label ? '2px solid #FF5500' : '1px solid var(--border-color)',
-                      background: frameSize === sizeObj.label ? 'var(--orange-light)' : 'var(--bg-input)',
-                      color: frameSize === sizeObj.label ? '#FF5500' : 'var(--text-primary)',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <span>{sizeObj.label}</span>
-                    <span>₹{sizeObj.price}</span>
-                  </button>
-                ))}
+                {frameSizes.map(sizeObj => {
+                  const isSelected = frameSize === sizeObj.label;
+                  const isCustomOption = sizeObj.label.startsWith('Custom');
+
+                  return (
+                    <div key={sizeObj.label}>
+                      <button 
+                        type="button"
+                        onClick={() => setFrameSize(sizeObj.label)}
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          borderRadius: isSelected && isCustomOption ? '10px 10px 0 0' : '10px',
+                          border: isSelected ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                          background: isSelected ? 'var(--orange-light)' : 'var(--bg-input)',
+                          color: isSelected ? '#FF5500' : 'var(--text-primary)',
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {isCustomOption && <Rulers size={16} />}
+                          {sizeObj.label}
+                        </span>
+                        <span>{isCustomOption ? `From ₹${getCustomPrice()}` : `₹${sizeObj.price}`}</span>
+                      </button>
+
+                      {/* Manual Dimension Input Drawer if Custom Option is selected */}
+                      {isCustomOption && isSelected && (
+                        <div style={{
+                          padding: '16px',
+                          background: 'var(--bg-input)',
+                          border: '2px solid #FF5500',
+                          borderTop: 'none',
+                          borderRadius: '0 0 12px 12px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '14px'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                            <span style={{ fontSize: '0.84rem', fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <Maximize2 size={15} color="#FF5500" /> Enter Manual Dimensions:
+                            </span>
+
+                            {/* Unit selector */}
+                            <div style={{ display: 'flex', background: 'var(--bg-card)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border-color)' }}>
+                              <button
+                                type="button"
+                                onClick={() => setCustomUnit('inches')}
+                                style={{
+                                  padding: '4px 12px',
+                                  borderRadius: '6px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 'bold',
+                                  border: 'none',
+                                  background: customUnit === 'inches' ? '#FF5500' : 'transparent',
+                                  color: customUnit === 'inches' ? '#ffffff' : 'var(--text-muted)',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                Inches (in)
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setCustomUnit('cm')}
+                                style={{
+                                  padding: '4px 12px',
+                                  borderRadius: '6px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 'bold',
+                                  border: 'none',
+                                  background: customUnit === 'cm' ? '#FF5500' : 'transparent',
+                                  color: customUnit === 'cm' ? '#ffffff' : 'var(--text-muted)',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                Centimeters (cm)
+                              </button>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <div>
+                              <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
+                                Width ({customUnit === 'inches' ? 'in' : 'cm'})
+                              </label>
+                              <input 
+                                type="number"
+                                min="2"
+                                max="120"
+                                step="0.5"
+                                value={customWidth}
+                                onChange={(e) => setCustomWidth(e.target.value === '' ? '' : Math.max(1, parseFloat(e.target.value) || 0))}
+                                style={{
+                                  width: '100%',
+                                  padding: '10px 12px',
+                                  borderRadius: '8px',
+                                  border: '1px solid var(--border-color)',
+                                  background: 'var(--bg-card)',
+                                  color: 'var(--text-primary)',
+                                  fontSize: '0.95rem',
+                                  fontWeight: 'bold',
+                                  boxSizing: 'border-box'
+                                }}
+                                placeholder={`Width (${customUnit})`}
+                              />
+                            </div>
+
+                            <div>
+                              <label style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
+                                Height ({customUnit === 'inches' ? 'in' : 'cm'})
+                              </label>
+                              <input 
+                                type="number"
+                                min="2"
+                                max="120"
+                                step="0.5"
+                                value={customHeight}
+                                onChange={(e) => setCustomHeight(e.target.value === '' ? '' : Math.max(1, parseFloat(e.target.value) || 0))}
+                                style={{
+                                  width: '100%',
+                                  padding: '10px 12px',
+                                  borderRadius: '8px',
+                                  border: '1px solid var(--border-color)',
+                                  background: 'var(--bg-card)',
+                                  color: 'var(--text-primary)',
+                                  fontSize: '0.95rem',
+                                  fontWeight: 'bold',
+                                  boxSizing: 'border-box'
+                                }}
+                                placeholder={`Height (${customUnit})`}
+                              />
+                            </div>
+                          </div>
+
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            background: 'var(--bg-card)',
+                            padding: '10px 14px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border-color)',
+                            fontSize: '0.82rem',
+                            flexWrap: 'wrap',
+                            gap: '6px'
+                          }}>
+                            <span style={{ color: 'var(--text-muted)' }}>
+                              Entered Size: <strong style={{ color: 'var(--text-primary)' }}>{customWidth || 0} x {customHeight || 0} {customUnit}</strong>
+                              {customUnit === 'cm' && (
+                                <span style={{ fontSize: '0.75rem', opacity: 0.8, marginLeft: '6px' }}>
+                                  (~{((customWidth || 0) / 2.54).toFixed(1)}" x {((customHeight || 0) / 2.54).toFixed(1)}")
+                                </span>
+                              )}
+                            </span>
+                            <span style={{ fontWeight: '800', color: '#FF5500' }}>
+                              Calculated Price: ₹{getCustomPrice()}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
