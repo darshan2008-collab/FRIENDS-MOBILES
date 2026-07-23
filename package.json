@@ -4,9 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "predev": "node copy_images.cjs",
     "dev": "vite",
-    "prebuild": "node copy_images.cjs",
     "build": "vite build",
     "preview": "vite preview"
   },
