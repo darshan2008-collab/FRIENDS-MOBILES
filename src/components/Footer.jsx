@@ -306,80 +306,80 @@ export default function Footer() {
               
               {/* 10000% OFFICIAL PIXEL-PERFECT BRAND PAYMENT LOGOS */}
               
+              {/* COMPACT MICRO-SIZED 21px OFFICIAL BRAND PAYMENT LOGOS */}
+              
               {/* Google Pay / UPI Official Logo */}
               <div style={{
-                height: '28px',
-                padding: '0 10px',
-                borderRadius: '6px',
+                height: '21px',
+                padding: '0 6px',
+                borderRadius: '4px',
                 background: '#ffffff',
                 border: '1px solid #cbd5e1',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '4px'
               }}>
-                <svg width="48" height="18" viewBox="0 0 120 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* Official Google G emblem */}
+                <svg width="34" height="13" viewBox="0 0 120 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.5 24.1c0-1.4-.1-2.8-.4-4.1H11.5v8.1h6.2c-.3 1.5-1.1 2.8-2.3 3.6v3h3.7c2.2-2 3.4-5 3.4-10.6z" fill="#4285F4"/>
                   <path d="M11.5 35.3c3.2 0 6-1.1 8-2.9l-3.7-3c-1.1.7-2.5 1.2-4.3 1.2-3.3 0-6.1-2.2-7.1-5.3H.6v3.1c2 4 6.2 6.9 10.9 6.9z" fill="#34A853"/>
                   <path d="M4.4 25.3c-.3-.8-.4-1.7-.4-2.7s.1-1.9.4-2.7v-3.1H.6C-.2 18.5-.6 20.7-.6 23s.4 4.5 1.2 6.1l3.8-3.8z" fill="#FBBC05"/>
                   <path d="M11.5 12.3c1.8 0 3.3.6 4.6 1.8l3.4-3.4C17.4 8.8 14.7 7.7 11.5 7.7 6.8 7.7 2.6 10.6.6 14.6l3.8 3.1c1-3.1 3.8-5.4 7.1-5.4z" fill="#EA4335"/>
-                  {/* Official Pay text */}
                   <path d="M37.8 24.7v9.4h-3.6V12.7h6.8c2.1 0 3.7.6 4.9 1.8s1.8 2.7 1.8 4.6c0 1.9-.6 3.4-1.8 4.6s-2.8 1.8-4.9 1.8h-3.2zm0-9.2v6.4h3.4c1.1 0 2-.3 2.7-1s1-1.4 1-2.2c0-.9-.3-1.6-1-2.2s-1.6-1-2.7-1h-3.4z" fill="#5F6368"/>
                   <path d="M57.6 19.3v14.8h-3.5v-2.3c-1 1.7-2.6 2.6-4.6 2.6-1.7 0-3.1-.6-4.1-1.7s-1.6-2.5-1.6-4.3c0-1.9.6-3.4 1.7-4.4s2.5-1.6 4.3-1.6c1.9 0 3.4.8 4.4 2.3v-5.4h3.4zm-6.8 6.4c-1 0-1.8.3-2.4 1s-.9 1.5-.9 2.5c0 1 .3 1.9.9 2.5s1.4 1 2.4 1c1 0 1.8-.3 2.4-1s.9-1.5.9-2.5c0-1-.3-1.9-.9-2.5s-1.4-1-2.4-1z" fill="#5F6368"/>
                   <path d="M60.6 38.6l3.7-8.1-6-13.8h3.8l3.9 9.8 3.8-9.8h3.7L64.1 38.6h-3.5z" fill="#5F6368"/>
                 </svg>
-                <span style={{ fontSize: '0.62rem', fontWeight: '900', color: '#047857', background: '#ecfdf5', padding: '1px 5px', borderRadius: '4px', border: '1px solid #a7f3d0', letterSpacing: '0.5px' }}>UPI</span>
+                <span style={{ fontSize: '0.55rem', fontWeight: '900', color: '#047857', background: '#ecfdf5', padding: '0 3px', borderRadius: '3px', border: '1px solid #a7f3d0' }}>UPI</span>
               </div>
 
               {/* PhonePe Official Logo */}
               <div style={{
-                height: '28px',
-                padding: '0 10px',
-                borderRadius: '6px',
+                height: '21px',
+                padding: '0 6px',
+                borderRadius: '4px',
                 background: '#ffffff',
                 border: '1px solid #cbd5e1',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '4px'
               }}>
-                <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
+                <svg width="14" height="14" viewBox="0 0 100 100" fill="none">
                   <rect width="100" height="100" rx="24" fill="#5F259F"/>
                   <path d="M66.4 32.5H47.8c-2.4 0-4.4 2-4.4 4.4v40c0 1.5.8 2.9 2.1 3.7 1.3.8 3 .8 4.3 0L65.4 68c2.1-1.3 3.4-3.6 3.4-6.1V36.9c0-2.4-2-4.4-4.4-4.4z" fill="#FFFFFF"/>
                   <path d="M52.8 40.5v18h6.5c4.2 0 7.5-3.4 7.5-7.5s-3.4-7.5-7.5-7.5h-6.5z" fill="#5F259F"/>
                 </svg>
-                <span style={{ fontSize: '0.78rem', fontWeight: '900', color: '#5F259F', letterSpacing: '-0.3px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>Phone<span style={{ color: '#5F259F' }}>Pe</span></span>
+                <span style={{ fontSize: '0.65rem', fontWeight: '900', color: '#5F259F', letterSpacing: '-0.3px' }}>Phone<span style={{ color: '#5F259F' }}>Pe</span></span>
               </div>
 
               {/* Paytm Official Logo */}
               <div style={{
-                height: '28px',
-                padding: '0 10px',
-                borderRadius: '6px',
+                height: '21px',
+                padding: '0 6px',
+                borderRadius: '4px',
                 background: '#ffffff',
                 border: '1px solid #cbd5e1',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                 display: 'inline-flex',
                 alignItems: 'center'
               }}>
-                <span style={{ fontSize: '0.92rem', fontWeight: '900', color: '#002E6E', fontFamily: 'system-ui, sans-serif', letterSpacing: '-0.5px' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: '900', color: '#002E6E', letterSpacing: '-0.4px' }}>
                   Pay<span style={{ color: '#00BAF2' }}>tm</span>
                 </span>
               </div>
 
               {/* VISA Official Logo */}
               <div style={{
-                height: '28px',
-                padding: '0 10px',
-                borderRadius: '6px',
+                height: '21px',
+                padding: '0 6px',
+                borderRadius: '4px',
                 background: '#ffffff',
                 border: '1px solid #cbd5e1',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                 display: 'inline-flex',
                 alignItems: 'center'
               }}>
-                <svg width="44" height="15" viewBox="0 0 100 32" fill="none">
+                <svg width="32" height="11" viewBox="0 0 100 32" fill="none">
                   <path d="M38.8 2.5L25.6 30H17.2L10.5 6.6C10.1 5.1 9.7 4.5 8.4 3.8C6.4 2.7 3.1 1.7 0 1L0.4 0H14.1C15.9 0 17.4 1.2 17.8 3.2L21.2 21L29.6 0H38.8V2.5ZM72.6 20.8C72.7 12.9 61.4 12.4 61.6 8.9C61.7 7.8 62.8 6.6 65.3 6.3C66.5 6.1 69.9 6 73.5 7.6L74.8 1.6C73.1 1 70.8 0.4 67.9 0.4C59.6 0.4 53.7 4.8 53.6 11C53.4 15.6 57.6 18.2 60.8 19.8C64 21.4 65.1 22.4 65.1 23.8C65 25.9 62.4 26.8 60 26.8C55.8 26.8 53.4 25.6 51.5 24.7L50.1 31C52 31.8 55.4 32.5 59 32.5C67.8 32.5 73.6 28.2 73.6 21.4M94.6 30H102L95.5 0H88.7C87.2 0 86 0.9 85.4 2.2L73 30H81.4L83.1 25.4H93.3L94.6 30ZM85.5 19L89.6 7.8L92 19H85.5ZM51 0L44.3 30H36.3L43 0H51Z" fill="#1A1F71"/>
                   <path d="M14.1 0L8.4 3.8L10.5 6.6L17.8 3.2L14.1 0Z" fill="#F7B600"/>
                 </svg>
@@ -387,43 +387,42 @@ export default function Footer() {
 
               {/* Mastercard Official Logo */}
               <div style={{
-                height: '28px',
-                padding: '0 10px',
-                borderRadius: '6px',
+                height: '21px',
+                padding: '0 6px',
+                borderRadius: '4px',
                 background: '#ffffff',
                 border: '1px solid #cbd5e1',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px'
+                gap: '4px'
               }}>
-                <svg width="26" height="16" viewBox="0 0 38 24" fill="none">
+                <svg width="18" height="11" viewBox="0 0 38 24" fill="none">
                   <circle cx="12" cy="12" r="12" fill="#EB001B"/>
                   <circle cx="26" cy="12" r="12" fill="#F79E1B"/>
                   <path d="M19 3.5C21.6 5.7 23.3 8.7 23.3 12C23.3 15.3 21.6 18.3 19 20.5C16.4 18.3 14.7 15.3 14.7 12C14.7 8.7 16.4 5.7 19 3.5Z" fill="#FF5F00"/>
                 </svg>
-                <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#111827', fontFamily: 'system-ui, sans-serif', letterSpacing: '-0.3px' }}>mastercard</span>
+                <span style={{ fontSize: '0.6rem', fontWeight: '900', color: '#111827', letterSpacing: '-0.3px' }}>mastercard</span>
               </div>
 
               {/* Cash On Delivery Official Badge */}
               <div style={{
-                height: '28px',
-                padding: '0 10px',
-                borderRadius: '6px',
+                height: '21px',
+                padding: '0 6px',
+                borderRadius: '4px',
                 background: '#f0fdf4',
                 border: '1px solid #a7f3d0',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '4px',
                 color: '#16a34a'
               }}>
-                <svg width="18" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="13" height="10" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="6" width="20" height="12" rx="2"/>
                   <circle cx="12" cy="12" r="2"/>
-                  <path d="M6 12h.01M18 12h.01"/>
                 </svg>
-                <span style={{ fontSize: '0.7rem', fontWeight: '900', color: '#15803d', letterSpacing: '0.5px' }}>COD</span>
+                <span style={{ fontSize: '0.6rem', fontWeight: '900', color: '#15803d', letterSpacing: '0.3px' }}>COD</span>
               </div>
 
             </div>
