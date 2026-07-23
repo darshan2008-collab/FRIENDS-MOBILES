@@ -701,8 +701,7 @@ export default function App() {
         onOpenCustomCover={() => setIsCustomCoverOpen(true)}
         onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
         onOpenWishlist={() => {
-          const productsElement = document.getElementById('products');
-          if (productsElement) productsElement.scrollIntoView({ behavior: 'smooth' });
+          handleOpenShop('Wishlist');
         }}
         onOpenCart={handleOpenCartClick}
       />
