@@ -5,31 +5,17 @@ import { PHONE_BRANDS, PHONE_MODELS_REGISTRY, findModelSpecs } from '../data/pho
 export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, addToast }) {
   const fileInputRef = useRef(null);
   const [selectedBrand, setSelectedBrand] = useState('Apple');
-  const [phoneModel, setPhoneModel] = useState('iPhone 15 Pro');
+  const [isBrandListOpen, setIsBrandListOpen] = useState(false);
+  const [phoneModel, setPhoneModel] = useState('');
   const [caseType, setCaseType] = useState('Full 3D Hard Case (Sides + Back Print)'); // 'Full 3D Hard Case' | 'Soft Silicone TPU' | 'Glass Finish'
   const [caseFinish, setCaseFinish] = useState('Matte Finish'); // 'Matte Finish' | 'Glossy Finish'
   const [customText, setCustomText] = useState('');
   const [uploadedPhoto, setUploadedPhoto] = useState(null);
   const [uploadedFileInfo, setUploadedFileInfo] = useState(null);
 
-  // Photo Precision Alignment States
-  const [imgScale, setImgScale] = useState(1);
-  const [imgOffsetX, setImgOffsetX] = useState(0);
-  const [imgOffsetY, setImgOffsetY] = useState(0);
-  const [imgRotate, setImgRotate] = useState(0);
-
-  // Model Catalog & Search States
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isModelCatalogOpen, setIsModelCatalogOpen] = useState(false);
-
   // Sync default model when brand changes
   useEffect(() => {
-    const models = PHONE_MODELS_REGISTRY[selectedBrand] || [];
-    if (models.length > 0) {
-      setPhoneModel(models[0].model);
-    } else {
-      setPhoneModel('Galaxy S24 Ultra');
-    }
+    setPhoneModel('');
   }, [selectedBrand]);
 
   if (!isOpen) return null;
@@ -126,20 +112,20 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
       );
     }
     if (b.includes('samsung')) {
-      return <span style={{ fontWeight: '900', fontStyle: 'italic', color: '#034EA2', fontSize: '0.74rem', letterSpacing: '-0.5px' }}>SAMSUNG</span>;
+      return <div style={{ width: '22px', height: '22px', background: '#034EA2', borderRadius: '50%', color: '#ffffff', fontSize: '0.75rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>S</div>;
     }
     if (b.includes('realme')) {
-      return <span style={{ background: '#FFC800', color: '#000', padding: '1px 6px', borderRadius: '4px', fontWeight: '900', fontSize: '0.68rem' }}>realme</span>;
+      return <div style={{ width: '22px', height: '22px', background: '#FFC800', borderRadius: '5px', color: '#000000', fontSize: '0.8rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>r</div>;
     }
     if (b.includes('xiaomi') || b.includes('redmi') || b.includes('poco')) {
-      return <div style={{ background: '#FF6700', color: '#fff', padding: '1px 5px', borderRadius: '4px', fontWeight: '900', fontSize: '0.68rem' }}>mi</div>;
+      return <div style={{ width: '22px', height: '22px', background: '#FF6700', borderRadius: '5px', color: '#ffffff', fontSize: '0.68rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>mi</div>;
     }
     if (b.includes('motorola') || b.includes('moto')) {
-      return <div style={{ width: '18px', height: '18px', background: '#001430', borderRadius: '50%', color: '#fff', fontSize: '0.68rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>M</div>;
+      return <div style={{ width: '22px', height: '22px', background: '#001430', borderRadius: '50%', color: '#ffffff', fontSize: '0.75rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>M</div>;
     }
     if (b.includes('vivo')) {
       return (
-        <svg viewBox="0 0 80 32" width="36" height="14" fill="none">
+        <svg viewBox="0 0 80 32" width="28" height="14" fill="none">
           <path d="M6 8 L13 24 L20 8" stroke="#415FFF" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round" />
           <line x1="28" y1="12" x2="28" y2="24" stroke="#415FFF" strokeWidth="5.5" strokeLinecap="round" />
           <circle cx="28" cy="5" r="2.5" fill="#415FFF" />
@@ -150,7 +136,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
     }
     if (b.includes('oppo')) {
       return (
-        <svg viewBox="0 0 125 40" width="40" height="14" fill="none">
+        <svg viewBox="0 0 125 40" width="30" height="14" fill="none">
           <circle cx="20" cy="20" r="10" stroke="#008A5C" strokeWidth="5" />
           <circle cx="48" cy="20" r="10" stroke="#008A5C" strokeWidth="5" />
           <rect x="38" y="20" width="5" height="15" fill="#008A5C" />
@@ -161,23 +147,23 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
       );
     }
     if (b.includes('oneplus')) {
-      return <div style={{ background: '#F5002C', color: '#fff', padding: '1px 5px', borderRadius: '4px', fontWeight: '900', fontSize: '0.68rem' }}>1+</div>;
+      return <div style={{ width: '22px', height: '22px', background: '#F5002C', borderRadius: '5px', color: '#ffffff', fontSize: '0.68rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>1+</div>;
     }
     if (b.includes('infinix')) {
-      return <span style={{ fontWeight: '900', fontSize: '0.72rem', color: '#00c3ff', letterSpacing: '0.3px' }}>Infinix</span>;
+      return <div style={{ width: '22px', height: '22px', background: '#00c3ff', borderRadius: '5px', color: '#ffffff', fontSize: '0.85rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>∞</div>;
     }
     if (b.includes('tecno')) {
-      return <span style={{ fontWeight: '900', fontSize: '0.74rem', color: '#0052D9', letterSpacing: '-0.2px' }}>TECNO</span>;
+      return <div style={{ width: '22px', height: '22px', background: '#0052D9', borderRadius: '5px', color: '#ffffff', fontSize: '0.75rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>T</div>;
     }
     if (b.includes('lava')) {
-      return <span style={{ background: '#E11D48', color: '#fff', padding: '1px 6px', borderRadius: '4px', fontWeight: '900', fontSize: '0.68rem' }}>LAVA</span>;
+      return <div style={{ width: '22px', height: '22px', background: '#E11D48', borderRadius: '5px', color: '#ffffff', fontSize: '0.75rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>L</div>;
     }
     if (b.includes('iqoo')) {
-      return <span style={{ fontWeight: '900', fontSize: '0.76rem', color: '#FFDD00' }}>iQOO</span>;
+      return <div style={{ width: '22px', height: '22px', background: '#1e293b', border: '1.5px solid #FFDD00', borderRadius: '5px', color: '#FFDD00', fontSize: '0.75rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Q</div>;
     }
     if (b.includes('pixel') || b.includes('google')) {
       return (
-        <svg viewBox="0 0 24 24" width="16" height="16">
+        <svg viewBox="0 0 24 24" width="18" height="18">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22-.83-.63z" />
@@ -186,12 +172,12 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
       );
     }
     if (b.includes('nokia') || b.includes('hmd')) {
-      return <span style={{ fontWeight: '900', fontSize: '0.72rem', color: '#124191', letterSpacing: '0.5px' }}>NOKIA</span>;
+      return <div style={{ width: '22px', height: '22px', background: '#124191', borderRadius: '5px', color: '#ffffff', fontSize: '0.75rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>N</div>;
     }
     if (b.includes('nothing')) {
-      return <span style={{ fontFamily: 'monospace', fontWeight: '900', fontSize: '0.68rem', letterSpacing: '0.5px' }}>NOTHING</span>;
+      return <div style={{ width: '22px', height: '22px', background: '#090d16', border: '1px solid #ffffff', borderRadius: '50%', color: '#ffffff', fontSize: '0.75rem', fontWeight: '900', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>•</div>;
     }
-    return <Smartphone size={16} color="var(--text-muted)" />;
+    return <Smartphone size={18} color="var(--text-muted)" />;
   };
 
   const renderCameraCutout = () => {
@@ -958,325 +944,125 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
   };
 
   return (
-    <div className="full-page-customizer-portal" style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      width: '100vw',
-      height: '100vh',
-      zIndex: 10000,
-      background: 'var(--bg-page)',
-      color: 'var(--text-primary)',
-      overflowY: 'auto',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      {/* Top Navigation Bar */}
-      <header className="modal-header-responsive" style={{
-        background: 'var(--bg-card)',
-        borderBottom: '1px solid var(--border-color)',
-        padding: '12px 16px',
+    <div 
+      className="cart-drawer-overlay" 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 10008,
+        background: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(8px)',
+        color: 'var(--text-primary)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        gap: '12px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
-          <div className="modal-header-logo-badge" style={{ 
-            background: '#FF5500', 
-            padding: '8px', 
-            borderRadius: '10px', 
-            display: 'flex', 
-            flexShrink: 0,
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <Smartphone className="modal-header-icon" size={20} color="#ffffff" />
-          </div>
-          <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <h2 className="modal-header-title" style={{ 
-              margin: 0, 
-              fontSize: '1rem', 
-              fontWeight: '800', 
-              lineHeight: 1.15,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}>
-              CUSTOM MOBILE BACK COVER STUDIO
-            </h2>
-            <span className="modal-header-subtitle" style={{ 
-              fontSize: '0.74rem', 
-              color: 'var(--text-muted)',
-              lineHeight: 1.2,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}>
-              Design your personalized phone case
-            </span>
-          </div>
-        </div>
-
-        <button 
-          onClick={onClose}
-          className="modal-header-close-btn"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            padding: '8px 14px',
-            borderRadius: '8px',
-            border: 'none',
-            background: '#FF5500',
-            color: '#ffffff',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            fontSize: '0.82rem',
-            flexShrink: 0,
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <X size={18} /> <span className="close-btn-label">Close</span>
-        </button>
-      </header>
-
-      {/* Main Studio Body */}
-      <div className="customizer-studio-grid" style={{
-        flex: 1,
-        padding: '20px 14px',
-        maxWidth: '1200px',
-        width: '100%',
-        margin: '0 auto',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '24px',
-        alignItems: 'start',
-        boxSizing: 'border-box'
-      }}>
-        
-        {/* Left Side: Interactive 3D Phone Case Live Preview */}
-        <div className="studio-preview-card" style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '20px',
-          padding: '30px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
+        justifyContent: 'center',
+        padding: '20px 14px'
+      }}
+      onClick={onClose}
+    >
+      <div 
+        className="customizer-modal-dialog"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: '680px',
           width: '100%',
-          boxSizing: 'border-box'
+          maxHeight: '90vh',
+          background: 'var(--bg-card)',
+          borderRadius: '20px',
+          border: '1px solid var(--border-color)',
+          boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        {/* Top Navigation Bar */}
+        <header className="modal-header-responsive" style={{
+          background: 'var(--bg-card)',
+          borderBottom: '1px solid var(--border-color)',
+          padding: '16px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+          gap: '12px'
         }}>
-          {/* Phone Mockup Canvas - Click to Open Photo Frame Picker */}
-          <div 
-            className="phone-mockup-canvas" 
-            onClick={() => fileInputRef.current?.click()}
-            title="Click to upload or change photo"
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+            <div className="modal-header-logo-badge" style={{ 
+              background: '#FF5500', 
+              padding: '8px', 
+              borderRadius: '10px', 
+              display: 'flex', 
+              flexShrink: 0,
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Smartphone className="modal-header-icon" size={20} color="#ffffff" />
+            </div>
+            <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <h2 className="modal-header-title" style={{ 
+                margin: 0, 
+                fontSize: '1rem', 
+                fontWeight: '800', 
+                lineHeight: 1.15,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
+                CUSTOM MOBILE BACK COVER STUDIO
+              </h2>
+              <span className="modal-header-subtitle" style={{ 
+                fontSize: '0.74rem', 
+                color: 'var(--text-muted)',
+                lineHeight: 1.2,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }}>
+                Design your personalized phone case
+              </span>
+            </div>
+          </div>
+
+          <button 
+            onClick={onClose}
+            className="modal-header-close-btn"
             style={{
-              position: 'relative',
-              width: canvasWidth,
-              minWidth: canvasWidth,
-              maxWidth: canvasWidth,
-              height: canvasHeight,
-              minHeight: canvasHeight,
-              maxHeight: canvasHeight,
-              background: '#1A1D24',
-              borderRadius: canvasBorderRadius,
-              padding: '12px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.3), 0 0 20px rgba(255,85,0,0.2)',
-              border: '4px solid #2D333F',
-              overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              flexShrink: 0,
+              gap: '6px',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              border: 'none',
+              background: '#FF5500',
+              color: '#ffffff',
+              fontWeight: 'bold',
               cursor: 'pointer',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              fontSize: '0.82rem',
+              flexShrink: 0,
+              transition: 'all 0.2s ease'
             }}
           >
-            {/* Camera Bump Island */}
-            {renderCameraCutout()}
+            <X size={18} /> <span className="close-btn-label">Close</span>
+          </button>
+        </header>
 
-            {/* Uploaded User Photo Render */}
-            {uploadedPhoto ? (
-              <img 
-                src={uploadedPhoto} 
-                alt="Custom Cover Design" 
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  borderRadius: innerImageBorderRadius,
-                  transform: `translate(${imgOffsetX}px, ${imgOffsetY}px) scale(${imgScale}) rotate(${imgRotate}deg)`,
-                  transition: 'transform 0.1s ease',
-                  pointerEvents: 'none'
-                }} 
-              />
-            ) : (
-              <div style={{
-                textAlign: 'center',
-                padding: '20px',
-                color: 'var(--text-muted)'
-              }}>
-                <Upload size={40} color="#FF5500" style={{ marginBottom: '12px' }} />
-                <p style={{ fontSize: '0.85rem', margin: 0, fontWeight: 'bold' }}>Upload Your Photo</p>
-                <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>JPEG, PNG, WEBP supported</span>
-              </div>
-            )}
+        {/* Main Studio Body */}
+        <div style={{
+          padding: '24px 20px',
+          width: '100%',
+          boxSizing: 'border-box'
+        }}>
 
-            {/* Custom Overlay Text */}
-            {customText && (
-              <div style={{
-                position: 'absolute',
-                bottom: '30px',
-                width: '80%',
-                textAlign: 'center',
-                background: 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(6px)',
-                color: '#ffffff',
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontWeight: 'bold',
-                fontSize: '0.9rem',
-                zIndex: 5
-              }}>
-                {customText}
-              </div>
-            )}
-          </div>
-
-          {/* Precision Photo Alignment Control Panel */}
-          {uploadedPhoto && (
-            <div style={{
-              width: '100%',
-              maxWidth: '280px',
-              marginTop: '16px',
-              padding: '12px',
-              background: 'var(--bg-input)',
-              borderRadius: '14px',
-              border: '1.5px solid var(--border-color)',
-              boxSizing: 'border-box'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px', color: '#FF5500' }}>
-                  <Sliders size={14} /> PHOTO ALIGNMENT &amp; ZOOM
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setImgScale(1);
-                    setImgOffsetX(0);
-                    setImgOffsetY(0);
-                    setImgRotate(0);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.72rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '3px'
-                  }}
-                >
-                  <RefreshCw size={12} /> Reset Fit
-                </button>
-              </div>
-
-              {/* Zoom Slider */}
-              <div style={{ marginBottom: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: 'var(--text-secondary)', marginBottom: '4px', fontWeight: '600' }}>
-                  <span>Zoom Scale</span>
-                  <span>{Math.round(imgScale * 100)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="2"
-                  step="0.05"
-                  value={imgScale}
-                  onChange={(e) => setImgScale(parseFloat(e.target.value))}
-                  style={{ width: '100%', accentColor: '#FF5500', cursor: 'pointer' }}
-                />
-              </div>
-
-              {/* Position Nudge & Rotate Controls */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                {/* Direction Pad */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', width: '90px' }}>
-                  <div></div>
-                  <button
-                    type="button"
-                    onClick={() => setImgOffsetY(prev => prev - 6)}
-                    style={{ padding: '4px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 'bold' }}
-                  >▲</button>
-                  <div></div>
-                  <button
-                    type="button"
-                    onClick={() => setImgOffsetX(prev => prev - 6)}
-                    style={{ padding: '4px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 'bold' }}
-                  >◀</button>
-                  <button
-                    type="button"
-                    onClick={() => { setImgOffsetX(0); setImgOffsetY(0); }}
-                    style={{ padding: '4px', borderRadius: '4px', border: '1px solid #FF5500', background: 'var(--orange-light)', color: '#FF5500', cursor: 'pointer', fontSize: '0.65rem', fontWeight: 'bold' }}
-                  >🎯</button>
-                  <button
-                    type="button"
-                    onClick={() => setImgOffsetX(prev => prev + 6)}
-                    style={{ padding: '4px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 'bold' }}
-                  >▶</button>
-                  <div></div>
-                  <button
-                    type="button"
-                    onClick={() => setImgOffsetY(prev => prev + 6)}
-                    style={{ padding: '4px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 'bold' }}
-                  >▼</button>
-                  <div></div>
-                </div>
-
-                {/* Rotate Button */}
-                <button
-                  type="button"
-                  onClick={() => setImgRotate(prev => (prev + 90) % 360)}
-                  style={{
-                    flex: 1,
-                    padding: '8px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-card)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.78rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <RotateCw size={14} color="#FF5500" /> Rotate ({imgRotate}°)
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div style={{ marginTop: '20px', textAlign: 'center' }}>
-            <strong style={{ display: 'block', fontSize: '1.05rem' }}>{selectedBrand} {phoneModel || 'Phone'}</strong>
-            <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{caseType} • {caseFinish}</span>
-          </div>
-        </div>
-
-        {/* Right Side: Customization Configuration Controls */}
+        {/* Customization Configuration Controls */}
         <div style={{
           background: 'var(--bg-card)',
           border: '1px solid var(--border-color)',
@@ -1321,206 +1107,123 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
                 </div>
               )}
             </div>
-
-            {/* Vertical Brand Selection Scroll Box */}
+               {/* Collapsible Smartphone Company Selector */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Smartphone size={15} /> Select Smartphone Company
-                </label>
-                <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '600' }}>15 Brands</span>
+              <div 
+                onClick={() => setIsBrandListOpen(!isBrandListOpen)}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'space-between', 
+                  padding: '12px 14px',
+                  background: 'var(--bg-input)',
+                  border: '1.5px solid var(--border-color)',
+                  borderRadius: isBrandListOpen ? '14px 14px 0 0' : '14px',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', minWidth: 0 }}>
+                  <Smartphone size={16} color="#FF5500" style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: '0.88rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Company:</span>
+                  <span style={{ fontSize: '0.84rem', fontWeight: '800', color: '#FF5500', background: 'var(--orange-light)', padding: '3px 10px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {renderBrandLogo(selectedBrand)}
+                    </div>
+                    {selectedBrand}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FF5500', fontWeight: 'bold', fontSize: '0.78rem', flexShrink: 0 }}>
+                  <span>{isBrandListOpen ? 'Close ▴' : 'Change Company ▾'}</span>
+                </div>
               </div>
 
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '6px',
-                maxHeight: '190px',
-                overflowY: 'auto',
-                padding: '8px',
-                background: 'var(--bg-input)',
-                borderRadius: '14px',
-                border: '1.5px solid var(--border-color)',
-                boxSizing: 'border-box'
-              }}>
-                {PHONE_BRANDS.map(bObj => {
-                  const isSelected = selectedBrand === bObj.name || selectedBrand === bObj.id;
-                  return (
-                    <button
-                      key={bObj.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedBrand(bObj.name);
-                        setSearchTerm('');
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '10px 14px',
-                        borderRadius: '10px',
-                        border: isSelected ? '2px solid #FF5500' : '1px solid var(--border-color)',
-                        background: isSelected ? 'var(--orange-light)' : 'var(--bg-card)',
-                        color: isSelected ? '#FF5500' : 'var(--text-primary)',
-                        fontWeight: isSelected ? 'bold' : '600',
-                        fontSize: '0.88rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        boxShadow: isSelected ? '0 4px 12px rgba(255,85,0,0.2)' : '0 1px 3px rgba(0,0,0,0.05)',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {renderBrandLogo(bObj.name)}
+              {isBrandListOpen && (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px',
+                  maxHeight: '220px',
+                  overflowY: 'auto',
+                  padding: '10px',
+                  background: 'var(--bg-input)',
+                  borderRadius: '0 0 14px 14px',
+                  border: '1.5px solid var(--border-color)',
+                  borderTop: 'none',
+                  boxSizing: 'border-box'
+                }}>
+                  {PHONE_BRANDS.map(bObj => {
+                    const isSelected = selectedBrand === bObj.name || selectedBrand === bObj.id;
+                    return (
+                      <button
+                        key={bObj.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedBrand(bObj.name);
+                          setIsBrandListOpen(false);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '10px 14px',
+                          borderRadius: '10px',
+                          border: isSelected ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                          background: isSelected ? 'var(--orange-light)' : 'var(--bg-card)',
+                          color: isSelected ? '#FF5500' : 'var(--text-primary)',
+                          fontWeight: isSelected ? 'bold' : '600',
+                          fontSize: '0.88rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          boxShadow: isSelected ? '0 4px 12px rgba(255,85,0,0.2)' : '0 1px 3px rgba(0,0,0,0.05)',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {renderBrandLogo(bObj.name)}
+                          </div>
+                          <span>{bObj.name}</span>
                         </div>
-                        <span>{bObj.name}</span>
-                      </div>
-                      {isSelected && <CheckCircle2 size={16} color="#FF5500" />}
-                    </button>
-                  );
-                })}
-              </div>
+                        {isSelected && <CheckCircle2 size={16} color="#FF5500" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            {/* Smartphone Model Selection & Manual Type Combo */}
+            {/* Manual Smartphone Model Input */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <div style={{ marginBottom: '8px' }}>
                 <label style={{ fontSize: '0.88rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Smartphone size={15} /> Select or Type Your Phone Model
+                  <Smartphone size={15} /> Enter Your Phone Model
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setIsModelCatalogOpen(!isModelCatalogOpen)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#FF5500',
-                    fontWeight: 'bold',
-                    fontSize: '0.78rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  {isModelCatalogOpen ? 'Hide Catalog ✕' : `Browse ${selectedBrand} Catalog (${brandModels.length} Models) ▾`}
-                </button>
               </div>
 
               {/* Manual Text Input Field */}
-              <div style={{ position: 'relative', marginBottom: '8px' }}>
+              <div style={{ position: 'relative' }}>
                 <Smartphone size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#FF5500' }} />
                 <input
                   type="text"
                   required
-                  placeholder={`Type or select your ${selectedBrand} model (e.g. iPhone 16 Pro, S25 Ultra, Vivo V40, Y200, Reno 12, C53...)`}
+                  placeholder={`Type your ${selectedBrand} model (e.g. iPhone 15 Pro, S24 Ultra, Vivo V30...)`}
                   value={phoneModel}
                   onChange={(e) => setPhoneModel(e.target.value)}
                   style={{
                     width: '100%',
                     padding: '14px 14px 14px 42px',
                     borderRadius: '12px',
-                    border: '2px solid #FF5500',
-                    background: 'var(--orange-light)',
+                    border: '1.5px solid var(--border-color)',
+                    background: 'var(--bg-input)',
                     color: 'var(--text-primary)',
                     fontSize: '0.95rem',
                     fontWeight: 'bold',
-                    boxSizing: 'border-box',
-                    boxShadow: '0 4px 12px rgba(255,85,0,0.15)'
+                    boxSizing: 'border-box'
                   }}
                 />
               </div>
-
-              {/* Quick Series Catalog Picker */}
-              {isModelCatalogOpen && (
-                <div style={{
-                  border: '1.5px solid var(--border-color)',
-                  borderRadius: '14px',
-                  background: 'var(--bg-input)',
-                  maxHeight: '260px',
-                  overflowY: 'auto',
-                  boxSizing: 'border-box',
-                  padding: '8px',
-                  marginBottom: '10px',
-                  animation: 'fadeIn 0.2s ease'
-                }}>
-                  {/* Live Search Filter */}
-                  <div style={{ position: 'relative', marginBottom: '8px' }}>
-                    <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                    <input
-                      type="text"
-                      placeholder={`Filter ${selectedBrand} models...`}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px 10px 8px 30px',
-                        borderRadius: '8px',
-                        border: '1px solid var(--border-color)',
-                        background: 'var(--bg-card)',
-                        color: 'var(--text-primary)',
-                        fontSize: '0.82rem',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                  </div>
-
-                  {/* Models grouped by Official Brand Series (e.g. S Series, A Series, Reno Series, V Series, Y Series) */}
-                  {Object.keys(seriesGroups).map(sKey => (
-                    <div key={sKey} style={{ marginBottom: '10px' }}>
-                      <div style={{
-                        fontSize: '0.72rem',
-                        fontWeight: '800',
-                        color: '#FF5500',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        padding: '4px 8px',
-                        background: 'var(--orange-light)',
-                        borderRadius: '6px',
-                        marginBottom: '4px'
-                      }}>
-                        {sKey}
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '6px' }}>
-                        {seriesGroups[sKey].map(mObj => {
-                          const isSelected = phoneModel.toLowerCase() === mObj.model.toLowerCase();
-                          return (
-                            <button
-                              key={mObj.model}
-                              type="button"
-                              onClick={() => {
-                                setPhoneModel(mObj.model);
-                                setIsModelCatalogOpen(false);
-                              }}
-                              style={{
-                                padding: '8px 10px',
-                                borderRadius: '8px',
-                                border: isSelected ? '2px solid #FF5500' : '1px solid var(--border-color)',
-                                background: isSelected ? 'var(--orange-light)' : 'var(--bg-card)',
-                                color: isSelected ? '#FF5500' : 'var(--text-primary)',
-                                fontWeight: isSelected ? 'bold' : '500',
-                                fontSize: '0.82rem',
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: '6px',
-                                transition: 'all 0.15s ease'
-                              }}
-                            >
-                              <span style={{ lineHeight: '1.25', wordBreak: 'break-word' }}>{mObj.model}</span>
-                              {isSelected && <CheckCircle2 size={14} color="#FF5500" style={{ flexShrink: 0 }} />}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* Case Type: Full 3D or Soft Back */}
@@ -1627,8 +1330,8 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
 
           </form>
         </div>
-
       </div>
     </div>
-  );
+  </div>
+);
 }
