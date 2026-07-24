@@ -9,6 +9,7 @@ const Complaint = require('../models/Complaint');
 const Banner = require('../models/Banner');
 const Setting = require('../models/Setting');
 const Subscriber = require('../models/Subscriber');
+const GoogleDriveService = require('./googleDriveService');
 
 const backupsDir = path.join(__dirname, '../data/backups');
 
@@ -113,6 +114,9 @@ const BackupService = {
       } catch (_) {}
 
       console.log(`[Backup Success] Created snapshot: ${filename} (${users.length} users, ${orders.length} orders, ${products.length} prods)`);
+
+      // Trigger parallel Google Drive Backup upload if configured
+      GoogleDriveService.uploadBackupSnapshot(filePath, filename).catch(() => {});
 
       return {
         success: true,
