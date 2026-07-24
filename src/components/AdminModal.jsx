@@ -1034,8 +1034,9 @@ export default function AdminModal({
                 setActiveTab('backups');
                 setIsAdminSidebarOpen(false);
               }}
+              style={{ color: '#3b82f6', fontWeight: '800' }}
             >
-              <Cloud size={16} color="#3b82f6" /> 5000 GB Cloud Storage ({backupStatus.totalBackupsCount || 0})
+              <Cloud size={16} color="#3b82f6" /> ☁️ Google Drive Backups ({backupStatus.totalBackupsCount || 0})
             </button>
           </aside>
 
@@ -2724,10 +2725,10 @@ export default function AdminModal({
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
                     <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                      <Cloud size={24} color="#3b82f6" /> 15 GB Google Drive &amp; GitHub Auto-Sync Database Backups
+                      <Cloud size={24} color="#3b82f6" /> 15 GB Google Drive Automated Database Backups
                     </h3>
                     <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                      Automated hourly PostgreSQL database backups pushed to your Google Drive folder and private GitHub repository.
+                      Automated hourly PostgreSQL database snapshots uploaded directly to your personal Google Drive folder.
                     </p>
                   </div>
 
@@ -2736,14 +2737,14 @@ export default function AdminModal({
                     disabled={isBackingUp}
                     style={{
                       padding: '10px 18px', borderRadius: '10px', border: 'none',
-                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
                       color: '#ffffff', fontWeight: '800', fontSize: '0.82rem',
                       cursor: isBackingUp ? 'not-allowed' : 'pointer',
                       display: 'flex', alignItems: 'center', gap: '8px',
-                      boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+                      boxShadow: '0 4px 14px rgba(59, 130, 246, 0.35)'
                     }}
                   >
-                    <Cloud size={16} /> {isBackingUp ? 'Syncing to Drive & GitHub...' : '☁️ Push Backup Now'}
+                    <Cloud size={16} /> {isBackingUp ? 'Uploading to Google Drive...' : '📁 Backup to Google Drive Now'}
                   </button>
                 </div>
 
