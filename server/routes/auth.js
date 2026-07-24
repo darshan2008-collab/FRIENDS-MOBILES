@@ -8,9 +8,9 @@ const User = require('../models/User');
 const usersFilePath = path.join(__dirname, '../data/users.json');
 
 // Rate limiters for auth endpoints (strict limits to prevent brute force)
-const loginLimiter = rateLimiter({ windowMs: 10 * 60 * 1000, max: 10, message: 'Too many login attempts. Please try again after 10 minutes.' });
-const signupLimiter = rateLimiter({ windowMs: 60 * 60 * 1000, max: 5, message: 'Too many signup attempts from this IP. Try again later.' });
-const resetLimiter = rateLimiter({ windowMs: 15 * 60 * 1000, max: 15, message: 'Too many password reset attempts. Please wait before trying again.' });
+const loginLimiter = rateLimiter({ windowMs: 10 * 60 * 1000, max: 30, message: 'Too many login attempts. Please try again after 10 minutes.' });
+const signupLimiter = rateLimiter({ windowMs: 60 * 60 * 1000, max: 30, message: 'Too many signup attempts from this IP. Try again later.' });
+const resetLimiter = rateLimiter({ windowMs: 15 * 60 * 1000, max: 30, message: 'Too many password reset attempts. Please wait before trying again.' });
 
 async function getUsersAsync() {
   const fileUsers = readData(usersFilePath, []);
@@ -114,13 +114,14 @@ router.post('/signup', signupLimiter, async (req, res) => {
     const cleanAddress = address ? sanitizeInput(address) : 'Tamil Nadu';
 
     const users = await getUsersAsync();
-    const existing = users.find(u =>
-      (u.email && u.email.toLowerCase().trim() === cleanEmail) ||
-      (cleanPhone && cleanPhone.length >= 10 && normalizePhone(u.phone) === cleanPhone)
-    );
+    const existingByEmail = users.find(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
+    if (existingByEmail) {
+      return res.status(409).json({ success: false, message: 'An account with this email address already exists. Please log in.' });
+    }
 
-    if (existing) {
-      return res.status(409).json({ success: false, message: 'An account with this email address already exists' });
+    const existingByPhone = users.find(u => cleanPhone && cleanPhone.length >= 10 && normalizePhone(u.phone) === cleanPhone);
+    if (existingByPhone) {
+      return res.status(409).json({ success: false, message: 'An account with this phone number already exists. Please log in or use another number.' });
     }
 
     const newId = users.length > 0 ? Math.max(...users.map(u => u.id || 0)) + 1 : 1;

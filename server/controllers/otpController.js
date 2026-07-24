@@ -40,12 +40,7 @@ exports.sendOtp = async (req, res) => {
     }
 
     // 2. Find user if exists (to retrieve name for email header)
-    const existingUser = (await User.findOne({
-      $or: [
-        { email: cleanEmail },
-        { email: { $regex: new RegExp(`^${cleanEmail}$`, 'i') } }
-      ]
-    })) || {};
+    const existingUser = (await User.findOne({ email: cleanEmail })) || {};
 
     // 3. Generate secure random 6-digit OTP
     const rawOtp = crypto.randomInt(100000, 1000000).toString();

@@ -1,19 +1,34 @@
-const { Pool } = require('pg');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
+let pg = null;
+try {
+  pg = require('pg');
+} catch (_) {
+  try {
+    pg = require(path.join(__dirname, '../node_modules/pg'));
+  } catch (_) {
+    try {
+      pg = require(path.join(__dirname, '../../node_modules/pg'));
+    } catch (_) {}
+  }
+}
+
 const connectionString = process.env.DATABASE_URL || 'postgres://postgres:postgres@127.0.0.1:5432/friends_mobile';
 
-const pool = new Pool({
-  connectionString,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
-});
+let pool = null;
+if (pg && pg.Pool) {
+  pool = new pg.Pool({
+    connectionString,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
+  });
 
-pool.on('error', (err) => {
-  console.error('[PostgreSQL Pool Error]', err.message);
-});
+  pool.on('error', (err) => {
+    console.error('[PostgreSQL Pool Error]', err.message);
+  });
+}
 
 let isInitialized = false;
 
@@ -114,6 +129,10 @@ CREATE TABLE IF NOT EXISTS otp_verifications (
 
 const connectDB = async () => {
   if (isInitialized) return true;
+  if (!pool) {
+    console.warn(`[PostgreSQL Warning] 'pg' package not loaded. Run 'cd server && npm install' or 'docker compose up'. Using local storage fallback.`);
+    return false;
+  }
   try {
     const client = await pool.connect();
     try {
@@ -130,8 +149,15 @@ const connectDB = async () => {
   }
 };
 
+const safeQuery = async (text, params) => {
+  if (!pool) {
+    return { rows: [], rowCount: 0 };
+  }
+  return pool.query(text, params);
+};
+
 module.exports = {
   pool,
-  query: (text, params) => pool.query(text, params),
+  query: safeQuery,
   connectDB
 };

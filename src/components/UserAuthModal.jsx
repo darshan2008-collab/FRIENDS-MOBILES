@@ -49,8 +49,8 @@ const safeFetchApi = async (endpoint, options = {}) => {
         if (res.ok) {
           return { ok: true, status: res.status, data: { success: true } };
         }
-        const friendlyMsg = res.status === 404
-          ? "Backend API server is offline or unreachable. Please start backend server."
+        const friendlyMsg = (res.status === 404 || res.status === 500 || res.status === 502 || res.status === 503)
+          ? "Backend API server (port 5000) is offline. Please start backend using 'docker compose up' or 'node server/server.js'."
           : `Server HTTP ${res.status} error`;
         return { ok: false, status: res.status, data: { success: false, message: friendlyMsg } };
       }

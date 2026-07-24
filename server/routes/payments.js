@@ -62,7 +62,7 @@ router.post('/razorpay-order', async (req, res) => {
 });
 
 // POST /api/payments/verify
-router.post('/verify', (req, res) => {
+router.post('/verify', async (req, res) => {
   try {
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature, orderId } = req.body;
 
