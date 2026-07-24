@@ -313,9 +313,12 @@ export default function App() {
     }, 3000);
   };
 
+  const [pendingCartItem, setPendingCartItem] = useState(null);
+
   const handleAddToCart = (product) => {
     if (!currentUser) {
-      setAuthRedirectMessage('Login Required: Please sign in or create an account to add items and view your cart.');
+      setPendingCartItem(product);
+      setAuthRedirectMessage('Login Required: Please sign in or create an account to add items to your cart.');
       setOpenCartAfterLogin(true);
       setIsAuthOpen(true);
       return;
@@ -377,8 +380,19 @@ export default function App() {
       localStorage.setItem('fm_user', JSON.stringify(user));
     } catch {}
     setIsAuthOpen(false);
-    
-    if (openCartAfterLogin) {
+
+    if (pendingCartItem) {
+      setCart(prev => {
+        const existing = prev.find(p => p.id === pendingCartItem.id);
+        if (existing) {
+          return prev.map(p => p.id === pendingCartItem.id ? { ...p, quantity: p.quantity + 1 } : p);
+        }
+        return [...prev, { ...pendingCartItem, quantity: 1 }];
+      });
+      addToast(`Added "${pendingCartItem.title.slice(0, 18)}..." to Cart!`, '🛍️');
+      setPendingCartItem(null);
+      setIsCartOpen(true);
+    } else if (openCartAfterLogin) {
       setIsCartOpen(true);
       setOpenCartAfterLogin(false);
     }
