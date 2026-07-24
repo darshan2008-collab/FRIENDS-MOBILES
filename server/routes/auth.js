@@ -172,79 +172,68 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
-// POST /api/auth/send-otp (Send 6-Digit OTP via Nodemailer Gmail)
+// POST /api/auth/send-otp (Send Unique 6-Digit OTP to Registered Email ID)
 router.post('/send-otp', resetLimiter, async (req, res) => {
   try {
-    const { email, phone } = req.body;
-    const targetEmail = email ? email.toLowerCase().trim() : null;
-    const cleanPhone = phone ? normalizePhone(phone) : null;
+    const { email } = req.body;
+    const cleanEmail = email ? email.toLowerCase().trim() : '';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!targetEmail && !cleanPhone) {
-      return res.status(400).json({ success: false, message: 'Please enter your registered email or mobile number' });
+    if (!cleanEmail || !emailRegex.test(cleanEmail)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please enter a valid Gmail / Email address (e.g. user@gmail.com)' 
+      });
     }
 
     const users = await getUsersAsync();
-    const user = users.find(u =>
-      (targetEmail && u.email && u.email.toLowerCase().trim() === targetEmail) ||
-      (cleanPhone && normalizePhone(u.phone) === cleanPhone)
-    );
+    const user = users.find(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
 
-    const recipientEmail = targetEmail || (user && user.email ? user.email : null);
-    const userPhone = cleanPhone || (user && user.phone ? normalizePhone(user.phone) : null);
-    const customerName = user ? user.name : 'Valued Customer';
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: `No account registered with ${cleanEmail}. Please check your email or Sign Up for a new account.` 
+      });
+    }
 
-    // Generate secure 6-digit OTP (valid for 2 minutes / 120s)
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 2 * 60 * 1000; // 2 minutes
+    const recipientEmail = user.email.toLowerCase().trim();
+    const customerName = user.name || 'Valued Customer';
+
+    // Generate cryptographically unique 6-digit OTP code (valid for 2 minutes)
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
+    const expiresAt = Date.now() + 2 * 60 * 1000;
 
     const otpData = {
       otpCode,
       expiresAt,
       attempts: 0,
       email: recipientEmail,
-      phone: userPhone,
-      userId: user ? user.id : null
+      userId: user.id
     };
 
-    if (recipientEmail) {
-      otpCache.set(recipientEmail.toLowerCase().trim(), otpData);
-    }
-    if (userPhone) {
-      otpCache.set(userPhone, otpData);
-    }
+    otpCache.set(recipientEmail, otpData);
+    await saveUserAsync({ ...user, otpCode, otpExpires: new Date(expiresAt).toISOString() });
 
-    if (user && user.id) {
-      await saveUserAsync({ ...user, otpCode, otpExpires: new Date(expiresAt).toISOString() });
-    }
+    // Send Unique OTP Email via Gmail Nodemailer
+    const emailResult = await sendOTPEmail(recipientEmail, otpCode, customerName);
 
-    // Send Gmail OTP if email is available
-    let emailSent = false;
-    let emailError = null;
-
-    if (recipientEmail) {
-      const emailResult = await sendOTPEmail(recipientEmail, otpCode, customerName);
-      if (emailResult && emailResult.success) {
-        emailSent = true;
-      } else {
-        emailError = emailResult ? emailResult.error : 'Unknown email dispatch error';
-        console.error(`[Auth Router Error] OTP Email dispatch failed to ${recipientEmail}:`, emailError);
-      }
+    if (!emailResult || !emailResult.success) {
+      console.error(`[Auth Router Error] OTP Email dispatch failed to ${recipientEmail}:`, emailResult ? emailResult.error : 'Unknown error');
+      return res.status(500).json({
+        success: false,
+        message: `Failed to send OTP code to ${recipientEmail}. Please check server email credentials or try again.`
+      });
     }
 
     res.json({
       success: true,
-      message: recipientEmail 
-        ? `6-digit OTP code sent to ${recipientEmail}! Valid for 2 minutes.`
-        : `6-digit OTP generated for mobile ${userPhone}.`,
+      message: `Unique 6-digit OTP code sent directly to ${recipientEmail}. Please check your Gmail inbox (valid for 2 mins).`,
       email: recipientEmail,
-      phone: userPhone,
-      name: customerName,
-      emailSent,
-      emailError: emailError || undefined,
-      demoOtp: process.env.NODE_ENV === 'production' ? undefined : otpCode
+      name: customerName
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to send OTP code', error: err.message });
+    console.error("[Send OTP Route Error]", err);
+    res.status(500).json({ success: false, message: 'Failed to generate and send OTP code', error: err.message });
   }
 });
 
