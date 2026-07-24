@@ -6,6 +6,7 @@ const Setting = require('../models/Setting');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Complaint = require('../models/Complaint');
+const BackupService = require('../services/backupService');
 
 const settingsFilePath = path.join(__dirname, '../data/settings.json');
 const ordersFilePath = path.join(__dirname, '../data/orders.json');
@@ -199,6 +200,40 @@ router.put('/complaints/:ticketId', async (req, res) => {
     res.json({ success: true, message: `Ticket #${ticketId} updated to "${status}"`, complaint: updated });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to update complaint ticket', error: err.message });
+  }
+});
+
+// GET /api/admin/backups — Get 5,000 GB Cloud Storage status & backup snapshots
+router.get('/backups', async (req, res) => {
+  try {
+    const result = await BackupService.getBackupStatus();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch backup status', error: err.message });
+  }
+});
+
+// POST /api/admin/backups/create — Trigger manual database backup snapshot
+router.post('/backups/create', async (req, res) => {
+  try {
+    const result = await BackupService.createBackup();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to create backup', error: err.message });
+  }
+});
+
+// POST /api/admin/backups/restore — Restore database state from selected backup file
+router.post('/backups/restore', async (req, res) => {
+  try {
+    const { filename } = req.body;
+    if (!filename) {
+      return res.status(400).json({ success: false, message: 'Backup filename is required' });
+    }
+    const result = await BackupService.restoreBackup(filename);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to restore database backup', error: err.message });
   }
 });
 

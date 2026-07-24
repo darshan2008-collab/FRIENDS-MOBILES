@@ -7,6 +7,7 @@ const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { connectDB } = require('./config/db');
 const migrateData = require('./scripts/migrateToPostgres');
+const BackupService = require('./services/backupService');
 
 // Connect Database & Migrate Existing Data
 (async () => {
@@ -14,7 +15,17 @@ const migrateData = require('./scripts/migrateToPostgres');
   if (isConnected) {
     await migrateData();
   }
+  // Create initial boot backup snapshot
+  setTimeout(() => {
+    BackupService.createBackup().catch(() => {});
+  }, 10000);
 })();
+
+// Automated Daily Database Backup Schedule (24-Hour Cycle)
+setInterval(() => {
+  console.log('[Auto Backup Cron] Running scheduled database backup snapshot...');
+  BackupService.createBackup().catch(err => console.error('[Auto Backup Error]', err.message));
+}, 24 * 60 * 60 * 1000);
 
 // ─── Data & Image Directory Bootstrap ─────────────────────────────────────────
 const dirsToEnsure = [

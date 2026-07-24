@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, ShieldCheck, Package, Truck, ShoppingBag, BarChart3, Plus, Trash2, Edit3, 
   Check, RefreshCw, Lock, User, Key, ArrowRight, LogOut, CheckCircle2, Clock, 
-  TrendingUp, TrendingDown, Tag, Sparkles, AlertTriangle, Percent, DollarSign, Menu, MapPin, Phone, Eye, EyeOff, Upload, CreditCard, AlertCircle, MessageSquare, PhoneCall
+  TrendingUp, TrendingDown, Tag, Sparkles, AlertTriangle, Percent, DollarSign, Menu, MapPin, Phone, Eye, EyeOff, Upload, CreditCard, AlertCircle, MessageSquare, PhoneCall,
+  Cloud, Database, HardDrive, Download
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
@@ -36,6 +37,81 @@ export default function AdminModal({
   const [complaintFilter, setComplaintFilter] = useState('All');
   const [complaintSearchTerm, setComplaintSearchTerm] = useState('');
 
+  // 5,000 GB Cloud Storage & Backups State
+  const [backupStatus, setBackupStatus] = useState({
+    storageQuota: '5,000 GB',
+    usedMB: '0.00 MB',
+    percentageUsed: '0.000000%',
+    totalBackupsCount: 0,
+    lastBackupAt: null,
+    backups: []
+  });
+  const [isBackingUp, setIsBackingUp] = useState(false);
+
+  const fetchBackupStatus = async () => {
+    try {
+      const apiHost = typeof window !== 'undefined' 
+        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? `${window.location.protocol}//${window.location.hostname}:5000` 
+            : `${window.location.protocol}//${window.location.host}`) 
+        : '';
+      const res = await fetch(`${apiHost}/api/admin/backups`);
+      const data = await res.json();
+      if (data.success) {
+        setBackupStatus(data);
+      }
+    } catch (_) {}
+  };
+
+  const handleTriggerBackup = async () => {
+    setIsBackingUp(true);
+    try {
+      const apiHost = typeof window !== 'undefined' 
+        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? `${window.location.protocol}//${window.location.hostname}:5000` 
+            : `${window.location.protocol}//${window.location.host}`) 
+        : '';
+      const res = await fetch(`${apiHost}/api/admin/backups/create`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        if (addToast) addToast(`Database backup "${data.filename}" created & synced!`, '☁️');
+        fetchBackupStatus();
+      } else {
+        if (addToast) addToast(`Backup failed: ${data.error}`, '⚠️');
+      }
+    } catch (err) {
+      if (addToast) addToast(`Backup trigger error: ${err.message}`, '⚠️');
+    }
+    setIsBackingUp(false);
+  };
+
+  const handleRestoreBackup = async (filename) => {
+    if (!window.confirm(`Are you sure you want to restore database snapshot "${filename}"? Current data will be merged/updated.`)) {
+      return;
+    }
+    try {
+      const apiHost = typeof window !== 'undefined' 
+        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? `${window.location.protocol}//${window.location.hostname}:5000` 
+            : `${window.location.protocol}//${window.location.host}`) 
+        : '';
+      const res = await fetch(`${apiHost}/api/admin/backups/restore`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (addToast) addToast(`Database restored successfully from "${filename}"!`, '✅');
+        window.location.reload();
+      } else {
+        if (addToast) addToast(`Restore failed: ${data.message}`, '⚠️');
+      }
+    } catch (err) {
+      if (addToast) addToast(`Restore error: ${err.message}`, '⚠️');
+    }
+  };
+
   const fetchComplaints = async () => {
     try {
       const apiHost = typeof window !== 'undefined' 
@@ -60,6 +136,7 @@ export default function AdminModal({
   useEffect(() => {
     if (isAuthenticated) {
       fetchComplaints();
+      fetchBackupStatus();
     }
   }, [isAuthenticated, activeTab]);
 
@@ -949,6 +1026,16 @@ export default function AdminModal({
               }}
             >
               <Sparkles size={16} /> Banner Carousel
+            </button>
+
+            <button 
+              className={`sidebar-tab-btn ${activeTab === 'backups' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('backups');
+                setIsAdminSidebarOpen(false);
+              }}
+            >
+              <Cloud size={16} color="#3b82f6" /> 5000 GB Cloud Storage ({backupStatus.totalBackupsCount || 0})
             </button>
           </aside>
 
@@ -2627,6 +2714,112 @@ export default function AdminModal({
                   </button>
                 </form>
               </div>
+            </div>
+          {/* TAB 6: 5,000 GB CLOUD STORAGE & BACKUPS */}
+          {activeTab === 'backups' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              
+              {/* Cloud Quota Overview Banner */}
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '24px', borderRadius: '18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                      <Cloud size={24} color="#3b82f6" /> 5,000 GB Cloud Storage &amp; Database Backups
+                    </h3>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                      Automated 24-hour PostgreSQL backups protecting customer accounts, orders, products, and support tickets.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={handleTriggerBackup}
+                    disabled={isBackingUp}
+                    style={{
+                      padding: '10px 18px', borderRadius: '10px', border: 'none',
+                      background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                      color: '#ffffff', fontWeight: '800', fontSize: '0.82rem',
+                      cursor: isBackingUp ? 'not-allowed' : 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '8px',
+                      boxShadow: '0 4px 14px rgba(59, 130, 246, 0.35)'
+                    }}
+                  >
+                    <Cloud size={16} /> {isBackingUp ? 'Creating Cloud Backup...' : '☁️ Backup Database Now'}
+                  </button>
+                </div>
+
+                {/* Quota KPI Stats Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginTop: '6px' }}>
+                  <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Total Storage Quota</span>
+                    <h4 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', color: '#3b82f6', fontWeight: '900' }}>5,000 GB (5 TB)</h4>
+                  </div>
+                  <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Used Storage</span>
+                    <h4 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: '900' }}>{backupStatus.usedMB}</h4>
+                  </div>
+                  <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Total Backup Snapshots</span>
+                    <h4 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', color: '#22c55e', fontWeight: '900' }}>{backupStatus.totalBackupsCount} Files</h4>
+                  </div>
+                  <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Last Auto-Backup</span>
+                    <h4 style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {backupStatus.lastBackupAt ? new Date(backupStatus.lastBackupAt).toLocaleString('en-IN') : 'None'}
+                    </h4>
+                  </div>
+                </div>
+              </div>
+
+              {/* Historical Cloud Snapshots Table */}
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '24px', borderRadius: '18px' }}>
+                <h4 style={{ margin: '0 0 16px 0', fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Database size={18} color="#3b82f6" /> Available Cloud Backup Snapshots ({backupStatus.backups ? backupStatus.backups.length : 0})
+                </h4>
+
+                {(!backupStatus.backups || backupStatus.backups.length === 0) ? (
+                  <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    No backups created yet. Click <strong>"☁️ Backup Database Now"</strong> to create your first cloud snapshot.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {backupStatus.backups.map((bk) => (
+                      <div
+                        key={bk.filename}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border-color)',
+                          background: 'var(--bg-input)', flexWrap: 'wrap', gap: '10px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <HardDrive size={20} color="#3b82f6" />
+                          <div>
+                            <strong style={{ display: 'block', fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                              {bk.filename}
+                            </strong>
+                            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                              Size: {bk.sizeFormatted} • Date: {new Date(bk.createdAt).toLocaleString('en-IN')}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => handleRestoreBackup(bk.filename)}
+                          style={{
+                            padding: '6px 14px', borderRadius: '8px', border: '1px solid #22c55e',
+                            background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e',
+                            fontWeight: '800', fontSize: '0.76rem', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '6px'
+                          }}
+                        >
+                          <Download size={13} /> Restore Snapshot 📥
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
             </div>
           )}
 
