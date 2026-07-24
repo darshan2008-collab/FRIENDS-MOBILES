@@ -410,6 +410,21 @@ export default function App() {
     }
   };
 
+  const handleUpdateUserProfile = (updatedUser) => {
+    if (!updatedUser) return;
+    setCurrentUser(updatedUser);
+    try {
+      localStorage.setItem('fm_user', JSON.stringify(updatedUser));
+    } catch {}
+    if (updatedUser.phone || updatedUser.email) {
+      fetch(`${API_BASE}/auth/update-profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedUser)
+      }).catch(() => {});
+    }
+  };
+
   const handleLogout = () => {
     setCurrentUser(null);
     try {
@@ -724,6 +739,7 @@ export default function App() {
         onTriggerAuth={triggerCompulsoryAuth}
         addToast={addToast}
         onOrderPlaced={handleOrderPlaced}
+        onUpdateUserProfile={handleUpdateUserProfile}
       />
 
       <MobileBottomBar 

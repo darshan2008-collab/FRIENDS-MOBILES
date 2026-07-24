@@ -18,7 +18,8 @@ export default function CartModal({
   currentUser,
   onTriggerAuth,
   addToast,
-  onOrderPlaced
+  onOrderPlaced,
+  onUpdateUserProfile
 }) {
   const [checkoutStep, setCheckoutStep] = useState('cart'); // 'cart' | 'checkout' | 'success'
   const [paymentMethod, setPaymentMethod] = useState('UPI');
@@ -32,22 +33,22 @@ export default function CartModal({
     }
   }, [isOpen]);
 
-  // Form State
+  // Form State - Empty by default so users enter their own address
   const [shippingDetails, setShippingDetails] = useState({
     name: currentUser?.name || '',
     phone: currentUser?.phone || '',
-    address: currentUser?.address || 'Double Tank, South Gandhigramam, Karur - 639004, Tamil Nadu',
-    pincode: '639004'
+    address: (currentUser?.address && !currentUser.address.includes('Double Tank')) ? currentUser.address : '',
+    pincode: currentUser?.pincode || ''
   });
 
-  // Sync shipping details when user logs in
+  // Sync shipping details when user logs in or updates profile
   useEffect(() => {
     if (currentUser) {
       setShippingDetails(prev => ({
-        ...prev,
-        name: currentUser.name || prev.name,
-        phone: currentUser.phone || prev.phone,
-        address: currentUser.address || prev.address,
+        name: currentUser.name || prev.name || '',
+        phone: currentUser.phone || prev.phone || '',
+        address: (currentUser.address && !currentUser.address.includes('Double Tank')) ? currentUser.address : (prev.address && !prev.address.includes('Double Tank') ? prev.address : ''),
+        pincode: currentUser.pincode || prev.pincode || ''
       }));
     }
   }, [currentUser]);
@@ -186,13 +187,27 @@ export default function CartModal({
       return;
     }
 
+    const fullDeliveryAddress = `${sanitizedAddress} - ${shippingDetails.pincode.trim()}`;
+
+    // Save entered delivery address to user profile
+    if (currentUser && sanitizedAddress) {
+      const updatedUser = {
+        ...currentUser,
+        address: fullDeliveryAddress,
+        pincode: shippingDetails.pincode.trim()
+      };
+      if (onUpdateUserProfile) {
+        onUpdateUserProfile(updatedUser);
+      }
+    }
+
     const newOrder = {
       orderId: `FM-ORD-${Math.floor(100000 + Math.random() * 900000)}`,
       createdAt: new Date().toISOString(),
       customer: {
         name: sanitizedName,
         phone: shippingDetails.phone.trim(),
-        address: `${sanitizedAddress} - ${shippingDetails.pincode.trim()}`
+        address: fullDeliveryAddress
       },
       items: [...cart],
       subtotal,
