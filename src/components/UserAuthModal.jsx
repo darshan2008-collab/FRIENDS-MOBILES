@@ -271,7 +271,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
   };
 
-  // Step 1: Send Unique Gmail OTP to Registered Email
+  // Step 1: Send 6-Digit OTP to Email Address
   const handleSendOtpSubmit = async (e) => {
     if (e) e.preventDefault();
     setEmailCheckError('');
@@ -301,12 +301,11 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         setEmailCheckError('');
         setForgotStep(2);
         setResendTimer(120); // 2 minutes (120 seconds)
-        if (addToast) addToast(data.message || `Unique 6-digit OTP sent to ${data.email || targetVal}! Valid for 2 mins.`, 'success');
+        if (addToast) addToast(data.message || `6-digit OTP sent to ${data.email || targetVal}! Valid for 2 mins.`, 'success');
       } else {
-        // Mail ID is not registered or dispatch failed -> STOP & stay on Step 1
-        const notFoundMsg = (data && data.message) || `Your Mail ID (${targetVal}) is not found in our database. Please check your email or Sign Up for a new account.`;
-        setEmailCheckError(notFoundMsg);
-        if (addToast) addToast(notFoundMsg, 'error');
+        const sendFailedMsg = (data && data.message) || `Failed to send OTP to ${targetVal}. Please try again.`;
+        setEmailCheckError(sendFailedMsg);
+        if (addToast) addToast(sendFailedMsg, 'error');
       }
     } catch (err) {
       console.error("Send OTP API Error:", err);
@@ -899,7 +898,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                     <KeyRound size={18} /> Gmail OTP Password Reset Portal
                   </h4>
                   <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                    {forgotStep === 1 && 'Step 1 of 3: Enter your registered Email Address.'}
+                    {forgotStep === 1 && 'Step 1 of 3: Enter your Email Address to receive OTP.'}
                     {forgotStep === 2 && `Step 2 of 3: Enter the 6-digit OTP sent to ${sentEmail}.`}
                     {forgotStep === 3 && `Step 3 of 3: Set a new secure password for ${verifiedName}.`}
                   </p>
@@ -908,7 +907,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                 {forgotStep === 1 ? (
                   <form onSubmit={handleSendOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div>
-                      <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Registered Gmail / Email Address</label>
+                      <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Gmail / Email Address</label>
                       <div className="auth-input-group">
                         <Mail size={16} className="auth-input-icon" />
                         <input 
@@ -925,7 +924,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                       </div>
                     </div>
 
-                    {/* Pre-Verification Email Error Warning Banner */}
+                    {/* Email Error Warning Banner */}
                     {emailCheckError && (
                       <div style={{
                         background: 'rgba(239, 68, 68, 0.12)',
@@ -944,27 +943,6 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                           <AlertCircle size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: '2px' }} />
                           <div>{emailCheckError}</div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveTab('signup');
-                            setEmailCheckError('');
-                          }}
-                          style={{
-                            alignSelf: 'flex-start',
-                            background: '#ef4444',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            padding: '4px 10px',
-                            fontSize: '0.75rem',
-                            fontWeight: '700',
-                            cursor: 'pointer',
-                            marginTop: '2px'
-                          }}
-                        >
-                          Create New Account
-                        </button>
                       </div>
                     )}
 
@@ -973,7 +951,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                       className="auth-submit-btn"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? 'Verifying Registered Mail ID...' : 'Verify Email & Send Gmail OTP'} <ArrowRight size={16} />
+                      {isSubmitting ? 'Sending OTP Code...' : 'Send OTP to Email'} <ArrowRight size={16} />
                     </button>
 
                     <button 
