@@ -2724,10 +2724,10 @@ export default function AdminModal({
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
                     <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                      <Cloud size={24} color="#3b82f6" /> 100% Free GitHub Auto-Sync &amp; Cloud Database Backups
+                      <Cloud size={24} color="#3b82f6" /> 15 GB Google Drive &amp; GitHub Auto-Sync Database Backups
                     </h3>
                     <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                      Zero-cost automated 24-hour PostgreSQL backups pushed directly to your private GitHub repository.
+                      Automated hourly PostgreSQL database backups pushed to your Google Drive folder and private GitHub repository.
                     </p>
                   </div>
 
@@ -2743,7 +2743,7 @@ export default function AdminModal({
                       boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
                     }}
                   >
-                    <Cloud size={16} /> {isBackingUp ? 'Syncing to GitHub...' : '🐙 Push Backup to GitHub Now'}
+                    <Cloud size={16} /> {isBackingUp ? 'Syncing to Drive & GitHub...' : '☁️ Push Backup Now'}
                   </button>
                 </div>
 
@@ -2751,7 +2751,7 @@ export default function AdminModal({
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginTop: '6px' }}>
                   <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Total Storage Quota</span>
-                    <h4 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', color: '#3b82f6', fontWeight: '900' }}>5,000 GB (5 TB)</h4>
+                    <h4 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', color: '#3b82f6', fontWeight: '900' }}>15 GB (Google Drive Free Tier)</h4>
                   </div>
                   <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Used Storage</span>
