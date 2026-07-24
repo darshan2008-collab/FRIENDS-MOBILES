@@ -88,6 +88,21 @@ async function migrate() {
     console.log(`[Migration] Migrated/synced Store Settings to MongoDB.`);
   }
 
+  // 6. Banners
+  try {
+    const Banner = require('../models/Banner');
+    const banners = readJSON('banners.json', null);
+    if (banners && Array.isArray(banners) && banners.length > 0) {
+      const existingBanner = await Banner.findOne({}).lean();
+      if (!existingBanner) {
+        await Banner.create({ slides: banners, updatedAt: new Date() });
+        console.log(`[Migration] Migrated/synced ${banners.length} Banner slides to MongoDB.`);
+      }
+    }
+  } catch (bErr) {
+    console.error('[Migration Banner Error]', bErr.message);
+  }
+
   console.log('[Migration] All JSON database data successfully synced with MongoDB!');
 }
 

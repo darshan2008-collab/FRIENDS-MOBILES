@@ -32,20 +32,23 @@ async function getUsersAsync() {
 }
 
 async function saveUserAsync(userData) {
-  // Save to JSON file
-  const fileUsers = readData(usersFilePath, []);
-  const idx = fileUsers.findIndex(u => (userData.id && u.id === userData.id) || (userData.phone && normalizePhone(u.phone) === normalizePhone(userData.phone)));
-  if (idx >= 0) fileUsers[idx] = userData;
-  else fileUsers.push(userData);
-  writeData(usersFilePath, fileUsers);
-
-  // Save to MongoDB
+  // Primary MongoDB save
   if (mongoose.connection.readyState === 1) {
     try {
       const query = userData.phone ? { phone: userData.phone } : { id: userData.id };
       await User.updateOne(query, { $set: userData }, { upsert: true });
-    } catch (_) {}
+    } catch (e) {
+      console.error("[User DB Save Error]", e.message);
+    }
   }
+  // Keep local file backup updated safely without deleting any files
+  try {
+    const fileUsers = readData(usersFilePath, []);
+    const idx = fileUsers.findIndex(u => (userData.id && u.id === userData.id) || (userData.phone && normalizePhone(u.phone) === normalizePhone(userData.phone)));
+    if (idx >= 0) fileUsers[idx] = userData;
+    else fileUsers.push(userData);
+    writeData(usersFilePath, fileUsers);
+  } catch (_) {}
 }
 
 // Secure PBKDF2 password hashing (100,000 iterations for production strength)

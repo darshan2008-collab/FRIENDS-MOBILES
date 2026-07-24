@@ -13,25 +13,30 @@ async function getOrdersAsync() {
     try {
       const dbOrders = await Order.find({}).sort({ createdAt: -1 }).lean();
       if (dbOrders && dbOrders.length > 0) return dbOrders;
-    } catch (_) {}
+    } catch (e) {
+      console.error("[Orders DB Get Error]", e.message);
+    }
   }
   return readData(ordersFilePath, []);
 }
 
 async function saveOrderAsync(orderData) {
-  // Save to JSON
-  const fileOrders = readData(ordersFilePath, []);
-  const idx = fileOrders.findIndex(o => o.orderId === orderData.orderId);
-  if (idx >= 0) fileOrders[idx] = orderData;
-  else fileOrders.unshift(orderData);
-  writeData(ordersFilePath, fileOrders);
-
-  // Save to MongoDB
+  // Primary MongoDB save
   if (mongoose.connection.readyState === 1) {
     try {
       await Order.updateOne({ orderId: orderData.orderId }, { $set: orderData }, { upsert: true });
-    } catch (_) {}
+    } catch (e) {
+      console.error("[Orders DB Save Error]", e.message);
+    }
   }
+  // Keep local file backup updated safely without deleting any files
+  try {
+    const fileOrders = readData(ordersFilePath, []);
+    const idx = fileOrders.findIndex(o => o.orderId === orderData.orderId);
+    if (idx >= 0) fileOrders[idx] = orderData;
+    else fileOrders.unshift(orderData);
+    writeData(ordersFilePath, fileOrders);
+  } catch (_) {}
 }
 
 function getSettings() {

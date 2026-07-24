@@ -12,25 +12,30 @@ async function getProductsAsync() {
     try {
       const dbProducts = await Product.find({}).lean();
       if (dbProducts && dbProducts.length > 0) return dbProducts;
-    } catch (_) {}
+    } catch (e) {
+      console.error("[Products DB Get Error]", e.message);
+    }
   }
   return readData(productsFilePath, []);
 }
 
 async function saveProductAsync(productData) {
-  // Always update JSON for local consistency
-  const fileProducts = readData(productsFilePath, []);
-  const idx = fileProducts.findIndex(p => p.id === productData.id);
-  if (idx >= 0) fileProducts[idx] = productData;
-  else fileProducts.push(productData);
-  writeData(productsFilePath, fileProducts);
-
-  // Sync to MongoDB if connected
+  // Primary MongoDB save
   if (mongoose.connection.readyState === 1) {
     try {
       await Product.updateOne({ id: productData.id }, { $set: productData }, { upsert: true });
-    } catch (_) {}
+    } catch (e) {
+      console.error("[Products DB Save Error]", e.message);
+    }
   }
+  // Keep local file backup updated safely without deleting any files
+  try {
+    const fileProducts = readData(productsFilePath, []);
+    const idx = fileProducts.findIndex(p => p.id === productData.id);
+    if (idx >= 0) fileProducts[idx] = productData;
+    else fileProducts.push(productData);
+    writeData(productsFilePath, fileProducts);
+  } catch (_) {}
 }
 
 // GET /api/products (Advanced Search, Filter, Sort, Pagination)
