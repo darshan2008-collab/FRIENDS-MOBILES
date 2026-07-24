@@ -43,21 +43,6 @@ function writeData(filePath, data) {
   };
 
   const primarySuccess = writeSingle(filePath);
-
-  // Sync with twin data directory (server <-> backend)
-  try {
-    const normalizedPath = filePath.replace(/\\/g, '/');
-    let twinPath = null;
-    if (normalizedPath.includes('/server/data/')) {
-      twinPath = normalizedPath.replace('/server/data/', '/backend/data/');
-    } else if (normalizedPath.includes('/backend/data/')) {
-      twinPath = normalizedPath.replace('/backend/data/', '/server/data/');
-    }
-    if (twinPath && twinPath !== normalizedPath) {
-      writeSingle(path.normalize(twinPath));
-    }
-  } catch (_) {}
-
   return primarySuccess;
 }
 
