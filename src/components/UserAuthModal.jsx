@@ -2,11 +2,48 @@ import React, { useState } from 'react';
 import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' 
-  ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-      ? `${window.location.protocol}//${window.location.hostname}:5000/api` 
-      : `${window.location.protocol}//${window.location.host}/api`) 
-  : '/api');
+const getApiEndpoints = (endpoint) => {
+  const endpoints = [];
+  
+  if (import.meta.env.VITE_API_BASE_URL) {
+    const envBase = import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '');
+    endpoints.push(`${envBase}${endpoint}`);
+  }
+  
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    const protocol = window.location.protocol;
+    const origin = window.location.origin;
+
+    endpoints.push(`${origin}/api${endpoint}`);
+
+    if (host === 'localhost' || host === '127.0.0.1') {
+      endpoints.push(`${protocol}//${host}:5000/api${endpoint}`);
+    }
+  }
+
+  endpoints.push(`/api${endpoint}`);
+  return [...new Set(endpoints)];
+};
+
+const safeFetchApi = async (endpoint, options = {}) => {
+  const urlList = getApiEndpoints(endpoint);
+  let lastError = null;
+
+  for (const url of urlList) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok || res.status < 500) {
+        const data = await res.json();
+        return { ok: res.ok, status: res.status, data };
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error("Unable to connect to backend server");
+};
 
 export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToast, redirectMessage }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'signup' | 'forgot'
@@ -28,6 +65,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   const [forgotStep, setForgotStep] = useState(1); // 1: Send OTP, 2: Verify OTP, 3: Reset Password
   const [verifiedName, setVerifiedName] = useState('');
   const [sentEmail, setSentEmail] = useState('');
+  const [emailCheckError, setEmailCheckError] = useState('');
   const [otpInput, setOtpInput] = useState('');
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
   const [focusedOtpIndex, setFocusedOtpIndex] = useState(0);
@@ -205,11 +243,14 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   // Step 1: Send Unique Gmail OTP to Registered Email
   const handleSendOtpSubmit = async (e) => {
     if (e) e.preventDefault();
+    setEmailCheckError('');
     const targetVal = forgotPhone ? forgotPhone.trim().toLowerCase() : '';
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!targetVal || !emailRegex.test(targetVal)) {
-      if (addToast) addToast('Please enter a valid Gmail / Email address (e.g. user@gmail.com)', 'warning');
+      const invalidMsg = 'Please enter a valid Gmail / Email address (e.g. user@gmail.com)';
+      setEmailCheckError(invalidMsg);
+      if (addToast) addToast(invalidMsg, 'warning');
       return;
     }
 
@@ -217,25 +258,30 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     setOtpDigits(['', '', '', '', '', '']);
     setOtpInput('');
     try {
-      const res = await fetch(`${API_BASE}/auth/send-otp`, {
+      const { data } = await safeFetchApi('/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: targetVal })
       });
-      const data = await res.json();
-      if (data.success) {
+
+      if (data && data.success) {
         setSentEmail(data.email || targetVal);
         setVerifiedName(data.name || 'Customer');
+        setEmailCheckError('');
         setForgotStep(2);
         setResendTimer(120); // 2 minutes (120 seconds)
         if (addToast) addToast(data.message || `Unique 6-digit OTP sent to ${data.email || targetVal}! Valid for 2 mins.`, 'success');
       } else {
-        // Stop & stay on step 1 if user account not found or email dispatch failed
-        if (addToast) addToast(data.message || 'Failed to send OTP code. Please check your email address.', 'error');
+        // Mail ID is not registered or dispatch failed
+        const notFoundMsg = (data && data.message) || `Your Mail ID (${targetVal}) is not found in our database. Please check your email or Sign Up for a new account.`;
+        setEmailCheckError(notFoundMsg);
+        if (addToast) addToast(notFoundMsg, 'error');
       }
     } catch (err) {
-      console.error("Send OTP error:", err);
-      if (addToast) addToast('Unable to connect to server. Please check your network and try again.', 'error');
+      console.error("Send OTP connection error:", err);
+      const connErr = 'Unable to connect to backend server. Please verify backend server is running.';
+      setEmailCheckError(connErr);
+      if (addToast) addToast(connErr, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -251,22 +297,22 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+      const { data } = await safeFetchApi('/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: sentEmail, phone: forgotPhone, otp: code.trim() })
       });
-      const data = await res.json();
-      if (data.success) {
+
+      if (data && data.success) {
         setResetToken(data.resetToken || '');
         setForgotStep(3);
         if (addToast) addToast('OTP code verified successfully! Please set your new password.', 'success');
       } else {
-        if (addToast) addToast(data.message || 'Invalid OTP code. Please try again.', 'error');
+        if (addToast) addToast((data && data.message) || 'Invalid OTP code. Please try again.', 'error');
       }
     } catch (err) {
-      setForgotStep(3);
-      if (addToast) addToast('OTP code verified! Set your new password.', 'success');
+      console.error("Verify OTP error:", err);
+      if (addToast) addToast('Unable to connect to server. Please check your network and try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -839,26 +885,72 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                 {forgotStep === 1 ? (
                   <form onSubmit={handleSendOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div>
-                      <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Email Address or Mobile Number</label>
+                      <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Registered Gmail / Email Address</label>
                       <div className="auth-input-group">
                         <Mail size={16} className="auth-input-icon" />
                         <input 
-                          type="text" 
-                          placeholder="e.g. user@gmail.com or 10-digit mobile"
+                          type="email" 
+                          placeholder="e.g. user@gmail.com"
                           value={forgotPhone}
-                          onChange={(e) => setForgotPhone(e.target.value)}
+                          onChange={(e) => {
+                            setForgotPhone(e.target.value);
+                            if (emailCheckError) setEmailCheckError('');
+                          }}
                           required
                           className="auth-input-field"
                         />
                       </div>
                     </div>
 
+                    {/* Pre-Verification Email Error Warning Banner */}
+                    {emailCheckError && (
+                      <div style={{
+                        background: 'rgba(239, 68, 68, 0.12)',
+                        border: '1.5px solid rgba(239, 68, 68, 0.4)',
+                        borderRadius: '10px',
+                        padding: '12px 14px',
+                        color: '#ef4444',
+                        fontSize: '0.82rem',
+                        fontWeight: '600',
+                        lineHeight: '1.4',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                          <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>⚠️</span>
+                          <div>{emailCheckError}</div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveTab('signup');
+                            setEmailCheckError('');
+                          }}
+                          style={{
+                            alignSelf: 'flex-start',
+                            background: '#ef4444',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '4px 10px',
+                            fontSize: '0.75rem',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            marginTop: '2px'
+                          }}
+                        >
+                          ➕ Click Here to Create New Account
+                        </button>
+                      </div>
+                    )}
+
                     <button 
                       type="submit" 
                       className="auth-submit-btn"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? 'Sending Gmail OTP Code...' : 'Send Gmail OTP Code'} <ArrowRight size={16} />
+                      {isSubmitting ? 'Verifying Registered Mail ID...' : 'Verify Email & Send Gmail OTP'} <ArrowRight size={16} />
                     </button>
 
                     <button 
