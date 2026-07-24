@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
@@ -96,12 +97,25 @@ const BackupService = {
 
       fs.writeFileSync(filePath, JSON.stringify(dumpPayload, null, 2), 'utf8');
 
+      let gitPushed = false;
+      try {
+        const projectRoot = path.join(__dirname, '../../');
+        execSync(`git add "${filePath}"`, { cwd: projectRoot, stdio: 'ignore' });
+        execSync(`git commit -m "chore(backup): Auto database snapshot ${filename}"`, { cwd: projectRoot, stdio: 'ignore' });
+        execSync('git push origin main', { cwd: projectRoot, stdio: 'ignore' });
+        gitPushed = true;
+        console.log(`[GitHub Backup Success] Pushed snapshot ${filename} to GitHub repo!`);
+      } catch (_) {}
+
       console.log(`[Backup Success] Created snapshot: ${filename} (${users.length} users, ${orders.length} orders, ${products.length} prods)`);
 
       return {
         success: true,
-        message: `Database backup snapshot "${filename}" created successfully!`,
+        message: gitPushed 
+          ? `Database backup snapshot "${filename}" created & pushed to GitHub!`
+          : `Database backup snapshot "${filename}" created locally!`,
         filename,
+        gitPushed,
         timestamp: dumpPayload.meta.createdAt,
         totalRecords: dumpPayload.meta.totalRecords
       };
