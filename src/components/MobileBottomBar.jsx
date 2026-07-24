@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Heart, Paintbrush, ShoppingBag, User, Smartphone, Frame, Sparkles } from 'lucide-react';
+import { Headphones, Heart, Paintbrush, ShoppingBag, User, Smartphone, Frame, Sparkles } from 'lucide-react';
 
 export default function MobileBottomBar({ 
   cartCount, 
@@ -10,13 +10,23 @@ export default function MobileBottomBar({
   onOpenCustomCover, 
   onOpenCustomFrame,
   onOpenWishlist,
-  onOpenCart
+  onOpenCart,
+  onOpenChatbot
 }) {
   const [showCustomMenu, setShowCustomMenu] = useState(false);
 
-  const handleHomeClick = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleSupportClick = () => {
     setShowCustomMenu(false);
+    if (onOpenChatbot) {
+      onOpenChatbot();
+    } else {
+      const contactElem = document.getElementById('contact') || document.querySelector('.main-footer');
+      if (contactElem) {
+        contactElem.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.open('https://wa.me/917448578507', '_blank');
+      }
+    }
   };
 
   const handleWishlistClick = () => {
@@ -93,9 +103,9 @@ export default function MobileBottomBar({
 
       {/* Main Sticky Bottom Navigation Bar */}
       <nav className="mobile-bottom-bar" aria-label="Mobile Navigation">
-        <button className="bottom-nav-item" onClick={handleHomeClick}>
-          <Home size={20} />
-          <span>Home</span>
+        <button className="bottom-nav-item" onClick={handleSupportClick} title="24/7 Customer Care" aria-label="24/7 Customer Care">
+          <Headphones size={20} />
+          <span>24/7 Care</span>
         </button>
 
         <button className="bottom-nav-item" onClick={handleWishlistClick}>

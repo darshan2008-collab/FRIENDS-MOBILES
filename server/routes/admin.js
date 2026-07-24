@@ -15,7 +15,7 @@ async function getSettingsAsync() {
     const dbSettings = await Setting.findOne({});
     if (dbSettings) return dbSettings;
   } catch (_) {}
-  return { freeShippingThreshold: 499, standardShippingFee: 49 };
+  return { freeShippingThreshold: 1000, standardShippingFee: 49 };
 }
 
 async function saveSettingsAsync(settingsData) {
