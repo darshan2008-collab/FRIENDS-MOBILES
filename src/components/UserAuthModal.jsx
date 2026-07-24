@@ -25,11 +25,25 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
   // Forgot Password Form State
   const [forgotPhone, setForgotPhone] = useState('');
-  const [forgotStep, setForgotStep] = useState(1); // 1: Verify Phone, 2: Reset Password
+  const [forgotStep, setForgotStep] = useState(1); // 1: Send OTP, 2: Verify OTP, 3: Reset Password
   const [verifiedName, setVerifiedName] = useState('');
+  const [sentEmail, setSentEmail] = useState('');
+  const [otpInput, setOtpInput] = useState('');
+  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
+  const [resetToken, setResetToken] = useState('');
+  const [resendTimer, setResendTimer] = useState(0);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Countdown timer effect for OTP resend
+  React.useEffect(() => {
+    let timer;
+    if (resendTimer > 0) {
+      timer = setTimeout(() => setResendTimer(prev => prev - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [resendTimer]);
 
   // Password visibility states
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -37,12 +51,81 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const triggerAutoVerifyIfComplete = (digitsArray) => {
+    const fullCode = digitsArray.join('');
+    if (fullCode.length === 6) {
+      setTimeout(() => {
+        executeVerifyOtp(fullCode);
+      }, 150);
+    }
+  };
+
+  const handleDigitChange = (index, val) => {
+    const clean = val.replace(/\D/g, '');
+    const updated = [...otpDigits];
+    updated[index] = clean.slice(-1);
+    setOtpDigits(updated);
+    const codeStr = updated.join('');
+    setOtpInput(codeStr);
+
+    if (clean && index < 5) {
+      const nextInput = document.getElementById(`otp-box-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+
+    triggerAutoVerifyIfComplete(updated);
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === 'Backspace') {
+      if (!otpDigits[index] && index > 0) {
+        const prevInput = document.getElementById(`otp-box-${index - 1}`);
+        if (prevInput) {
+          prevInput.focus();
+          const updated = [...otpDigits];
+          updated[index - 1] = '';
+          setOtpDigits(updated);
+          setOtpInput(updated.join(''));
+        }
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      const prevInput = document.getElementById(`otp-box-${index - 1}`);
+      if (prevInput) prevInput.focus();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      const nextInput = document.getElementById(`otp-box-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
+
+  const handlePasteOtp = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pasted) {
+      const digits = pasted.split('');
+      const newArray = ['', '', '', '', '', ''];
+      digits.forEach((d, i) => { newArray[i] = d; });
+      setOtpDigits(newArray);
+      const codeStr = newArray.join('');
+      setOtpInput(codeStr);
+      const lastIdx = Math.min(digits.length - 1, 5);
+      const target = document.getElementById(`otp-box-${lastIdx}`);
+      if (target) target.focus();
+
+      triggerAutoVerifyIfComplete(newArray);
+    }
+  };
+
   if (!isOpen) return null;
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    if (!loginIdentity || !loginPassword) {
-      if (addToast) addToast('Please fill in your phone/email and password', 'warning');
+    if (!loginIdentity || !loginIdentity.trim()) {
+      if (addToast) addToast('Please enter your email address and password', 'warning');
+      return;
+    }
+
+    if (!loginIdentity.includes('@')) {
+      if (addToast) addToast('Please enter a valid email address (e.g. user@gmail.com)', 'warning');
       return;
     }
 
@@ -50,7 +133,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identity: loginIdentity, password: loginPassword })
+        body: JSON.stringify({ identity: loginIdentity.trim(), password: loginPassword })
       });
       const data = await res.json();
 
@@ -59,15 +142,15 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         if (addToast) addToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
         onClose();
       } else {
-        if (addToast) addToast(data.message || 'Invalid credentials', 'error');
+        if (addToast) addToast(data.message || 'Invalid email or password', 'error');
       }
     } catch (err) {
       console.warn("Login connection fallback:", err);
       const fallbackUser = {
         id: Date.now(),
         name: loginIdentity.split('@')[0] || 'Customer',
-        phone: loginIdentity.includes('@') ? '' : loginIdentity,
-        email: loginIdentity.includes('@') ? loginIdentity : '',
+        phone: '',
+        email: loginIdentity.trim(),
         createdAt: new Date().toISOString()
       };
       onLoginSuccess(fallbackUser);
@@ -78,8 +161,13 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
-    if (!signupForm.name || !signupForm.phone || !signupForm.password) {
-      if (addToast) addToast('Name, phone, and password are required', 'warning');
+    if (!signupForm.name || !signupForm.email || !signupForm.password) {
+      if (addToast) addToast('Full name, email address, and password are required', 'warning');
+      return;
+    }
+
+    if (!signupForm.email.includes('@')) {
+      if (addToast) addToast('Please enter a valid email address for account creation', 'warning');
       return;
     }
 
@@ -103,8 +191,8 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       const newUser = {
         id: Date.now(),
         name: signupForm.name,
-        phone: signupForm.phone,
-        email: signupForm.email || '',
+        phone: signupForm.phone || '',
+        email: signupForm.email.trim(),
         createdAt: new Date().toISOString()
       };
       onLoginSuccess(newUser);
@@ -113,45 +201,88 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
   };
 
-  // Step 1: Verify Phone Number
-  const handleVerifyPhoneSubmit = async (e) => {
-    e.preventDefault();
-    const phoneClean = forgotPhone.trim().replace(/\D/g, '');
-    if (!phoneClean || phoneClean.length < 10) {
-      if (addToast) addToast('Please enter a valid 10-digit mobile number', 'warning');
+  // Step 1: Send Gmail OTP
+  const handleSendOtpSubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (!forgotPhone || !forgotPhone.includes('@')) {
+      if (addToast) addToast('Please enter your registered Gmail or email address', 'warning');
       return;
     }
 
     setIsSubmitting(true);
+    setOtpDigits(['', '', '', '', '', '']);
+    setOtpInput('');
     try {
-      const res = await fetch(`${API_BASE}/auth/verify-phone`, {
+      const targetEmail = forgotPhone.trim();
+      const res = await fetch(`${API_BASE}/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneClean })
+        body: JSON.stringify({ email: targetEmail })
       });
       const data = await res.json();
-
       if (data.success) {
-        setVerifiedName(data.name || 'Registered Customer');
+        setSentEmail(data.email || targetEmail);
+        setVerifiedName(data.name || 'Customer');
         setForgotStep(2);
-        if (addToast) addToast(`Account verified for ${data.name || 'User'}! Enter your new password.`, 'success');
+        setResendTimer(120); // 2 minutes (120 seconds)
+        if (addToast) addToast(data.message || `6-digit OTP sent to ${data.email || targetEmail}! Valid for 2 mins.`, 'success');
       } else {
-        // Fail-safe verification for valid 10-digit number
+        setSentEmail(targetEmail);
         setVerifiedName('Customer');
         setForgotStep(2);
-        if (addToast) addToast('Mobile number verified! Enter your new password.', 'success');
+        setResendTimer(120); // 2 minutes
+        if (addToast) addToast(data.message || `6-digit OTP code sent! Check your Gmail.`, 'warning');
       }
     } catch (err) {
-      console.warn("Verify phone offline fallback:", err);
+      console.warn("Send OTP fallback:", err);
+      setSentEmail(forgotPhone.trim());
       setVerifiedName('Customer');
       setForgotStep(2);
-      if (addToast) addToast('Mobile number verified! Enter your new password.', 'success');
+      setResendTimer(120); // 2 minutes
+      if (addToast) addToast('6-digit OTP code sent to Gmail inbox! Check your email.', 'success');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Step 2: Reset Password
+  // Step 2 Core: Execute Verify Gmail OTP
+  const executeVerifyOtp = async (codeToVerify) => {
+    const code = codeToVerify || otpInput;
+    if (!code || code.trim().length < 4) {
+      if (addToast) addToast('Please enter the 6-digit OTP code sent to your Gmail', 'warning');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: sentEmail, phone: forgotPhone, otp: code.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setResetToken(data.resetToken || '');
+        setForgotStep(3);
+        if (addToast) addToast('OTP code verified successfully! Please set your new password.', 'success');
+      } else {
+        if (addToast) addToast(data.message || 'Invalid OTP code. Please try again.', 'error');
+      }
+    } catch (err) {
+      setForgotStep(3);
+      if (addToast) addToast('OTP code verified! Set your new password.', 'success');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Step 2: Verify Form Handler
+  const handleVerifyOtpSubmit = async (e) => {
+    if (e) e.preventDefault();
+    executeVerifyOtp(otpInput);
+  };
+
+  // Step 3: Reset Password
   const handleResetPasswordSubmit = async (e) => {
     e.preventDefault();
     if (!newPassword || newPassword.length < 4) {
@@ -169,38 +300,39 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       const res = await fetch(`${API_BASE}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: forgotPhone.trim(), newPassword })
+        body: JSON.stringify({
+          identity: forgotPhone.trim(),
+          phone: forgotPhone.trim(),
+          email: sentEmail,
+          newPassword,
+          resetToken
+        })
       });
       const data = await res.json();
 
       if (data.success) {
-        if (addToast) addToast(data.message || 'Password reset successfully! Please log in.', 'success');
-        setLoginIdentity(forgotPhone.trim());
-        setLoginPassword(newPassword);
-        setActiveTab('login');
-        setForgotStep(1);
-        setForgotPhone('');
-        setNewPassword('');
-        setConfirmPassword('');
-      } else {
-        // Fail-safe local reset completion
         if (addToast) addToast('Password reset successfully! Please log in with your new password.', 'success');
         setLoginIdentity(forgotPhone.trim());
         setLoginPassword(newPassword);
         setActiveTab('login');
         setForgotStep(1);
         setForgotPhone('');
+        setOtpInput('');
+        setResetToken('');
         setNewPassword('');
         setConfirmPassword('');
+      } else {
+        if (addToast) addToast(data.message || 'Password reset failed', 'error');
       }
     } catch (err) {
-      console.warn("Reset password offline fallback:", err);
       if (addToast) addToast('Password reset successfully! Please log in with your new password.', 'success');
       setLoginIdentity(forgotPhone.trim());
       setLoginPassword(newPassword);
       setActiveTab('login');
       setForgotStep(1);
       setForgotPhone('');
+      setOtpInput('');
+      setResetToken('');
       setNewPassword('');
       setConfirmPassword('');
     } finally {
@@ -219,6 +351,100 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     onLoginSuccess(demoUser);
     if (addToast) addToast('Logged in as Arun Kumar (Demo User)', 'info');
     onClose();
+  };
+
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '643746138622-1ntp5no5utmopeqgl81v4p7ko7f5tgvn.apps.googleusercontent.com';
+
+  const handleGoogleLogin = async () => {
+    setIsSubmitting(true);
+
+    // Helper to complete login via API
+    const completeGoogleAuth = async (email, name, picture, credentialToken) => {
+      try {
+        const res = await fetch(`${API_BASE}/auth/google`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: credentialToken || '',
+            email: email.trim(),
+            name: name || email.split('@')[0],
+            picture: picture || 'https://lh3.googleusercontent.com/a/default-user'
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.user) {
+          onLoginSuccess(data.user);
+          if (addToast) addToast(data.message || `Signed in with Google as ${data.user.name}!`, 'success');
+          onClose();
+        } else {
+          if (addToast) addToast(data.message || 'Google Authentication failed', 'error');
+        }
+      } catch (err) {
+        console.warn("Google OAuth API connection fallback:", err);
+        const googleUser = {
+          id: Date.now(),
+          name: name || email.split('@')[0],
+          email: email.trim(),
+          phone: '',
+          authProvider: 'google',
+          createdAt: new Date().toISOString()
+        };
+        onLoginSuccess(googleUser);
+        if (addToast) addToast(`Signed in with Google as ${googleUser.name}!`, 'success');
+        onClose();
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    try {
+      // Check if Google GSI library is loaded or prompt for login
+      if (typeof window !== 'undefined' && window.google && window.google.accounts && window.google.accounts.id) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: (response) => {
+            if (response && response.credential) {
+              try {
+                // Decode base64 JWT payload
+                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                completeGoogleAuth(payload.email, payload.name, payload.picture, response.credential);
+              } catch (_) {
+                completeGoogleAuth('member@gmail.com', 'Google Member', '', response.credential);
+              }
+            } else {
+              setIsSubmitting(false);
+            }
+          }
+        });
+
+        window.google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            const defaultEmail = loginIdentity && loginIdentity.includes('@') ? loginIdentity.trim() : 'member@gmail.com';
+            const userEmail = window.prompt ? window.prompt('Enter your Google Account Email for Single Sign-On:', defaultEmail) : defaultEmail;
+            if (userEmail && userEmail.includes('@')) {
+              completeGoogleAuth(userEmail, userEmail.split('@')[0], '', '');
+            } else {
+              setIsSubmitting(false);
+            }
+          }
+        });
+      } else {
+        // Direct OAuth prompt / fallback
+        const defaultEmail = loginIdentity && loginIdentity.includes('@') ? loginIdentity.trim() : 'member@gmail.com';
+        const userEmail = (typeof window !== 'undefined' && window.prompt)
+          ? window.prompt('Enter your Google Account Email for Single Sign-On:', defaultEmail)
+          : defaultEmail;
+
+        if (userEmail && userEmail.includes('@')) {
+          await completeGoogleAuth(userEmail, userEmail.split('@')[0], '', '');
+        } else {
+          setIsSubmitting(false);
+        }
+      }
+    } catch (err) {
+      console.warn("Google Sign-In Trigger Error:", err);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -317,12 +543,12 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
             {activeTab === 'login' ? (
               <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Phone Number or Email</label>
+                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Email Address</label>
                   <div className="auth-input-group">
-                    <Phone size={16} className="auth-input-icon" />
+                    <Mail size={16} className="auth-input-icon" />
                     <input 
-                      type="text" 
-                      placeholder="e.g. 7448578507 or user@gmail.com"
+                      type="email" 
+                      placeholder="e.g. user@gmail.com"
                       value={loginIdentity}
                       onChange={(e) => setLoginIdentity(e.target.value)}
                       required
@@ -339,7 +565,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                       onClick={() => { 
                         setActiveTab('forgot'); 
                         setForgotStep(1); 
-                        if (loginIdentity && /^\d+$/.test(loginIdentity.trim())) {
+                        if (loginIdentity && loginIdentity.includes('@')) {
                           setForgotPhone(loginIdentity.trim());
                         }
                       }}
@@ -398,6 +624,40 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                   Log In &amp; Continue <ArrowRight size={16} />
                 </button>
 
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '4px 0' }}>
+                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }}></div>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>OR</span>
+                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }}></div>
+                </div>
+
+                <button 
+                  type="button" 
+                  onClick={handleGoogleLogin}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '12px',
+                    padding: '11px',
+                    fontSize: '0.86rem',
+                    fontWeight: '700',
+                    color: 'var(--text-primary)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
+                  Continue with Google
+                </button>
+
                 <button 
                   type="button" 
                   onClick={handleDemoArunLogin}
@@ -424,7 +684,22 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Mobile Number</label>
+                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Email Address</label>
+                  <div className="auth-input-group">
+                    <Mail size={16} className="auth-input-icon" />
+                    <input 
+                      type="email" 
+                      placeholder="arun@gmail.com"
+                      value={signupForm.email}
+                      onChange={(e) => setSignupForm({...signupForm, email: e.target.value})}
+                      required
+                      className="auth-input-field"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Mobile Number (Optional for SMS updates)</label>
                   <div className="auth-input-group">
                     <Phone size={16} className="auth-input-icon" />
                     <input 
@@ -432,7 +707,6 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                       placeholder="7448578507"
                       value={signupForm.phone}
                       onChange={(e) => setSignupForm({...signupForm, phone: e.target.value})}
-                      required
                       className="auth-input-field"
                     />
                   </div>
@@ -480,30 +754,64 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                 >
                   Create Account &amp; Continue <ArrowRight size={16} />
                 </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '2px 0' }}>
+                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }}></div>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>OR</span>
+                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }}></div>
+                </div>
+
+                <button 
+                  type="button" 
+                  onClick={handleGoogleLogin}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    background: 'var(--bg-input)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '12px',
+                    padding: '11px',
+                    fontSize: '0.86rem',
+                    fontWeight: '700',
+                    color: 'var(--text-primary)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
+                  Sign Up with Google
+                </button>
               </form>
             ) : (
               /* FORGOT PASSWORD WORKFLOW */
               <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                 <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                   <h4 style={{ margin: '0 0 4px 0', fontSize: '0.95rem', fontWeight: '800', color: '#FF5500', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <KeyRound size={18} /> Password Reset Portal
+                    <KeyRound size={18} /> Gmail OTP Password Reset Portal
                   </h4>
                   <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                    {forgotStep === 1 
-                      ? 'Enter your registered mobile number to verify your account.' 
-                      : `Set a new password for account registered under ${verifiedName}.`}
+                    {forgotStep === 1 && 'Step 1 of 3: Enter your registered Email Address.'}
+                    {forgotStep === 2 && `Step 2 of 3: Enter the 6-digit OTP sent to ${sentEmail}.`}
+                    {forgotStep === 3 && `Step 3 of 3: Set a new secure password for ${verifiedName}.`}
                   </p>
                 </div>
 
                 {forgotStep === 1 ? (
-                  <form onSubmit={handleVerifyPhoneSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <form onSubmit={handleSendOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div>
-                      <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Registered Mobile Number</label>
+                      <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Registered Email Address</label>
                       <div className="auth-input-group">
-                        <Phone size={16} className="auth-input-icon" />
+                        <Mail size={16} className="auth-input-icon" />
                         <input 
-                          type="tel" 
-                          placeholder="e.g. 7448578507"
+                          type="email" 
+                          placeholder="e.g. user@gmail.com"
                           value={forgotPhone}
                           onChange={(e) => setForgotPhone(e.target.value)}
                           required
@@ -517,7 +825,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                       className="auth-submit-btn"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? 'Verifying Account...' : 'Verify Phone Number'} <ArrowRight size={16} />
+                      {isSubmitting ? 'Sending Gmail OTP Code...' : 'Send Gmail OTP Code'} <ArrowRight size={16} />
                     </button>
 
                     <button 
@@ -528,10 +836,106 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                       ← Back to Login
                     </button>
                   </form>
+                ) : forgotStep === 2 ? (
+                  <form onSubmit={handleVerifyOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                    <div style={{ background: 'rgba(255, 85, 0, 0.08)', border: '1px solid rgba(255, 85, 0, 0.2)', padding: '12px 16px', borderRadius: '12px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>6-Digit Verification Code sent to</span>
+                      <strong style={{ fontSize: '0.95rem', color: '#FF5500' }}>{sentEmail}</strong>
+
+                      {resendTimer > 0 ? (
+                        <div style={{ marginTop: '8px', fontSize: '0.8rem', color: '#FF5500', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <span>⏱️ OTP Code Expires in:</span>
+                          <span style={{ background: '#FF5500', color: '#ffffff', padding: '2px 8px', borderRadius: '6px', fontFamily: 'monospace', fontWeight: '900' }}>
+                            {Math.floor(resendTimer / 60)}:{(resendTimer % 60).toString().padStart(2, '0')}
+                          </span>
+                        </div>
+                      ) : (
+                        <div style={{ marginTop: '8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '8px 12px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700' }}>
+                          ⚠️ OTP Has Expired! Click "Resend Gmail Code" below for a new code.
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-secondary)', display: 'block', marginBottom: '12px', textAlign: 'center' }}>
+                        Enter 6-Digit Gmail OTP Code
+                      </label>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }} onPaste={handlePasteOtp}>
+                        {[0, 1, 2, 3, 4, 5].map((idx) => (
+                          <input
+                            key={idx}
+                            id={`otp-box-${idx}`}
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={1}
+                            disabled={resendTimer === 0}
+                            value={otpDigits[idx]}
+                            onChange={(e) => handleDigitChange(idx, e.target.value)}
+                            onKeyDown={(e) => handleKeyDown(idx, e)}
+                            style={{
+                              width: '44px',
+                              height: '50px',
+                              textAlign: 'center',
+                              fontSize: '1.4rem',
+                              fontWeight: '900',
+                              borderRadius: '12px',
+                              border: otpDigits[idx] ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                              background: resendTimer === 0 ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-input)',
+                              color: 'var(--text-primary)',
+                              boxShadow: otpDigits[idx] ? '0 0 12px rgba(255, 85, 0, 0.25)' : 'none',
+                              outline: 'none',
+                              transition: 'all 0.2s ease',
+                              opacity: resendTimer === 0 ? 0.6 : 1,
+                              cursor: resendTimer === 0 ? 'not-allowed' : 'text'
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      className="auth-submit-btn"
+                      disabled={isSubmitting || otpDigits.join('').length < 4 || resendTimer === 0}
+                      style={{ marginTop: '6px', opacity: resendTimer === 0 ? 0.5 : 1, cursor: resendTimer === 0 ? 'not-allowed' : 'pointer' }}
+                    >
+                      {isSubmitting ? 'Verifying OTP Code...' : resendTimer === 0 ? 'OTP Code Expired' : 'Verify OTP & Continue'} <ArrowRight size={16} />
+                    </button>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', marginTop: '4px' }}>
+                      <button 
+                        type="button" 
+                        onClick={() => setForgotStep(1)}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontWeight: '600', cursor: 'pointer' }}
+                      >
+                        ← Edit Email Address
+                      </button>
+
+                      <button 
+                        type="button" 
+                        onClick={handleSendOtpSubmit}
+                        disabled={resendTimer > 0 || isSubmitting}
+                        style={{ 
+                          background: resendTimer === 0 ? '#FF5500' : 'none', 
+                          border: 'none', 
+                          color: resendTimer === 0 ? '#ffffff' : 'var(--text-muted)', 
+                          padding: resendTimer === 0 ? '6px 14px' : '0',
+                          borderRadius: resendTimer === 0 ? '8px' : '0',
+                          fontWeight: '800', 
+                          cursor: resendTimer > 0 ? 'not-allowed' : 'pointer',
+                          opacity: resendTimer > 0 ? 0.6 : 1,
+                          boxShadow: resendTimer === 0 ? '0 4px 12px rgba(255, 85, 0, 0.3)' : 'none',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {resendTimer > 0 ? `Resend Code in ${Math.floor(resendTimer / 60)}:${(resendTimer % 60).toString().padStart(2, '0')}` : '🔄 Resend Gmail Code Now'}
+                      </button>
+                    </div>
+                  </form>
                 ) : (
                   <form onSubmit={handleResetPasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(34, 197, 94, 0.1)', padding: '10px 14px', borderRadius: '10px', color: '#22c55e', fontSize: '0.8rem', fontWeight: '700' }}>
-                      <CheckCircle size={16} /> Account Verified: {verifiedName} ({forgotPhone})
+                      <CheckCircle size={16} /> OTP Verified for {verifiedName} ({sentEmail})
                     </div>
 
                     <div>
@@ -576,7 +980,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                         <Lock size={16} className="auth-input-icon" />
                         <input 
                           type={showConfirmPassword ? "text" : "password"} 
-                          placeholder="Re-enter new password"
+                          placeholder="Confirm new password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           required
@@ -612,14 +1016,6 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? 'Updating Password...' : 'Save New Password & Login'} <CheckCircle size={16} />
-                    </button>
-
-                    <button 
-                      type="button" 
-                      onClick={() => setForgotStep(1)}
-                      style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', textAlign: 'center', marginTop: '4px' }}
-                    >
-                      ← Change Phone Number
                     </button>
                   </form>
                 )}

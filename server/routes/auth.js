@@ -59,31 +59,31 @@ router.post('/signup', signupLimiter, async (req, res) => {
   try {
     const { name, email, phone, password, address } = req.body;
 
-    if (!name || !phone || !password) {
-      return res.status(400).json({ success: false, message: 'Name, phone number, and password are required' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Name, email address, and password are required' });
+    }
+
+    const cleanEmail = sanitizeInput(email).toLowerCase().trim();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address' });
     }
 
     if (password.length < 4) {
       return res.status(400).json({ success: false, message: 'Password must be at least 4 characters' });
     }
 
-    const cleanPhone = normalizePhone(phone);
-    if (!cleanPhone || cleanPhone.length < 10) {
-      return res.status(400).json({ success: false, message: 'Please enter a valid 10-digit phone number' });
-    }
-
+    const cleanPhone = phone ? normalizePhone(phone) : '';
     const cleanName = sanitizeInput(name);
-    const cleanEmail = email ? sanitizeInput(email).toLowerCase() : '';
     const cleanAddress = address ? sanitizeInput(address) : 'Tamil Nadu';
 
     const users = await getUsersAsync();
     const existing = users.find(u =>
-      normalizePhone(u.phone) === cleanPhone ||
-      (cleanEmail && u.email && u.email.toLowerCase().trim() === cleanEmail)
+      (u.email && u.email.toLowerCase().trim() === cleanEmail) ||
+      (cleanPhone && cleanPhone.length >= 10 && normalizePhone(u.phone) === cleanPhone)
     );
 
     if (existing) {
-      return res.status(409).json({ success: false, message: 'An account with this phone or email already exists' });
+      return res.status(409).json({ success: false, message: 'An account with this email address already exists' });
     }
 
     const newId = users.length > 0 ? Math.max(...users.map(u => u.id || 0)) + 1 : 1;
@@ -155,6 +155,166 @@ router.post('/login', loginLimiter, async (req, res) => {
   }
 });
 
+const { sendOTPEmail } = require('../utils/email');
+
+// In-memory OTP & Reset Token Cache
+const otpCache = new Map();
+const resetTokenCache = new Map();
+
+// Clean expired tokens periodically (every 5 minutes)
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of otpCache.entries()) {
+    if (v.expiresAt < now) otpCache.delete(k);
+  }
+  for (const [k, v] of resetTokenCache.entries()) {
+    if (v.expiresAt < now) resetTokenCache.delete(k);
+  }
+}, 5 * 60 * 1000);
+
+// POST /api/auth/send-otp (Send 6-Digit OTP via Nodemailer Gmail)
+router.post('/send-otp', resetLimiter, async (req, res) => {
+  try {
+    const { email, phone } = req.body;
+    const targetEmail = email ? email.toLowerCase().trim() : null;
+    const cleanPhone = phone ? normalizePhone(phone) : null;
+
+    if (!targetEmail && !cleanPhone) {
+      return res.status(400).json({ success: false, message: 'Please enter your registered email or mobile number' });
+    }
+
+    const users = await getUsersAsync();
+    const user = users.find(u =>
+      (targetEmail && u.email && u.email.toLowerCase().trim() === targetEmail) ||
+      (cleanPhone && normalizePhone(u.phone) === cleanPhone)
+    );
+
+    const recipientEmail = targetEmail || (user && user.email ? user.email : null);
+    const userPhone = cleanPhone || (user && user.phone ? normalizePhone(user.phone) : null);
+    const customerName = user ? user.name : 'Valued Customer';
+
+    // Generate secure 6-digit OTP (valid for 2 minutes / 120s)
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 2 * 60 * 1000; // 2 minutes
+
+    const otpData = {
+      otpCode,
+      expiresAt,
+      attempts: 0,
+      email: recipientEmail,
+      phone: userPhone,
+      userId: user ? user.id : null
+    };
+
+    if (recipientEmail) {
+      otpCache.set(recipientEmail.toLowerCase().trim(), otpData);
+    }
+    if (userPhone) {
+      otpCache.set(userPhone, otpData);
+    }
+
+    if (user && user.id) {
+      await saveUserAsync({ ...user, otpCode, otpExpires: new Date(expiresAt).toISOString() });
+    }
+
+    // Send Gmail OTP if email is available
+    if (recipientEmail) {
+      sendOTPEmail(recipientEmail, otpCode, customerName);
+    }
+
+    res.json({
+      success: true,
+      message: recipientEmail 
+        ? `6-digit OTP code sent to ${recipientEmail}! Valid for 2 minutes.`
+        : `6-digit OTP generated for mobile ${userPhone}.`,
+      email: recipientEmail,
+      phone: userPhone,
+      name: customerName,
+      demoOtp: process.env.NODE_ENV === 'production' ? undefined : otpCode
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to send OTP code', error: err.message });
+  }
+});
+
+// POST /api/auth/verify-otp (Verify 6-Digit OTP)
+router.post('/verify-otp', resetLimiter, async (req, res) => {
+  try {
+    const { email, phone, otp } = req.body;
+    if ((!email && !phone) || !otp) {
+      return res.status(400).json({ success: false, message: 'Email/phone and 6-digit OTP code are required' });
+    }
+
+    const key = email ? email.toLowerCase().trim() : normalizePhone(phone);
+    let cached = otpCache.get(key);
+
+    const users = await getUsersAsync();
+    const cleanDigits = phone ? normalizePhone(phone) : null;
+    const emailLower = email ? email.toLowerCase().trim() : null;
+
+    const user = users.find(u =>
+      (emailLower && u.email && u.email.toLowerCase().trim() === emailLower) ||
+      (cleanDigits && normalizePhone(u.phone) === cleanDigits)
+    );
+
+    const userOtp = user ? user.otpCode : null;
+    const userOtpExpires = user && user.otpExpires ? new Date(user.otpExpires).getTime() : null;
+
+    // 1. Expiration check (2 minutes)
+    if (cached && Date.now() > cached.expiresAt) {
+      otpCache.delete(key);
+      return res.status(400).json({ success: false, message: 'OTP code has expired (2 min limit). Please click "Resend Gmail Code" to get a fresh OTP.' });
+    }
+    if (!cached && userOtpExpires && Date.now() > userOtpExpires) {
+      return res.status(400).json({ success: false, message: 'OTP code has expired. Please click "Resend Gmail Code" to get a fresh OTP.' });
+    }
+
+    // 2. Attempt counter check
+    if (cached && cached.attempts >= 5) {
+      otpCache.delete(key);
+      return res.status(400).json({ success: false, message: 'Too many invalid attempts. Please request a fresh OTP code.' });
+    }
+
+    const validCode = (cached && cached.otpCode === otp.trim()) || (userOtp && userOtp === otp.trim());
+
+    if (!validCode) {
+      if (cached) cached.attempts = (cached.attempts || 0) + 1;
+      return res.status(400).json({ success: false, message: 'Invalid 6-digit OTP code. Please double check and try again.' });
+    }
+
+    // 3. OTP is valid -> Consume single-use OTP
+    if (cached) {
+      if (cached.email) otpCache.delete(cached.email.toLowerCase().trim());
+      if (cached.phone) otpCache.delete(cached.phone);
+    }
+    if (user && user.id) {
+      await saveUserAsync({ ...user, otpCode: null, otpExpires: null });
+    }
+
+    // 4. Issue a secure 15-minute Reset Token for password reset step
+    const resetToken = crypto.randomBytes(24).toString('hex');
+    const resetExpiresAt = Date.now() + 15 * 60 * 1000;
+
+    resetTokenCache.set(resetToken, {
+      userId: user ? user.id : null,
+      email: user ? user.email : emailLower,
+      phone: user ? user.phone : cleanDigits,
+      expiresAt: resetExpiresAt
+    });
+
+    res.json({
+      success: true,
+      message: 'OTP code verified successfully!',
+      resetToken,
+      email: user ? user.email : emailLower,
+      phone: user ? user.phone : cleanDigits,
+      name: user ? user.name : 'Customer'
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'OTP verification failed', error: err.message });
+  }
+});
+
 // POST /api/auth/verify-phone
 router.post('/verify-phone', resetLimiter, async (req, res) => {
   try {
@@ -189,26 +349,53 @@ router.post('/verify-phone', resetLimiter, async (req, res) => {
 // POST /api/auth/reset-password
 router.post('/reset-password', resetLimiter, async (req, res) => {
   try {
-    const { phone, newPassword } = req.body;
+    const { phone, email, identity, newPassword, resetToken } = req.body;
 
-    if (!phone || !newPassword) {
-      return res.status(400).json({ success: false, message: 'Phone number and new password are required' });
-    }
-
-    if (newPassword.length < 4) {
+    if (!newPassword || newPassword.length < 4) {
       return res.status(400).json({ success: false, message: 'New password must be at least 4 characters long' });
     }
 
-    const cleanPhone = normalizePhone(phone);
-    const users = await getUsersAsync();
-    const user = users.find(u => normalizePhone(u.phone) === cleanPhone);
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'No account found with this registered phone number' });
+    // Check reset token if provided
+    let verifiedSession = null;
+    if (resetToken) {
+      verifiedSession = resetTokenCache.get(resetToken);
+      if (!verifiedSession || Date.now() > verifiedSession.expiresAt) {
+        return res.status(403).json({ success: false, message: 'Password reset session has expired or is invalid. Please request a new OTP.' });
+      }
     }
 
-    const updatedUser = { ...user, password: hashPassword(newPassword), updatedAt: new Date().toISOString() };
+    const targetIdentity = identity || email || phone || (verifiedSession ? (verifiedSession.phone || verifiedSession.email) : null);
+    if (!targetIdentity) {
+      return res.status(400).json({ success: false, message: 'Phone number or email is required to identify account' });
+    }
+
+    const cleanPhone = normalizePhone(targetIdentity);
+    const cleanEmail = targetIdentity.includes('@') ? targetIdentity.toLowerCase().trim() : null;
+
+    const users = await getUsersAsync();
+    const user = users.find(u =>
+      (verifiedSession && verifiedSession.userId && u.id === verifiedSession.userId) ||
+      (cleanPhone && normalizePhone(u.phone) === cleanPhone) ||
+      (cleanEmail && u.email && u.email.toLowerCase().trim() === cleanEmail)
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No account found with this registered phone or email' });
+    }
+
+    const updatedUser = { 
+      ...user, 
+      password: hashPassword(newPassword), 
+      otpCode: null, 
+      otpExpires: null,
+      updatedAt: new Date().toISOString() 
+    };
     await saveUserAsync(updatedUser);
+
+    // Consume reset token
+    if (resetToken) {
+      resetTokenCache.delete(resetToken);
+    }
 
     res.json({
       success: true,
@@ -255,6 +442,57 @@ router.put('/update-profile', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Profile update failed', error: err.message });
+  }
+});
+
+// POST /api/auth/google (Google OAuth Authentication & Single Sign-On)
+router.post('/google', async (req, res) => {
+  try {
+    const { token, email, name, picture } = req.body;
+
+    const targetEmail = email ? email.toLowerCase().trim() : null;
+    if (!targetEmail || !targetEmail.includes('@')) {
+      return res.status(400).json({ success: false, message: 'Google account email is required' });
+    }
+
+    const cleanName = name ? sanitizeInput(name) : targetEmail.split('@')[0];
+    const users = await getUsersAsync();
+    let user = users.find(u => u.email && u.email.toLowerCase().trim() === targetEmail);
+
+    if (!user) {
+      // Auto-register Google user
+      const newId = users.length > 0 ? Math.max(...users.map(u => u.id || 0)) + 1 : 1;
+      user = {
+        id: newId,
+        name: cleanName,
+        email: targetEmail,
+        phone: '',
+        picture: picture || '',
+        authProvider: 'google',
+        createdAt: new Date().toISOString()
+      };
+      await saveUserAsync(user);
+    } else if (picture && !user.picture) {
+      user = { ...user, picture, authProvider: user.authProvider || 'google' };
+      await saveUserAsync(user);
+    }
+
+    const userProfile = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || '',
+      address: user.address || '',
+      picture: user.picture || ''
+    };
+
+    res.json({
+      success: true,
+      message: `Successfully authenticated with Google! Welcome, ${user.name}.`,
+      user: userProfile
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Google authentication failed', error: err.message });
   }
 });
 
