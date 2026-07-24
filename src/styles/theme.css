@@ -2424,22 +2424,26 @@ img {
 
 /* Top Sticky Header */
 .auth-header-bar {
-  background: rgba(11, 14, 20, 0.85);
+  background: var(--bg-card);
   backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 16px 32px;
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
 }
 
 [data-theme="light"] .auth-header-bar {
-  background: rgba(255, 255, 255, 0.88);
-  border-bottom-color: rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  border-bottom-color: #e2e8f0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
 .auth-close-btn {

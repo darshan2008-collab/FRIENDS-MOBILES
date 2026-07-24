@@ -225,13 +225,15 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     <div className="full-page-user-auth-portal">
       {/* Top Sticky Header */}
       <header className="auth-header-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
-          <CompanyLogo size={32} />
-          <div style={{ minWidth: 0 }}>
-            <h2 style={{ margin: 0, fontSize: 'clamp(0.95rem, 3.5vw, 1.25rem)', fontWeight: '900', letterSpacing: '-0.3px', whiteSpace: 'nowrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+          <CompanyLogo size={36} />
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
+            <h2 style={{ margin: 0, fontSize: 'clamp(1rem, 3.5vw, 1.25rem)', fontWeight: '900', letterSpacing: '-0.3px', lineHeight: '1.2', whiteSpace: 'nowrap' }}>
               FRIENDS <span style={{ color: '#FF5500' }}>MOBILE</span>
             </h2>
-            <span className="admin-subtitle-mobile-hide" style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '600', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Member Orders &amp; Account Portal</span>
+            <span className="admin-subtitle-mobile-hide" style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '600', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '1px' }}>
+              Member Orders &amp; Account Portal
+            </span>
           </div>
         </div>
 
