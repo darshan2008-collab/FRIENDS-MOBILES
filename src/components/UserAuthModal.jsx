@@ -36,9 +36,14 @@ const safeFetchApi = async (endpoint, options = {}) => {
   for (const url of urlList) {
     try {
       const res = await fetch(url, options);
-      if (res.ok || res.status < 500) {
+      try {
         const data = await res.json();
         return { ok: res.ok, status: res.status, data };
+      } catch (jsonErr) {
+        if (res.ok) {
+          return { ok: true, status: res.status, data: { success: true } };
+        }
+        return { ok: false, status: res.status, data: { success: false, message: `Server HTTP ${res.status}` } };
       }
     } catch (err) {
       lastError = err;
