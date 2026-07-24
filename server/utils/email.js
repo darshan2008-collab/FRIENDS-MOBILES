@@ -9,17 +9,20 @@ try {
   console.warn('[Email Warning] nodemailer module not loaded yet.');
 }
 
-const getGmailUser = () => (process.env.GMAIL_USER || 'xunitary@gmail.com').trim();
-const getGmailPassword = () => (process.env.GMAIL_APP_PASSWORD || 'cymeyaijcvbofggd').replace(/\s+/g, '').trim();
+const getSmtpHost = () => (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
+const getSmtpPort = () => parseInt(process.env.SMTP_PORT || '587', 10);
+const getGmailUser = () => (process.env.SMTP_USER || process.env.GMAIL_USER || 'xunitary@gmail.com').trim();
+const getGmailPassword = () => (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || 'cymeyaijcvbofggd').replace(/\s+/g, '').trim();
 
-const createTransporter = (port = 465) => {
+const createTransporter = (overridePort = null) => {
   if (!nodemailer) return null;
   const user = getGmailUser();
   const pass = getGmailPassword();
+  const host = getSmtpHost();
+  const port = overridePort || getSmtpPort();
 
   return nodemailer.createTransport({
-    service: 'gmail',
-    host: 'smtp.gmail.com',
+    host: host,
     port: port,
     secure: port === 465,
     auth: { user, pass },
@@ -33,7 +36,8 @@ const createTransporter = (port = 465) => {
 
 async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') {
   try {
-    let transporter = createTransporter(465);
+    const configuredPort = getSmtpPort();
+    let transporter = createTransporter(configuredPort);
     if (!transporter) {
       console.error(`[Email Critical Error] Nodemailer module or transporter unavailable for ${toEmail}`);
       return { success: false, error: 'Gmail SMTP engine unavailable on server.' };
@@ -87,16 +91,17 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
       `
     };
 
+    const fallbackPort = configuredPort === 587 ? 465 : 587;
     try {
       const info = await transporter.sendMail(mailOptions);
-      console.log(`[Email Success] OTP sent via Port 465 to ${toEmail}. Message ID: ${info.messageId}`);
+      console.log(`[Email Success] OTP sent via Port ${configuredPort} to ${toEmail}. Message ID: ${info.messageId}`);
       return { success: true, messageId: info.messageId };
-    } catch (port465Err) {
-      console.warn(`[Email Port 465 Retry] Retrying via Port 587 STARTTLS... Error: ${port465Err.message}`);
-      const transporter587 = createTransporter(587);
-      const info587 = await transporter587.sendMail(mailOptions);
-      console.log(`[Email Success] OTP sent via Port 587 to ${toEmail}. Message ID: ${info587.messageId}`);
-      return { success: true, messageId: info587.messageId };
+    } catch (primaryErr) {
+      console.warn(`[Email Retry] Primary Port ${configuredPort} failed (${primaryErr.message}). Retrying via Port ${fallbackPort}...`);
+      const fallbackTransporter = createTransporter(fallbackPort);
+      const fallbackInfo = await fallbackTransporter.sendMail(mailOptions);
+      console.log(`[Email Success] OTP sent via Port ${fallbackPort} to ${toEmail}. Message ID: ${fallbackInfo.messageId}`);
+      return { success: true, messageId: fallbackInfo.messageId };
     }
   } catch (err) {
     console.error(`[Email Error] Failed to send OTP to ${toEmail}:`, err.message);
