@@ -39,21 +39,13 @@ exports.sendOtp = async (req, res) => {
       });
     }
 
-    // 2. Check if User exists in MongoDB (User collection)
+    // 2. Find user if exists (to retrieve name for email header)
     const existingUser = await User.findOne({
       $or: [
         { email: cleanEmail },
         { email: { $regex: new RegExp(`^${cleanEmail}$`, 'i') } }
       ]
     }).lean();
-
-    if (!existingUser) {
-      // 404 User Not Found
-      return res.status(404).json({
-        success: false,
-        message: `Your Mail ID (${cleanEmail}) is not found in our database. Please check your email or Sign Up.`
-      });
-    }
 
     // 3. Generate secure random 6-digit OTP
     const rawOtp = crypto.randomInt(100000, 1000000).toString();
@@ -264,7 +256,7 @@ exports.resetPassword = async (req, res) => {
     if (updateResult.matchedCount === 0) {
       return res.status(404).json({
         success: false,
-        message: 'User account not found.'
+        message: `No registered account found with email (${cleanEmail}). Password cannot be changed.`
       });
     }
 
