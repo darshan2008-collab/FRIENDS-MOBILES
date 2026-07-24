@@ -23,6 +23,7 @@ export default function ShoppingPortal({
   const [priceRange, setPriceRange] = useState('all'); // 'all' | 'under-500' | '500-1000' | '1000-3000' | 'above-3000'
   const [inStockOnly, setInStockOnly] = useState(false);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Synchronize category when initialCategory prop changes on open
   useEffect(() => {
@@ -223,11 +224,47 @@ export default function ShoppingPortal({
         </div>
       </div>
 
-      {/* Main Layout Grid: Sidebar Filters + Main Product Catalog */}
-      <div className="shop-main-layout container">
+      {/* Main Layout: Collapsible Sidebar + Full-Width Product Catalog */}
+      <div className={`shop-main-layout container ${isFilterOpen ? 'filter-open' : 'filter-closed'}`}>
         
-        {/* Left Filter Sidebar */}
-        <aside className={`shop-sidebar-panel ${isMobileFilterOpen ? 'open' : ''}`}>
+        {/* Filter Toggle Button (always visible at corner) */}
+        <button
+          className="filter-toggle-corner-btn"
+          onClick={() => { setIsFilterOpen(!isFilterOpen); setIsMobileFilterOpen(!isMobileFilterOpen); }}
+          style={{
+            position: isFilterOpen ? 'relative' : 'absolute',
+            top: isFilterOpen ? '0' : '0',
+            left: '0',
+            zIndex: 100,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: isFilterOpen ? '10px 10px 0 0' : '10px',
+            background: isFilterOpen ? '#FF5500' : 'var(--bg-card)',
+            color: isFilterOpen ? '#fff' : '#FF5500',
+            border: isFilterOpen ? 'none' : '1px solid var(--border-color)',
+            fontWeight: '800',
+            fontSize: '0.82rem',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            transition: 'all 0.25s ease'
+          }}
+        >
+          <Filter size={16} />
+          {isFilterOpen ? 'Close Filters' : 'Filters'}
+          {(selectedCategory !== 'All' || priceRange !== 'all' || inStockOnly) && (
+            <span style={{
+              width: '8px', height: '8px', borderRadius: '50%',
+              background: isFilterOpen ? '#fff' : '#FF5500',
+              display: 'inline-block'
+            }} />
+          )}
+        </button>
+
+        {/* Left Filter Sidebar (collapsible) */}
+        <aside className={`shop-sidebar-panel ${isFilterOpen ? 'open' : ''} ${isMobileFilterOpen ? 'open' : ''}`} style={{ display: isFilterOpen ? 'flex' : 'none' }}>
           <div className="sidebar-header">
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontSize: '1rem', fontWeight: '850' }}>
               <Filter size={18} color="#FF5500" /> Filter Products
@@ -237,7 +274,7 @@ export default function ShoppingPortal({
                 Reset All
               </button>
             )}
-            <button className="mobile-sidebar-close" onClick={() => setIsMobileFilterOpen(false)}>
+            <button className="mobile-sidebar-close" onClick={() => { setIsMobileFilterOpen(false); setIsFilterOpen(false); }}>
               <X size={20} />
             </button>
           </div>
