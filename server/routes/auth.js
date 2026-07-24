@@ -221,7 +221,7 @@ router.post('/send-otp', resetLimiter, async (req, res) => {
       console.error(`[Auth Router Error] OTP Email dispatch failed to ${recipientEmail}:`, emailResult ? emailResult.error : 'Unknown error');
       return res.status(500).json({
         success: false,
-        message: `Failed to send OTP code to ${recipientEmail}. Please check server email credentials or try again.`
+        message: `Failed to send OTP email to ${recipientEmail}. Reason: ${emailResult?.error || 'Gmail SMTP Server Error'}. Please check server email credentials.`
       });
     }
 
