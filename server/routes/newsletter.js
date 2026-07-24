@@ -1,21 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
-const path = require('path');
-
-const subscribersFilePath = path.join(__dirname, '../data/subscribers.json');
-
-function getSubscribers() {
-  const data = fs.readFileSync(subscribersFilePath, 'utf8');
-  return JSON.parse(data);
-}
-
-function saveSubscribers(subscribers) {
-  fs.writeFileSync(subscribersFilePath, JSON.stringify(subscribers, null, 2), 'utf8');
-}
+const Subscriber = require('../models/Subscriber');
 
 // POST /api/newsletter/subscribe
-router.post('/subscribe', (req, res) => {
+router.post('/subscribe', async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -23,19 +11,17 @@ router.post('/subscribe', (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid email address' });
     }
 
-    const subscribers = getSubscribers();
-    const exists = subscribers.some(s => s.email.toLowerCase() === email.toLowerCase());
+    const cleanEmail = email.toLowerCase().trim();
+    const existing = await Subscriber.findOne({ email: cleanEmail });
 
-    if (exists) {
+    if (existing) {
       return res.json({ success: true, message: 'You are already subscribed!' });
     }
 
-    subscribers.push({
-      email: email.toLowerCase(),
+    await Subscriber.create({
+      email: cleanEmail,
       subscribedAt: new Date().toISOString()
     });
-
-    saveSubscribers(subscribers);
 
     res.status(201).json({ success: true, message: 'Subscribed to FRIENDS MOBILE newsletter!' });
   } catch (err) {
