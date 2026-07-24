@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Send, Bot, User, Sparkles, Package, Truck, Phone, MessageSquare, 
   RefreshCw, ChevronRight, ShieldCheck, Clock, CheckCircle2, AlertCircle, 
-  HelpCircle, Smartphone, Frame, ShoppingBag, ArrowRight
+  HelpCircle, Smartphone, Frame, ShoppingBag, ArrowRight, Maximize2, Minimize2
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
@@ -17,6 +17,7 @@ export default function AIChatbotModal({
   onOpenUserAccount,
   addToast 
 }) {
+  const [isCompactView, setIsCompactView] = useState(false); // Default: false (Full View on Desktop & Mobile)
   const [messages, setMessages] = useState([
     {
       id: 'welcome-1',
@@ -266,8 +267,8 @@ export default function AIChatbotModal({
   };
 
   return (
-    <div className="ai-chatbot-modal-overlay" onClick={onClose}>
-      <div className="ai-chatbot-container" onClick={(e) => e.stopPropagation()}>
+    <div className={`ai-chatbot-modal-overlay ${isCompactView ? 'compact-overlay' : 'full-view-overlay'}`} onClick={onClose}>
+      <div className={`ai-chatbot-container ${isCompactView ? 'compact-container' : 'full-view-container'}`} onClick={(e) => e.stopPropagation()}>
         
         {/* Header Bar */}
         <div className="ai-chatbot-header">
@@ -286,6 +287,13 @@ export default function AIChatbotModal({
           </div>
 
           <div className="ai-chatbot-header-right">
+            <button 
+              className="ai-reset-btn"
+              onClick={() => setIsCompactView(!isCompactView)}
+              title={isCompactView ? "Switch to Full Screen View" : "Switch to Compact Window"}
+            >
+              {isCompactView ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
+            </button>
             <button 
               className="ai-reset-btn"
               onClick={() => {
