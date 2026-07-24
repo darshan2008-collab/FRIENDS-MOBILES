@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const OtpVerification = require('../models/OtpVerification');
 const User = require('../models/User');
-const { sendOTPEmail } = require('../services/emailService');
+const { sendOTPEmail } = require('../utils/email');
 
 // In-memory verification token cache for seamless password reset bridging
 const verifiedTokens = new Map();
