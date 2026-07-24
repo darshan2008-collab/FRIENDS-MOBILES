@@ -168,42 +168,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
   };
 
-  const handleGoogleLogin = async () => {
-    const promptEmail = window.prompt("Enter your Google Account Gmail Address to sign in or create an account:", "user@gmail.com");
-    if (!promptEmail || !promptEmail.includes('@')) {
-      if (promptEmail !== null && addToast) addToast('Please enter a valid Gmail address', 'warning');
-      return;
-    }
 
-    const cleanEmail = promptEmail.trim().toLowerCase();
-    const defaultName = cleanEmail.split('@')[0] || 'Google Customer';
-
-    setIsSubmitting(true);
-    try {
-      const { data } = await safeFetchApi('/auth/google-auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: cleanEmail,
-          name: defaultName,
-          googleId: 'g_' + Date.now()
-        })
-      });
-
-      if (data && data.success && data.user) {
-        onLoginSuccess(data.user);
-        if (addToast) addToast(data.message || `Welcome, ${data.user.name}! Account registered with Google.`, 'success');
-        onClose();
-      } else {
-        if (addToast) addToast((data && data.message) || 'Failed to authenticate Google account.', 'error');
-      }
-    } catch (err) {
-      console.error("Google Auth connection error:", err);
-      if (addToast) addToast('Failed to connect to authentication server. Please check your network.', 'error');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -433,8 +398,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
             picture: picture || 'https://lh3.googleusercontent.com/a/default-user'
           })
         });
-        const data = await res.json();
-        if (data.success && data.user) {
+        if (data && data.success && data.user) {
           onLoginSuccess(data.user);
           if (addToast) addToast(data.message || `Signed in with Google as ${data.user.name}!`, 'success');
           onClose();
