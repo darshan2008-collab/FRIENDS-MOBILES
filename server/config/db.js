@@ -125,6 +125,21 @@ CREATE TABLE IF NOT EXISTS otp_verifications (
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS complaints (
+  id SERIAL PRIMARY KEY,
+  ticket_id VARCHAR(100) UNIQUE NOT NULL,
+  customer_name VARCHAR(255) NOT NULL,
+  customer_phone VARCHAR(50) NOT NULL,
+  customer_email VARCHAR(255) DEFAULT '',
+  order_id VARCHAR(100) DEFAULT '',
+  category VARCHAR(100) DEFAULT 'General Issue',
+  message TEXT NOT NULL,
+  status VARCHAR(50) DEFAULT 'Open',
+  admin_notes TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
 `;
 
 const ensureDatabaseExists = async () => {

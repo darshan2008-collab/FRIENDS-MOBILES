@@ -5,6 +5,7 @@ const { readData, writeData, sanitizeInput } = require('../utils/db');
 const Setting = require('../models/Setting');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const Complaint = require('../models/Complaint');
 
 const settingsFilePath = path.join(__dirname, '../data/settings.json');
 const ordersFilePath = path.join(__dirname, '../data/orders.json');
@@ -139,6 +140,65 @@ router.get('/analytics', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to fetch analytics', error: err.message });
+  }
+});
+
+// GET /api/admin/complaints — Get all customer complaints/tickets
+router.get('/complaints', async (req, res) => {
+  try {
+    const complaints = await Complaint.find({});
+    res.json({ success: true, count: complaints.length, complaints });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch complaints', error: err.message });
+  }
+});
+
+// POST /api/admin/complaints — Submit a new customer complaint/ticket
+router.post('/complaints', async (req, res) => {
+  try {
+    const { customerName, customerPhone, customerEmail, orderId, category, message } = req.body;
+
+    if (!customerName || !customerPhone || !message) {
+      return res.status(400).json({ success: false, message: 'Customer name, phone number, and complaint description are required' });
+    }
+
+    const ticketId = `TKT-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const newComplaint = await Complaint.create({
+      ticketId,
+      customerName: sanitizeInput(customerName),
+      customerPhone: sanitizeInput(customerPhone),
+      customerEmail: customerEmail ? sanitizeInput(customerEmail) : '',
+      orderId: orderId ? sanitizeInput(orderId) : '',
+      category: category ? sanitizeInput(category) : 'General Issue',
+      message: sanitizeInput(message),
+      status: 'Open'
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Complaint registered successfully! Our team will contact you shortly.',
+      complaint: newComplaint
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to register complaint', error: err.message });
+  }
+});
+
+// PUT /api/admin/complaints/:ticketId — Update complaint status / notes
+router.put('/complaints/:ticketId', async (req, res) => {
+  try {
+    const { status, adminNotes } = req.body;
+    const { ticketId } = req.params;
+
+    const updated = await Complaint.updateOne({ ticketId }, { status, adminNotes });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Ticket ID not found' });
+    }
+
+    res.json({ success: true, message: `Ticket #${ticketId} updated to "${status}"`, complaint: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to update complaint ticket', error: err.message });
   }
 });
 
