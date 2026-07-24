@@ -12,30 +12,31 @@ try {
 const getGmailUser = () => (process.env.GMAIL_USER || 'xunitary@gmail.com').trim();
 const getGmailPassword = () => (process.env.GMAIL_APP_PASSWORD || 'cymeyaijcvbofggd').replace(/\s+/g, '').trim();
 
-const createTransporter = () => {
+const createTransporter = (port = 465) => {
   if (!nodemailer) return null;
   const user = getGmailUser();
   const pass = getGmailPassword();
 
   return nodemailer.createTransport({
+    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    port: port,
+    secure: port === 465,
     auth: { user, pass },
     tls: {
       rejectUnauthorized: false
     },
-    connectionTimeout: 10000,
-    socketTimeout: 15000
+    connectionTimeout: 15000,
+    socketTimeout: 20000
   });
 };
 
 async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') {
   try {
-    const transporter = createTransporter();
+    let transporter = createTransporter(465);
     if (!transporter) {
       console.error(`[Email Critical Error] Nodemailer module or transporter unavailable for ${toEmail}`);
-      return { success: false, error: 'Gmail SMTP engine unavailable on server. Please check server logs.' };
+      return { success: false, error: 'Gmail SMTP engine unavailable on server.' };
     }
 
     const senderEmail = getGmailUser();
@@ -86,9 +87,17 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
       `
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`[Email Success] Password reset OTP sent to ${toEmail}. Message ID: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`[Email Success] OTP sent via Port 465 to ${toEmail}. Message ID: ${info.messageId}`);
+      return { success: true, messageId: info.messageId };
+    } catch (port465Err) {
+      console.warn(`[Email Port 465 Retry] Retrying via Port 587 STARTTLS... Error: ${port465Err.message}`);
+      const transporter587 = createTransporter(587);
+      const info587 = await transporter587.sendMail(mailOptions);
+      console.log(`[Email Success] OTP sent via Port 587 to ${toEmail}. Message ID: ${info587.messageId}`);
+      return { success: true, messageId: info587.messageId };
+    }
   } catch (err) {
     console.error(`[Email Error] Failed to send OTP to ${toEmail}:`, err.message);
     return { success: false, error: err.message };

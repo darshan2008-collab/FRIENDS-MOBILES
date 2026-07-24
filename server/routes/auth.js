@@ -14,20 +14,48 @@ const signupLimiter = rateLimiter({ windowMs: 60 * 60 * 1000, max: 5, message: '
 const resetLimiter = rateLimiter({ windowMs: 15 * 60 * 1000, max: 15, message: 'Too many password reset attempts. Please wait before trying again.' });
 
 async function getUsersAsync() {
+  const fileUsers = readData(usersFilePath, []);
   try {
     const dbUsers = await User.find({}).lean();
-    return dbUsers || [];
+    if (dbUsers && dbUsers.length > 0) {
+      const combinedMap = new Map();
+      fileUsers.forEach(u => {
+        if (u.email) combinedMap.set(u.email.toLowerCase().trim(), u);
+        else if (u.phone) combinedMap.set(normalizePhone(u.phone), u);
+      });
+      dbUsers.forEach(u => {
+        if (u.email) combinedMap.set(u.email.toLowerCase().trim(), u);
+        else if (u.phone) combinedMap.set(normalizePhone(u.phone), u);
+      });
+      return Array.from(combinedMap.values());
+    }
   } catch (e) {
     console.error("[User MongoDB Get Error]", e.message);
-    return [];
   }
+  return fileUsers;
 }
 
 async function saveUserAsync(userData) {
-  try {
-    const cleanEmail = userData.email ? userData.email.toLowerCase().trim() : '';
-    const cleanPhone = userData.phone ? normalizePhone(userData.phone) : '';
+  // 1. Update normal local file storage
+  const fileUsers = readData(usersFilePath, []);
+  const cleanEmail = userData.email ? userData.email.toLowerCase().trim() : '';
+  const cleanPhone = userData.phone ? normalizePhone(userData.phone) : '';
 
+  const idx = fileUsers.findIndex(u =>
+    (cleanEmail && u.email && u.email.toLowerCase().trim() === cleanEmail) ||
+    (cleanPhone && cleanPhone.length >= 10 && normalizePhone(u.phone) === cleanPhone) ||
+    (userData.id && u.id === userData.id)
+  );
+
+  if (idx !== -1) {
+    fileUsers[idx] = { ...fileUsers[idx], ...userData };
+  } else {
+    fileUsers.push(userData);
+  }
+  writeData(usersFilePath, fileUsers);
+
+  // 2. Save in MongoDB
+  try {
     const query = cleanEmail
       ? { email: cleanEmail }
       : (cleanPhone ? { phone: cleanPhone } : { id: userData.id });
@@ -238,148 +266,16 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
+const otpController = require('../controllers/otpController');
+
 // POST /api/auth/send-otp (Send Unique 6-Digit OTP to Registered Email ID)
-router.post('/send-otp', resetLimiter, async (req, res) => {
-  try {
-    const { email } = req.body;
-    const cleanEmail = email ? email.toLowerCase().trim() : '';
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!cleanEmail || !emailRegex.test(cleanEmail)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Please enter a valid Gmail / Email address (e.g. user@gmail.com)' 
-      });
-    }
-
-    const users = await getUsersAsync();
-    const user = users.find(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
-
-    if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: `Your Mail ID (${cleanEmail}) is not found in our database. Please check and enter your correct registered Mail ID or Sign Up for a new account.` 
-      });
-    }
-
-    const recipientEmail = user.email.toLowerCase().trim();
-    const customerName = user.name || 'Valued Customer';
-
-    // Generate cryptographically unique 6-digit OTP code (valid for 2 minutes)
-    const otpCode = crypto.randomInt(100000, 1000000).toString();
-    const expiresAt = Date.now() + 2 * 60 * 1000;
-
-    const otpData = {
-      otpCode,
-      expiresAt,
-      attempts: 0,
-      email: recipientEmail,
-      userId: user.id
-    };
-
-    otpCache.set(recipientEmail, otpData);
-    await saveUserAsync({ ...user, otpCode, otpExpires: new Date(expiresAt).toISOString() });
-
-    // Send Unique OTP Email via Gmail Nodemailer
-    const emailResult = await sendOTPEmail(recipientEmail, otpCode, customerName);
-
-    if (!emailResult || !emailResult.success) {
-      console.error(`[Auth Router Error] OTP Email dispatch failed to ${recipientEmail}:`, emailResult ? emailResult.error : 'Unknown error');
-      return res.status(500).json({
-        success: false,
-        message: `Failed to send OTP email to ${recipientEmail}. Reason: ${emailResult?.error || 'Gmail SMTP Server Error'}. Please check server email credentials.`
-      });
-    }
-
-    res.json({
-      success: true,
-      message: `Unique 6-digit OTP code sent directly to ${recipientEmail}. Please check your Gmail inbox (valid for 2 mins).`,
-      email: recipientEmail,
-      name: customerName
-    });
-  } catch (err) {
-    console.error("[Send OTP Route Error]", err);
-    res.status(500).json({ success: false, message: 'Failed to generate and send OTP code', error: err.message });
-  }
-});
+router.post('/send-otp', resetLimiter, otpController.sendOtp);
 
 // POST /api/auth/verify-otp (Verify 6-Digit OTP)
-router.post('/verify-otp', resetLimiter, async (req, res) => {
-  try {
-    const { email, phone, otp } = req.body;
-    if ((!email && !phone) || !otp) {
-      return res.status(400).json({ success: false, message: 'Email/phone and 6-digit OTP code are required' });
-    }
+router.post('/verify-otp', resetLimiter, otpController.verifyOtp);
 
-    const key = email ? email.toLowerCase().trim() : normalizePhone(phone);
-    let cached = otpCache.get(key);
-
-    const users = await getUsersAsync();
-    const cleanDigits = phone ? normalizePhone(phone) : null;
-    const emailLower = email ? email.toLowerCase().trim() : null;
-
-    const user = users.find(u =>
-      (emailLower && u.email && u.email.toLowerCase().trim() === emailLower) ||
-      (cleanDigits && normalizePhone(u.phone) === cleanDigits)
-    );
-
-    const userOtp = user ? user.otpCode : null;
-    const userOtpExpires = user && user.otpExpires ? new Date(user.otpExpires).getTime() : null;
-
-    // 1. Expiration check (2 minutes)
-    if (cached && Date.now() > cached.expiresAt) {
-      otpCache.delete(key);
-      return res.status(400).json({ success: false, message: 'OTP code has expired (2 min limit). Please click "Resend Gmail Code" to get a fresh OTP.' });
-    }
-    if (!cached && userOtpExpires && Date.now() > userOtpExpires) {
-      return res.status(400).json({ success: false, message: 'OTP code has expired. Please click "Resend Gmail Code" to get a fresh OTP.' });
-    }
-
-    // 2. Attempt counter check
-    if (cached && cached.attempts >= 5) {
-      otpCache.delete(key);
-      return res.status(400).json({ success: false, message: 'Too many invalid attempts. Please request a fresh OTP code.' });
-    }
-
-    const validCode = (cached && cached.otpCode === otp.trim()) || (userOtp && userOtp === otp.trim());
-
-    if (!validCode) {
-      if (cached) cached.attempts = (cached.attempts || 0) + 1;
-      return res.status(400).json({ success: false, message: 'Invalid 6-digit OTP code. Please double check and try again.' });
-    }
-
-    // 3. OTP is valid -> Consume single-use OTP
-    if (cached) {
-      if (cached.email) otpCache.delete(cached.email.toLowerCase().trim());
-      if (cached.phone) otpCache.delete(cached.phone);
-    }
-    if (user && user.id) {
-      await saveUserAsync({ ...user, otpCode: null, otpExpires: null });
-    }
-
-    // 4. Issue a secure 15-minute Reset Token for password reset step
-    const resetToken = crypto.randomBytes(24).toString('hex');
-    const resetExpiresAt = Date.now() + 15 * 60 * 1000;
-
-    resetTokenCache.set(resetToken, {
-      userId: user ? user.id : null,
-      email: user ? user.email : emailLower,
-      phone: user ? user.phone : cleanDigits,
-      expiresAt: resetExpiresAt
-    });
-
-    res.json({
-      success: true,
-      message: 'OTP code verified successfully!',
-      resetToken,
-      email: user ? user.email : emailLower,
-      phone: user ? user.phone : cleanDigits,
-      name: user ? user.name : 'Customer'
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'OTP verification failed', error: err.message });
-  }
-});
+// POST /api/auth/reset-password (Reset Password)
+router.post('/reset-password', resetLimiter, otpController.resetPassword);
 
 // POST /api/auth/verify-phone
 router.post('/verify-phone', resetLimiter, async (req, res) => {
@@ -475,31 +371,36 @@ router.post('/reset-password', resetLimiter, async (req, res) => {
 // PUT /api/auth/update-profile
 router.put('/update-profile', async (req, res) => {
   try {
-    const { phone, name, address, email } = req.body;
+    const { phone, name, address, email, pincode } = req.body;
 
-    if (!phone) {
-      return res.status(400).json({ success: false, message: 'Phone number is required to identify user' });
+    const cleanEmail = email ? sanitizeInput(email).toLowerCase().trim() : '';
+    const cleanPhone = phone ? normalizePhone(phone) : '';
+
+    if (!cleanEmail && !cleanPhone) {
+      return res.status(400).json({ success: false, message: 'Email address or phone number is required to identify user' });
     }
 
-    const cleanPhone = normalizePhone(phone);
     const users = await getUsersAsync();
-    const user = users.find(u => normalizePhone(u.phone) === cleanPhone);
+    const user = users.find(u =>
+      (cleanEmail && u.email && u.email.toLowerCase().trim() === cleanEmail) ||
+      (cleanPhone && cleanPhone.length >= 10 && normalizePhone(u.phone) === cleanPhone)
+    );
 
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User account not found' });
-    }
+    const fullAddr = (address && pincode && !address.includes(pincode)) ? `${sanitizeInput(address)} - ${pincode}` : (address ? sanitizeInput(address) : '');
 
     const updatedUser = {
-      ...user,
-      name: name ? sanitizeInput(name) : user.name,
-      address: address ? sanitizeInput(address) : user.address,
-      email: email ? sanitizeInput(email).toLowerCase() : user.email,
+      ...(user || {}),
+      name: name ? sanitizeInput(name) : (user?.name || cleanEmail.split('@')[0] || 'Customer'),
+      address: fullAddr || (user?.address || ''),
+      email: cleanEmail || (user?.email || ''),
+      phone: cleanPhone || (user?.phone || ''),
+      pincode: pincode || (user?.pincode || ''),
       updatedAt: new Date().toISOString()
     };
 
     await saveUserAsync(updatedUser);
 
-    const userProfile = { id: updatedUser.id, name: updatedUser.name, email: updatedUser.email, phone: updatedUser.phone, address: updatedUser.address };
+    const userProfile = { id: updatedUser.id || Date.now(), name: updatedUser.name, email: updatedUser.email, phone: updatedUser.phone, address: updatedUser.address };
 
     res.json({
       success: true,
