@@ -158,7 +158,6 @@ export default function Header({ theme, toggleTheme, cartCount, wishlistCount, o
                 type="button"
                 onClick={() => onOpenShop && onOpenShop('Mobile Phones')}
                 className="nav-link"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Mobile Phones
               </button>
@@ -168,7 +167,6 @@ export default function Header({ theme, toggleTheme, cartCount, wishlistCount, o
                 type="button"
                 onClick={() => onOpenShop && onOpenShop('Chargers & Cables')}
                 className="nav-link"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Chargers &amp; Accessories
               </button>
@@ -180,7 +178,6 @@ export default function Header({ theme, toggleTheme, cartCount, wishlistCount, o
                 type="button"
                 onClick={() => onOpenShop && onOpenShop('All')}
                 className="nav-link"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Shop All Store
               </button>

@@ -4407,6 +4407,159 @@ img {
 .product-card:nth-child(5) { transition-delay: 0.20s !important; }
 .product-card:nth-child(6) { transition-delay: 0.25s !important; }
 
+/* ==========================================================================
+   DESKTOP VIEW (min-width: 769px & min-width: 1024px) PREMIUM LINK & TYPOGRAPHY CORRECTIONS
+   ========================================================================== */
+
+@media (min-width: 769px) {
+  /* Navigation Bar & Desktop Links */
+  .main-nav {
+    display: block !important;
+    background-color: var(--bg-nav) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+  }
+
+  .nav-links {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 8px 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
+    overflow: visible !important;
+  }
+
+  .nav-link,
+  button.nav-link,
+  a.nav-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 6px 14px !important;
+    font-size: 0.81rem !important; /* Premium 13px crisp desktop sizing */
+    font-weight: 600 !important;
+    letter-spacing: 0.25px !important;
+    color: var(--text-secondary) !important;
+    border-radius: 6px !important;
+    border: 1px solid transparent !important;
+    background: transparent !important;
+    cursor: pointer !important;
+    font-family: var(--font-body) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    line-height: 1.4 !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+  }
+
+  .nav-link:hover,
+  button.nav-link:hover,
+  a.nav-link:hover {
+    color: var(--primary-orange) !important;
+    background-color: rgba(255, 85, 0, 0.08) !important;
+    border-color: rgba(255, 85, 0, 0.15) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .nav-link.active,
+  button.nav-link.active,
+  a.nav-link.active {
+    color: var(--primary-orange) !important;
+    background-color: rgba(255, 85, 0, 0.12) !important;
+    border: 1px solid rgba(255, 85, 0, 0.35) !important;
+    font-weight: 700 !important;
+  }
+
+  /* Header Brand Logo & Text Proportions */
+  .logo-brand {
+    font-size: 1.15rem !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .logo-sub {
+    font-size: 0.95rem !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  /* Desktop Header Actions & Search */
+  .header-actions {
+    gap: 12px !important;
+  }
+
+  .header-actions .action-btn {
+    font-size: 0.80rem !important;
+    font-weight: 600 !important;
+  }
+
+  .acc-title {
+    font-size: 0.80rem !important;
+    font-weight: 700 !important;
+  }
+
+  .acc-sub {
+    font-size: 0.70rem !important;
+  }
+
+  .header-logout-btn {
+    font-size: 0.78rem !important;
+    padding: 5px 10px !important;
+    border-radius: 6px !important;
+  }
+
+  .desktop-search-box {
+    max-width: 440px !important;
+    height: 38px !important;
+  }
+
+  .desktop-search-box input {
+    font-size: 0.81rem !important;
+  }
+
+  /* Section Titles & Desktop Subheadings */
+  .section-title {
+    font-size: 1.6rem !important;
+    letter-spacing: -0.3px !important;
+  }
+
+  .section-desc {
+    font-size: 0.88rem !important;
+  }
+
+  /* Footer Links & Text Proportions on Desktop */
+  .footer-col brand-col .logo-brand {
+    font-size: 1.25rem !important;
+  }
+
+  .footer-col brand-col .logo-sub {
+    font-size: 1.25rem !important;
+  }
+
+  .footer-title {
+    font-size: 0.85rem !important;
+    letter-spacing: 0.8px !important;
+  }
+
+  .footer-col a,
+  .footer-col span,
+  .footer-col p {
+    font-size: 0.83rem !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .nav-links {
+    gap: 12px !important;
+  }
+
+  .nav-link,
+  button.nav-link,
+  a.nav-link {
+    font-size: 0.82rem !important;
+    padding: 7px 16px !important;
+  }
+}
+
+
 
 
 
