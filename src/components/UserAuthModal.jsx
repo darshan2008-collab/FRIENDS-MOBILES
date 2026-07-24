@@ -202,12 +202,14 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
   };
 
-  // Step 1: Send Gmail / Phone OTP
+  // Step 1: Send Unique Gmail OTP to Registered Email
   const handleSendOtpSubmit = async (e) => {
     if (e) e.preventDefault();
-    const targetVal = forgotPhone ? forgotPhone.trim() : '';
-    if (!targetVal) {
-      if (addToast) addToast('Please enter your registered Email or Mobile number', 'warning');
+    const targetVal = forgotPhone ? forgotPhone.trim().toLowerCase() : '';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!targetVal || !emailRegex.test(targetVal)) {
+      if (addToast) addToast('Please enter a valid Gmail / Email address (e.g. user@gmail.com)', 'warning');
       return;
     }
 
@@ -215,13 +217,10 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     setOtpDigits(['', '', '', '', '', '']);
     setOtpInput('');
     try {
-      const isEmail = targetVal.includes('@');
-      const payload = isEmail ? { email: targetVal } : { phone: targetVal };
-
       const res = await fetch(`${API_BASE}/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ email: targetVal })
       });
       const data = await res.json();
       if (data.success) {
@@ -229,21 +228,14 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         setVerifiedName(data.name || 'Customer');
         setForgotStep(2);
         setResendTimer(120); // 2 minutes (120 seconds)
-        if (addToast) addToast(data.message || `6-digit OTP code sent to ${data.email || targetVal}! Valid for 2 mins.`, 'success');
+        if (addToast) addToast(data.message || `Unique 6-digit OTP sent to ${data.email || targetVal}! Valid for 2 mins.`, 'success');
       } else {
-        setSentEmail(data.email || targetVal);
-        setVerifiedName(data.name || 'Customer');
-        setForgotStep(2);
-        setResendTimer(120); // 2 minutes
-        if (addToast) addToast(data.message || `6-digit OTP code sent! Check your inbox or phone.`, 'warning');
+        // Stop & stay on step 1 if user account not found or email dispatch failed
+        if (addToast) addToast(data.message || 'Failed to send OTP code. Please check your email address.', 'error');
       }
     } catch (err) {
-      console.warn("Send OTP fallback:", err);
-      setSentEmail(forgotPhone.trim());
-      setVerifiedName('Customer');
-      setForgotStep(2);
-      setResendTimer(120); // 2 minutes
-      if (addToast) addToast('6-digit OTP code sent! Check your inbox or phone.', 'success');
+      console.error("Send OTP error:", err);
+      if (addToast) addToast('Unable to connect to server. Please check your network and try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }
