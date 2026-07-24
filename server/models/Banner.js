@@ -1,17 +1,40 @@
-const mongoose = require('mongoose');
+const { query } = require('../config/db');
 
-const BannerSchema = new mongoose.Schema({
-  slides: [{
-    id: { type: Number, required: true },
-    tag: { type: String, default: '' },
-    titleWhite: { type: String, default: '' },
-    titleGradient: { type: String, default: '' },
-    desc: { type: String, default: '' },
-    imgSrc: { type: String, default: '' },
-    btnText: { type: String, default: 'SHOP NOW' },
-    btnLink: { type: String, default: '#products' }
-  }],
-  updatedAt: { type: Date, default: Date.now }
-}, { timestamps: true });
+const Banner = {
+  findOne: async () => {
+    const res = await query('SELECT * FROM banners ORDER BY id ASC LIMIT 1');
+    if (res.rows.length === 0) return null;
+    const row = res.rows[0];
+    const slides = typeof row.slides === 'string' ? JSON.parse(row.slides) : row.slides;
+    return {
+      id: row.id,
+      slides: slides || [],
+      updatedAt: row.updated_at
+    };
+  },
 
-module.exports = mongoose.model('Banner', BannerSchema);
+  deleteMany: async () => {
+    await query('DELETE FROM banners');
+    return { deletedCount: 1 };
+  },
+
+  create: async (data) => {
+    const slidesJSON = JSON.stringify(data.slides || []);
+    const res = await query(`
+      INSERT INTO banners (id, slides, updated_at)
+      VALUES (1, $1, NOW())
+      ON CONFLICT (id) DO UPDATE SET
+        slides = EXCLUDED.slides,
+        updated_at = NOW()
+      RETURNING *;
+    `, [slidesJSON]);
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      slides: typeof row.slides === 'string' ? JSON.parse(row.slides) : row.slides,
+      updatedAt: row.updated_at
+    };
+  }
+};
+
+module.exports = Banner;

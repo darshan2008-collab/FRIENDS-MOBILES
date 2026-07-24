@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const crypto = require('crypto');
-const mongoose = require('mongoose');
 const { readData, writeData, sanitizeInput, normalizePhone, rateLimiter } = require('../utils/db');
 const User = require('../models/User');
 
@@ -16,7 +15,7 @@ const resetLimiter = rateLimiter({ windowMs: 15 * 60 * 1000, max: 15, message: '
 async function getUsersAsync() {
   const fileUsers = readData(usersFilePath, []);
   try {
-    const dbUsers = await User.find({}).lean();
+    const dbUsers = await User.find({});
     if (dbUsers && dbUsers.length > 0) {
       const combinedMap = new Map();
       fileUsers.forEach(u => {
@@ -30,7 +29,7 @@ async function getUsersAsync() {
       return Array.from(combinedMap.values());
     }
   } catch (e) {
-    console.error("[User MongoDB Get Error]", e.message);
+    console.error("[User PostgreSQL Get Error]", e.message);
   }
   return fileUsers;
 }
@@ -54,7 +53,7 @@ async function saveUserAsync(userData) {
   }
   writeData(usersFilePath, fileUsers);
 
-  // 2. Save in MongoDB
+  // 2. Save in PostgreSQL
   try {
     const query = cleanEmail
       ? { email: cleanEmail }
@@ -62,7 +61,7 @@ async function saveUserAsync(userData) {
 
     await User.updateOne(query, { $set: userData }, { upsert: true });
   } catch (e) {
-    console.error("[User MongoDB Save Error]", e.message);
+    console.error("[User PostgreSQL Save Error]", e.message);
   }
 }
 

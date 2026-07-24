@@ -82,7 +82,7 @@ router.post('/verify', (req, res) => {
       }
     }
 
-    // Mark the order as paid in MongoDB
+    // Mark the order as paid in PostgreSQL
     if (orderId) {
       try {
         const Order = require('../models/Order');

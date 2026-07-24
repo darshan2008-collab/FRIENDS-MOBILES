@@ -22,7 +22,7 @@ const getApiEndpoints = (endpoint) => {
       endpoints.push(`${origin}/api${endpoint}`);
     } else {
       endpoints.push(`${origin}/api${endpoint}`);
-      endpoints.push(`https://friends-mobiles-bb9x-eight.vercel.app/api${endpoint}`);
+      endpoints.push(`https://friends-mobiles-rho.vercel.app/api${endpoint}`);
     }
   }
 
@@ -49,7 +49,10 @@ const safeFetchApi = async (endpoint, options = {}) => {
         if (res.ok) {
           return { ok: true, status: res.status, data: { success: true } };
         }
-        return { ok: false, status: res.status, data: { success: false, message: `Server HTTP ${res.status}` } };
+        const friendlyMsg = res.status === 404
+          ? "Backend API server is offline or unreachable. Please start backend server."
+          : `Server HTTP ${res.status} error`;
+        return { ok: false, status: res.status, data: { success: false, message: friendlyMsg } };
       }
     } catch (err) {
       lastError = err;

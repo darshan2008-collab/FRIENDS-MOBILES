@@ -5,8 +5,8 @@ const path = require('path');
 const fs = require('fs');
 
 require('dotenv').config({ path: path.join(__dirname, '.env') });
-const connectDB = require('./config/db');
-const migrateData = require('./scripts/migrateData');
+const { connectDB } = require('./config/db');
+const migrateData = require('./scripts/migrateToPostgres');
 
 // Connect Database & Migrate Existing Data
 (async () => {

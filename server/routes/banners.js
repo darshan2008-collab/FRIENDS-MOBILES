@@ -72,7 +72,7 @@ const DEFAULT_SLIDES = [
 router.get('/', async (req, res) => {
   try {
     if (Banner) {
-      const banner = await Banner.findOne({}).lean();
+      const banner = await Banner.findOne({});
       if (banner && banner.slides && banner.slides.length > 0) {
         return res.json({ success: true, slides: banner.slides });
       }
@@ -97,7 +97,7 @@ router.put('/', async (req, res) => {
       await Banner.create({ slides, updatedAt: new Date() });
     }
 
-    res.json({ success: true, message: 'Banners saved successfully to MongoDB', slides });
+    res.json({ success: true, message: 'Banners saved successfully to PostgreSQL', slides });
   } catch (err) {
     console.error('[Banners PUT Error]', err.message);
     res.status(500).json({ success: false, message: 'Failed to save banners' });
