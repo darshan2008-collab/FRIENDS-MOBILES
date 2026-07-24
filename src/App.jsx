@@ -316,6 +316,8 @@ export default function App() {
   const [pendingCartItem, setPendingCartItem] = useState(null);
 
   const handleAddToCart = (product) => {
+    if (!product) return;
+    const safeTitle = product.title || product.name || 'Item';
     if (!currentUser) {
       setPendingCartItem(product);
       setAuthRedirectMessage('Login Required: Please sign in or create an account to add items to your cart.');
@@ -324,25 +326,26 @@ export default function App() {
       return;
     }
     setCart(prev => {
-      const existing = prev.find(p => p.id === product.id);
+      const safePrev = Array.isArray(prev) ? prev : [];
+      const existing = safePrev.find(p => p && p.id === product.id);
       if (existing) {
-        return prev.map(p => p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p);
+        return safePrev.map(p => (p && p.id === product.id) ? { ...p, quantity: (p.quantity || 1) + 1 } : p);
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...safePrev, { ...product, quantity: 1 }];
     });
-    addToast(`Added "${product.title.slice(0, 18)}..." to Cart!`, '🛍️');
+    addToast(`Added "${String(safeTitle).slice(0, 18)}..." to Cart!`, '🛍️');
   };
 
   const handleUpdateCartQuantity = (productId, newQty) => {
     if (newQty <= 0) {
       handleRemoveFromCart(productId);
     } else {
-      setCart(prev => prev.map(p => p.id === productId ? { ...p, quantity: newQty } : p));
+      setCart(prev => (Array.isArray(prev) ? prev : []).map(p => p && p.id === productId ? { ...p, quantity: newQty } : p));
     }
   };
 
   const handleRemoveFromCart = (productId) => {
-    setCart(prev => prev.filter(p => p.id !== productId));
+    setCart(prev => (Array.isArray(prev) ? prev : []).filter(p => p && p.id !== productId));
     addToast('Item removed from cart', '🗑️');
   };
 
@@ -351,30 +354,36 @@ export default function App() {
   };
 
   const handleOrderPlaced = (newOrder) => {
+    if (!newOrder) return;
     // Add to global orders state immediately
-    setOrders(prev => [newOrder, ...prev]);
+    setOrders(prev => [newOrder, ...(Array.isArray(prev) ? prev : [])]);
     // Persist to localStorage for UserAccountModal to pick up
     try {
       const stored = JSON.parse(localStorage.getItem('fm_user_orders') || '[]');
-      localStorage.setItem('fm_user_orders', JSON.stringify([newOrder, ...stored]));
+      const safeStored = Array.isArray(stored) ? stored : [];
+      localStorage.setItem('fm_user_orders', JSON.stringify([newOrder, ...safeStored]));
     } catch {}
   };
 
   const handleToggleWishlist = (product) => {
-    if (wishlist.includes(product.id)) {
-      setWishlist(prev => prev.filter(id => id !== product.id));
-      addToast(`Removed "${product.title.slice(0, 15)}..." from Wishlist`, '🤍');
+    if (!product || !product.id) return;
+    const safeWishlist = Array.isArray(wishlist) ? wishlist : [];
+    const safeTitle = product.title || product.name || 'Product';
+    if (safeWishlist.includes(product.id)) {
+      setWishlist(prev => (Array.isArray(prev) ? prev : []).filter(id => id !== product.id));
+      addToast(`Removed "${String(safeTitle).slice(0, 15)}..." from Wishlist`, '🤍');
     } else {
-      setWishlist(prev => [...prev, product.id]);
-      addToast(`Added "${product.title.slice(0, 15)}..." to Wishlist`, '❤️');
+      setWishlist(prev => [...(Array.isArray(prev) ? prev : []), product.id]);
+      addToast(`Added "${String(safeTitle).slice(0, 15)}..." to Wishlist`, '❤️');
     }
   };
 
   const handleSubscribe = (email) => {
-    addToast(`Subscribed ${email} to Newsletter!`, '📩');
+    if (email) addToast(`Subscribed ${email} to Newsletter!`, '📩');
   };
 
   const handleLoginSuccess = (user) => {
+    if (!user) return;
     setCurrentUser(user);
     try {
       localStorage.setItem('fm_user', JSON.stringify(user));
@@ -382,15 +391,18 @@ export default function App() {
     setIsAuthOpen(false);
 
     if (pendingCartItem) {
-      setCart(prev => {
-        const existing = prev.find(p => p.id === pendingCartItem.id);
-        if (existing) {
-          return prev.map(p => p.id === pendingCartItem.id ? { ...p, quantity: p.quantity + 1 } : p);
-        }
-        return [...prev, { ...pendingCartItem, quantity: 1 }];
-      });
-      addToast(`Added "${pendingCartItem.title.slice(0, 18)}..." to Cart!`, '🛍️');
+      const itemToCart = pendingCartItem;
       setPendingCartItem(null);
+      const safeTitle = itemToCart.title || itemToCart.name || 'Item';
+      setCart(prev => {
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const existing = safePrev.find(p => p && p.id === itemToCart.id);
+        if (existing) {
+          return safePrev.map(p => (p && p.id === itemToCart.id) ? { ...p, quantity: (p.quantity || 1) + 1 } : p);
+        }
+        return [...safePrev, { ...itemToCart, quantity: 1 }];
+      });
+      addToast(`Added "${String(safeTitle).slice(0, 18)}..." to Cart!`, '🛍️');
       setIsCartOpen(true);
     } else if (openCartAfterLogin) {
       setIsCartOpen(true);
