@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Headphones } from 'lucide-react';
 import Header from './components/Header';
 import MobileDrawer from './components/MobileDrawer';
 import Hero from './components/Hero';
@@ -667,6 +668,7 @@ export default function App() {
         onOpenCart={handleOpenCartClick}
         onLogout={handleLogout}
         onOpenShop={handleOpenShop}
+        onOpenChatbot={() => setIsChatbotOpen(true)}
       />
 
       <MobileDrawer 
@@ -819,6 +821,22 @@ export default function App() {
         onOpenUserAccount={() => setIsAccountOpen(true)}
         addToast={addToast}
       />
+
+      {/* Sticky Floating 24/7 AI Customer Care Launcher (Desktop View) */}
+      <button 
+        className="desktop-floating-ai-btn mobile-hide-action"
+        onClick={() => setIsChatbotOpen(true)}
+        title="24/7 AI Customer Care & Order Tracking"
+      >
+        <div className="floating-ai-icon-wrap">
+          <Headphones size={22} color="#ffffff" />
+          <span className="floating-ai-pulse" />
+        </div>
+        <div className="floating-ai-text-wrap">
+          <span className="floating-ai-title">24/7 Customer Care</span>
+          <span className="floating-ai-sub">AI Order Track &amp; Support</span>
+        </div>
+      </button>
 
       <ToastContainer toasts={toasts} onRemoveToast={handleRemoveToast} />
     </div>
