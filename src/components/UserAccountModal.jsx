@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, ShoppingBag, User, LogOut, PackageCheck, Clock, MapPin, Phone, Mail, 
   CheckCircle2, ShieldCheck, Tag, CreditCard, Star, ArrowRight, Heart, 
-  Sparkles, MessageCircle, HelpCircle, Copy, Truck
+  Sparkles, MessageCircle, HelpCircle, Copy, Truck, Lock
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
@@ -439,7 +439,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                         <User size={22} color="#FF5500" />
                         <div>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Full Name</span>
-                          <strong style={{ fontSize: '1.05rem' }}>{user.name}</strong>
+                          <strong style={{ fontSize: '1.05rem' }}>{user?.name || 'Customer'}</strong>
                         </div>
                       </div>
                     </div>
@@ -449,7 +449,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                         <Phone size={22} color="#FF5500" />
                         <div>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Mobile Phone</span>
-                          <strong style={{ fontSize: '1.05rem' }}>{user.phone}</strong>
+                          <strong style={{ fontSize: '1.05rem' }}>{user?.phone || 'Not provided'}</strong>
                         </div>
                       </div>
                     </div>
@@ -459,7 +459,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                         <Mail size={22} color="#FF5500" />
                         <div>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Email Address</span>
-                          <strong style={{ fontSize: '1.05rem' }}>{user.email || 'Not provided'}</strong>
+                          <strong style={{ fontSize: '1.05rem' }}>{user?.email || 'Not provided'}</strong>
                         </div>
                       </div>
                     </div>
