@@ -202,11 +202,12 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
   };
 
-  // Step 1: Send Gmail OTP
+  // Step 1: Send Gmail / Phone OTP
   const handleSendOtpSubmit = async (e) => {
     if (e) e.preventDefault();
-    if (!forgotPhone || !forgotPhone.includes('@')) {
-      if (addToast) addToast('Please enter your registered Gmail or email address', 'warning');
+    const targetVal = forgotPhone ? forgotPhone.trim() : '';
+    if (!targetVal) {
+      if (addToast) addToast('Please enter your registered Email or Mobile number', 'warning');
       return;
     }
 
@@ -214,25 +215,27 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     setOtpDigits(['', '', '', '', '', '']);
     setOtpInput('');
     try {
-      const targetEmail = forgotPhone.trim();
+      const isEmail = targetVal.includes('@');
+      const payload = isEmail ? { email: targetVal } : { phone: targetVal };
+
       const res = await fetch(`${API_BASE}/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: targetEmail })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (data.success) {
-        setSentEmail(data.email || targetEmail);
+        setSentEmail(data.email || targetVal);
         setVerifiedName(data.name || 'Customer');
         setForgotStep(2);
         setResendTimer(120); // 2 minutes (120 seconds)
-        if (addToast) addToast(data.message || `6-digit OTP sent to ${data.email || targetEmail}! Valid for 2 mins.`, 'success');
+        if (addToast) addToast(data.message || `6-digit OTP code sent to ${data.email || targetVal}! Valid for 2 mins.`, 'success');
       } else {
-        setSentEmail(targetEmail);
-        setVerifiedName('Customer');
+        setSentEmail(data.email || targetVal);
+        setVerifiedName(data.name || 'Customer');
         setForgotStep(2);
         setResendTimer(120); // 2 minutes
-        if (addToast) addToast(data.message || `6-digit OTP code sent! Check your Gmail.`, 'warning');
+        if (addToast) addToast(data.message || `6-digit OTP code sent! Check your inbox or phone.`, 'warning');
       }
     } catch (err) {
       console.warn("Send OTP fallback:", err);
@@ -240,7 +243,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       setVerifiedName('Customer');
       setForgotStep(2);
       setResendTimer(120); // 2 minutes
-      if (addToast) addToast('6-digit OTP code sent to Gmail inbox! Check your email.', 'success');
+      if (addToast) addToast('6-digit OTP code sent! Check your inbox or phone.', 'success');
     } finally {
       setIsSubmitting(false);
     }
@@ -844,12 +847,12 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                 {forgotStep === 1 ? (
                   <form onSubmit={handleSendOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div>
-                      <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Registered Email Address</label>
+                      <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Email Address or Mobile Number</label>
                       <div className="auth-input-group">
                         <Mail size={16} className="auth-input-icon" />
                         <input 
-                          type="email" 
-                          placeholder="e.g. user@gmail.com"
+                          type="text" 
+                          placeholder="e.g. user@gmail.com or 10-digit mobile"
                           value={forgotPhone}
                           onChange={(e) => setForgotPhone(e.target.value)}
                           required

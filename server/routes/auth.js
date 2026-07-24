@@ -218,8 +218,17 @@ router.post('/send-otp', resetLimiter, async (req, res) => {
     }
 
     // Send Gmail OTP if email is available
+    let emailSent = false;
+    let emailError = null;
+
     if (recipientEmail) {
-      sendOTPEmail(recipientEmail, otpCode, customerName);
+      const emailResult = await sendOTPEmail(recipientEmail, otpCode, customerName);
+      if (emailResult && emailResult.success) {
+        emailSent = true;
+      } else {
+        emailError = emailResult ? emailResult.error : 'Unknown email dispatch error';
+        console.error(`[Auth Router Error] OTP Email dispatch failed to ${recipientEmail}:`, emailError);
+      }
     }
 
     res.json({
@@ -230,6 +239,8 @@ router.post('/send-otp', resetLimiter, async (req, res) => {
       email: recipientEmail,
       phone: userPhone,
       name: customerName,
+      emailSent,
+      emailError: emailError || undefined,
       demoOtp: process.env.NODE_ENV === 'production' ? undefined : otpCode
     });
   } catch (err) {
