@@ -19,6 +19,7 @@ import CartModal from './components/CartModal';
 import ProductDetailModal from './components/ProductDetailModal';
 import BrandMarquee from './components/BrandMarquee';
 import ShoppingPortal from './components/ShoppingPortal';
+import SEOManager from './components/SEOManager';
 
 import './styles/theme.css';
 
@@ -639,6 +640,13 @@ export default function App() {
 
   return (
     <div className="app">
+      <SEOManager 
+        selectedProduct={selectedProduct}
+        shopCategory={shopCategory}
+        isCustomCoverOpen={isCustomCoverOpen}
+        isCustomFrameOpen={isCustomFrameOpen}
+        isShopOpen={isShopOpen}
+      />
       <Header 
         theme={theme}
         toggleTheme={toggleTheme}
