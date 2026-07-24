@@ -1,0 +1,11 @@
+# FRIENDS MOBILE Search Engine Crawler Rules
+User-agent: *
+Allow: /
+Allow: /images/
+Allow: /api/products
+
+Disallow: /admin
+Disallow: /api/admin
+
+# Sitemap Location
+Sitemap: https://friendsmobile.in/sitemap.xml
