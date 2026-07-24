@@ -66,7 +66,7 @@ export default function CartModal({
       `*Shipping:* ${order.shipping === 'Pending' ? 'Pending verify (Admin will update)' : `₹${order.shipping}`}\n` +
       `*Total Amount:* ₹${order.total}\n` +
       `*Payment Method:* ${order.paymentMethod || 'COD'}`;
-    return `https://wa.me/917448578507?text=${encodeURIComponent(whatsappMsg)}`;
+    return `https://wa.me/919344522086?text=${encodeURIComponent(whatsappMsg)}`;
   };
 
   if (!isOpen) return null;
@@ -269,7 +269,7 @@ export default function CartModal({
         `*Total Amount:* ₹${order.total || 0}\n` +
         `*Payment Method:* ${order.paymentMethod || 'Cash On Delivery'}`;
 
-      const whatsappUrl = `https://wa.me/917448578507?text=${encodeURIComponent(whatsappMsg)}`;
+      const whatsappUrl = `https://wa.me/919344522086?text=${encodeURIComponent(whatsappMsg)}`;
       window.open(whatsappUrl, '_blank');
     } catch (err) {
       console.error("WhatsApp redirect error", err);

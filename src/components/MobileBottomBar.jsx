@@ -24,7 +24,7 @@ export default function MobileBottomBar({
       if (contactElem) {
         contactElem.scrollIntoView({ behavior: 'smooth' });
       } else {
-        window.open('https://wa.me/917448578507', '_blank');
+        window.open('https://wa.me/919344522086', '_blank');
       }
     }
   };
