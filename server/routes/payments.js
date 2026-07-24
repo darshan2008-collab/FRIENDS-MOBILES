@@ -82,18 +82,24 @@ router.post('/verify', (req, res) => {
       }
     }
 
-    // Mark the order as paid if orderId is provided
+    // Mark the order as paid in MongoDB
     if (orderId) {
       try {
-        const orders = readData(ordersFilePath, []);
-        const idx = orders.findIndex(o => o.orderId && o.orderId.toLowerCase() === orderId.toLowerCase());
-        if (idx !== -1) {
-          orders[idx].status = 'Payment Confirmed';
-          orders[idx].paymentId = razorpay_payment_id;
-          orders[idx].paymentVerifiedAt = new Date().toISOString();
-          writeData(ordersFilePath, orders);
-        }
-      } catch (_) {}
+        const Order = require('../models/Order');
+        await Order.updateOne(
+          { orderId: orderId },
+          { 
+            $set: { 
+              status: 'Payment Confirmed',
+              paymentStatus: 'Paid',
+              razorpayPaymentId: razorpay_payment_id || '',
+              paymentVerifiedAt: new Date().toISOString()
+            } 
+          }
+        );
+      } catch (e) {
+        console.error('[Payment Verification DB Error]', e.message);
+      }
     }
 
     res.json({

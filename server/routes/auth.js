@@ -14,41 +14,22 @@ const signupLimiter = rateLimiter({ windowMs: 60 * 60 * 1000, max: 5, message: '
 const resetLimiter = rateLimiter({ windowMs: 15 * 60 * 1000, max: 15, message: 'Too many password reset attempts. Please wait before trying again.' });
 
 async function getUsersAsync() {
-  const fileUsers = readData(usersFilePath, []);
-  let dbUsers = [];
-  if (mongoose.connection.readyState === 1) {
-    try {
-      dbUsers = await User.find({}).lean();
-    } catch (_) {}
+  try {
+    const dbUsers = await User.find({}).lean();
+    if (dbUsers && dbUsers.length > 0) return dbUsers;
+  } catch (e) {
+    console.error("[User DB Get Error]", e.message);
   }
-  const userMap = new Map();
-  [...fileUsers, ...(dbUsers || [])].forEach(u => {
-    if (u) {
-      const key = normalizePhone(u.phone) || (u.email ? u.email.toLowerCase().trim() : null) || u.id;
-      if (key) userMap.set(key, u);
-    }
-  });
-  return Array.from(userMap.values());
+  return readData(usersFilePath, []);
 }
 
 async function saveUserAsync(userData) {
-  // Primary MongoDB save
-  if (mongoose.connection.readyState === 1) {
-    try {
-      const query = userData.phone ? { phone: userData.phone } : { id: userData.id };
-      await User.updateOne(query, { $set: userData }, { upsert: true });
-    } catch (e) {
-      console.error("[User DB Save Error]", e.message);
-    }
-  }
-  // Keep local file backup updated safely without deleting any files
   try {
-    const fileUsers = readData(usersFilePath, []);
-    const idx = fileUsers.findIndex(u => (userData.id && u.id === userData.id) || (userData.phone && normalizePhone(u.phone) === normalizePhone(userData.phone)));
-    if (idx >= 0) fileUsers[idx] = userData;
-    else fileUsers.push(userData);
-    writeData(usersFilePath, fileUsers);
-  } catch (_) {}
+    const query = userData.phone ? { phone: userData.phone } : { id: userData.id };
+    await User.updateOne(query, { $set: userData }, { upsert: true });
+  } catch (e) {
+    console.error("[User DB Save Error]", e.message);
+  }
 }
 
 // Secure PBKDF2 password hashing (100,000 iterations for production strength)
