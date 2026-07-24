@@ -37,13 +37,13 @@ const BackupService = {
         };
       }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-      const totalQuotaBytes = 5000 * 1024 * 1024 * 1024; // 5000 GB in bytes
+      const totalQuotaBytes = 15 * 1024 * 1024 * 1024; // 15 GB in bytes
       const usedMB = (totalBytesUsed / (1024 * 1024)).toFixed(2);
       const percentageUsed = ((totalBytesUsed / totalQuotaBytes) * 100).toFixed(6);
 
       return {
         success: true,
-        storageQuota: '5,000 GB',
+        storageQuota: '15 GB',
         usedMB: `${usedMB} MB`,
         totalBytesUsed,
         percentageUsed: `${percentageUsed}%`,
