@@ -12,42 +12,37 @@ const ordersFilePath = path.join(__dirname, '../data/orders.json');
 const productsFilePath = path.join(__dirname, '../data/products.json');
 
 async function getSettingsAsync() {
-  if (mongoose.connection.readyState === 1) {
-    try {
-      const dbSettings = await Setting.findOne({}).lean();
-      if (dbSettings) return dbSettings;
-    } catch (_) {}
-  }
-  return readData(settingsFilePath, { freeShippingThreshold: 499, standardShippingFee: 49 });
+  try {
+    const dbSettings = await Setting.findOne({}).lean();
+    if (dbSettings) return dbSettings;
+  } catch (_) {}
+  return { freeShippingThreshold: 499, standardShippingFee: 49 };
 }
 
 async function saveSettingsAsync(settingsData) {
-  if (mongoose.connection.readyState === 1) {
-    try {
-      await Setting.updateOne({}, { $set: settingsData }, { upsert: true });
-    } catch (_) {}
+  try {
+    await Setting.updateOne({}, { $set: settingsData }, { upsert: true });
+  } catch (e) {
+    console.error("[Admin Settings Save Error]", e.message);
   }
-  try { writeData(settingsFilePath, settingsData); } catch (_) {}
 }
 
 async function getOrdersAsync() {
-  if (mongoose.connection.readyState === 1) {
-    try {
-      const dbOrders = await Order.find({}).sort({ createdAt: -1 }).lean();
-      if (dbOrders && dbOrders.length > 0) return dbOrders;
-    } catch (_) {}
+  try {
+    return await Order.find({}).sort({ createdAt: -1 }).lean();
+  } catch (e) {
+    console.error("[Admin Orders Get Error]", e.message);
+    return [];
   }
-  return readData(ordersFilePath, []);
 }
 
 async function getProductsAsync() {
-  if (mongoose.connection.readyState === 1) {
-    try {
-      const dbProducts = await Product.find({}).lean();
-      if (dbProducts && dbProducts.length > 0) return dbProducts;
-    } catch (_) {}
+  try {
+    return await Product.find({}).lean();
+  } catch (e) {
+    console.error("[Admin Products Get Error]", e.message);
+    return [];
   }
-  return readData(productsFilePath, []);
 }
 
 // GET /api/admin/settings
@@ -112,13 +107,7 @@ router.put('/orders/:orderId', async (req, res) => {
     orders[orderIndex].updatedAt = new Date().toISOString();
 
     // Save to MongoDB
-    if (mongoose.connection.readyState === 1) {
-      try {
-        await Order.updateOne({ orderId: orders[orderIndex].orderId }, { $set: orders[orderIndex] }, { upsert: true });
-      } catch (_) {}
-    }
-    // Save to local file backup
-    try { writeData(ordersFilePath, orders); } catch (_) {}
+    await Order.updateOne({ orderId: orders[orderIndex].orderId }, { $set: orders[orderIndex] }, { upsert: true });
 
     res.json({ success: true, message: `Order updated successfully!`, order: orders[orderIndex] });
   } catch (err) {

@@ -8,34 +8,20 @@ const Product = require('../models/Product');
 const productsFilePath = path.join(__dirname, '../data/products.json');
 
 async function getProductsAsync() {
-  if (mongoose.connection.readyState === 1) {
-    try {
-      const dbProducts = await Product.find({}).lean();
-      if (dbProducts && dbProducts.length > 0) return dbProducts;
-    } catch (e) {
-      console.error("[Products DB Get Error]", e.message);
-    }
+  try {
+    return await Product.find({}).lean();
+  } catch (e) {
+    console.error("[Products DB Get Error]", e.message);
+    return [];
   }
-  return readData(productsFilePath, []);
 }
 
 async function saveProductAsync(productData) {
-  // Primary MongoDB save
-  if (mongoose.connection.readyState === 1) {
-    try {
-      await Product.updateOne({ id: productData.id }, { $set: productData }, { upsert: true });
-    } catch (e) {
-      console.error("[Products DB Save Error]", e.message);
-    }
-  }
-  // Keep local file backup updated safely without deleting any files
   try {
-    const fileProducts = readData(productsFilePath, []);
-    const idx = fileProducts.findIndex(p => p.id === productData.id);
-    if (idx >= 0) fileProducts[idx] = productData;
-    else fileProducts.push(productData);
-    writeData(productsFilePath, fileProducts);
-  } catch (_) {}
+    await Product.updateOne({ id: productData.id }, { $set: productData }, { upsert: true });
+  } catch (e) {
+    console.error("[Products DB Save Error]", e.message);
+  }
 }
 
 // GET /api/products (Advanced Search, Filter, Sort, Pagination)
@@ -200,23 +186,10 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const productId = parseInt(req.params.id);
-    let products = await getProductsAsync();
-    const initialCount = products.length;
-
-    products = products.filter(p => p.id !== productId);
-
-    if (products.length === initialCount) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
-    }
-
-    // Delete in JSON
-    writeData(productsFilePath, products);
-
-    // Delete in MongoDB
-    if (mongoose.connection.readyState === 1) {
-      try {
-        await Product.deleteOne({ id: productId });
-      } catch (_) {}
+    const result = await Product.deleteOne({ id: productId });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ success: false, message: 'Product not found in database' });
     }
 
     res.json({

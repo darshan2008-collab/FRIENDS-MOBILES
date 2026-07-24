@@ -8,39 +8,31 @@ const Order = require('../models/Order');
 const ordersFilePath = path.join(__dirname, '../data/orders.json');
 const settingsFilePath = path.join(__dirname, '../data/settings.json');
 
+const Setting = require('../models/Setting');
+
 async function getOrdersAsync() {
-  if (mongoose.connection.readyState === 1) {
-    try {
-      const dbOrders = await Order.find({}).sort({ createdAt: -1 }).lean();
-      if (dbOrders && dbOrders.length > 0) return dbOrders;
-    } catch (e) {
-      console.error("[Orders DB Get Error]", e.message);
-    }
+  try {
+    return await Order.find({}).sort({ createdAt: -1 }).lean();
+  } catch (e) {
+    console.error("[Orders DB Get Error]", e.message);
+    return [];
   }
-  return readData(ordersFilePath, []);
 }
 
 async function saveOrderAsync(orderData) {
-  // Primary MongoDB save
-  if (mongoose.connection.readyState === 1) {
-    try {
-      await Order.updateOne({ orderId: orderData.orderId }, { $set: orderData }, { upsert: true });
-    } catch (e) {
-      console.error("[Orders DB Save Error]", e.message);
-    }
-  }
-  // Keep local file backup updated safely without deleting any files
   try {
-    const fileOrders = readData(ordersFilePath, []);
-    const idx = fileOrders.findIndex(o => o.orderId === orderData.orderId);
-    if (idx >= 0) fileOrders[idx] = orderData;
-    else fileOrders.unshift(orderData);
-    writeData(ordersFilePath, fileOrders);
-  } catch (_) {}
+    await Order.updateOne({ orderId: orderData.orderId }, { $set: orderData }, { upsert: true });
+  } catch (e) {
+    console.error("[Orders DB Save Error]", e.message);
+  }
 }
 
-function getSettings() {
-  return readData(settingsFilePath, { freeShippingThreshold: 499, standardShippingFee: 49 });
+async function getSettingsAsync() {
+  try {
+    const dbSettings = await Setting.findOne({}).lean();
+    if (dbSettings) return dbSettings;
+  } catch (_) {}
+  return { freeShippingThreshold: 499, standardShippingFee: 49 };
 }
 
 // Handler for placing an order
@@ -63,7 +55,7 @@ const placeOrderHandler = async (req, res) => {
       address: sanitizeInput(customer.address)
     };
 
-    const settings = getSettings();
+    const settings = await getSettingsAsync();
     const subtotal = clientSubtotal || items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
     const shipping = clientShipping !== undefined ? clientShipping : (subtotal >= (settings.freeShippingThreshold || 499) ? 0 : (settings.standardShippingFee || 49));
     const total = clientTotal || (subtotal + (typeof shipping === 'number' ? shipping : 0));

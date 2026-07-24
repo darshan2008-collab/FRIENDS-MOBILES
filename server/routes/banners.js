@@ -71,21 +71,12 @@ const DEFAULT_SLIDES = [
 // GET /api/banners — Fetch all banner slides
 router.get('/', async (req, res) => {
   try {
-    // Try MongoDB first
     if (Banner) {
       const banner = await Banner.findOne({}).lean();
       if (banner && banner.slides && banner.slides.length > 0) {
         return res.json({ success: true, slides: banner.slides });
       }
     }
-
-    // Fallback to file
-    const fileData = readData(bannersFilePath, null);
-    if (fileData && fileData.length > 0) {
-      return res.json({ success: true, slides: fileData });
-    }
-
-    // Return defaults
     return res.json({ success: true, slides: DEFAULT_SLIDES });
   } catch (err) {
     console.error('[Banners GET Error]', err.message);
@@ -101,20 +92,12 @@ router.put('/', async (req, res) => {
       return res.status(400).json({ success: false, message: 'slides array is required' });
     }
 
-    // Save to file
-    writeData(bannersFilePath, slides);
-
-    // Save to MongoDB
     if (Banner) {
-      try {
-        await Banner.deleteMany({});
-        await Banner.create({ slides, updatedAt: new Date() });
-      } catch (dbErr) {
-        console.error('[Banner DB Save Error]', dbErr.message);
-      }
+      await Banner.deleteMany({});
+      await Banner.create({ slides, updatedAt: new Date() });
     }
 
-    res.json({ success: true, message: 'Banners saved successfully', slides });
+    res.json({ success: true, message: 'Banners saved successfully to MongoDB', slides });
   } catch (err) {
     console.error('[Banners PUT Error]', err.message);
     res.status(500).json({ success: false, message: 'Failed to save banners' });
