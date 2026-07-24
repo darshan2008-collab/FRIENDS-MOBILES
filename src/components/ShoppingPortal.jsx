@@ -226,42 +226,6 @@ export default function ShoppingPortal({
 
       {/* Main Layout: Collapsible Sidebar + Full-Width Product Catalog */}
       <div className={`shop-main-layout container ${isFilterOpen ? 'filter-open' : 'filter-closed'}`}>
-        
-        {/* Filter Toggle Button (always visible at corner) */}
-        <button
-          className="filter-toggle-corner-btn"
-          onClick={() => { setIsFilterOpen(!isFilterOpen); setIsMobileFilterOpen(!isMobileFilterOpen); }}
-          style={{
-            position: isFilterOpen ? 'relative' : 'absolute',
-            top: isFilterOpen ? '0' : '0',
-            left: '0',
-            zIndex: 100,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '8px 14px',
-            borderRadius: isFilterOpen ? '10px 10px 0 0' : '10px',
-            background: isFilterOpen ? '#FF5500' : 'var(--bg-card)',
-            color: isFilterOpen ? '#fff' : '#FF5500',
-            border: isFilterOpen ? 'none' : '1px solid var(--border-color)',
-            fontWeight: '800',
-            fontSize: '0.82rem',
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            transition: 'all 0.25s ease'
-          }}
-        >
-          <Filter size={16} />
-          {isFilterOpen ? 'Close Filters' : 'Filters'}
-          {(selectedCategory !== 'All' || priceRange !== 'all' || inStockOnly) && (
-            <span style={{
-              width: '8px', height: '8px', borderRadius: '50%',
-              background: isFilterOpen ? '#fff' : '#FF5500',
-              display: 'inline-block'
-            }} />
-          )}
-        </button>
 
         {/* Left Filter Sidebar (collapsible) */}
         <aside className={`shop-sidebar-panel ${isFilterOpen ? 'open' : ''} ${isMobileFilterOpen ? 'open' : ''}`} style={{ display: isFilterOpen ? 'flex' : 'none' }}>
@@ -354,8 +318,41 @@ export default function ShoppingPortal({
           
           {/* Controls Header Bar */}
           <div className="shop-controls-bar">
-            <div className="controls-left">
-              <h2 className="section-heading">
+            <div className="controls-left" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="filter-toggle-corner-btn"
+                onClick={() => { setIsFilterOpen(!isFilterOpen); setIsMobileFilterOpen(!isMobileFilterOpen); }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 14px',
+                  borderRadius: '10px',
+                  background: isFilterOpen ? '#FF5500' : 'var(--bg-card)',
+                  color: isFilterOpen ? '#ffffff' : '#FF5500',
+                  border: isFilterOpen ? '1px solid #FF5500' : '1px solid var(--border-color)',
+                  fontWeight: '800',
+                  fontSize: '0.84rem',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                  transition: 'all 0.2s ease',
+                  flexShrink: 0
+                }}
+              >
+                <Filter size={16} />
+                {isFilterOpen ? 'Hide Filters' : 'Filters'}
+                {(selectedCategory !== 'All' || priceRange !== 'all' || inStockOnly) && (
+                  <span style={{
+                    width: '8px', height: '8px', borderRadius: '50%',
+                    background: isFilterOpen ? '#ffffff' : '#FF5500',
+                    display: 'inline-block'
+                  }} />
+                )}
+              </button>
+
+              <h2 className="section-heading" style={{ margin: 0 }}>
                 {selectedCategory === 'All' ? 'All Showroom Products' : selectedCategory}
                 <span className="count-tag">({sortedProducts.length} items found)</span>
               </h2>

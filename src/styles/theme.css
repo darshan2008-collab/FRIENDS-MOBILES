@@ -4142,14 +4142,7 @@ img {
   }
 
   .filter-toggle-corner-btn {
-    position: fixed !important;
-    bottom: 20px;
-    left: 16px;
-    top: auto !important;
-    z-index: 10004 !important;
-    border-radius: 50px !important;
-    padding: 10px 18px !important;
-    box-shadow: 0 4px 16px rgba(255,85,0,0.3) !important;
+    position: static !important;
   }
 }
 
