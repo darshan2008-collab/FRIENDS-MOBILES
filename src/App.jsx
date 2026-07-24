@@ -315,9 +315,47 @@ export default function App() {
 
   const [pendingCartItem, setPendingCartItem] = useState(null);
 
+  const handleSelectProduct = (product) => {
+    if (!product) return;
+    const safeTitle = (product.title || product.name || '').toLowerCase();
+    const cat = (product.category || '').toLowerCase();
+
+    if (safeTitle.includes('customized back cover') || safeTitle.includes('custom cover') || cat.includes('customized back cover')) {
+      setIsCustomCoverOpen(true);
+      return;
+    }
+    if (safeTitle.includes('photo frame') || cat.includes('photo frame')) {
+      setIsCustomFrameOpen(true);
+      return;
+    }
+    setSelectedProduct(product);
+  };
+
   const handleAddToCart = (product) => {
     if (!product) return;
     const safeTitle = product.title || product.name || 'Item';
+    const cat = (product.category || '').toLowerCase();
+    const titleLower = safeTitle.toLowerCase();
+
+    // Redirect to Customization Studio if this customizable product has not been customized yet
+    if (!product.isCustomized && !product.customizationDetails) {
+      if (titleLower.includes('customized back cover') || titleLower.includes('custom cover') || cat.includes('customized back cover')) {
+        setIsCustomCoverOpen(true);
+        if (selectedProduct) setSelectedProduct(null);
+        if (isShopOpen) setIsShopOpen(false);
+        addToast('Redirected to Back Cover Customization Studio! Select model & design.', '✨');
+        return;
+      }
+
+      if (titleLower.includes('photo frame') || cat.includes('photo frame')) {
+        setIsCustomFrameOpen(true);
+        if (selectedProduct) setSelectedProduct(null);
+        if (isShopOpen) setIsShopOpen(false);
+        addToast('Redirected to Photo Frame Customization Studio!', '✨');
+        return;
+      }
+    }
+
     if (!currentUser) {
       setPendingCartItem(product);
       setAuthRedirectMessage('Login Required: Please sign in or create an account to add items to your cart.');
@@ -648,7 +686,7 @@ export default function App() {
           onToggleWishlist={handleToggleWishlist}
           onAddToCart={handleAddToCart}
           searchQuery={searchQuery}
-          onSelectProduct={setSelectedProduct}
+          onSelectProduct={handleSelectProduct}
           onOpenShop={handleOpenShop}
         />
         <ServicesSection />
@@ -661,7 +699,7 @@ export default function App() {
         onClose={() => setSelectedProduct(null)}
         onToggleWishlist={handleToggleWishlist}
         onAddToCart={handleAddToCart}
-        onSelectProduct={setSelectedProduct}
+        onSelectProduct={handleSelectProduct}
       />
 
       <ShoppingPortal 
@@ -671,7 +709,7 @@ export default function App() {
         onAddToCart={handleAddToCart}
         wishlist={wishlist}
         onToggleWishlist={handleToggleWishlist}
-        onSelectProduct={setSelectedProduct}
+        onSelectProduct={handleSelectProduct}
         initialCategory={shopCategory}
         cartCount={cartCount}
         onOpenCart={handleOpenCartClick}

@@ -127,6 +127,27 @@ CREATE TABLE IF NOT EXISTS otp_verifications (
 );
 `;
 
+const ensureDatabaseExists = async () => {
+  if (!pg || !pg.Client) return false;
+  try {
+    const adminUrl = connectionString.replace(/\/([^\/?#]+)(?:([\?#].*)?)$/, '/postgres$2');
+    const client = new pg.Client({ connectionString: adminUrl, connectionTimeoutMillis: 3000 });
+    await client.connect();
+    try {
+      const res = await client.query("SELECT 1 FROM pg_database WHERE datname = 'friends_mobile'");
+      if (res.rows.length === 0) {
+        await client.query('CREATE DATABASE friends_mobile');
+        console.log('[PostgreSQL] Database "friends_mobile" created automatically!');
+      }
+    } finally {
+      await client.end();
+    }
+    return true;
+  } catch (_) {
+    return false;
+  }
+};
+
 const connectDB = async () => {
   if (isInitialized) return true;
   if (!pool) {
@@ -144,7 +165,24 @@ const connectDB = async () => {
       client.release();
     }
   } catch (error) {
-    console.warn(`[PostgreSQL Warning] Connection/Init failed (${error.message}). Will retry on next request.`);
+    if (error.message.includes('does not exist') || error.code === '3D000') {
+      console.log('[PostgreSQL] Database "friends_mobile" not found. Attempting auto-creation...');
+      const created = await ensureDatabaseExists();
+      if (created) {
+        try {
+          const client = await pool.connect();
+          try {
+            await client.query(initTablesSQL);
+            isInitialized = true;
+            console.log(`[PostgreSQL] Connected to "friends_mobile" & Database Schema Verified.`);
+            return true;
+          } finally {
+            client.release();
+          }
+        } catch (_) {}
+      }
+    }
+    console.warn(`[PostgreSQL Warning] Connection/Init failed (${error.message}). Using local storage fallback.`);
     return false;
   }
 };

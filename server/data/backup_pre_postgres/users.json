@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "name": "Arun Kumar",
+    "email": "arun@example.com",
+    "phone": "7448578507",
+    "password": "user123",
+    "address": "Double Tank, South Gandhigramam, Karur - 639004, Tamil Nadu",
+    "createdAt": "2026-07-21T10:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "name": "Test User",
+    "email": "test@example.com",
+    "phone": "9999999999",
+    "password": "1234",
+    "address": "Tamil Nadu",
+    "createdAt": "2026-07-22T23:55:00.000Z"
+  },
+  {
+    "id": 3,
+    "name": "Hari Customer 1",
+    "email": "hari1@gmail.com",
+    "phone": "9363734565",
+    "password": "c9e5031234beb401b597a6a839c3cec2:44baee88e2bc19d2af04bf7fdefb05f837675293ee499d5d47f67a83a818b6d321e32a442c27b6654fa7d737a5d63b39add6a9680d0d9459508c236aa28bf8cd",
+    "address": "Tamil Nadu",
+    "createdAt": "2026-07-23T04:59:08.673Z"
+  },
+  {
+    "id": 4,
+    "name": "Hari Customer 2",
+    "email": "hari2@gmail.com",
+    "phone": "9894224131",
+    "password": "77a6db40f123c4fba8e5b330f3e2f4ba:13f0e27dcc0720294881b36c2e0272c3afa4ad3d14240eaafb743716d0074299453eed1e25e4ae26994f3a5b27695271a74855bb6c08a01e3b97dc99eddd2c23",
+    "address": "Tamil Nadu",
+    "createdAt": "2026-07-23T05:15:57.965Z"
+  },
+  {
+    "id": 5,
+    "name": "darshan",
+    "email": "darshansabari2008@gmail.com",
+    "phone": "8754379559",
+    "password": "9cb394fbb670c454250066de0c07cba0:6431d3018e2d4aff5ac554ebdd245a1986612b069ddec3c37898e2758e696db960668ae261a63a6c5302e45edbbff51af4f59bf0858f87dc7711e53cc00c608f",
+    "address": "Tamil Nadu",
+    "createdAt": "2026-07-24T14:16:31.239Z"
+  },
+  {
+    "id": 6,
+    "name": "darshan",
+    "email": "darshankannan2008@gmail.com",
+    "phone": "9942274565",
+    "password": "25abbaf069eaea9db1caa91f4da34095:cdf5f674f4b4fd2b1945aaac6a225c024455a595af2c1e1c29ce015cd5b7adb64650acd8c5db789d01359766aa7b108ae07e40f340ddc71392f9f39e7d18ffc4",
+    "address": "Tamil Nadu",
+    "createdAt": "2026-07-24T14:17:34.642Z"
+  }
+]
