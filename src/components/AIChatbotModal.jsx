@@ -18,6 +18,15 @@ export default function AIChatbotModal({
   addToast 
 }) {
   const [isCompactView, setIsCompactView] = useState(false); // Default: false (Full View on Desktop & Mobile)
+  const [showComplaintForm, setShowComplaintForm] = useState(false);
+  const [complaintForm, setComplaintForm] = useState({
+    customerName: currentUser ? currentUser.name : '',
+    customerPhone: currentUser ? (currentUser.phone || '') : '',
+    customerEmail: currentUser ? (currentUser.email || '') : '',
+    orderId: '',
+    category: 'Damaged Product',
+    message: ''
+  });
   const [messages, setMessages] = useState([
     {
       id: 'welcome-1',
@@ -26,6 +35,7 @@ export default function AIChatbotModal({
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       quickReplies: [
         '📦 Track My Order',
+        '🚨 Raise a Complaint / Ticket',
         '🎨 Custom Back Cover Query',
         '🖼️ Photo Frame Help',
         '🚚 Shipping & COD Info',
@@ -258,12 +268,77 @@ export default function AIChatbotModal({
       window.open('https://wa.me/917448578507', '_blank');
       return;
     }
+    if (replyText.includes('Raise a Complaint') || replyText.includes('Ticket')) {
+      setShowComplaintForm(true);
+      return;
+    }
     if (replyText.includes('Call Store') || replyText.includes('Call Support')) {
       window.location.href = 'tel:+917448578507';
       return;
     }
 
     handleSendMessage(replyText);
+  };
+
+  const handleComplaintSubmit = (e) => {
+    e.preventDefault();
+    if (!complaintForm.customerName || !complaintForm.customerPhone || !complaintForm.message) {
+      if (addToast) addToast('Please fill in your name, phone number, and issue description.', '⚠️');
+      return;
+    }
+
+    const ticketId = `TKT-${Math.floor(100000 + Math.random() * 900000)}`;
+    const newComplaint = {
+      ticketId,
+      customerName: complaintForm.customerName,
+      customerPhone: complaintForm.customerPhone,
+      customerEmail: complaintForm.customerEmail,
+      orderId: complaintForm.orderId,
+      category: complaintForm.category,
+      message: complaintForm.message,
+      status: 'Open',
+      createdAt: new Date().toISOString()
+    };
+
+    // Post to Server API
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+    fetch(`${API_BASE}/admin/complaints`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newComplaint)
+    }).catch(() => {});
+
+    // Save to local storage for instant feedback
+    try {
+      const stored = JSON.parse(localStorage.getItem('fm_complaints') || '[]');
+      localStorage.setItem('fm_complaints', JSON.stringify([newComplaint, ...stored]));
+    } catch {}
+
+    setShowComplaintForm(false);
+    if (addToast) addToast(`Complaint Registered! Ticket #${ticketId}`, '🚨');
+
+    // Add confirmation message in chat
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setMessages(prev => [
+      ...prev,
+      {
+        id: `user-ticket-${Date.now()}`,
+        sender: 'user',
+        text: `Submitted Support Ticket #${ticketId} (${complaintForm.category})`,
+        timestamp: timeStr
+      },
+      {
+        id: `bot-ticket-${Date.now()}`,
+        sender: 'bot',
+        text: `✅ **Complaint Registered Successfully!**\n\n` +
+              `• **Ticket ID**: \`${ticketId}\`\n` +
+              `• **Category**: ${complaintForm.category}\n` +
+              `• **Status**: 🔴 **Open (Assigned to Showroom Admin)**\n\n` +
+              `Your complaint details have been sent directly to the FRIENDS MOBILE Admin Dashboard. Our support team will review your case and contact you at **${complaintForm.customerPhone}** within 2-4 hours!`,
+        timestamp: timeStr,
+        quickReplies: ['💬 Chat on WhatsApp', '📦 Track My Order', '🛍️ Continue Shopping']
+      }
+    ]);
   };
 
   return (
@@ -320,19 +395,124 @@ export default function AIChatbotModal({
           <button className="ai-chip" onClick={() => handleQuickReplyClick('📦 Track My Order')}>
             <Package size={13} color="#FF5500" /> Track Order
           </button>
+          <button className="ai-chip" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => setShowComplaintForm(true)}>
+            <AlertCircle size={13} color="#ef4444" /> Raise Complaint Ticket
+          </button>
           <button className="ai-chip" onClick={() => handleQuickReplyClick('🎨 Custom Back Cover Query')}>
             <Smartphone size={13} color="#FF5500" /> Custom Cover
           </button>
           <button className="ai-chip" onClick={() => handleQuickReplyClick('🖼️ Photo Frame Help')}>
             <Frame size={13} color="#FF5500" /> Photo Frame
           </button>
-          <button className="ai-chip" onClick={() => handleQuickReplyClick('🚚 Shipping Charges')}>
-            <Truck size={13} color="#FF5500" /> Delivery Speed
-          </button>
           <button className="ai-chip" onClick={() => handleQuickReplyClick('💬 Chat on WhatsApp')}>
             <MessageSquare size={13} color="#22c55e" /> WhatsApp Live
           </button>
         </div>
+
+        {/* Embedded Complaint Submission Form Panel */}
+        {showComplaintForm ? (
+          <div style={{ flex: 1, padding: '24px', background: 'var(--bg-page)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertCircle size={20} color="#ef4444" /> Raise Official Complaint / Support Ticket
+              </h3>
+              <button onClick={() => setShowComplaintForm(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleComplaintSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                  Your Full Name *
+                </label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="Enter your name"
+                  value={complaintForm.customerName}
+                  onChange={(e) => setComplaintForm({ ...complaintForm, customerName: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', outline: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                    Mobile Number *
+                  </label>
+                  <input 
+                    type="tel" 
+                    required
+                    placeholder="Mobile number for callback"
+                    value={complaintForm.customerPhone}
+                    onChange={(e) => setComplaintForm({ ...complaintForm, customerPhone: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                    Order ID (Optional)
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. FM-1001"
+                    value={complaintForm.orderId}
+                    onChange={(e) => setComplaintForm({ ...complaintForm, orderId: e.target.value })}
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', outline: 'none' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                  Issue Category *
+                </label>
+                <select
+                  value={complaintForm.category}
+                  onChange={(e) => setComplaintForm({ ...complaintForm, category: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', outline: 'none' }}
+                >
+                  <option value="Damaged Product / Print Defect">Damaged Product / Print Defect</option>
+                  <option value="Wrong Phone Model / Item Delivered">Wrong Phone Model / Item Delivered</option>
+                  <option value="Delayed Delivery Inquiry">Delayed Delivery Inquiry</option>
+                  <option value="Payment / Refund Assistance">Payment / Refund Assistance</option>
+                  <option value="Showroom & Other Complaints">Showroom &amp; Other Complaints</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', marginBottom: '4px', color: 'var(--text-secondary)' }}>
+                  Describe your complaint in detail *
+                </label>
+                <textarea 
+                  rows={4}
+                  required
+                  placeholder="Explain what went wrong or how we can resolve this for you..."
+                  value={complaintForm.message}
+                  onChange={(e) => setComplaintForm({ ...complaintForm, message: e.target.value })}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', outline: 'none', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowComplaintForm(false)}
+                  style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontWeight: '700', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{ flex: 2, padding: '12px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#ffffff', fontWeight: '800', cursor: 'pointer', boxShadow: '0 4px 14px rgba(239, 68, 68, 0.4)' }}
+                >
+                  Submit Complaint Ticket 🚨
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
 
         {/* Messages Body Scroll Area */}
         <div className="ai-messages-body">
@@ -438,6 +618,7 @@ export default function AIChatbotModal({
 
           <div ref={messagesEndRef} />
         </div>
+        )}
 
         {/* Input Bar */}
         <form 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, ShieldCheck, Package, Truck, ShoppingBag, BarChart3, Plus, Trash2, Edit3, 
   Check, RefreshCw, Lock, User, Key, ArrowRight, LogOut, CheckCircle2, Clock, 
-  TrendingUp, TrendingDown, Tag, Sparkles, AlertTriangle, Percent, DollarSign, Menu, MapPin, Phone, Eye, EyeOff, Upload, CreditCard
+  TrendingUp, TrendingDown, Tag, Sparkles, AlertTriangle, Percent, DollarSign, Menu, MapPin, Phone, Eye, EyeOff, Upload, CreditCard, AlertCircle, MessageSquare, PhoneCall
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
@@ -30,6 +30,62 @@ export default function AdminModal({
   const [isAdminSidebarOpen, setIsAdminSidebarOpen] = useState(false);
   const [isManualCategory, setIsManualCategory] = useState(false);
   const [isEditManualCategory, setIsEditManualCategory] = useState(false);
+
+  // Complaints & Support Tickets State
+  const [complaints, setComplaints] = useState([]);
+  const [complaintFilter, setComplaintFilter] = useState('All');
+  const [complaintSearchTerm, setComplaintSearchTerm] = useState('');
+
+  const fetchComplaints = async () => {
+    try {
+      const apiHost = typeof window !== 'undefined' 
+        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? `${window.location.protocol}//${window.location.hostname}:5000` 
+            : `${window.location.protocol}//${window.location.host}`) 
+        : '';
+      const res = await fetch(`${apiHost}/api/admin/complaints`);
+      const data = await res.json();
+      if (data.success && data.complaints) {
+        setComplaints(data.complaints);
+        return;
+      }
+    } catch (_) {}
+
+    try {
+      const stored = JSON.parse(localStorage.getItem('fm_complaints') || '[]');
+      setComplaints(stored);
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchComplaints();
+    }
+  }, [isAuthenticated, activeTab]);
+
+  const handleUpdateComplaintStatus = async (ticketId, newStatus, notes = '') => {
+    try {
+      const apiHost = typeof window !== 'undefined' 
+        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? `${window.location.protocol}//${window.location.hostname}:5000` 
+            : `${window.location.protocol}//${window.location.host}`) 
+        : '';
+      await fetch(`${apiHost}/api/admin/complaints/${ticketId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus, adminNotes: notes })
+      });
+    } catch (_) {}
+
+    setComplaints(prev => prev.map(c => c.ticketId === ticketId ? { ...c, status: newStatus, adminNotes: notes } : c));
+    try {
+      const stored = JSON.parse(localStorage.getItem('fm_complaints') || '[]');
+      const updated = stored.map(c => c.ticketId === ticketId ? { ...c, status: newStatus, adminNotes: notes } : c);
+      localStorage.setItem('fm_complaints', JSON.stringify(updated));
+    } catch {}
+
+    if (addToast) addToast(`Ticket #${ticketId} updated to "${newStatus}"`, '📍');
+  };
 
   // Order Search, Filter & Manual Creation State
   const [orderSearchTerm, setOrderSearchTerm] = useState('');
@@ -862,6 +918,17 @@ export default function AdminModal({
               }}
             >
               <Clock size={16} /> Order History ({totalOrders})
+            </button>
+
+            <button 
+              className={`sidebar-tab-btn ${activeTab === 'complaints' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('complaints');
+                setIsAdminSidebarOpen(false);
+              }}
+              style={{ color: complaints && complaints.some(c => c.status === 'Open') ? '#ef4444' : 'inherit' }}
+            >
+              <AlertCircle size={16} color={complaints && complaints.some(c => c.status === 'Open') ? '#ef4444' : 'currentColor'} /> Complaints &amp; Tickets ({complaints ? complaints.length : 0})
             </button>
 
             <button 
@@ -2174,6 +2241,200 @@ export default function AdminModal({
                   SAVE SHIPPING SETTINGS
                 </button>
               </form>
+            </div>
+          )}
+
+          {/* TAB: CUSTOMER COMPLAINTS & SUPPORT TICKETS */}
+          {activeTab === 'complaints' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* Complaints Control Bar */}
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '20px', borderRadius: '18px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                      <AlertCircle size={22} color="#ef4444" /> Customer Complaints &amp; Support Tickets
+                    </h3>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      Track and resolve customer issues submitted via 24/7 AI Customer Care Chatbot.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={fetchComplaints}
+                    style={{
+                      padding: '8px 14px', borderRadius: '10px', border: '1px solid var(--border-color)',
+                      background: 'var(--bg-input)', color: 'var(--text-primary)', fontWeight: '700',
+                      fontSize: '0.78rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+                    }}
+                  >
+                    <RefreshCw size={14} /> Refresh Complaints
+                  </button>
+                </div>
+
+                {/* Search & Status Filters */}
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    placeholder="Search by Ticket ID, Customer Name, Phone, or Order ID..."
+                    value={complaintSearchTerm}
+                    onChange={(e) => setComplaintSearchTerm(e.target.value)}
+                    style={{ flex: 1, minWidth: '240px', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
+                  />
+
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {['All', 'Open', 'In Review', 'Resolved'].map((st) => (
+                      <button
+                        key={st}
+                        onClick={() => setComplaintFilter(st)}
+                        style={{
+                          padding: '7px 14px', borderRadius: '20px', border: '1px solid var(--border-color)',
+                          background: complaintFilter === st ? '#FF5500' : 'var(--bg-card)',
+                          color: complaintFilter === st ? '#ffffff' : 'var(--text-secondary)',
+                          fontWeight: '700', fontSize: '0.76rem', cursor: 'pointer'
+                        }}
+                      >
+                        {st}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Complaints List Cards */}
+              {(() => {
+                const filtered = complaints.filter(c => {
+                  const matchesFilter = complaintFilter === 'All' || c.status === complaintFilter;
+                  const q = complaintSearchTerm.toLowerCase().trim();
+                  const matchesQuery = !q || 
+                    (c.ticketId && c.ticketId.toLowerCase().includes(q)) ||
+                    (c.customerName && c.customerName.toLowerCase().includes(q)) ||
+                    (c.customerPhone && c.customerPhone.includes(q)) ||
+                    (c.orderId && c.orderId.toLowerCase().includes(q)) ||
+                    (c.category && c.category.toLowerCase().includes(q)) ||
+                    (c.message && c.message.toLowerCase().includes(q));
+                  return matchesFilter && matchesQuery;
+                });
+
+                if (filtered.length === 0) {
+                  return (
+                    <div style={{ background: 'var(--bg-card)', border: '1px dashed var(--border-color)', padding: '40px 20px', borderRadius: '18px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                      <AlertCircle size={36} color="var(--text-muted)" style={{ marginBottom: '10px' }} />
+                      <h4 style={{ margin: '0 0 6px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>No Customer Complaints Found</h4>
+                      <p style={{ margin: 0, fontSize: '0.8rem' }}>When customers raise an issue in the 24/7 AI Chatbot, their tickets will appear here.</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {filtered.map((c) => {
+                      const isOpened = c.status === 'Open';
+                      const isResolved = c.status === 'Resolved';
+                      return (
+                        <div
+                          key={c.ticketId || c.id}
+                          style={{
+                            background: 'var(--bg-card)',
+                            border: `1px solid ${isOpened ? 'rgba(239, 68, 68, 0.4)' : (isResolved ? 'rgba(34, 197, 94, 0.4)' : 'var(--border-color)')}`,
+                            borderRadius: '16px',
+                            padding: '20px',
+                            boxShadow: 'var(--shadow-sm)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                                <span style={{ background: isOpened ? '#ef4444' : (isResolved ? '#22c55e' : '#f59e0b'), color: '#ffffff', fontWeight: '800', fontSize: '0.72rem', padding: '3px 10px', borderRadius: '12px' }}>
+                                  Ticket #{c.ticketId}
+                                </span>
+                                <span style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontWeight: '700', fontSize: '0.72rem', padding: '3px 10px', borderRadius: '12px' }}>
+                                  Category: {c.category}
+                                </span>
+                                {c.orderId && (
+                                  <span style={{ background: 'rgba(255, 85, 0, 0.1)', color: '#FF5500', fontWeight: '800', fontSize: '0.72rem', padding: '3px 10px', borderRadius: '12px' }}>
+                                    Order #{c.orderId}
+                                  </span>
+                                )}
+                              </div>
+                              <h4 style={{ margin: '8px 0 2px 0', fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                                Customer: {c.customerName}
+                              </h4>
+                              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '2px' }}>
+                                <span>📞 {c.customerPhone}</span>
+                                {c.customerEmail && <span>✉️ {c.customerEmail}</span>}
+                                <span>🕒 Submitted: {new Date(c.createdAt || Date.now()).toLocaleString('en-IN')}</span>
+                              </div>
+                            </div>
+
+                            {/* Status Change Selector & WhatsApp Link */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                              <select
+                                value={c.status}
+                                onChange={(e) => handleUpdateComplaintStatus(c.ticketId, e.target.value, c.adminNotes)}
+                                style={{
+                                  padding: '7px 12px', borderRadius: '10px',
+                                  border: `1px solid ${isOpened ? '#ef4444' : (isResolved ? '#22c55e' : '#f59e0b')}`,
+                                  background: 'var(--bg-input)', color: 'var(--text-primary)',
+                                  fontWeight: '800', fontSize: '0.78rem', cursor: 'pointer', outline: 'none'
+                                }}
+                              >
+                                <option value="Open">🔴 Open (Pending Action)</option>
+                                <option value="In Review">🟡 In Review</option>
+                                <option value="Resolved">🟢 Resolved</option>
+                                <option value="Closed">⚪ Closed</option>
+                              </select>
+
+                              <a
+                                href={`https://wa.me/91${(c.customerPhone || '').replace(/\D/g, '')}?text=Hello%20${encodeURIComponent(c.customerName)},%20this%20is%20FRIENDS%20MOBILE%20Support%20regarding%20your%20complaint%20Ticket%20%23${c.ticketId}.`}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                  padding: '7px 12px', borderRadius: '10px', border: 'none',
+                                  background: '#22c55e', color: '#ffffff', fontWeight: '800',
+                                  fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'none',
+                                  display: 'inline-flex', alignItems: 'center', gap: '6px'
+                                }}
+                              >
+                                <MessageSquare size={14} /> WhatsApp Customer
+                              </a>
+                            </div>
+                          </div>
+
+                          {/* Complaint Message Content */}
+                          <div style={{ background: 'var(--bg-input)', padding: '14px 16px', borderRadius: '12px', borderLeft: '4px solid #ef4444' }}>
+                            <span style={{ display: 'block', fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase', color: '#ef4444', marginBottom: '4px' }}>
+                              Customer Complaint Description:
+                            </span>
+                            <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-primary)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
+                              {c.message}
+                            </p>
+                          </div>
+
+                          {/* Admin Resolution Notes Input */}
+                          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                            <input
+                              type="text"
+                              placeholder="Add resolution notes or outcome for this ticket..."
+                              defaultValue={c.adminNotes || ''}
+                              onBlur={(e) => {
+                                if (e.target.value !== (c.adminNotes || '')) {
+                                  handleUpdateComplaintStatus(c.ticketId, c.status, e.target.value);
+                                }
+                              }}
+                              style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-page)', color: 'var(--text-primary)', fontSize: '0.78rem', outline: 'none' }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
             </div>
           )}
 
