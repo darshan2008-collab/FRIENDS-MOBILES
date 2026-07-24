@@ -3,11 +3,8 @@ const router = express.Router();
 const path = require('path');
 const { readData, writeData, sanitizeInput, normalizePhone } = require('../utils/db');
 const Order = require('../models/Order');
-
-const ordersFilePath = path.join(__dirname, '../data/orders.json');
-const settingsFilePath = path.join(__dirname, '../data/settings.json');
-
 const Setting = require('../models/Setting');
+const BackupService = require('../services/backupService');
 
 async function getOrdersAsync() {
   try {
@@ -76,6 +73,9 @@ const placeOrderHandler = async (req, res) => {
 
     await saveOrderAsync(newOrder);
 
+    // Trigger real-time instant backup sync
+    BackupService.triggerRealTimeBackup(`new_order_${newOrder.orderId}`);
+
     res.status(201).json({
       success: true,
       message: 'Order placed successfully!',
@@ -108,8 +108,21 @@ router.get('/', async (req, res) => {
 router.get('/track/:orderId', async (req, res) => {
   try {
     const orders = await getOrdersAsync();
-    const q = req.params.orderId.toLowerCase().trim();
-    const order = orders.find(o => o.orderId && o.orderId.toLowerCase() === q);
+    const rawQ = req.params.orderId.toLowerCase().trim();
+    const cleanQ = rawQ.replace(/[^a-z0-9]/g, '');
+
+    const order = orders.find(o => {
+      if (!o || !o.orderId) return false;
+      const rawOId = String(o.orderId).toLowerCase().trim();
+      const cleanOId = rawOId.replace(/[^a-z0-9]/g, '');
+      
+      return (
+        rawOId === rawQ ||
+        cleanOId === cleanQ ||
+        (cleanQ.length >= 4 && cleanOId.endsWith(cleanQ)) ||
+        (cleanOId.length >= 4 && cleanQ.endsWith(cleanOId))
+      );
+    });
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order tracking ID not found' });

@@ -4,6 +4,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { readData, writeData, sanitizeInput, normalizePhone, rateLimiter } = require('../utils/db');
 const User = require('../models/User');
+const BackupService = require('../services/backupService');
 
 const usersFilePath = path.join(__dirname, '../data/users.json');
 
@@ -106,6 +107,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
     };
 
     await saveUserAsync(newUser);
+    BackupService.triggerRealTimeBackup(`user_signup_${cleanEmail}`);
 
     const userProfile = { id: newUser.id, name: newUser.name, email: newUser.email, phone: newUser.phone, address: newUser.address };
 

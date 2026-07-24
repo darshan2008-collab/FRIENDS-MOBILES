@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { execSync } = require('child_process');
 const User = require('../models/User');
 const Product = require('../models/Product');
@@ -70,12 +71,16 @@ const BackupService = {
       const filename = backupName || `friends_mobile_backup_${timestamp}.json`;
       const filePath = path.join(backupsDir, filename);
 
+      const dataString = JSON.stringify({ users, products, orders, complaints, banners, settings, subscribers });
+      const sha256Checksum = crypto.createHash('sha256').update(dataString).digest('hex');
+
       const dumpPayload = {
         meta: {
           app: 'FRIENDS MOBILE',
           version: '2.0.0',
           databaseEngine: 'PostgreSQL',
           createdAt: new Date().toISOString(),
+          sha256Checksum,
           totalRecords: {
             users: users.length,
             products: products.length,
@@ -182,6 +187,17 @@ const BackupService = {
       console.error('[Restore Exception]', err);
       return { success: false, error: err.message };
     }
+  },
+
+  // Real-time Event-Driven Backup Queue (Debounced by 3 seconds)
+  triggerRealTimeBackup: (reason = 'store_event') => {
+    if (global._realTimeBackupTimer) {
+      clearTimeout(global._realTimeBackupTimer);
+    }
+    global._realTimeBackupTimer = setTimeout(() => {
+      console.log(`[Real-Time Backup Event] Triggered backup snapshot due to: ${reason}`);
+      BackupService.createBackup().catch(e => console.error('[Real-Time Backup Error]', e.message));
+    }, 3000);
   }
 };
 
