@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const mongoose = require('mongoose');
 const { readData, writeData, sanitizeInput } = require('../utils/db');
 const Product = require('../models/Product');
 
@@ -9,7 +8,7 @@ const productsFilePath = path.join(__dirname, '../data/products.json');
 
 async function getProductsAsync() {
   try {
-    return await Product.find({}).lean();
+    return await Product.find({});
   } catch (e) {
     console.error("[Products DB Get Error]", e.message);
     return [];

@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const mongoose = require('mongoose');
 const { readData, writeData, sanitizeInput } = require('../utils/db');
 const Setting = require('../models/Setting');
 const Order = require('../models/Order');
@@ -13,7 +12,7 @@ const productsFilePath = path.join(__dirname, '../data/products.json');
 
 async function getSettingsAsync() {
   try {
-    const dbSettings = await Setting.findOne({}).lean();
+    const dbSettings = await Setting.findOne({});
     if (dbSettings) return dbSettings;
   } catch (_) {}
   return { freeShippingThreshold: 499, standardShippingFee: 49 };
@@ -29,7 +28,7 @@ async function saveSettingsAsync(settingsData) {
 
 async function getOrdersAsync() {
   try {
-    return await Order.find({}).sort({ createdAt: -1 }).lean();
+    return await Order.find({});
   } catch (e) {
     console.error("[Admin Orders Get Error]", e.message);
     return [];
@@ -38,7 +37,7 @@ async function getOrdersAsync() {
 
 async function getProductsAsync() {
   try {
-    return await Product.find({}).lean();
+    return await Product.find({});
   } catch (e) {
     console.error("[Admin Products Get Error]", e.message);
     return [];
@@ -106,7 +105,7 @@ router.put('/orders/:orderId', async (req, res) => {
 
     orders[orderIndex].updatedAt = new Date().toISOString();
 
-    // Save to MongoDB
+    // Save to PostgreSQL
     await Order.updateOne({ orderId: orders[orderIndex].orderId }, { $set: orders[orderIndex] }, { upsert: true });
 
     res.json({ success: true, message: `Order updated successfully!`, order: orders[orderIndex] });

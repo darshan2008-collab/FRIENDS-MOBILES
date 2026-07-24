@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const mongoose = require('mongoose');
 const { readData, writeData, sanitizeInput, normalizePhone } = require('../utils/db');
 const Order = require('../models/Order');
 
@@ -12,7 +11,7 @@ const Setting = require('../models/Setting');
 
 async function getOrdersAsync() {
   try {
-    return await Order.find({}).sort({ createdAt: -1 }).lean();
+    return await Order.find({});
   } catch (e) {
     console.error("[Orders DB Get Error]", e.message);
     return [];
@@ -29,7 +28,7 @@ async function saveOrderAsync(orderData) {
 
 async function getSettingsAsync() {
   try {
-    const dbSettings = await Setting.findOne({}).lean();
+    const dbSettings = await Setting.findOne({});
     if (dbSettings) return dbSettings;
   } catch (_) {}
   return { freeShippingThreshold: 499, standardShippingFee: 49 };

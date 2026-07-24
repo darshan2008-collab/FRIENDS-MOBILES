@@ -40,12 +40,12 @@ exports.sendOtp = async (req, res) => {
     }
 
     // 2. Find user if exists (to retrieve name for email header)
-    const existingUser = await User.findOne({
+    const existingUser = (await User.findOne({
       $or: [
         { email: cleanEmail },
         { email: { $regex: new RegExp(`^${cleanEmail}$`, 'i') } }
       ]
-    }).lean();
+    })) || {};
 
     // 3. Generate secure random 6-digit OTP
     const rawOtp = crypto.randomInt(100000, 1000000).toString();
@@ -60,7 +60,7 @@ exports.sendOtp = async (req, res) => {
     // 6. OTP Lifetime: 5 Minutes (300 seconds)
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-    // 7. Insert new OTP document into MongoDB Atlas (otp_verifications)
+    // 7. Insert new OTP document into PostgreSQL (otp_verifications)
     await OtpVerification.create({
       email: cleanEmail,
       otpHash,
@@ -246,7 +246,7 @@ exports.resetPassword = async (req, res) => {
       });
     }
 
-    // Update Password in MongoDB User collection (Hashed)
+    // Update Password in PostgreSQL User table (Hashed)
     const hashedPassword = hashPassword(newPassword);
     const updateResult = await User.updateOne(
       { $or: [{ email: cleanEmail }, { email: { $regex: new RegExp(`^${cleanEmail}$`, 'i') } }] },
