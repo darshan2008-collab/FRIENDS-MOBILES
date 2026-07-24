@@ -275,19 +275,16 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         setResendTimer(120); // 2 minutes (120 seconds)
         if (addToast) addToast(data.message || `Unique 6-digit OTP sent to ${data.email || targetVal}! Valid for 2 mins.`, 'success');
       } else {
-        // Mail ID is not registered or dispatch failed
+        // Mail ID is not registered or dispatch failed -> STOP & stay on Step 1
         const notFoundMsg = (data && data.message) || `Your Mail ID (${targetVal}) is not found in our database. Please check your email or Sign Up for a new account.`;
         setEmailCheckError(notFoundMsg);
         if (addToast) addToast(notFoundMsg, 'error');
       }
     } catch (err) {
-      console.warn("Send OTP connection fallback:", err);
-      setSentEmail(targetVal);
-      setVerifiedName('Customer');
-      setEmailCheckError('');
-      setForgotStep(2);
-      setResendTimer(120);
-      if (addToast) addToast(`Unique 6-digit OTP code sent to ${targetVal}! Check your inbox.`, 'success');
+      console.error("Send OTP API Error:", err);
+      const connErr = 'Failed to connect to authentication server. Please ensure the backend server is running and try again.';
+      setEmailCheckError(connErr);
+      if (addToast) addToast(connErr, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -296,8 +293,8 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   // Step 2 Core: Execute Verify Gmail OTP
   const executeVerifyOtp = async (codeToVerify) => {
     const code = codeToVerify || otpInput;
-    if (!code || code.trim().length < 4) {
-      if (addToast) addToast('Please enter the 6-digit OTP code sent to your Gmail', 'warning');
+    if (!code || code.trim().length < 6) {
+      if (addToast) addToast('Please enter the full 6-digit OTP code sent to your Gmail inbox', 'warning');
       return;
     }
 
@@ -314,13 +311,12 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         setForgotStep(3);
         if (addToast) addToast('OTP code verified successfully! Please set your new password.', 'success');
       } else {
-        if (addToast) addToast((data && data.message) || 'Invalid OTP code. Please try again.', 'error');
+        // REJECT INCORRECT OTP -> STOP & stay on Step 2!
+        if (addToast) addToast((data && data.message) || 'Invalid 6-digit OTP code. Please check your Gmail inbox and try again.', 'error');
       }
     } catch (err) {
-      console.warn("Verify OTP connection fallback:", err);
-      setResetToken('token_' + Date.now());
-      setForgotStep(3);
-      if (addToast) addToast('OTP code verified successfully! Set your new password.', 'success');
+      console.error("Verify OTP API Error:", err);
+      if (addToast) addToast('Failed to verify OTP with server. Please check your network and try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }
