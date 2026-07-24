@@ -652,7 +652,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                       <h4 style={{ margin: '0 0 6px 0' }}>WhatsApp Instant Support</h4>
                       <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Chat directly with our Madurai store executive</p>
                       <a 
-                        href="https://wa.me/917448578507" 
+                        href="https://wa.me/919344522086" 
                         target="_blank" 
                         rel="noreferrer"
                         style={{

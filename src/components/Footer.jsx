@@ -111,7 +111,7 @@ export default function Footer() {
             </div>
 
             <a 
-              href="https://wa.me/917448578507" 
+              href="https://wa.me/919344522086" 
               target="_blank" 
               rel="noreferrer"
               style={{
@@ -214,8 +214,8 @@ export default function Footer() {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Phone size={18} color="#FF5500" style={{ flexShrink: 0 }} />
-                <a href="tel:+917448578507" style={{ fontSize: '0.92rem', fontWeight: '800', color: '#FF5500', textDecoration: 'none' }}>
-                  +91 74485 78507
+                <a href="tel:+919344522086" style={{ fontSize: '0.92rem', fontWeight: '800', color: '#FF5500', textDecoration: 'none' }}>
+                  +91 93445 22086
                 </a>
               </div>
 

@@ -196,8 +196,8 @@ export default function AIChatbotModal({
         text: `📍 **FRIENDS MOBILE Showroom Details**:\n\n` +
               `• **Flagship Store Address**: South Gandhigramam, Karur / Madurai Highway, Tamil Nadu - 639004.\n` +
               `• **Store Timing**: Mon - Sun: 9:00 AM – 10:00 PM (Open All 7 Days!).\n` +
-              `• **Support Phone**: 📞 **+91 74485 78507**\n` +
-              `• **WhatsApp Direct Support**: 💬 +91 74485 78507\n` +
+              `• **Support Phone**: 📞 **+91 93445 22086**\n` +
+              `• **WhatsApp Direct Support**: 💬 +91 93445 22086\n` +
               `• **Email**: support@friendsmobile.in\n\n` +
               `You can visit our store for 30-Minute instant custom printing or order online!`,
         quickReplies: ['💬 Chat on WhatsApp', '📞 Call Store directly', '🛍️ View Products']
@@ -292,7 +292,7 @@ export default function AIChatbotModal({
       return;
     }
     if (replyText.includes('WhatsApp')) {
-      window.open('https://wa.me/917448578507', '_blank');
+      window.open('https://wa.me/919344522086', '_blank');
       return;
     }
     if (replyText.includes('Raise a Complaint') || replyText.includes('Ticket')) {
@@ -300,7 +300,7 @@ export default function AIChatbotModal({
       return;
     }
     if (replyText.includes('Call Store') || replyText.includes('Call Support')) {
-      window.location.href = 'tel:+917448578507';
+      window.location.href = 'tel:+919344522086';
       return;
     }
 
@@ -674,8 +674,8 @@ export default function AIChatbotModal({
         {/* Showroom Direct WhatsApp Banner Footer */}
         <div className="ai-chatbot-footer-hint">
           <span>Need immediate human help?</span>
-          <a href="https://wa.me/917448578507" target="_blank" rel="noreferrer">
-            <MessageSquare size={13} color="#22c55e" /> WhatsApp Support (+91 74485 78507)
+          <a href="https://wa.me/919344522086" target="_blank" rel="noreferrer">
+            <MessageSquare size={13} color="#22c55e" /> WhatsApp Support (+91 93445 22086)
           </a>
         </div>
 

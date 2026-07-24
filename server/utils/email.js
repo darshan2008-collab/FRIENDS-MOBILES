@@ -85,7 +85,7 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
 
           <div style="background: #f8fafc; padding: 16px 24px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; line-height: 1.6;">
             <strong>FRIENDS MOBILE Store</strong> • South Gandhigramam, Karur / Madurai, Tamil Nadu<br />
-            Need help? Call Helpline: <strong style="color: #ff5500;">+91 74485 78507</strong>
+            Need help? Call Helpline: <strong style="color: #ff5500;">+91 93445 22086</strong>
           </div>
         </div>
       `
