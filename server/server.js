@@ -137,14 +137,27 @@ app.use('/images', express.static(path.join(__dirname, '../public/images')));
 app.use('/images', express.static(path.join(__dirname, '../images')));
 app.use(express.static(path.join(__dirname, '../')));
 
-// ─── API Routes ────────────────────────────────────────────────────────────────
+// ─── API Routes (Dual-mounted for Vercel Serverless & Express compatibility) ──
 app.use('/api/products', productsRouter);
+app.use('/products', productsRouter);
+
 app.use('/api/orders', ordersRouter);
+app.use('/orders', ordersRouter);
+
 app.use('/api/custom-cover', customCoverRouter);
+app.use('/custom-cover', customCoverRouter);
+
 app.use('/api/admin', adminRouter);
+app.use('/admin', adminRouter);
+
 app.use('/api/auth', authRouter);
+app.use('/auth', authRouter);
+
 app.use('/api/payments', paymentsRouter);
+app.use('/payments', paymentsRouter);
+
 app.use('/api/banners', bannersRouter);
+app.use('/banners', bannersRouter);
 
 // ─── Health Check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

@@ -192,7 +192,7 @@ router.post('/send-otp', resetLimiter, async (req, res) => {
     if (!user) {
       return res.status(404).json({ 
         success: false, 
-        message: `No account registered with ${cleanEmail}. Please check your email or Sign Up for a new account.` 
+        message: `Your Mail ID (${cleanEmail}) is not found in our database. Please check and enter your correct registered Mail ID or Sign Up for a new account.` 
       });
     }
 
