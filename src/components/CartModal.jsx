@@ -72,7 +72,7 @@ export default function CartModal({
   if (!isOpen) return null;
 
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  const freeThreshold = shippingSettings?.freeShippingThreshold || 499;
+  const freeThreshold = shippingSettings?.freeShippingThreshold || 1000;
   const isFreeShipping = subtotal >= freeThreshold;
   const shippingFeeVal = isFreeShipping ? 0 : 'Pending';
   const grandTotal = subtotal; // Shipping cost added by admin later

@@ -20,6 +20,7 @@ import ProductDetailModal from './components/ProductDetailModal';
 import BrandMarquee from './components/BrandMarquee';
 import ShoppingPortal from './components/ShoppingPortal';
 import SEOManager from './components/SEOManager';
+import AIChatbotModal from './components/AIChatbotModal';
 
 import './styles/theme.css';
 
@@ -116,6 +117,7 @@ export default function App() {
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isCustomCoverOpen, setIsCustomCoverOpen] = useState(false);
   const [isCustomFrameOpen, setIsCustomFrameOpen] = useState(false);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isShopOpen, setIsShopOpen] = useState(false);
   const [shopCategory, setShopCategory] = useState('All');
   const [authRedirectMessage, setAuthRedirectMessage] = useState('');
@@ -150,7 +152,7 @@ export default function App() {
   });
   const [shippingSettings, setShippingSettings] = useState({
     standardShippingFee: 49,
-    freeShippingThreshold: 499,
+    freeShippingThreshold: 1000,
     expressShippingFee: 99,
     supportPhone: '+91 74485 78507',
     supportEmail: 'friendsmobile@gmail.com'
@@ -803,6 +805,19 @@ export default function App() {
           handleOpenShop('Wishlist');
         }}
         onOpenCart={handleOpenCartClick}
+        onOpenChatbot={() => setIsChatbotOpen(true)}
+      />
+
+      <AIChatbotModal 
+        isOpen={isChatbotOpen}
+        onClose={() => setIsChatbotOpen(false)}
+        orders={orders}
+        currentUser={currentUser}
+        onOpenCustomCover={() => setIsCustomCoverOpen(true)}
+        onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+        onOpenShop={handleOpenShop}
+        onOpenUserAccount={() => setIsAccountOpen(true)}
+        addToast={addToast}
       />
 
       <ToastContainer toasts={toasts} onRemoveToast={handleRemoveToast} />

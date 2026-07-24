@@ -586,7 +586,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                           <strong style={{ fontSize: '1.1rem', color: '#FF5500' }}>FRIENDS10</strong>
                         </div>
                         <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: '600' }}>10% Instant Discount on Accessories</p>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Valid on orders above ₹499</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Valid on orders above ₹1,000</span>
                       </div>
                       <button 
                         onClick={() => handleCopyCoupon('FRIENDS10')}

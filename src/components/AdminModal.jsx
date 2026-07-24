@@ -202,7 +202,7 @@ export default function AdminModal({
     if (shippingSettings) {
       setShippingForm({
         standardShippingFee: shippingSettings.standardShippingFee ?? 49,
-        freeShippingThreshold: shippingSettings.freeShippingThreshold ?? 499,
+        freeShippingThreshold: shippingSettings.freeShippingThreshold ?? 1000,
         expressShippingFee: shippingSettings.expressShippingFee ?? 99,
         supportPhone: shippingSettings.supportPhone || '+91 74485 78507',
         supportEmail: shippingSettings.supportEmail || 'friendsmobile@gmail.com'
