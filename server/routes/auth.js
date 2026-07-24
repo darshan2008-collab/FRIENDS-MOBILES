@@ -14,13 +14,21 @@ const signupLimiter = rateLimiter({ windowMs: 60 * 60 * 1000, max: 5, message: '
 const resetLimiter = rateLimiter({ windowMs: 15 * 60 * 1000, max: 15, message: 'Too many password reset attempts. Please wait before trying again.' });
 
 async function getUsersAsync() {
+  const fileUsers = readData(usersFilePath, []);
+  let dbUsers = [];
   if (mongoose.connection.readyState === 1) {
     try {
-      const dbUsers = await User.find({}).lean();
-      if (dbUsers && dbUsers.length > 0) return dbUsers;
+      dbUsers = await User.find({}).lean();
     } catch (_) {}
   }
-  return readData(usersFilePath, []);
+  const userMap = new Map();
+  [...fileUsers, ...(dbUsers || [])].forEach(u => {
+    if (u) {
+      const key = normalizePhone(u.phone) || (u.email ? u.email.toLowerCase().trim() : null) || u.id;
+      if (key) userMap.set(key, u);
+    }
+  });
+  return Array.from(userMap.values());
 }
 
 async function saveUserAsync(userData) {
