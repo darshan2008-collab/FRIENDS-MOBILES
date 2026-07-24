@@ -14,18 +14,51 @@ const signupLimiter = rateLimiter({ windowMs: 60 * 60 * 1000, max: 5, message: '
 const resetLimiter = rateLimiter({ windowMs: 15 * 60 * 1000, max: 15, message: 'Too many password reset attempts. Please wait before trying again.' });
 
 async function getUsersAsync() {
+  let fileUsers = readData(usersFilePath, []);
   try {
     const dbUsers = await User.find({}).lean();
-    if (dbUsers && dbUsers.length > 0) return dbUsers;
+    if (dbUsers && dbUsers.length > 0) {
+      const combinedMap = new Map();
+      fileUsers.forEach(u => {
+        if (u.email) combinedMap.set(u.email.toLowerCase().trim(), u);
+        else if (u.phone) combinedMap.set(normalizePhone(u.phone), u);
+      });
+      dbUsers.forEach(u => {
+        if (u.email) combinedMap.set(u.email.toLowerCase().trim(), u);
+        else if (u.phone) combinedMap.set(normalizePhone(u.phone), u);
+      });
+      return Array.from(combinedMap.values());
+    }
   } catch (e) {
     console.error("[User DB Get Error]", e.message);
   }
-  return readData(usersFilePath, []);
+  return fileUsers;
 }
 
 async function saveUserAsync(userData) {
+  // 1. Always update local JSON database file
+  const fileUsers = readData(usersFilePath, []);
+  const cleanEmail = userData.email ? userData.email.toLowerCase().trim() : '';
+  const cleanPhone = userData.phone ? normalizePhone(userData.phone) : '';
+
+  const idx = fileUsers.findIndex(u =>
+    (cleanEmail && u.email && u.email.toLowerCase().trim() === cleanEmail) ||
+    (cleanPhone && cleanPhone.length >= 10 && normalizePhone(u.phone) === cleanPhone) ||
+    (userData.id && u.id === userData.id)
+  );
+
+  if (idx !== -1) {
+    fileUsers[idx] = { ...fileUsers[idx], ...userData };
+  } else {
+    fileUsers.push(userData);
+  }
+  writeData(usersFilePath, fileUsers);
+
+  // 2. Sync with MongoDB database if connected
   try {
-    const query = userData.phone ? { phone: userData.phone } : { id: userData.id };
+    const query = cleanEmail
+      ? { email: cleanEmail }
+      : (cleanPhone ? { phone: cleanPhone } : { id: userData.id });
     await User.updateOne(query, { $set: userData }, { upsert: true });
   } catch (e) {
     console.error("[User DB Save Error]", e.message);
@@ -108,6 +141,66 @@ router.post('/signup', signupLimiter, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Signup failed', error: err.message });
+  }
+});
+
+// POST /api/auth/google-auth (Google OAuth Registration & Login Database Sync)
+router.post('/google-auth', async (req, res) => {
+  try {
+    const { email, name, googleId, picture, phone } = req.body;
+
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ success: false, message: 'Valid Google email address is required' });
+    }
+
+    const cleanEmail = sanitizeInput(email).toLowerCase().trim();
+    const cleanName = name ? sanitizeInput(name) : cleanEmail.split('@')[0];
+    const cleanPhone = phone ? normalizePhone(phone) : '';
+
+    const users = await getUsersAsync();
+    let existing = users.find(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
+
+    if (existing) {
+      const updatedUser = {
+        ...existing,
+        name: existing.name || cleanName,
+        googleId: googleId || existing.googleId || 'google_' + Date.now(),
+        updatedAt: new Date().toISOString()
+      };
+      await saveUserAsync(updatedUser);
+      const userProfile = { id: updatedUser.id, name: updatedUser.name, email: updatedUser.email, phone: updatedUser.phone || '', address: updatedUser.address || '' };
+
+      return res.json({
+        success: true,
+        message: `Welcome back, ${updatedUser.name}!`,
+        user: userProfile
+      });
+    }
+
+    const newId = users.length > 0 ? Math.max(...users.map(u => u.id || 0)) + 1 : 1;
+    const newUser = {
+      id: newId,
+      name: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone,
+      password: hashPassword('google_oauth_' + Math.random().toString(36).substring(2)),
+      address: 'Tamil Nadu',
+      googleId: googleId || 'google_' + Date.now(),
+      role: 'customer',
+      createdAt: new Date().toISOString()
+    };
+
+    await saveUserAsync(newUser);
+    const userProfile = { id: newUser.id, name: newUser.name, email: newUser.email, phone: newUser.phone, address: newUser.address };
+
+    res.status(201).json({
+      success: true,
+      message: `Account registered with Google! Welcome, ${newUser.name}.`,
+      user: userProfile
+    });
+  } catch (err) {
+    console.error("[Google Auth Error]", err);
+    res.status(500).json({ success: false, message: 'Google authentication failed', error: err.message });
   }
 });
 

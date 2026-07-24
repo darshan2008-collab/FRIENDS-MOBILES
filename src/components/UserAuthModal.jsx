@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, Eye, EyeOff, AlertCircle, Clock, RefreshCw } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
 const getApiEndpoints = (endpoint) => {
@@ -154,6 +154,43 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       if (target) target.focus();
 
       triggerAutoVerifyIfComplete(newArray);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    const promptEmail = window.prompt("Enter your Google Account Gmail Address to sign in or create an account:", "user@gmail.com");
+    if (!promptEmail || !promptEmail.includes('@')) {
+      if (promptEmail !== null && addToast) addToast('Please enter a valid Gmail address', 'warning');
+      return;
+    }
+
+    const cleanEmail = promptEmail.trim().toLowerCase();
+    const defaultName = cleanEmail.split('@')[0] || 'Google Customer';
+
+    setIsSubmitting(true);
+    try {
+      const { data } = await safeFetchApi('/auth/google-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: cleanEmail,
+          name: defaultName,
+          googleId: 'g_' + Date.now()
+        })
+      });
+
+      if (data && data.success && data.user) {
+        onLoginSuccess(data.user);
+        if (addToast) addToast(data.message || `Welcome, ${data.user.name}! Account registered with Google.`, 'success');
+        onClose();
+      } else {
+        if (addToast) addToast((data && data.message) || 'Failed to authenticate Google account.', 'error');
+      }
+    } catch (err) {
+      console.error("Google Auth connection error:", err);
+      if (addToast) addToast('Failed to connect to authentication server. Please check your network.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -922,7 +959,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                         gap: '8px'
                       }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                          <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>⚠️</span>
+                          <AlertCircle size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: '2px' }} />
                           <div>{emailCheckError}</div>
                         </div>
                         <button
@@ -944,7 +981,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                             marginTop: '2px'
                           }}
                         >
-                          ➕ Click Here to Create New Account
+                          Create New Account
                         </button>
                       </div>
                     )}
@@ -973,14 +1010,16 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
                       {resendTimer > 0 ? (
                         <div style={{ marginTop: '8px', fontSize: '0.8rem', color: '#FF5500', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                          <span>⏱️ OTP Code Expires in:</span>
+                          <Clock size={14} />
+                          <span>OTP Code Expires in:</span>
                           <span style={{ background: '#FF5500', color: '#ffffff', padding: '2px 8px', borderRadius: '6px', fontFamily: 'monospace', fontWeight: '900' }}>
                             {Math.floor(resendTimer / 60)}:{(resendTimer % 60).toString().padStart(2, '0')}
                           </span>
                         </div>
                       ) : (
-                        <div style={{ marginTop: '8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '8px 12px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700' }}>
-                          ⚠️ OTP Has Expired! Click "Resend Gmail Code" below for a new code.
+                        <div style={{ marginTop: '8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '8px 12px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <AlertCircle size={14} />
+                          <span>OTP Has Expired! Click "Resend Gmail Code" below for a new code.</span>
                         </div>
                       )}
                     </div>
@@ -1073,7 +1112,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                           transition: 'all 0.2s ease'
                         }}
                       >
-                        {resendTimer > 0 ? `Resend Code in ${Math.floor(resendTimer / 60)}:${(resendTimer % 60).toString().padStart(2, '0')}` : '🔄 Resend Gmail Code Now'}
+                        {resendTimer > 0 ? `Resend Code in ${Math.floor(resendTimer / 60)}:${(resendTimer % 60).toString().padStart(2, '0')}` : 'Resend Gmail Code Now'}
                       </button>
                     </div>
                   </form>

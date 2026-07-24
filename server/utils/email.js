@@ -42,7 +42,7 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
     const mailOptions = {
       from: `"FRIENDS MOBILE Security" <${senderEmail}>`,
       to: toEmail,
-      subject: `🔑 FRIENDS MOBILE - ${otpCode} is your Password Reset Code`,
+      subject: `FRIENDS MOBILE - ${otpCode} is your Password Reset Code`,
       html: `
         <div style="font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif; max-width: 540px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 36px rgba(0,0,0,0.1);">
           <div style="background: linear-gradient(135deg, #FF5500 0%, #E03E00 100%); padding: 28px 24px; text-align: center; color: #ffffff;">
@@ -63,13 +63,13 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
 
             <div style="background: #fff7ed; border-left: 4px solid #ff5500; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
               <p style="margin: 0; font-size: 12.5px; color: #c2410c; line-height: 1.5;">
-                ⏱️ <strong>Time Sensitive:</strong> This code will expire in <strong>2 minutes</strong>. Please verify promptly.
+                <strong>Time Sensitive:</strong> This code will expire in <strong>2 minutes</strong>. Please verify promptly.
               </p>
             </div>
 
             <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px 16px; border-radius: 6px; margin-bottom: 24px;">
               <p style="margin: 0; font-size: 12.5px; color: #991b1b; line-height: 1.5;">
-                🛡️ <strong>Security Tip:</strong> FRIENDS MOBILE will never ask for your OTP over phone calls or messages. Never share this code with anyone.
+                <strong>Security Tip:</strong> FRIENDS MOBILE will never ask for your OTP over phone calls or messages. Never share this code with anyone.
               </p>
             </div>
 
