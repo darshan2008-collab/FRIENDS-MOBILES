@@ -5,10 +5,10 @@ backend/node_modules
 
 # Environment & Secret Files
 .env
-.env.local
-.env.production
-.env.development
+.env.*
+*.env
 server/.env
+server/config/private_secrets.env
 backend/.env
 
 # Build & Output Folders
