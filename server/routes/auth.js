@@ -14,54 +14,27 @@ const signupLimiter = rateLimiter({ windowMs: 60 * 60 * 1000, max: 5, message: '
 const resetLimiter = rateLimiter({ windowMs: 15 * 60 * 1000, max: 15, message: 'Too many password reset attempts. Please wait before trying again.' });
 
 async function getUsersAsync() {
-  let fileUsers = readData(usersFilePath, []);
   try {
     const dbUsers = await User.find({}).lean();
-    if (dbUsers && dbUsers.length > 0) {
-      const combinedMap = new Map();
-      fileUsers.forEach(u => {
-        if (u.email) combinedMap.set(u.email.toLowerCase().trim(), u);
-        else if (u.phone) combinedMap.set(normalizePhone(u.phone), u);
-      });
-      dbUsers.forEach(u => {
-        if (u.email) combinedMap.set(u.email.toLowerCase().trim(), u);
-        else if (u.phone) combinedMap.set(normalizePhone(u.phone), u);
-      });
-      return Array.from(combinedMap.values());
-    }
+    return dbUsers || [];
   } catch (e) {
-    console.error("[User DB Get Error]", e.message);
+    console.error("[User MongoDB Get Error]", e.message);
+    return [];
   }
-  return fileUsers;
 }
 
 async function saveUserAsync(userData) {
-  // 1. Always update local JSON database file
-  const fileUsers = readData(usersFilePath, []);
-  const cleanEmail = userData.email ? userData.email.toLowerCase().trim() : '';
-  const cleanPhone = userData.phone ? normalizePhone(userData.phone) : '';
-
-  const idx = fileUsers.findIndex(u =>
-    (cleanEmail && u.email && u.email.toLowerCase().trim() === cleanEmail) ||
-    (cleanPhone && cleanPhone.length >= 10 && normalizePhone(u.phone) === cleanPhone) ||
-    (userData.id && u.id === userData.id)
-  );
-
-  if (idx !== -1) {
-    fileUsers[idx] = { ...fileUsers[idx], ...userData };
-  } else {
-    fileUsers.push(userData);
-  }
-  writeData(usersFilePath, fileUsers);
-
-  // 2. Sync with MongoDB database if connected
   try {
+    const cleanEmail = userData.email ? userData.email.toLowerCase().trim() : '';
+    const cleanPhone = userData.phone ? normalizePhone(userData.phone) : '';
+
     const query = cleanEmail
       ? { email: cleanEmail }
       : (cleanPhone ? { phone: cleanPhone } : { id: userData.id });
+
     await User.updateOne(query, { $set: userData }, { upsert: true });
   } catch (e) {
-    console.error("[User DB Save Error]", e.message);
+    console.error("[User MongoDB Save Error]", e.message);
   }
 }
 
