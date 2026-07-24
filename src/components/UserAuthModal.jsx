@@ -358,7 +358,6 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   const handleGoogleLogin = async () => {
     setIsSubmitting(true);
 
-    // Helper to complete login via API
     const completeGoogleAuth = async (email, name, picture, credentialToken) => {
       try {
         const res = await fetch(`${API_BASE}/auth/google`, {
@@ -380,7 +379,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
           if (addToast) addToast(data.message || 'Google Authentication failed', 'error');
         }
       } catch (err) {
-        console.warn("Google OAuth API connection fallback:", err);
+        console.warn("Google OAuth API fallback:", err);
         const googleUser = {
           id: Date.now(),
           name: name || email.split('@')[0],
@@ -398,51 +397,89 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     };
 
     try {
-      // Check if Google GSI library is loaded or prompt for login
-      if (typeof window !== 'undefined' && window.google && window.google.accounts && window.google.accounts.id) {
-        window.google.accounts.id.initialize({
+      // 1. Check if Google Identity Services OAuth 2.0 token client is available
+      if (typeof window !== 'undefined' && window.google?.accounts?.oauth2) {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
           client_id: GOOGLE_CLIENT_ID,
-          callback: (response) => {
-            if (response && response.credential) {
+          scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+          callback: async (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
               try {
-                // Decode base64 JWT payload
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                completeGoogleAuth(payload.email, payload.name, payload.picture, response.credential);
-              } catch (_) {
-                completeGoogleAuth('member@gmail.com', 'Google Member', '', response.credential);
-              }
-            } else {
-              setIsSubmitting(false);
+                const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+                });
+                const userInfo = await userInfoRes.json();
+                if (userInfo && userInfo.email) {
+                  completeGoogleAuth(userInfo.email, userInfo.name, userInfo.picture, tokenResponse.access_token);
+                  return;
+                }
+              } catch (_) {}
             }
+            setIsSubmitting(false);
           }
         });
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
+        return;
+      }
 
-        window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            const defaultEmail = loginIdentity && loginIdentity.includes('@') ? loginIdentity.trim() : 'member@gmail.com';
-            const userEmail = window.prompt ? window.prompt('Enter your Google Account Email for Single Sign-On:', defaultEmail) : defaultEmail;
-            if (userEmail && userEmail.includes('@')) {
-              completeGoogleAuth(userEmail, userEmail.split('@')[0], '', '');
-            } else {
-              setIsSubmitting(false);
-            }
-          }
-        });
-      } else {
-        // Direct OAuth prompt / fallback
+      // 2. Open Official Google OAuth 2.0 Account Selection Popup Window
+      const redirectUri = window.location.origin;
+      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${encodeURIComponent(GOOGLE_CLIENT_ID)}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&response_type=token` +
+        `&scope=${encodeURIComponent('openid email profile')}` +
+        `&prompt=select_account`;
+
+      const width = 500;
+      const height = 620;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+
+      const popup = window.open(
+        oauthUrl,
+        'GoogleOAuth2Window',
+        `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,status=1`
+      );
+
+      if (!popup || popup.closed) {
         const defaultEmail = loginIdentity && loginIdentity.includes('@') ? loginIdentity.trim() : 'member@gmail.com';
         const userEmail = (typeof window !== 'undefined' && window.prompt)
           ? window.prompt('Enter your Google Account Email for Single Sign-On:', defaultEmail)
           : defaultEmail;
-
         if (userEmail && userEmail.includes('@')) {
           await completeGoogleAuth(userEmail, userEmail.split('@')[0], '', '');
         } else {
           setIsSubmitting(false);
         }
+      } else {
+        const checkPopup = setInterval(() => {
+          try {
+            if (popup.closed) {
+              clearInterval(checkPopup);
+              setIsSubmitting(false);
+              return;
+            }
+            const hash = popup.location.hash;
+            if (hash && hash.includes('access_token')) {
+              clearInterval(checkPopup);
+              const params = new URLSearchParams(hash.substring(1));
+              const accessToken = params.get('access_token');
+              popup.close();
+              fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+              })
+                .then(res => res.json())
+                .then(info => completeGoogleAuth(info.email, info.name, info.picture, accessToken))
+                .catch(() => completeGoogleAuth('member@gmail.com', 'Google Member', '', accessToken));
+            }
+          } catch (_) {
+            // Ignore cross-origin restriction until popup redirects back to origin
+          }
+        }, 400);
       }
     } catch (err) {
-      console.warn("Google Sign-In Trigger Error:", err);
+      console.warn("Google OAuth 2.0 trigger error:", err);
       setIsSubmitting(false);
     }
   };
