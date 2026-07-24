@@ -176,6 +176,8 @@ router.post('/complaints', async (req, res) => {
       status: 'Open'
     });
 
+    BackupService.triggerRealTimeBackup(`new_complaint_${ticketId}`);
+
     res.status(201).json({
       success: true,
       message: 'Complaint registered successfully! Our team will contact you shortly.',
@@ -196,6 +198,8 @@ router.put('/complaints/:ticketId', async (req, res) => {
     if (!updated) {
       return res.status(404).json({ success: false, message: 'Ticket ID not found' });
     }
+
+    BackupService.triggerRealTimeBackup(`update_complaint_${ticketId}`);
 
     res.json({ success: true, message: `Ticket #${ticketId} updated to "${status}"`, complaint: updated });
   } catch (err) {
