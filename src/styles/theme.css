@@ -5004,6 +5004,101 @@ img {
   }
 }
 
+/* =========================================================
+   DESKTOP FLOATING 24/7 AI CUSTOMER CARE BUTTON
+   ========================================================= */
+.desktop-floating-ai-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 999;
+  background: linear-gradient(135deg, #FF5500, #ff7700);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 10px 18px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(255, 85, 0, 0.4), 0 0 20px rgba(255, 85, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+}
+
+.desktop-floating-ai-btn:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 12px 35px rgba(255, 85, 0, 0.55), 0 0 25px rgba(255, 85, 0, 0.3);
+}
+
+.desktop-floating-ai-btn:active {
+  transform: scale(0.96);
+}
+
+.floating-ai-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.floating-ai-pulse {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  background: #22c55e;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #22c55e;
+  animation: pulseGlow 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.floating-ai-text-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.floating-ai-title {
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.floating-ai-sub {
+  font-size: 0.7rem;
+  opacity: 0.9;
+  font-weight: 600;
+}
+
+.header-ai-care-btn {
+  transition: transform 0.2s ease;
+}
+
+.header-ai-care-btn:hover {
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .desktop-floating-ai-btn {
+    display: none !important;
+  }
+}
+
 
 
 

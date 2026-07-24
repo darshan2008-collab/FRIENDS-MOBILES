@@ -1,8 +1,8 @@
 import React from 'react';
-import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut } from 'lucide-react';
+import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
-export default function Header({ theme, toggleTheme, cartCount, wishlistCount, onOpenDrawer, searchQuery, setSearchQuery, onOpenAdmin, currentUser, onOpenAuth, onOpenUserAccount, onOpenCart, onLogout, onOpenShop }) {
+export default function Header({ theme, toggleTheme, cartCount, wishlistCount, onOpenDrawer, searchQuery, setSearchQuery, onOpenAdmin, currentUser, onOpenAuth, onOpenUserAccount, onOpenCart, onLogout, onOpenShop, onOpenChatbot }) {
   return (
     <>
       {/* Main Header */}
@@ -46,6 +46,17 @@ export default function Header({ theme, toggleTheme, cartCount, wishlistCount, o
             <div className="header-actions">
               <button className="theme-toggle-btn" onClick={toggleTheme} title="Switch Light/Dark Theme">
                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+
+              <button 
+                className="action-btn mobile-hide-action header-ai-care-btn" 
+                title="24/7 AI Customer Care & Order Tracking"
+                onClick={onOpenChatbot}
+                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                <div className="icon-wrap" style={{ color: '#FF5500' }}>
+                  <Headphones size={20} />
+                </div>
               </button>
 
               <button 
