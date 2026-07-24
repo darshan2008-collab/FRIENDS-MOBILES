@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, Eye, EyeOff, AlertCircle, Clock, RefreshCw } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined'
+  ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? `${window.location.protocol}//${window.location.hostname}:5000/api`
+      : `${window.location.origin}/api`)
+  : '/api');
+
 const getApiEndpoints = (endpoint) => {
   const endpoints = [];
   
@@ -214,39 +220,29 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
 
     try {
-      const res = await fetch(`${API_BASE}/auth/login`, {
+      const { data, ok } = await safeFetchApi('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identity: loginIdentity.trim(), password: loginPassword })
       });
-      const data = await res.json();
 
-      if (data.success && data.user) {
+      if (data && data.success && data.user) {
         onLoginSuccess(data.user);
         if (addToast) addToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
         onClose();
       } else {
-        if (addToast) addToast(data.message || 'Invalid email or password', 'error');
+        if (addToast) addToast((data && data.message) || 'Invalid email or password', 'error');
       }
     } catch (err) {
-      console.warn("Login connection fallback:", err);
-      const fallbackUser = {
-        id: Date.now(),
-        name: loginIdentity.split('@')[0] || 'Customer',
-        phone: '',
-        email: loginIdentity.trim(),
-        createdAt: new Date().toISOString()
-      };
-      onLoginSuccess(fallbackUser);
-      if (addToast) addToast(`Welcome back, ${fallbackUser.name}!`, 'success');
-      onClose();
+      console.warn("Login connection error:", err);
+      if (addToast) addToast('Failed to connect to login server. Please try again.', 'error');
     }
   };
 
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
-    if (!signupForm.name || !signupForm.email || !signupForm.password) {
-      if (addToast) addToast('Full name, email address, and password are required', 'warning');
+    if (!signupForm.name || !signupForm.email || !signupForm.phone || !signupForm.password) {
+      if (addToast) addToast('Full name, email address, mobile phone number, and password are required', 'warning');
       return;
     }
 
@@ -256,32 +252,22 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
 
     try {
-      const res = await fetch(`${API_BASE}/auth/signup`, {
+      const { data, ok } = await safeFetchApi('/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(signupForm)
       });
-      const data = await res.json();
 
-      if (data.success && data.user) {
+      if (data && data.success && data.user) {
         onLoginSuccess(data.user);
         if (addToast) addToast(data.message || `Account created! Welcome, ${data.user.name}`, 'success');
         onClose();
       } else {
-        if (addToast) addToast(data.message || 'Registration failed', 'error');
+        if (addToast) addToast((data && data.message) || 'Registration failed', 'error');
       }
     } catch (err) {
-      console.warn("Signup fallback:", err);
-      const newUser = {
-        id: Date.now(),
-        name: signupForm.name,
-        phone: signupForm.phone || '',
-        email: signupForm.email.trim(),
-        createdAt: new Date().toISOString()
-      };
-      onLoginSuccess(newUser);
-      if (addToast) addToast(`Welcome, ${newUser.name}! Account registered.`, 'success');
-      onClose();
+      console.warn("Signup connection error:", err);
+      if (addToast) addToast('Failed to connect to registration server. Please try again.', 'error');
     }
   };
 
@@ -385,7 +371,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/auth/reset-password`, {
+      const { data, ok } = await safeFetchApi('/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -396,10 +382,9 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
           resetToken
         })
       });
-      const data = await res.json();
 
-      if (data.success) {
-        if (addToast) addToast('Password reset successfully! Please log in with your new password.', 'success');
+      if (data && data.success) {
+        if (addToast) addToast(data.message || 'Password reset successfully! Please log in with your new password.', 'success');
         setLoginIdentity(forgotPhone.trim());
         setLoginPassword(newPassword);
         setActiveTab('login');
@@ -410,19 +395,10 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         setNewPassword('');
         setConfirmPassword('');
       } else {
-        if (addToast) addToast(data.message || 'Password reset failed', 'error');
+        if (addToast) addToast((data && data.message) || 'Password reset failed', 'error');
       }
     } catch (err) {
-      if (addToast) addToast('Password reset successfully! Please log in with your new password.', 'success');
-      setLoginIdentity(forgotPhone.trim());
-      setLoginPassword(newPassword);
-      setActiveTab('login');
-      setForgotStep(1);
-      setForgotPhone('');
-      setOtpInput('');
-      setResetToken('');
-      setNewPassword('');
-      setConfirmPassword('');
+      if (addToast) addToast('Password reset failed. Please check your network and try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -448,7 +424,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
     const completeGoogleAuth = async (email, name, picture, credentialToken) => {
       try {
-        const res = await fetch(`${API_BASE}/auth/google`, {
+        const { data } = await safeFetchApi('/auth/google', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
