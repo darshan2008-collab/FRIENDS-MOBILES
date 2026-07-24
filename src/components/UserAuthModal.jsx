@@ -30,6 +30,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   const [sentEmail, setSentEmail] = useState('');
   const [otpInput, setOtpInput] = useState('');
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
+  const [focusedOtpIndex, setFocusedOtpIndex] = useState(0);
   const [resetToken, setResetToken] = useState('');
   const [resendTimer, setResendTimer] = useState(0);
   const [newPassword, setNewPassword] = useState('');
@@ -898,35 +899,51 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                         Enter 6-Digit Gmail OTP Code
                       </label>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }} onPaste={handlePasteOtp}>
-                        {[0, 1, 2, 3, 4, 5].map((idx) => (
-                          <input
-                            key={idx}
-                            id={`otp-box-${idx}`}
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={1}
-                            disabled={resendTimer === 0}
-                            value={otpDigits[idx]}
-                            onChange={(e) => handleDigitChange(idx, e.target.value)}
-                            onKeyDown={(e) => handleKeyDown(idx, e)}
-                            style={{
-                              width: '44px',
-                              height: '50px',
-                              textAlign: 'center',
-                              fontSize: '1.4rem',
-                              fontWeight: '900',
-                              borderRadius: '12px',
-                              border: otpDigits[idx] ? '2px solid #FF5500' : '1px solid var(--border-color)',
-                              background: resendTimer === 0 ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-input)',
-                              color: 'var(--text-primary)',
-                              boxShadow: otpDigits[idx] ? '0 0 12px rgba(255, 85, 0, 0.25)' : 'none',
-                              outline: 'none',
-                              transition: 'all 0.2s ease',
-                              opacity: resendTimer === 0 ? 0.6 : 1,
-                              cursor: resendTimer === 0 ? 'not-allowed' : 'text'
-                            }}
-                          />
-                        ))}
+                        {[0, 1, 2, 3, 4, 5].map((idx) => {
+                          const isFocused = focusedOtpIndex === idx;
+                          const isFilled = Boolean(otpDigits[idx]);
+                          const isActive = isFocused || isFilled;
+
+                          return (
+                            <input
+                              key={idx}
+                              id={`otp-box-${idx}`}
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={1}
+                              disabled={resendTimer === 0}
+                              value={otpDigits[idx]}
+                              onFocus={() => setFocusedOtpIndex(idx)}
+                              onBlur={() => setFocusedOtpIndex(null)}
+                              onChange={(e) => handleDigitChange(idx, e.target.value)}
+                              onKeyDown={(e) => handleKeyDown(idx, e)}
+                              style={{
+                                width: '46px',
+                                height: '52px',
+                                textAlign: 'center',
+                                fontSize: '1.45rem',
+                                fontWeight: '900',
+                                borderRadius: '12px',
+                                border: isActive 
+                                  ? '2.5px solid #FF5500' 
+                                  : '2px solid #94a3b8',
+                                background: resendTimer === 0 
+                                  ? 'rgba(239, 68, 68, 0.08)' 
+                                  : isActive 
+                                    ? 'rgba(255, 85, 0, 0.08)' 
+                                    : 'var(--bg-card)',
+                                color: 'var(--text-primary)',
+                                boxShadow: isActive 
+                                  ? '0 0 14px rgba(255, 85, 0, 0.35)' 
+                                  : '0 2px 6px rgba(0, 0, 0, 0.08)',
+                                outline: 'none',
+                                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                opacity: resendTimer === 0 ? 0.6 : 1,
+                                cursor: resendTimer === 0 ? 'not-allowed' : 'text'
+                              }}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
 
