@@ -19,8 +19,8 @@
   },
   {
     "id": 3,
-    "name": "hari",
-    "email": "",
+    "name": "Hari Customer 1",
+    "email": "hari1@gmail.com",
     "phone": "9363734565",
     "password": "c9e5031234beb401b597a6a839c3cec2:44baee88e2bc19d2af04bf7fdefb05f837675293ee499d5d47f67a83a818b6d321e32a442c27b6654fa7d737a5d63b39add6a9680d0d9459508c236aa28bf8cd",
     "address": "Tamil Nadu",
@@ -28,8 +28,8 @@
   },
   {
     "id": 4,
-    "name": "hari",
-    "email": "",
+    "name": "Hari Customer 2",
+    "email": "hari2@gmail.com",
     "phone": "9894224131",
     "password": "77a6db40f123c4fba8e5b330f3e2f4ba:13f0e27dcc0720294881b36c2e0272c3afa4ad3d14240eaafb743716d0074299453eed1e25e4ae26994f3a5b27695271a74855bb6c08a01e3b97dc99eddd2c23",
     "address": "Tamil Nadu",

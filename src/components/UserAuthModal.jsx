@@ -824,7 +824,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Mobile Number (Optional for SMS updates)</label>
+                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Mobile Phone Number</label>
                   <div className="auth-input-group">
                     <Phone size={16} className="auth-input-icon" />
                     <input 
@@ -832,6 +832,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                       placeholder="7448578507"
                       value={signupForm.phone}
                       onChange={(e) => setSignupForm({...signupForm, phone: e.target.value})}
+                      required
                       className="auth-input-field"
                     />
                   </div>

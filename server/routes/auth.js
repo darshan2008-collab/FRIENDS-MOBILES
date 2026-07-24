@@ -93,20 +93,24 @@ router.post('/signup', signupLimiter, async (req, res) => {
   try {
     const { name, email, phone, password, address } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ success: false, message: 'Name, email address, and password are required' });
+    if (!name || !email || !phone || !password) {
+      return res.status(400).json({ success: false, message: 'Full name, email address, mobile phone number, and password are required' });
     }
 
     const cleanEmail = sanitizeInput(email).toLowerCase().trim();
     if (!cleanEmail || !cleanEmail.includes('@')) {
-      return res.status(400).json({ success: false, message: 'Please enter a valid email address' });
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address (e.g. user@gmail.com)' });
+    }
+
+    const cleanPhone = normalizePhone(phone);
+    if (!cleanPhone || cleanPhone.length < 10) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid 10-digit mobile phone number' });
     }
 
     if (password.length < 4) {
       return res.status(400).json({ success: false, message: 'Password must be at least 4 characters' });
     }
 
-    const cleanPhone = phone ? normalizePhone(phone) : '';
     const cleanName = sanitizeInput(name);
     const cleanAddress = address ? sanitizeInput(address) : 'Tamil Nadu';
 
