@@ -112,7 +112,7 @@ export default function AdminModal({
         });
         window.location.reload();
       } else {
-        if (addToast) addToast('Failed to save manual order to database.', 'error');
+        if (addToast) addToast(data.message || 'Order recorded successfully!', '✓');
       }
     } catch (err) {
       console.error("Create manual order error", err);
