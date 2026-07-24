@@ -19,12 +19,21 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
   const [copiedCoupon, setCopiedCoupon] = useState('');
 
   // Address management state
-  const [addresses, setAddresses] = useState([
-    { id: 1, title: 'Home (Default)', address: 'Double Tank, South Gandhigramam, Karur - 639004, Tamil Nadu', isDefault: true },
-    { id: 2, title: 'Office', address: 'Plot 45, Tech Park Road, KK Nagar, Madurai - 625020, Tamil Nadu', isDefault: false }
-  ]);
+  const [addresses, setAddresses] = useState(() => {
+    if (user?.address && !user.address.includes('Double Tank')) {
+      return [{ id: 1, title: 'Primary Delivery Address (Default)', address: user.address, isDefault: true }];
+    }
+    return [];
+  });
   const [newAddressText, setNewAddressText] = useState('');
   const [isAddingAddress, setIsAddingAddress] = useState(false);
+
+  // Sync user saved address
+  useEffect(() => {
+    if (user?.address && !user.address.includes('Double Tank')) {
+      setAddresses([{ id: 1, title: 'Primary Delivery Address (Default)', address: user.address, isDefault: true }]);
+    }
+  }, [user]);
 
   // ✅ Get user's orders from parent state (instant) + also try API
   useEffect(() => {
