@@ -16,6 +16,7 @@ const getApiEndpoints = (endpoint) => {
       endpoints.push(`${origin}/api${endpoint}`);
     } else {
       endpoints.push(`${origin}/api${endpoint}`);
+      endpoints.push(`https://friendsmobiles.unitaryx.org/api${endpoint}`);
     }
   }
 
