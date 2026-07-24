@@ -34,8 +34,8 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
   try {
     const transporter = createTransporter();
     if (!transporter) {
-      console.warn(`[OTP Simulation] nodemailer unavailable. OTP for ${toEmail}: ${otpCode}`);
-      return { success: true, simulated: true };
+      console.error(`[Email Critical Error] Nodemailer module or transporter unavailable for ${toEmail}`);
+      return { success: false, error: 'Gmail SMTP engine unavailable on server. Please check server logs.' };
     }
 
     const senderEmail = getGmailUser();
