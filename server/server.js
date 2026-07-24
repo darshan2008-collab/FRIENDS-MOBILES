@@ -62,6 +62,7 @@ const adminRouter = require('./routes/admin');
 const authRouter = require('./routes/auth');
 const paymentsRouter = require('./routes/payments');
 const bannersRouter = require('./routes/banners');
+const otpRouter = require('./routes/otp');
 
 // ─── App Initialization ────────────────────────────────────────────────────────
 const app = express();
@@ -158,6 +159,9 @@ app.use('/payments', paymentsRouter);
 
 app.use('/api/banners', bannersRouter);
 app.use('/banners', bannersRouter);
+
+app.use('/api/otp', otpRouter);
+app.use('/otp', otpRouter);
 
 // ─── Health Check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
