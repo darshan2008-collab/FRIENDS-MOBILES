@@ -1,3 +1,7 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+
 let nodemailer;
 try {
   nodemailer = require('nodemailer');
@@ -5,17 +9,24 @@ try {
   console.warn('[Email Warning] nodemailer module not loaded yet.');
 }
 
-const GMAIL_USER = process.env.GMAIL_USER || 'xunitary@gmail.com';
-const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || 'cymeyaijcvbofggd';
+const getGmailUser = () => (process.env.GMAIL_USER || 'xunitary@gmail.com').trim();
+const getGmailPassword = () => (process.env.GMAIL_APP_PASSWORD || 'cymeyaijcvbofggd').replace(/\s+/g, '').trim();
 
 const createTransporter = () => {
   if (!nodemailer) return null;
+  const user = getGmailUser();
+  const pass = getGmailPassword();
+
   return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: GMAIL_USER,
-      pass: GMAIL_APP_PASSWORD
-    }
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: { user, pass },
+    tls: {
+      rejectUnauthorized: false
+    },
+    connectionTimeout: 10000,
+    socketTimeout: 15000
   });
 };
 
@@ -27,8 +38,9 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
       return { success: true, simulated: true };
     }
 
+    const senderEmail = getGmailUser();
     const mailOptions = {
-      from: `"FRIENDS MOBILE Security" <${GMAIL_USER}>`,
+      from: `"FRIENDS MOBILE Security" <${senderEmail}>`,
       to: toEmail,
       subject: `🔑 FRIENDS MOBILE - ${otpCode} is your Password Reset Code`,
       html: `
