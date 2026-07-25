@@ -81,7 +81,7 @@ const BackupService = {
 
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = backupName || `friends_mobile_backup_${timestamp}.json`;
+      const filename = backupName || `friends_mobile_json_backup_${timestamp}.json`;
       const filePath = path.join(backupsDir, filename);
 
       const dataString = JSON.stringify({ users, products, orders, complaints, banners, settings, subscribers });
@@ -90,6 +90,7 @@ const BackupService = {
       const dumpPayload = {
         meta: {
           app: 'FRIENDS MOBILE',
+          backupType: 'JSON Database Backup',
           version: '2.0.0',
           databaseEngine: 'PostgreSQL',
           createdAt: new Date().toISOString(),
@@ -115,16 +116,16 @@ const BackupService = {
 
       fs.writeFileSync(filePath, JSON.stringify(dumpPayload, null, 2), 'utf8');
 
-      console.log(`[Backup Success] Created snapshot: ${filename} (${users.length} users, ${orders.length} orders, ${products.length} prods)`);
+      console.log(`[JSON Backup Success] Created JSON Database Backup: ${filename} (${users.length} users, ${orders.length} orders, ${products.length} prods)`);
 
-      // Trigger Google Drive Backup upload exclusively
+      // Trigger Google Drive Backup upload
       const driveResult = await GoogleDriveService.uploadBackupSnapshot(filePath, filename);
 
       return {
         success: true,
         message: driveResult && driveResult.success
-          ? `Database backup snapshot "${filename}" successfully uploaded to Google Drive!`
-          : `Database backup snapshot "${filename}" saved locally!`,
+          ? `JSON Database Backup "${filename}" successfully uploaded to Google Drive!`
+          : `JSON Database Backup "${filename}" saved locally!`,
         filename,
         gdriveSynced: Boolean(driveResult && driveResult.success),
         timestamp: dumpPayload.meta.createdAt,
