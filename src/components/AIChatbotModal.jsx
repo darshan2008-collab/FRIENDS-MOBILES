@@ -183,7 +183,8 @@ export default function AIChatbotModal({
         text: `🚚 **Shipping & Delivery Timelines**:\n\n` +
               `• **Tamil Nadu (Karur/Madurai/Chennai/Coimbatore)**: 24 - 48 Hours Express Courier.\n` +
               `• **Rest of India**: 3 - 5 Business Days.\n` +
-              `• **Standard Shipping Fee**: ₹49 (FREE Shipping on orders above ₹1,000!).\n` +
+              `• **Standard Shipping Fee**: ₹70 (FREE Shipping on orders above ₹1,000!).\n` +
+
               `• **Cash on Delivery (COD)**: Available pan-India with zero extra COD fees.\n` +
               `• **Real-Time SMS & WhatsApp Alerts**: Sent automatically once your package is dispatched!`,
         quickReplies: ['📦 Track My Order', '💳 Payment Options', '📍 Showroom Address']
