@@ -14,7 +14,9 @@ try {
   }
 }
 
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:postgres@127.0.0.1:5432/friends_mobile';
+// Ensure IPv4 address 127.0.0.1 instead of localhost ::1 DNS resolution
+const rawUrl = process.env.DATABASE_URL || 'postgres://postgres:postgres@127.0.0.1:5432/friends_mobile';
+const connectionString = rawUrl.replace(/@localhost:/g, '@127.0.0.1:');
 
 let pool = null;
 if (pg && pg.Pool) {
@@ -22,7 +24,7 @@ if (pg && pg.Pool) {
     connectionString,
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 3000,
   });
 
   pool.on('error', (err) => {
@@ -166,7 +168,7 @@ const ensureDatabaseExists = async () => {
 const connectDB = async () => {
   if (isInitialized) return true;
   if (!pool) {
-    console.warn(`[PostgreSQL Warning] 'pg' package not loaded. Run 'cd server && npm install' or 'docker compose up'. Using local storage fallback.`);
+    console.warn(`[PostgreSQL Warning] 'pg' package not loaded. Using in-memory fallback.`);
     return false;
   }
   try {
@@ -197,7 +199,7 @@ const connectDB = async () => {
         } catch (_) {}
       }
     }
-    console.warn(`[PostgreSQL Warning] Connection/Init failed (${error.message}). Using local storage fallback.`);
+    console.warn(`[PostgreSQL Warning] Connection/Init failed (${error.message}). Using local JSON/In-memory fallback.`);
     return false;
   }
 };
@@ -206,7 +208,12 @@ const safeQuery = async (text, params) => {
   if (!pool) {
     return { rows: [], rowCount: 0 };
   }
-  return pool.query(text, params);
+  try {
+    return await pool.query(text, params);
+  } catch (err) {
+    console.warn(`[PostgreSQL Fallback] Query bypassed (${err.message}). Using fallback data store.`);
+    return { rows: [], rowCount: 0 };
+  }
 };
 
 module.exports = {

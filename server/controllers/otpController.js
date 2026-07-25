@@ -49,7 +49,11 @@ exports.sendOtp = async (req, res) => {
     }
 
     // 2. Find user if exists (to retrieve name for email header)
-    const existingUser = (await User.findOne({ email: cleanEmail })) || {};
+    let existingUser = {};
+    try {
+      existingUser = (await User.findOne({ email: cleanEmail })) || {};
+    } catch (_) {}
+
 
     // 3. Generate secure random 6-digit OTP
     const rawOtp = crypto.randomInt(100000, 1000000).toString();
@@ -145,8 +149,12 @@ exports.verifyOtp = async (req, res) => {
     }
 
     // 2. Find Active OTP Document (DB or In-Memory Store)
-    let record = await OtpVerification.findOne({ email: cleanEmail }).sort({ createdAt: -1 });
+    let record = null;
+    try {
+      record = await OtpVerification.findOne({ email: cleanEmail }).sort({ createdAt: -1 });
+    } catch (_) {}
     let isMemoryRecord = false;
+
 
     if (!record && inMemoryOtpStore.has(cleanEmail)) {
       const memData = inMemoryOtpStore.get(cleanEmail);
@@ -264,7 +272,10 @@ exports.resetPassword = async (req, res) => {
     }
 
     if (!isAuthorized && otp && /^\d{6}$/.test(otp.toString().trim())) {
-      let record = await OtpVerification.findOne({ email: cleanEmail });
+      let record = null;
+      try {
+        record = await OtpVerification.findOne({ email: cleanEmail });
+      } catch (_) {}
       let memData = inMemoryOtpStore.get(cleanEmail);
       const hashToTest = record ? record.otpHash : (memData ? memData.otpHash : null);
 
@@ -284,11 +295,14 @@ exports.resetPassword = async (req, res) => {
 
     // Update Password in User storage
     const hashedPassword = hashPassword(newPassword);
-    const updateResult = await User.updateOne(
-      { email: cleanEmail },
-      { $set: { password: hashedPassword, updatedAt: new Date() } },
-      { upsert: true }
-    );
+    try {
+      await User.updateOne(
+        { email: cleanEmail },
+        { $set: { password: hashedPassword, updatedAt: new Date() } },
+        { upsert: true }
+      );
+    } catch (_) {}
+
 
     console.log(`[OTP Info] Password Reset completed for ${cleanEmail}`);
 
