@@ -1,9 +1,8 @@
-import { createRequire } from 'node:module';
+import app from '../server/server.js';
 
-const require = createRequire(import.meta.url);
+export default (req, res) => {
+  return app(req, res);
+};
 
-// Import main Express app from server
-const app = require('../server/server.js');
 
-export default app;
 
