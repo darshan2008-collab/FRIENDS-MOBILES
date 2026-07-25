@@ -208,10 +208,24 @@ app.get('/api/store-info', (req, res) => {
   }
 });
 
+// ─── Production SPA Fallback Routing ─────────────────────────────────────────
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/images')) return next();
+  const distIndex = path.join(__dirname, '../dist/index.html');
+  const rootIndex = path.join(__dirname, '../index.html');
+  if (fs.existsSync(distIndex)) {
+    return res.sendFile(distIndex);
+  } else if (fs.existsSync(rootIndex)) {
+    return res.sendFile(rootIndex);
+  }
+  next();
+});
+
 // ─── 404 Catch ─────────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.method} ${req.path} not found` });
 });
+
 
 // ─── Global Error Handler ──────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
