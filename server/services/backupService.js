@@ -67,13 +67,14 @@ const BackupService = {
   // Create full PostgreSQL database snapshot
   createBackup: async (backupName = null) => {
     try {
-      const users = await User.find({});
-      const products = await Product.find({});
-      const orders = await Order.find({});
-      const complaints = await Complaint.find({});
-      const banners = await Banner.find({});
-      const settings = await Setting.findOne({});
-      const subscribers = await Subscriber.find({});
+      const users = (await User.find({})) || [];
+      const products = (await Product.find({})) || [];
+      const orders = (await Order.find({})) || [];
+      const complaints = (await Complaint.find({})) || [];
+      const banners = (typeof Banner.find === 'function' ? await Banner.find({}) : [await Banner.findOne({})]).filter(Boolean);
+      const settings = (await Setting.findOne({})) || {};
+      const subscribers = (await Subscriber.find({})) || [];
+
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = backupName || `friends_mobile_backup_${timestamp}.json`;
