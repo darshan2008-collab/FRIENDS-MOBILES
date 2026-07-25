@@ -108,6 +108,34 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const resetAllAuthForms = () => {
+    setLoginIdentity('');
+    setLoginPassword('');
+    setSignupForm({ name: '', phone: '', email: '', password: '' });
+    setForgotPhone('');
+    setForgotStep(1);
+    setVerifiedName('');
+    setSentEmail('');
+    setEmailCheckError('');
+    setOtpInput('');
+    setOtpDigits(['', '', '', '', '', '']);
+    setResetToken('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setShowLoginPassword(false);
+    setShowSignupPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+  };
+
+  // Reset credentials & form inputs whenever modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      resetAllAuthForms();
+    }
+  }, [isOpen]);
+
+
   const triggerAutoVerifyIfComplete = (digitsArray) => {
     const fullCode = digitsArray.join('');
     if (fullCode.length === 6) {
