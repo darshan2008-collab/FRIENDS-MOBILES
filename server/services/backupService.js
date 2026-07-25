@@ -45,15 +45,17 @@ const BackupService = {
       }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
       const totalQuotaBytes = 15 * 1024 * 1024 * 1024; // 15 GB in bytes
-      const usedMB = (totalBytesUsed / (1024 * 1024)).toFixed(2);
+      const formattedUsedStorage = totalBytesUsed >= 1024 * 1024
+        ? (totalBytesUsed / (1024 * 1024)).toFixed(2) + ' MB'
+        : (totalBytesUsed > 0 ? (totalBytesUsed / 1024).toFixed(2) + ' KB' : '0.00 MB');
       const percentageUsed = ((totalBytesUsed / totalQuotaBytes) * 100).toFixed(6);
 
       return {
         success: true,
-        storageQuota: '15 GB',
+        storageQuota: '15 GB (Google Drive Free Tier)',
         folderId: process.env.GDRIVE_FOLDER_ID || '1d-ca4wnFG0cwyy_b0Ry-cKnhr9b_G3Yl',
         folderUrl: `https://drive.google.com/drive/folders/${process.env.GDRIVE_FOLDER_ID || '1d-ca4wnFG0cwyy_b0Ry-cKnhr9b_G3Yl'}`,
-        usedMB: `${usedMB} MB`,
+        usedMB: formattedUsedStorage,
         totalBytesUsed,
         percentageUsed: `${percentageUsed}%`,
         totalBackupsCount: backupList.length,

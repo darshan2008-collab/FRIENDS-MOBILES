@@ -233,19 +233,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: 'An internal server error occurred.' });
 });
 
-// ─── Automated 1-Hour Google Drive Cloud Backup Scheduler ──────────────────────
-const BackupService = require('./services/backupService');
-const BACKUP_INTERVAL_HOURS = parseInt(process.env.BACKUP_INTERVAL_HOURS || '1', 10);
-const BACKUP_INTERVAL_MS = BACKUP_INTERVAL_HOURS * 60 * 60 * 1000;
-
-setInterval(async () => {
-  console.log(`[Auto Cloud Backup] Running hourly automated database backup snapshot to Google Drive...`);
-  try {
-    await BackupService.createBackup(`friends_mobile_autobackup_${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
-  } catch (err) {
-    console.error(`[Auto Cloud Backup Error]`, err.message);
-  }
-}, BACKUP_INTERVAL_MS);
 
 // ─── Start Server ──────────────────────────────────────────────────────────────
 if (require.main === module) {
