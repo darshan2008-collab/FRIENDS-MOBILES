@@ -6,7 +6,15 @@ const darkImgPath = 'C:\\Users\\ELCOT\\.gemini\\antigravity-ide\\brain\\bf1f9e73
 const targetJsPath = path.join(__dirname, 'src/assets/heroDeviceBase64.js');
 
 try {
+  const cjsApiPath = path.join(__dirname, 'api/index.cjs');
+  if (fs.existsSync(cjsApiPath)) {
+    try { fs.unlinkSync(cjsApiPath); } catch (_) {}
+  }
+} catch (_) {}
+
+try {
   let lightUri = '';
+
   let darkUri = '';
 
   if (fs.existsSync(lightImgPath)) {
