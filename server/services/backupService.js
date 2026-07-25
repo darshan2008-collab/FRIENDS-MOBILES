@@ -14,9 +14,12 @@ const GoogleDriveService = require('./googleDriveService');
 const backupsDir = path.join(__dirname, '../data/backups');
 
 // Ensure backups directory exists
-if (!fs.existsSync(backupsDir)) {
-  fs.mkdirSync(backupsDir, { recursive: true });
-}
+try {
+  if (!fs.existsSync(backupsDir)) {
+    fs.mkdirSync(backupsDir, { recursive: true });
+  }
+} catch (_) {}
+
 
 const BackupService = {
   // Get all backup snapshots and 5000 GB storage metrics
