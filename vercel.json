@@ -1,5 +1,9 @@
 {
   "version": 2,
+  "name": "friends-mobiles-rho",
+  "alias": [
+    "friends-mobiles-rho.vercel.app"
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -11,4 +15,5 @@
     }
   ]
 }
+
 

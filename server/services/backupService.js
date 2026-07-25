@@ -25,8 +25,12 @@ const BackupService = {
   // Get all backup snapshots and 5000 GB storage metrics
   getBackupStatus: async () => {
     try {
-      const files = fs.readdirSync(backupsDir).filter(f => f.endsWith('.json'));
+      if (!fs.existsSync(backupsDir)) {
+        try { fs.mkdirSync(backupsDir, { recursive: true }); } catch (_) {}
+      }
+      const files = fs.existsSync(backupsDir) ? fs.readdirSync(backupsDir).filter(f => f.endsWith('.json')) : [];
       let totalBytesUsed = 0;
+
 
       const backupList = files.map(filename => {
         const filePath = path.join(backupsDir, filename);
