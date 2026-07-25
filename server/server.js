@@ -13,22 +13,27 @@ const BackupService = require('./services/backupService');
 (async () => {
   const isConnected = await connectDB();
   if (isConnected) {
-    await migrateData();
+    await migrateData().catch(() => {});
   }
-  // Create initial boot backup snapshot
-  setTimeout(() => {
-    BackupService.createBackup().catch(() => {});
-  }, 10000);
+  // Create initial boot backup snapshot (Local server environment only)
+  if (!process.env.VERCEL) {
+    setTimeout(() => {
+      BackupService.createBackup().catch(() => {});
+    }, 10000);
+  }
 })();
 
-// Automated Database Backup Schedule (Configurable Interval, Default: Every 1 Hour)
-const backupIntervalHours = parseInt(process.env.BACKUP_INTERVAL_HOURS || '1', 10);
-const backupIntervalMs = Math.max(1, backupIntervalHours) * 60 * 60 * 1000;
+// Automated Database Backup Schedule (Local server environment only)
+if (!process.env.VERCEL) {
+  const backupIntervalHours = parseInt(process.env.BACKUP_INTERVAL_HOURS || '1', 10);
+  const backupIntervalMs = Math.max(1, backupIntervalHours) * 60 * 60 * 1000;
 
-setInterval(() => {
-  console.log(`[Auto Backup Cron] Running scheduled database backup snapshot (Interval: Every ${backupIntervalHours} Hour(s))...`);
-  BackupService.createBackup().catch(err => console.error('[Auto Backup Error]', err.message));
-}, backupIntervalMs);
+  setInterval(() => {
+    console.log(`[Auto Backup Cron] Running scheduled database backup snapshot (Interval: Every ${backupIntervalHours} Hour(s))...`);
+    BackupService.createBackup().catch(err => console.error('[Auto Backup Error]', err.message));
+  }, backupIntervalMs);
+}
+
 
 // ─── Data & Image Directory Bootstrap ─────────────────────────────────────────
 const dirsToEnsure = [

@@ -9,20 +9,23 @@ async function migrate() {
   const dataDir = path.join(__dirname, '../data');
   const backupDir = path.join(__dirname, '../data/backup_pre_postgres');
 
-  if (!fs.existsSync(backupDir)) {
-    fs.mkdirSync(backupDir, { recursive: true });
-  }
-
-  // 1. Create safety backups of existing JSON files
-  const filesToBackup = ['products.json', 'orders.json', 'users.json', 'subscribers.json', 'settings.json', 'banners.json'];
-  for (const f of filesToBackup) {
-    const src = path.join(dataDir, f);
-    const dest = path.join(backupDir, f);
-    if (fs.existsSync(src)) {
-      fs.copyFileSync(src, dest);
-      console.log(`[Backup] Pre-migration backup created: ${f}`);
+  try {
+    if (!fs.existsSync(backupDir)) {
+      fs.mkdirSync(backupDir, { recursive: true });
     }
-  }
+
+    // 1. Create safety backups of existing JSON files
+    const filesToBackup = ['products.json', 'orders.json', 'users.json', 'subscribers.json', 'settings.json', 'banners.json'];
+    for (const f of filesToBackup) {
+      const src = path.join(dataDir, f);
+      const dest = path.join(backupDir, f);
+      if (fs.existsSync(src)) {
+        fs.copyFileSync(src, dest);
+        console.log(`[Backup] Pre-migration backup created: ${f}`);
+      }
+    }
+  } catch (_) {}
+
 
   const isConnected = await connectDB();
   if (!isConnected) {
