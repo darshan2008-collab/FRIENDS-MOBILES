@@ -2734,10 +2734,10 @@ export default function AdminModal({
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
                     <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
-                      <Cloud size={24} color="#3b82f6" /> 15 GB Google Drive Automated Database Backups
+                      <Cloud size={24} color="#3b82f6" /> 15 GB Google Drive Automated JSON Database Backups
                     </h3>
                     <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                      Automated hourly PostgreSQL database snapshots uploaded directly to your personal Google Drive folder.
+                      Automated hourly PostgreSQL JSON database backup files uploaded directly to your personal Google Drive folder.
                     </p>
                   </div>
 
@@ -2768,7 +2768,7 @@ export default function AdminModal({
                         boxShadow: '0 4px 14px rgba(59, 130, 246, 0.35)'
                       }}
                     >
-                      <Cloud size={16} /> {isBackingUp ? 'Uploading to Google Drive...' : '📁 Backup to Google Drive Now'}
+                      <Cloud size={16} /> {isBackingUp ? 'Uploading JSON to Google Drive...' : '📁 Backup JSON Database Now'}
                     </button>
                   </div>
 
@@ -2785,11 +2785,11 @@ export default function AdminModal({
                     <h4 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: '900' }}>{backupStatus.usedMB}</h4>
                   </div>
                   <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px' }}>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Total Backup Snapshots</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Total JSON Backups</span>
                     <h4 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', color: '#22c55e', fontWeight: '900' }}>{backupStatus.totalBackupsCount} Files</h4>
                   </div>
                   <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px' }}>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Last Auto-Backup</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Last Auto JSON Backup</span>
                     <h4 style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {backupStatus.lastBackupAt ? new Date(backupStatus.lastBackupAt).toLocaleString('en-IN') : 'None'}
                     </h4>
@@ -2800,13 +2800,14 @@ export default function AdminModal({
               {/* Historical Cloud Snapshots Table */}
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '24px', borderRadius: '18px' }}>
                 <h4 style={{ margin: '0 0 16px 0', fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Database size={18} color="#3b82f6" /> Available Cloud Backup Snapshots ({backupStatus.backups ? backupStatus.backups.length : 0})
+                  <Database size={18} color="#3b82f6" /> Available JSON Database Backups ({backupStatus.backups ? backupStatus.backups.length : 0})
                 </h4>
 
                 {(!backupStatus.backups || backupStatus.backups.length === 0) ? (
                   <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                    No backups created yet. Click <strong>"☁️ Backup Database Now"</strong> to create your first cloud snapshot.
+                    No JSON backups created yet. Click <strong>"📁 Backup JSON Database Now"</strong> to create your first JSON backup.
                   </div>
+
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {backupStatus.backups.map((bk) => (
@@ -2839,7 +2840,8 @@ export default function AdminModal({
                             display: 'flex', alignItems: 'center', gap: '6px'
                           }}
                         >
-                          <Download size={13} /> Restore Snapshot 📥
+                          <Download size={13} /> Restore JSON Backup 📥
+
                         </button>
                       </div>
                     ))}
