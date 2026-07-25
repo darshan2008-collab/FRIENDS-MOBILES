@@ -16,17 +16,17 @@ const getApiEndpoints = (endpoint) => {
     const protocol = window.location.protocol;
     const origin = window.location.origin;
 
-    // If testing on localhost, try port 5000 first before external domains
-    if (host === 'localhost' || host === '127.0.0.1') {
-      endpoints.push(`${protocol}//${host}:5000/api${endpoint}`);
-      endpoints.push(`${origin}/api${endpoint}`);
-    } else {
-      endpoints.push(`${origin}/api${endpoint}`);
-      endpoints.push(`https://friends-mobiles-rho.vercel.app/api${endpoint}`);
-    }
+    // 1. Try relative origin API (/api)
+    endpoints.push(`${origin}/api${endpoint}`);
+
+    // 2. Try direct backend container port 5000 on custom domain / host
+    endpoints.push(`${protocol}//${host}:5000/api${endpoint}`);
+
+    // 3. Try Vercel production backend cloud fallback
+    endpoints.push(`https://friends-mobiles-rho.vercel.app/api${endpoint}`);
   }
 
-  if (import.meta.env.VITE_API_BASE_URL) {
+  if (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== '/api') {
     const envBase = import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '');
     endpoints.push(`${envBase}${endpoint}`);
   }
@@ -34,6 +34,7 @@ const getApiEndpoints = (endpoint) => {
   endpoints.push(`/api${endpoint}`);
   return [...new Set(endpoints)];
 };
+
 
 const safeFetchApi = async (endpoint, options = {}) => {
   const urlList = getApiEndpoints(endpoint);
