@@ -733,10 +733,11 @@ export default function AdminModal({
         zIndex: 10000,
         background: 'var(--bg-page)',
         color: 'var(--text-primary)',
-        overflowY: 'auto',
+        overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column'
       }}
+
     >
       {/* Top Header Navigation */}
       <header className="admin-header-responsive" style={{
@@ -964,9 +965,10 @@ export default function AdminModal({
         </div>
       ) : (
         /* Full Page Admin Dashboard Workspace with Left Collapsible Sidebar (Sandwich Menu) */
-        <div className="admin-workspace-layout">
+        <div className="admin-workspace-layout" style={{ display: 'flex', flex: 1, height: 'calc(100vh - 65px)', overflow: 'hidden' }}>
           
-          <aside className={`admin-sidebar-nav ${isAdminSidebarOpen ? 'open' : ''}`}>
+          <aside className={`admin-sidebar-nav ${isAdminSidebarOpen ? 'open' : ''}`} style={{ overflowY: 'auto' }}>
+
             <button 
               className={`sidebar-tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
               onClick={() => {
@@ -1040,7 +1042,8 @@ export default function AdminModal({
             </button>
           </aside>
 
-          <div className="admin-main-panel">
+          <div className="admin-main-panel" style={{ flex: 1, height: '100%', overflowY: 'auto', padding: '24px' }}>
+
 
           {/* TAB 1: OVERVIEW & SALES ANALYTICS (HIGH VS LOW SELLING PRODUCTS) */}
           {activeTab === 'overview' && (

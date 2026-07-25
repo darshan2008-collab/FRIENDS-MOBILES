@@ -5131,6 +5131,44 @@ img {
   }
 }
 
+/* ─── Modern Custom Scrollbars (Hides ugly browser default arrows & thick bars) ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 85, 0, 0.35);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 85, 0, 0.7);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 85, 0, 0.35) transparent;
+}
+
+.full-page-admin-portal {
+  overflow: hidden !important;
+}
+
+.admin-workspace-layout {
+  height: calc(100vh - 65px) !important;
+  overflow: hidden !important;
+}
+
+.admin-main-panel {
+  overflow-y: auto !important;
+}
+
+
 
 
 
