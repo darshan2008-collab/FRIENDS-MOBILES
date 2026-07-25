@@ -51,6 +51,8 @@ const BackupService = {
       return {
         success: true,
         storageQuota: '15 GB',
+        folderId: process.env.GDRIVE_FOLDER_ID || '1d-ca4wnFG0cwyy_b0Ry-cKnhr9b_G3Yl',
+        folderUrl: `https://drive.google.com/drive/folders/${process.env.GDRIVE_FOLDER_ID || '1d-ca4wnFG0cwyy_b0Ry-cKnhr9b_G3Yl'}`,
         usedMB: `${usedMB} MB`,
         totalBytesUsed,
         percentageUsed: `${percentageUsed}%`,
