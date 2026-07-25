@@ -1034,12 +1034,14 @@ export default function AdminModal({
               className={`sidebar-tab-btn ${activeTab === 'backups' ? 'active' : ''}`}
               onClick={() => {
                 setActiveTab('backups');
+                fetchBackupStatus();
                 setIsAdminSidebarOpen(false);
               }}
               style={{ color: '#3b82f6', fontWeight: '800' }}
             >
               <Cloud size={16} color="#3b82f6" /> ☁️ Google Drive Backups ({backupStatus.totalBackupsCount || 0})
             </button>
+
           </aside>
 
           <div className="admin-main-panel" style={{ flex: 1, height: '100%', overflowY: 'auto', padding: '24px' }}>
