@@ -13,6 +13,11 @@ const Banner = {
     };
   },
 
+  find: async () => {
+    const banner = await Banner.findOne();
+    return banner ? [banner] : [];
+  },
+
   deleteMany: async () => {
     await query('DELETE FROM banners');
     return { deletedCount: 1 };
