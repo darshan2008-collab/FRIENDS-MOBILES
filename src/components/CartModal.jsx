@@ -33,6 +33,114 @@ export default function CartModal({
     }
   }, [isOpen]);
 
+  const handleDownloadInvoice = (order) => {
+    if (!order) return;
+    const isCOD = String(order.paymentMethod || '').toLowerCase().includes('cod') || String(order.paymentMethod || '').toLowerCase().includes('cash');
+    if (isCOD) {
+      if (addToast) addToast('E-Bills are not generated for Cash on Delivery orders.', 'ℹ️');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank', 'width=850,height=900');
+    if (!printWindow) return;
+
+    const itemsRows = (order.items || []).map((item, idx) => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 12px; font-size: 14px; font-weight: 600;">${idx + 1}. ${item.title}</td>
+        <td style="padding: 12px; font-size: 14px; text-align: center;">${item.quantity || 1}</td>
+        <td style="padding: 12px; font-size: 14px; text-align: right;">₹${item.price}</td>
+        <td style="padding: 12px; font-size: 14px; text-align: right; font-weight: 700;">₹${(item.price * (item.quantity || 1)).toLocaleString('en-IN')}</td>
+      </tr>
+    `).join('');
+
+    const invoiceHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>FRIENDS MOBILE Tax Invoice #${order.orderId || order.id}</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b; padding: 40px; background: #fff; }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ea580c; padding-bottom: 20px; }
+          .logo-title { font-size: 28px; font-weight: 900; color: #ea580c; text-transform: uppercase; margin: 0; }
+          .sub-title { font-size: 12px; color: #64748b; margin-top: 4px; }
+          .invoice-tag { font-size: 18px; font-weight: 800; color: #0f172a; text-align: right; }
+          .badge-paid { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 800; display: inline-block; margin-top: 6px; }
+          .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0; }
+          .meta-box { background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; }
+          .meta-label { font-size: 11px; text-transform: uppercase; font-weight: 800; color: #64748b; }
+          .meta-val { font-size: 14px; font-weight: 700; margin-top: 4px; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          th { background: #f1f5f9; padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; color: #475569; border-bottom: 2px solid #cbd5e1; }
+          .total-box { margin-left: auto; width: 300px; background: #fff7ed; padding: 16px; border-radius: 12px; border: 1.5px solid #ffedd5; margin-top: 20px; }
+          .total-row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
+          .grand-total { font-size: 18px; font-weight: 900; color: #ea580c; border-top: 2px solid #fdba74; padding-top: 8px; margin-top: 6px; }
+          .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1 class="logo-title">FRIENDS MOBILE</h1>
+            <div class="sub-title">Madurai Road, Near Double Tank, Karur / Madurai, Tamil Nadu | Ph: +91 74485 78507</div>
+          </div>
+          <div>
+            <div class="invoice-tag">OFFICIAL E-BILL / TAX INVOICE</div>
+            <div style="text-align: right;"><span class="badge-paid">ONLINE PAYMENT VERIFIED ✅</span></div>
+          </div>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-box">
+            <div class="meta-label">Billed To (Customer Details)</div>
+            <div class="meta-val">${order.customer?.name || 'Valued Customer'}</div>
+            <div style="font-size: 13px; color: #475569; margin-top: 2px;">📞 ${order.customer?.phone || ''}</div>
+            <div style="font-size: 13px; color: #475569;">📍 ${order.customer?.address || 'Tamil Nadu, India'}</div>
+          </div>
+          <div class="meta-box">
+            <div class="meta-label">Invoice Details</div>
+            <div class="meta-val">Invoice #: ${order.orderId || order.id}</div>
+            <div style="font-size: 13px; color: #475569; margin-top: 2px;">Date: ${new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+            <div style="font-size: 13px; color: #475569;">Payment Method: <strong>${order.paymentMethod || 'Online Payment'}</strong></div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Item Description</th>
+              <th style="text-align: center;">Qty</th>
+              <th style="text-align: right;">Unit Price</th>
+              <th style="text-align: right;">Total Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsRows}
+          </tbody>
+        </table>
+
+        <div class="total-box">
+          <div class="total-row"><span>Subtotal:</span><strong>₹${order.subtotal || order.total}</strong></div>
+          <div class="total-row"><span>Shipping Fee:</span><strong>${order.shipping === 0 ? 'FREE' : '₹' + (order.shipping || 0)}</strong></div>
+          <div class="total-row grand-total"><span>Total Paid:</span><span>₹${order.total}</span></div>
+        </div>
+
+        <div class="footer">
+          This is an official computer-generated E-Bill tax invoice for Online Payment Order #${order.orderId || order.id}.<br/>
+          Thank you for shopping with <strong>FRIENDS MOBILE</strong>!
+        </div>
+
+        <script>
+          window.onload = function() { window.print(); };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(invoiceHTML);
+    printWindow.document.close();
+  };
+
+
   // Form State - Empty by default so users enter their own address
   const [shippingDetails, setShippingDetails] = useState({
     name: currentUser?.name || '',
@@ -684,6 +792,34 @@ export default function CartModal({
                   <strong style={{ color: '#FF5500' }}>₹{placedOrderDetails.total.toLocaleString('en-IN')}</strong>
                 </div>
               </div>
+
+              {/* Online Payment E-Bill Download Option */}
+              {!String(placedOrderDetails.paymentMethod || '').toLowerCase().includes('cod') && 
+               !String(placedOrderDetails.paymentMethod || '').toLowerCase().includes('cash') && (
+                <button
+                  onClick={() => handleDownloadInvoice(placedOrderDetails)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    color: '#ffffff',
+                    fontWeight: '800',
+                    fontSize: '0.88rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    marginBottom: '10px',
+                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+                  }}
+                >
+                  📄 Download E-Bill (Tax Invoice)
+                </button>
+              )}
+
 
               <a 
                 href={getWhatsAppUrl(placedOrderDetails)}
