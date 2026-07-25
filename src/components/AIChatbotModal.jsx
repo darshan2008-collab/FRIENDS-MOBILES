@@ -540,9 +540,9 @@ export default function AIChatbotModal({
             </form>
           </div>
         ) : (
+          /* Messages Body Scroll Area */
+          <div className="ai-messages-body">
 
-        {/* Messages Body Scroll Area */}
-        <div className="ai-messages-body">
           {messages.map((msg) => (
             <div key={msg.id} className={`ai-message-row ${msg.sender === 'user' ? 'user-row' : 'bot-row'}`}>
               {msg.sender === 'bot' && (
