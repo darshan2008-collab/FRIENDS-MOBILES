@@ -814,6 +814,7 @@ export default function App() {
         isOpen={isChatbotOpen}
         onClose={() => setIsChatbotOpen(false)}
         orders={orders}
+        products={products}
         currentUser={currentUser}
         onOpenCustomCover={() => setIsCustomCoverOpen(true)}
         onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
@@ -821,6 +822,7 @@ export default function App() {
         onOpenUserAccount={() => setIsAccountOpen(true)}
         addToast={addToast}
       />
+
 
       <ToastContainer toasts={toasts} onRemoveToast={handleRemoveToast} />
     </div>

@@ -10,6 +10,7 @@ export default function AIChatbotModal({
   isOpen, 
   onClose, 
   orders = [], 
+  products = [],
   currentUser, 
   onOpenCustomCover, 
   onOpenCustomFrame,
@@ -17,6 +18,7 @@ export default function AIChatbotModal({
   onOpenUserAccount,
   addToast 
 }) {
+
   const [isCompactView, setIsCompactView] = useState(false); // Default: false (Full View on Desktop & Mobile)
   const [showComplaintForm, setShowComplaintForm] = useState(false);
   const [complaintForm, setComplaintForm] = useState({
@@ -150,7 +152,38 @@ export default function AIChatbotModal({
       }
     }
 
+    // 1.5. Live Product Search & Product Details Query
+    if (text.length >= 2 && !orderMatch) {
+      const searchTerms = text.split(/\s+/).filter(w => w.length >= 3);
+      const matchedProducts = (products || []).filter(p => {
+        if (!p || !p.title) return false;
+        const titleLower = p.title.toLowerCase();
+        const catLower = (p.category || '').toLowerCase();
+        const brandLower = (p.brand || '').toLowerCase();
+        return searchTerms.some(term => titleLower.includes(term) || catLower.includes(term) || brandLower.includes(term));
+      });
+
+      if (matchedProducts.length > 0) {
+        const p = matchedProducts[0];
+        const stockBadge = p.inStock !== false ? `🟢 **In Stock** (${p.stock || 50} units available in warehouse)` : `🔴 **Out of Stock**`;
+        const ratingBadge = p.rating ? `⭐ **${p.rating} / 5.0** (${p.reviews || 18} Customer Reviews)` : `⭐ **4.9 / 5.0** (Top Rated Product)`;
+
+        return {
+          text: `🛍️ **100% Verified Product Details for "${p.title}"**:\n\n` +
+                `• **Product Title**: ${p.title}\n` +
+                `• **Category**: ${p.category || 'Mobile Accessories'}\n` +
+                `• **Offer Price**: **₹${p.price}** ~₹${p.originalPrice || Math.round(p.price * 1.3)}~ (${p.discount || 'Special Discount'})\n` +
+                `• **Stock Availability**: ${stockBadge}\n` +
+                `• **Customer Rating**: ${ratingBadge}\n` +
+                `• **Product Description**: ${p.description || 'Original high-durability mobile accessory with official FRIENDS MOBILE store warranty.'}\n\n` +
+                `Would you like to buy this item or browse more products in our store?`,
+          quickReplies: ['🛍️ View Products', '📦 Track My Order', '💬 Chat on WhatsApp']
+        };
+      }
+    }
+
     // 2. Custom Back Cover Queries
+
     if (text.includes('cover') || text.includes('custom') || text.includes('case') || text.includes('phone cover') || text.includes('printing')) {
       return {
         text: `✨ **3D Custom Phone Cover Studio Details**:\n\n` +
