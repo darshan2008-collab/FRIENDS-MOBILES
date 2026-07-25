@@ -2719,8 +2719,11 @@ export default function AdminModal({
                 </form>
               </div>
             </div>
+          )}
+
           {/* TAB 6: 5,000 GB CLOUD STORAGE & BACKUPS */}
           {activeTab === 'backups' && (
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               
               {/* Cloud Quota Overview Banner */}
