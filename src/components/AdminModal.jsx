@@ -320,8 +320,8 @@ export default function AdminModal({
 
   // Shipping Form State
   const [shippingForm, setShippingForm] = useState({
-    standardShippingFee: 49,
-    freeShippingThreshold: 499,
+    standardShippingFee: 70,
+    freeShippingThreshold: 1000,
     expressShippingFee: 99,
     supportPhone: '+91 74485 78507',
     supportEmail: 'friendsmobile@gmail.com'
@@ -334,7 +334,7 @@ export default function AdminModal({
   useEffect(() => {
     if (shippingSettings) {
       setShippingForm({
-        standardShippingFee: shippingSettings.standardShippingFee ?? 49,
+        standardShippingFee: shippingSettings.standardShippingFee ?? 70,
         freeShippingThreshold: shippingSettings.freeShippingThreshold ?? 1000,
         expressShippingFee: shippingSettings.expressShippingFee ?? 99,
         supportPhone: shippingSettings.supportPhone || '+91 74485 78507',
@@ -342,6 +342,7 @@ export default function AdminModal({
       });
     }
   }, [shippingSettings]);
+
 
   if (!isOpen) return null;
 

@@ -100,7 +100,8 @@ CREATE TABLE IF NOT EXISTS banners (
 CREATE TABLE IF NOT EXISTS settings (
   id SERIAL PRIMARY KEY,
   free_shipping_threshold NUMERIC(10,2) DEFAULT 1000,
-  standard_shipping_fee NUMERIC(10,2) DEFAULT 49,
+  standard_shipping_fee NUMERIC(10,2) DEFAULT 70,
+
   store_name VARCHAR(255) DEFAULT 'FRIENDS MOBILE',
   store_city VARCHAR(255) DEFAULT 'Madurai, Tamil Nadu',
   store_phone VARCHAR(50) DEFAULT '+91 74485 78507',

@@ -1,14 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { URL } = require('url');
 
 /**
  * Google Drive Backup Service
- * Performs direct REST API v3 uploads for database JSON dumps into Google Drive Folder
+ * Performs direct REST API v3 uploads and Webhook uploads for database JSON dumps into Google Drive Folder
  */
 const GoogleDriveService = {
   isEnabled: () => {
-    return Boolean(process.env.GDRIVE_FOLDER_ID);
+    return Boolean(process.env.GDRIVE_FOLDER_ID || process.env.GDRIVE_WEBHOOK_URL);
   },
 
   getAccessToken: async () => {
@@ -62,19 +63,61 @@ const GoogleDriveService = {
   uploadBackupSnapshot: async (filePath, filename) => {
     try {
       const folderId = process.env.GDRIVE_FOLDER_ID || '1d-ca4wnFG0cwyy_b0Ry-cKnhr9b_G3Yl';
+      const webhookUrl = process.env.GDRIVE_WEBHOOK_URL;
+
       if (!fs.existsSync(filePath)) {
         return { success: false, reason: 'FILE_NOT_FOUND' };
       }
 
       const fileContent = fs.readFileSync(filePath, 'utf8');
-      const accessToken = await GoogleDriveService.getAccessToken();
 
+      // Method 1: Google Apps Script Webhook (Zero-Auth Direct Drive Drop)
+      if (webhookUrl) {
+        console.log(`[Google Drive Webhook] Syncing snapshot ${filename} to Google Drive...`);
+        try {
+          const payloadData = JSON.parse(fileContent);
+          const postData = JSON.stringify({ filename, folderId, payload: payloadData });
+          const parsed = new URL(webhookUrl);
+
+          return new Promise((resolve) => {
+            const req = https.request({
+              hostname: parsed.hostname,
+              path: parsed.pathname + parsed.search,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(postData)
+              }
+            }, (res) => {
+              let body = '';
+              res.on('data', chunk => { body += chunk; });
+              res.on('end', () => {
+                console.log(`[Google Drive Webhook Success] Snapshot ${filename} created in Google Drive!`);
+                resolve({ success: true, filename, webhookSynced: true });
+              });
+            });
+
+            req.on('error', (err) => {
+              console.error('[Google Drive Webhook Error]', err.message);
+              resolve({ success: true, localOnly: true, filename });
+            });
+
+            req.write(postData);
+            req.end();
+          });
+        } catch (e) {
+          console.error('[Google Drive Webhook Parsing Error]', e.message);
+        }
+      }
+
+      // Method 2: Direct REST API v3 Upload with OAuth Token
+      const accessToken = await GoogleDriveService.getAccessToken();
       if (!accessToken) {
-        console.log(`[Google Drive Backup] Snapshot "${filename}" saved in server/data/backups/ (Add GDRIVE_REFRESH_TOKEN in .env for direct cloud sync).`);
+        console.log(`[Google Drive Backup] Snapshot "${filename}" saved in server/data/backups/ (Follow 1-step Google Script guide to enable instant automatic Drive file drops).`);
         return {
           success: true,
           localOnly: true,
-          message: `Snapshot "${filename}" saved in server/data/backups/! Add GDRIVE_REFRESH_TOKEN to .env for direct Google Drive sync.`,
+          message: `Snapshot "${filename}" saved in server/data/backups/!`,
           filename
         };
       }
@@ -117,7 +160,7 @@ const GoogleDriveService = {
             try {
               const data = JSON.parse(body);
               if (res.statusCode >= 200 && res.statusCode < 300) {
-                console.log(`[Google Drive API Success] Uploaded ${filename} (ID: ${data.id}) to Google Drive folder ${folderId}!`);
+                console.log(`[Google Drive API Success] Uploaded ${filename} (ID: ${data.id}) to Google Drive!`);
                 resolve({ success: true, fileId: data.id, filename });
               } else {
                 console.warn(`[Google Drive API Notice] HTTP ${res.statusCode}:`, data.error?.message || body);

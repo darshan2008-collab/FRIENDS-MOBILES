@@ -152,7 +152,7 @@ export default function App() {
     return initialProducts;
   });
   const [shippingSettings, setShippingSettings] = useState({
-    standardShippingFee: 49,
+    standardShippingFee: 70,
     freeShippingThreshold: 1000,
     expressShippingFee: 99,
     supportPhone: '+91 74485 78507',
