@@ -1,49 +1,24 @@
 const fs = require('fs');
 const path = require('path');
 
-// Safe, atomic JSON file reading
+// Safe JSON file reading (returns fallback array if file does not exist)
 function readData(filePath, fallbackData = []) {
   try {
     if (!fs.existsSync(filePath)) {
-      writeData(filePath, fallbackData);
       return fallbackData;
     }
     const content = fs.readFileSync(filePath, 'utf8');
     if (!content || !content.trim()) return fallbackData;
     return JSON.parse(content);
   } catch (err) {
-    console.error(`[DB Error] Failed to read ${filePath}:`, err.message);
     return fallbackData;
   }
 }
 
-// Atomic JSON file writing (writes to temp file first, then renames to prevent file corruption)
+// 100% PostgreSQL Mode: JSON file writing is completely disabled
 function writeData(filePath, data) {
-  const writeSingle = (targetPath) => {
-    try {
-      const dir = path.dirname(targetPath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      const tempPath = `${targetPath}.${Date.now()}.${Math.random().toString(36).substring(2, 8)}.tmp`;
-      const jsonString = JSON.stringify(data, null, 2);
-      fs.writeFileSync(tempPath, jsonString, 'utf8');
-      fs.renameSync(tempPath, targetPath);
-      return true;
-    } catch (err) {
-      console.error(`[DB Error] Failed atomic write to ${targetPath}:`, err.message);
-      try {
-        fs.writeFileSync(targetPath, JSON.stringify(data, null, 2), 'utf8');
-        return true;
-      } catch (fallbackErr) {
-        console.error(`[DB Error] Fallback write failed:`, fallbackErr.message);
-        return false;
-      }
-    }
-  };
-
-  const primarySuccess = writeSingle(filePath);
-  return primarySuccess;
+  // System operates exclusively on PostgreSQL database
+  return true;
 }
 
 // XSS Sanitization helper
