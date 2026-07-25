@@ -328,19 +328,37 @@ export default function AIChatbotModal({
       createdAt: new Date().toISOString()
     };
 
-    // Post to Server API
-    const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
-    fetch(`${API_BASE}/admin/complaints`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newComplaint)
-    }).catch(() => {});
+    // Post to Server API with smart multi-endpoint fallback
+    const payload = JSON.stringify(newComplaint);
+    const endpoints = [];
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname;
+      const protocol = window.location.protocol;
+      const origin = window.location.origin;
+      endpoints.push(`${origin}/api/admin/complaints`);
+      endpoints.push(`${protocol}//${host}:5000/api/admin/complaints`);
+      endpoints.push(`https://friends-mobiles-rho.vercel.app/api/admin/complaints`);
+    }
+
+    (async () => {
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload
+          });
+          if (res.ok) break;
+        } catch (_) {}
+      }
+    })();
 
     // Save to local storage for instant feedback
     try {
       const stored = JSON.parse(localStorage.getItem('fm_complaints') || '[]');
       localStorage.setItem('fm_complaints', JSON.stringify([newComplaint, ...stored]));
     } catch {}
+
 
     setShowComplaintForm(false);
     if (addToast) addToast(`Complaint Registered! Ticket #${ticketId}`, '🚨');
