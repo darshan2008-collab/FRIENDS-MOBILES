@@ -2740,20 +2740,37 @@ export default function AdminModal({
                     </p>
                   </div>
 
-                  <button
-                    onClick={handleTriggerBackup}
-                    disabled={isBackingUp}
-                    style={{
-                      padding: '10px 18px', borderRadius: '10px', border: 'none',
-                      background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-                      color: '#ffffff', fontWeight: '800', fontSize: '0.82rem',
-                      cursor: isBackingUp ? 'not-allowed' : 'pointer',
-                      display: 'flex', alignItems: 'center', gap: '8px',
-                      boxShadow: '0 4px 14px rgba(59, 130, 246, 0.35)'
-                    }}
-                  >
-                    <Cloud size={16} /> {isBackingUp ? 'Uploading to Google Drive...' : '📁 Backup to Google Drive Now'}
-                  </button>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <a
+                      href={backupStatus.folderUrl || `https://drive.google.com/drive/folders/${backupStatus.folderId || '1d-ca4wnFG0cwyy_b0Ry-cKnhr9b_G3Yl'}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        padding: '10px 18px', borderRadius: '10px',
+                        border: '1.5px solid #3b82f6', background: 'rgba(59, 130, 246, 0.1)',
+                        color: '#3b82f6', fontWeight: '800', fontSize: '0.82rem',
+                        textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px'
+                      }}
+                    >
+                      <HardDrive size={16} /> 📁 Open Google Drive Folder 🔗
+                    </a>
+
+                    <button
+                      onClick={handleTriggerBackup}
+                      disabled={isBackingUp}
+                      style={{
+                        padding: '10px 18px', borderRadius: '10px', border: 'none',
+                        background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                        color: '#ffffff', fontWeight: '800', fontSize: '0.82rem',
+                        cursor: isBackingUp ? 'not-allowed' : 'pointer',
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        boxShadow: '0 4px 14px rgba(59, 130, 246, 0.35)'
+                      }}
+                    >
+                      <Cloud size={16} /> {isBackingUp ? 'Uploading to Google Drive...' : '📁 Backup to Google Drive Now'}
+                    </button>
+                  </div>
+
                 </div>
 
                 {/* Quota KPI Stats Grid */}
