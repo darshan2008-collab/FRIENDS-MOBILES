@@ -8,20 +8,29 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '929652702793-
 const getApiEndpoints = (endpoint) => {
   const endpoints = [];
 
-  // 1. Always try relative /api first (works for same-origin: NGINX proxy, Docker, etc.)
+  // Primary relative path
   endpoints.push(`/api${endpoint}`);
+
+  // Alternate route path fallback (e.g. /auth/send-otp <-> /otp/send)
+  if (endpoint.startsWith('/auth/send-otp')) {
+    endpoints.push('/api/otp/send');
+  } else if (endpoint.startsWith('/auth/verify-otp')) {
+    endpoints.push('/api/otp/verify');
+  } else if (endpoint.startsWith('/auth/reset-password')) {
+    endpoints.push('/api/otp/reset-password');
+  }
 
   if (typeof window !== 'undefined') {
     const origin = window.location.origin;
-    // 2. Absolute origin-based path
     if (!origin.includes('localhost') && !origin.includes('127.0.0.1')) {
       endpoints.push(`${origin}/api${endpoint}`);
+      if (endpoint.startsWith('/auth/send-otp')) {
+        endpoints.push(`${origin}/api/otp/send`);
+      }
     }
-    // 3. Local backend direct
     endpoints.push(`http://localhost:5000/api${endpoint}`);
   }
 
-  // 4. Custom VITE_API_BASE_URL if set
   if (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== '/api') {
     const envBase = import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '');
     endpoints.push(`${envBase}${endpoint}`);
