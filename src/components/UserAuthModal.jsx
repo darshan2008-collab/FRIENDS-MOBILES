@@ -3,9 +3,9 @@ import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, Shield
 import CompanyLogo from './CompanyLogo';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined'
-  ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? (window.location.port && window.location.port !== '5000'
       ? `${window.location.protocol}//${window.location.hostname}:5000/api`
-      : `${window.location.origin}/api`)
+      : '/api')
   : '/api');
 
 const getApiEndpoints = (endpoint) => {

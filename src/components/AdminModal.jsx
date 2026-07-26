@@ -51,9 +51,9 @@ export default function AdminModal({
   const fetchBackupStatus = async () => {
     try {
       const apiHost = typeof window !== 'undefined' 
-        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? (window.location.port && window.location.port !== '5000' 
             ? `${window.location.protocol}//${window.location.hostname}:5000` 
-            : `${window.location.protocol}//${window.location.host}`) 
+            : '') 
         : '';
       const res = await fetch(`${apiHost}/api/admin/backups`);
       const data = await res.json();
@@ -67,9 +67,9 @@ export default function AdminModal({
     setIsBackingUp(true);
     try {
       const apiHost = typeof window !== 'undefined' 
-        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? (window.location.port && window.location.port !== '5000' 
             ? `${window.location.protocol}//${window.location.hostname}:5000` 
-            : `${window.location.protocol}//${window.location.host}`) 
+            : '') 
         : '';
       const res = await fetch(`${apiHost}/api/admin/backups/create`, { method: 'POST' });
       const data = await res.json();
@@ -91,9 +91,9 @@ export default function AdminModal({
     }
     try {
       const apiHost = typeof window !== 'undefined' 
-        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? (window.location.port && window.location.port !== '5000' 
             ? `${window.location.protocol}//${window.location.hostname}:5000` 
-            : `${window.location.protocol}//${window.location.host}`) 
+            : '') 
         : '';
       const res = await fetch(`${apiHost}/api/admin/backups/restore`, {
         method: 'POST',
