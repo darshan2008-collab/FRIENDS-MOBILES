@@ -102,9 +102,25 @@ const initialProducts = [
 
 export default function App() {
   const [theme, setTheme] = useState('light');
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = localStorage.getItem('fm_cart');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (_) {}
+    return [];
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('fm_cart', JSON.stringify(cart));
+    } catch (_) {}
+  }, [cart]);
+
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const cartCount = (Array.isArray(cart) ? cart : []).reduce((acc, item) => acc + (parseInt(item?.quantity) || 1), 0);
 
   const [wishlist, setWishlist] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -385,15 +401,6 @@ export default function App() {
         addToast('Redirected to Photo Frame Customization Studio!', '✨');
         return;
       }
-    }
-
-    // MANDATORY AUTHENTICATION GUARD: Guest users cannot add items to cart directly
-    if (!currentUser) {
-      setPendingCartItem(product);
-      setAuthRedirectMessage('🔒 Login Required: Please sign in or create an account to add items to your shopping cart.');
-      setOpenCartAfterLogin(true);
-      setIsAuthOpen(true);
-      return;
     }
 
     setCart(prev => {
