@@ -2998,19 +2998,50 @@ export default function AdminModal({
                           key={fileName}
                           style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border-color)',
-                            background: 'var(--bg-input)', flexWrap: 'wrap', gap: '10px'
+                            padding: '14px 18px', borderRadius: '14px', border: '1px solid var(--border-color)',
+                            background: 'var(--bg-input)', flexWrap: 'wrap', gap: '12px'
                           }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <HardDrive size={20} color="#3b82f6" />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '280px' }}>
+                            <HardDrive size={22} color="#3b82f6" />
                             <div>
-                              <strong style={{ display: 'block', fontSize: '0.88rem', color: 'var(--text-primary)' }}>
-                                {fileName} {idx === 0 && <span style={{ background: '#22c55e', color: '#ffffff', fontSize: '0.65rem', padding: '2px 8px', borderRadius: '10px', marginLeft: '6px', textTransform: 'uppercase', fontWeight: '900' }}>Active Auto-Restored</span>}
-                              </strong>
-                              <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                                Size: {sizeText} • Date: {dateText}
-                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                                  {fileName}
+                                </strong>
+                                {idx === 0 && (
+                                  <span style={{ background: '#22c55e', color: '#ffffff', fontSize: '0.65rem', padding: '2px 8px', borderRadius: '10px', textTransform: 'uppercase', fontWeight: '900' }}>
+                                    Active Auto-Restored
+                                  </span>
+                                )}
+                                <span style={{ background: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', fontSize: '0.68rem', padding: '2px 8px', borderRadius: '8px', fontWeight: '800' }}>
+                                  {bk.backupType || 'Master Backup'}
+                                </span>
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', flexWrap: 'wrap', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                                <span>Size: <strong>{sizeText}</strong></span>
+                                <span>• Date: <strong>{dateText}</strong></span>
+                              </div>
+
+                              {/* Rich Users & Orders Breakdown Badges */}
+                              <div style={{ display: 'flex', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '0.72rem', background: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '2px 8px', borderRadius: '6px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  👥 Users: <strong style={{ color: '#FF5500' }}>{bk.userCount || 0}</strong>
+                                </span>
+                                <span style={{ fontSize: '0.72rem', background: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '2px 8px', borderRadius: '6px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  🛒 Orders: <strong style={{ color: '#3b82f6' }}>{bk.orderCount || 0}</strong>
+                                </span>
+                                <span style={{ fontSize: '0.72rem', background: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '2px 8px', borderRadius: '6px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  📦 Products: <strong style={{ color: '#22c55e' }}>{bk.productCount || 0}</strong>
+                                </span>
+                              </div>
+
+                              {bk.sampleUsers && bk.sampleUsers.length > 0 && (
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px', fontStyle: 'italic' }}>
+                                  User Accounts: {bk.sampleUsers.join(', ')} {bk.userCount > bk.sampleUsers.length ? `(+${bk.userCount - bk.sampleUsers.length} more)` : ''}
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -3024,26 +3055,26 @@ export default function AdminModal({
                               rel="noreferrer"
                               download={fileName}
                               style={{
-                                padding: '5px 10px', borderRadius: '6px', border: '1px solid #3b82f6',
+                                padding: '6px 12px', borderRadius: '8px', border: '1px solid #3b82f6',
                                 background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6',
-                                fontWeight: '700', fontSize: '0.72rem', cursor: 'pointer',
+                                fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer',
                                 display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none'
                               }}
                               title="Download Backup JSON File to Device"
                             >
-                              <Download size={12} /> Download JSON
+                              <Download size={13} /> Download JSON
                             </a>
                             <button
                               onClick={() => handleRestoreBackup(fileName)}
                               style={{
-                                padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--border-color)',
+                                padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-color)',
                                 background: 'var(--bg-card)', color: 'var(--text-muted)',
-                                fontWeight: '600', fontSize: '0.72rem', cursor: 'pointer',
+                                fontWeight: '600', fontSize: '0.75rem', cursor: 'pointer',
                                 display: 'flex', alignItems: 'center', gap: '4px'
                               }}
                               title="Force Manual Re-Sync"
                             >
-                              <RefreshCw size={12} /> Force Re-Sync
+                              <RefreshCw size={13} /> Force Re-Sync
                             </button>
                           </div>
                         </div>

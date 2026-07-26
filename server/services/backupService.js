@@ -102,11 +102,39 @@ const BackupService = {
         const filePath = path.join(backupsDir, filename);
         const stats = fs.statSync(filePath);
         totalBytesUsed += stats.size;
+
+        let backupType = 'Database Snapshot';
+        let userCount = 0;
+        let orderCount = 0;
+        let productCount = 0;
+        let sampleUsers = [];
+
+        try {
+          const raw = fs.readFileSync(filePath, 'utf8');
+          const parsed = JSON.parse(raw);
+          backupType = parsed.meta?.backupType || (filename.includes('users') ? 'User Accounts Backup' : filename.includes('orders') ? 'Orders History Backup' : filename.includes('products') ? 'Products Catalog Backup' : 'Master Database Backup');
+
+          const usersArr = parsed.users || parsed.data?.users || [];
+          const ordersArr = parsed.orders || parsed.data?.orders || [];
+          const prodsArr = parsed.products || parsed.data?.products || [];
+
+          userCount = parsed.meta?.totalUsers ?? parsed.meta?.totalRecords?.users ?? usersArr.length;
+          orderCount = parsed.meta?.totalOrders ?? parsed.meta?.totalRecords?.orders ?? ordersArr.length;
+          productCount = parsed.meta?.totalProducts ?? parsed.meta?.totalRecords?.products ?? prodsArr.length;
+
+          sampleUsers = usersArr.slice(0, 4).map(u => u.name || u.email || u.phone).filter(Boolean);
+        } catch (_) {}
+
         return {
           filename,
           sizeBytes: stats.size,
-          sizeFormatted: (stats.size / 1024).toFixed(2) + ' KB',
-          createdAt: stats.birthtime || stats.mtime
+          sizeFormatted: stats.size >= 1024 * 1024 ? (stats.size / (1024 * 1024)).toFixed(2) + ' MB' : (stats.size / 1024).toFixed(2) + ' KB',
+          createdAt: stats.birthtime || stats.mtime,
+          backupType,
+          userCount,
+          orderCount,
+          productCount,
+          sampleUsers
         };
       }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
