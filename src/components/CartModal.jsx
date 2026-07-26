@@ -257,6 +257,31 @@ export default function CartModal({
     setCheckoutStep('checkout');
   };
 
+  const awardUserPointsOnOrder = (order) => {
+    if (!currentUser || !order) return;
+    const earned = Math.floor((order.total || 0) / 10);
+    if (earned <= 0) return;
+
+    const currentPts = currentUser.rewardPoints || 150;
+    const updatedPts = currentPts + earned;
+    const currentHist = currentUser.pointHistory || [];
+    const updatedHist = [
+      { id: Date.now(), type: 'credit', points: earned, title: `Earned from Order #${order.orderId}`, date: 'Just Now' },
+      ...currentHist
+    ];
+
+    const updatedUser = {
+      ...currentUser,
+      rewardPoints: updatedPts,
+      pointHistory: updatedHist
+    };
+
+    if (onUpdateUserProfile) {
+      onUpdateUserProfile(updatedUser);
+    }
+    if (addToast) addToast(`🎉 You earned +${earned} Friends Reward Points! Total: ${updatedPts} PTS`, '🎁');
+  };
+
   const handlePlaceOrderSubmit = async (e) => {
     e.preventDefault();
     
@@ -313,31 +338,6 @@ export default function CartModal({
       total: grandTotal,
       paymentMethod: paymentMethod || 'COD',
       status: isFreeShipping ? 'Order Placed' : 'Pending Shipping Cost'
-    };
-
-    const awardUserPointsOnOrder = (order) => {
-      if (!currentUser || !order) return;
-      const earned = Math.floor((order.total || 0) / 10);
-      if (earned <= 0) return;
-
-      const currentPts = currentUser.rewardPoints || 150;
-      const updatedPts = currentPts + earned;
-      const currentHist = currentUser.pointHistory || [];
-      const updatedHist = [
-        { id: Date.now(), type: 'credit', points: earned, title: `Earned from Order #${order.orderId}`, date: 'Just Now' },
-        ...currentHist
-      ];
-
-      const updatedUser = {
-        ...currentUser,
-        rewardPoints: updatedPts,
-        pointHistory: updatedHist
-      };
-
-      if (onUpdateUserProfile) {
-        onUpdateUserProfile(updatedUser);
-      }
-      if (addToast) addToast(`🎉 You earned +${earned} Friends Reward Points! Total: ${updatedPts} PTS`, '🎁');
     };
 
     try {
