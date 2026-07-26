@@ -2938,18 +2938,24 @@ export default function AdminModal({
 
               {/* Historical Cloud Snapshots Table */}
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '24px', borderRadius: '18px' }}>
+                <div style={{ background: 'rgba(34, 197, 94, 0.12)', border: '1px solid #22c55e', borderRadius: '12px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Zap size={18} color="#22c55e" />
+                  <span style={{ fontSize: '0.84rem', color: '#15803d', fontWeight: '700' }}>
+                    ⚡ Auto-Restore Active: The system automatically restores the latest database snapshot on server boot and recovery. No manual action required!
+                  </span>
+                </div>
+
                 <h4 style={{ margin: '0 0 16px 0', fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Database size={18} color="#3b82f6" /> Available JSON Database Backups ({backupStatus.backups ? backupStatus.backups.length : 0})
+                  <Database size={18} color="#3b82f6" /> Auto-Synced Database Snapshots ({backupStatus.backups ? backupStatus.backups.length : 0})
                 </h4>
 
                 {(!backupStatus.backups || backupStatus.backups.length === 0) ? (
                   <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                    No JSON backups created yet. Click <strong>"📁 Backup JSON Database Now"</strong> to create your first JSON backup.
+                    No JSON backups created yet. The system automatically creates a snapshot on every store event.
                   </div>
-
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {backupStatus.backups.map((bk) => (
+                    {backupStatus.backups.map((bk, idx) => (
                       <div
                         key={bk.filename}
                         style={{
@@ -2962,7 +2968,7 @@ export default function AdminModal({
                           <HardDrive size={20} color="#3b82f6" />
                           <div>
                             <strong style={{ display: 'block', fontSize: '0.88rem', color: 'var(--text-primary)' }}>
-                              {bk.filename}
+                              {bk.filename} {idx === 0 && <span style={{ background: '#22c55e', color: '#ffffff', fontSize: '0.65rem', padding: '2px 8px', borderRadius: '10px', marginLeft: '6px', textTransform: 'uppercase', fontWeight: '900' }}>Active Auto-Restored</span>}
                             </strong>
                             <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                               Size: {bk.sizeFormatted} • Date: {new Date(bk.createdAt).toLocaleString('en-IN')}
@@ -2970,18 +2976,23 @@ export default function AdminModal({
                           </div>
                         </div>
 
-                        <button
-                          onClick={() => handleRestoreBackup(bk.filename)}
-                          style={{
-                            padding: '6px 14px', borderRadius: '8px', border: '1px solid #22c55e',
-                            background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e',
-                            fontWeight: '800', fontSize: '0.76rem', cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', gap: '6px'
-                          }}
-                        >
-                          <Download size={13} /> Restore JSON Backup 📥
-
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#16a34a', background: 'rgba(34, 197, 94, 0.1)', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+                            ✅ Auto-Synced
+                          </span>
+                          <button
+                            onClick={() => handleRestoreBackup(bk.filename)}
+                            style={{
+                              padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--border-color)',
+                              background: 'var(--bg-card)', color: 'var(--text-muted)',
+                              fontWeight: '600', fontSize: '0.72rem', cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', gap: '4px'
+                            }}
+                            title="Force Manual Re-Sync"
+                          >
+                            <Download size={12} /> Force Re-Sync
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

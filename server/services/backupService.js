@@ -196,6 +196,28 @@ const BackupService = {
     }
   },
 
+  // Auto-Restore latest database backup automatically on boot / recovery
+  autoRestoreLatestBackup: async () => {
+    try {
+      if (!fs.existsSync(backupsDir)) return { success: false, message: 'Backups directory does not exist' };
+      const files = fs.readdirSync(backupsDir).filter(f => f.endsWith('.json'));
+      if (files.length === 0) return { success: false, message: 'No backup snapshots found' };
+
+      const sorted = files.map(filename => {
+        const filePath = path.join(backupsDir, filename);
+        const stats = fs.statSync(filePath);
+        return { filename, mtime: stats.mtime };
+      }).sort((a, b) => new Date(b.mtime) - new Date(a.mtime));
+
+      const latest = sorted[0].filename;
+      console.log(`[Auto-Restore System] Automatically restoring latest snapshot: ${latest}`);
+      return await BackupService.restoreBackup(latest);
+    } catch (err) {
+      console.error('[Auto-Restore Exception]', err.message);
+      return { success: false, error: err.message };
+    }
+  },
+
   // Real-time Event-Driven Backup Queue (Debounced by 3 seconds)
   triggerRealTimeBackup: (reason = 'store_event') => {
     if (global._realTimeBackupTimer) {

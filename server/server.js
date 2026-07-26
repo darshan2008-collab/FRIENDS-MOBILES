@@ -9,12 +9,15 @@ const { connectDB } = require('./config/db');
 const migrateData = require('./scripts/migrateToPostgres');
 const BackupService = require('./services/backupService');
 
-// Connect Database & Migrate Existing Data
+// Connect Database & Auto-Restore Latest Backup Snapshot
 (async () => {
   const isConnected = await connectDB();
   if (isConnected) {
     await migrateData().catch(() => {});
   }
+  // Auto-restore latest database snapshot on boot hands-free
+  await BackupService.autoRestoreLatestBackup().catch(() => {});
+  
   // Create initial boot backup snapshot (Local server environment only)
   if (!process.env.VERCEL) {
     setTimeout(() => {
