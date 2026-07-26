@@ -10,9 +10,9 @@ try {
 }
 
 const getSmtpHost = () => (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
-const getSmtpPort = () => parseInt(process.env.SMTP_PORT || '587', 10);
-const getGmailUser = () => (process.env.SMTP_USER || process.env.GMAIL_USER || 'xunitary@gmail.com').trim();
-const getGmailPassword = () => (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || 'cymeyaijcvbofggd').replace(/\s+/g, '').trim();
+const getSmtpPort = () => parseInt(process.env.SMTP_PORT || '465', 10);
+const getGmailUser = () => (process.env.SMTP_USER || process.env.GMAIL_USER || 'noreplyfriendsmobiles@gmail.com').trim();
+const getGmailPassword = () => (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || 'yltshmpyxnzzmqmq').replace(/\s+/g, '').trim();
 
 const createTransporter = (overridePort = null) => {
   if (!nodemailer) return null;
@@ -68,7 +68,7 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
 
             <div style="background: #fff7ed; border-left: 4px solid #ff5500; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
               <p style="margin: 0; font-size: 12.5px; color: #c2410c; line-height: 1.5;">
-                <strong>Time Sensitive:</strong> This code will expire in <strong>2 minutes</strong>. Please verify promptly.
+                <strong>Time Sensitive:</strong> This code will expire in <strong>5 minutes</strong>. Please verify promptly.
               </p>
             </div>
 
@@ -91,7 +91,7 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
       `
     };
 
-    const fallbackPort = configuredPort === 587 ? 465 : 587;
+    const fallbackPort = configuredPort === 465 ? 587 : 465;
     try {
       const info = await transporter.sendMail(mailOptions);
       console.log(`[Email Success] OTP sent via Port ${configuredPort} to ${toEmail}. Message ID: ${info.messageId}`);
@@ -108,23 +108,11 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
       } catch (fallbackErr) {
         console.warn(`[Email Warning] Fallback Port ${fallbackPort} also failed (${fallbackErr.message}).`);
       }
-      // Development / Local Fallback: Print OTP to console so reset flow is never blocked
-      console.log(`\n=======================================================`);
-      console.log(`  [DEV OTP SECURITY LOG]`);
-      console.log(`  To Email : ${toEmail}`);
-      console.log(`  OTP Code : ${otpCode}`);
-      console.log(`=======================================================\n`);
-      return { success: true, devMode: true, message: 'OTP generated and logged to server console.' };
+      return { success: false, error: primaryErr.message || 'Failed to connect to Gmail SMTP server' };
     }
   } catch (err) {
     console.error(`[Email Error] Failed to send OTP to ${toEmail}:`, err.message);
-    // Development / Local Fallback: Print OTP to console
-    console.log(`\n=======================================================`);
-    console.log(`  [DEV OTP SECURITY LOG]`);
-    console.log(`  To Email : ${toEmail}`);
-    console.log(`  OTP Code : ${otpCode}`);
-    console.log(`=======================================================\n`);
-    return { success: true, devMode: true, message: 'OTP generated and logged to server console.' };
+    return { success: false, error: err.message };
   }
 }
 
