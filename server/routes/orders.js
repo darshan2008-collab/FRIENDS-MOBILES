@@ -6,16 +6,32 @@ const Order = require('../models/Order');
 const Setting = require('../models/Setting');
 const BackupService = require('../services/backupService');
 
+const ordersFilePath = path.join(__dirname, '../data/orders.json');
+
 async function getOrdersAsync() {
   try {
-    return await Order.find({});
+    const dbOrders = await Order.find({});
+    if (dbOrders && dbOrders.length > 0) return dbOrders;
   } catch (e) {
     console.error("[Orders DB Get Error]", e.message);
-    return [];
   }
+  return readData(ordersFilePath, []);
 }
 
 async function saveOrderAsync(orderData) {
+  try {
+    const orders = readData(ordersFilePath, []);
+    const index = orders.findIndex(o => o.orderId === orderData.orderId);
+    if (index !== -1) {
+      orders[index] = { ...orders[index], ...orderData };
+    } else {
+      orders.push(orderData);
+    }
+    writeData(ordersFilePath, orders);
+  } catch (e) {
+    console.error("[Orders JSON Save Error]", e.message);
+  }
+
   try {
     await Order.updateOne({ orderId: orderData.orderId }, { $set: orderData }, { upsert: true });
   } catch (e) {

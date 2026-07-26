@@ -366,46 +366,89 @@ export default function AdminModal({
     setAdminPassword('fm@1234');
   };
 
-  // --- Executive Order History Report (CSV Export) ---
-  const handleExportCSV = () => {
+  // --- Executive Order History Report (Excel CSV Export) ---
+  const handleExportCSV = async () => {
     if (!orders || orders.length === 0) {
       if (addToast) addToast('No order history available to export!', '⚠️');
       return;
     }
 
+    try {
+      const apiHost = typeof window !== 'undefined'
+        ? (window.location.port && window.location.port !== '5000'
+            ? `${window.location.protocol}//${window.location.hostname}:5000`
+            : '')
+        : '';
+      const response = await fetch(`${apiHost}/api/admin/orders/export-excel`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `FRIENDS_MOBILE_Orders_Master_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        if (addToast) addToast('Master Excel Order History downloaded successfully!', '📊');
+        return;
+      }
+    } catch (_) {}
+
+    // Fallback Client-side Excel CSV Export
     const headers = [
-      'Order ID', 'Date & Time', 'Customer Name', 'Phone Number', 
-      'Pincode', 'Delivery Address', 'Payment Method', 'Items Count', 
-      'Total Amount (INR)', 'Order Status'
+      'Order ID', 'Order Date & Time', 'Customer Name', 'Phone Number',
+      'Delivery Address', 'Products Added & Quantity', 'Subtotal (INR)',
+      'Shipping Fee (INR)', 'Grand Total (INR)', 'Payment Method', 'Payment Status', 'Order Status'
     ];
 
+    const escapeCsv = (val) => {
+      if (val === undefined || val === null) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
     const rows = orders.map(o => {
-      const custName = (o.customer?.name || '').split('"').join('""');
-      const custAddr = (o.customer?.address || '').split('"').join('""');
+      const custName = o.customer?.name || 'Walk-in Customer';
+      const custPhone = o.customer?.phone || '';
+      const custAddr = o.customer?.address || '';
+      const itemsFormatted = (o.items || []).map(i => `${i.title || 'Item'} (x${i.quantity || 1}) - Rs.${i.price || 0}`).join('; ');
+      const subtotal = o.subtotal || o.total || 0;
+      const shipping = o.shipping === 'Pending' ? 'Pending' : (o.shipping || 0);
+      const total = o.total || 0;
+      const payMethod = o.paymentMethod || 'COD';
+      const payStatus = o.paymentStatus || (payMethod === 'COD' ? 'Pending' : 'Paid');
+      const orderStatus = o.status || 'Order Placed';
+      const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
+
       return [
-        '"' + (o.orderId || '') + '"',
-        '"' + (o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : '') + '"',
-        '"' + custName + '"',
-        '"' + (o.customer?.phone || '') + '"',
-        '"' + (o.customer?.pincode || '') + '"',
-        '"' + custAddr + '"',
-        '"' + (o.paymentMethod || 'COD') + '"',
-        o.items ? o.items.length : 0,
-        o.totalAmount || 0,
-        '"' + (o.status || 'Order Placed') + '"'
-      ];
+        escapeCsv(o.orderId),
+        escapeCsv(dateStr),
+        escapeCsv(custName),
+        escapeCsv(custPhone),
+        escapeCsv(custAddr),
+        escapeCsv(itemsFormatted),
+        escapeCsv(subtotal),
+        escapeCsv(shipping),
+        escapeCsv(total),
+        escapeCsv(payMethod),
+        escapeCsv(payStatus),
+        escapeCsv(orderStatus)
+      ].join(',');
     });
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `FriendsMobile_Order_History_Report_${new Date().toISOString().slice(0,10)}.csv`);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `FRIENDS_MOBILE_Orders_Master_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
-    if (addToast) addToast('Order History Report (CSV) downloaded successfully!', '📥');
+    if (addToast) addToast('Master Excel Order History downloaded successfully!', '📊');
   };
 
   // --- Printable Official Tax Invoice ---

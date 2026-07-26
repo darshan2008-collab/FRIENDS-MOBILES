@@ -71,10 +71,30 @@ const updateSettingsHandler = async (req, res) => {
 router.put('/settings', updateSettingsHandler);
 router.post('/settings', updateSettingsHandler);
 
+// GET /api/admin/orders/export-excel (Download Master Excel Order History Report)
+router.get('/orders/export-excel', async (req, res) => {
+  try {
+    const orders = await getOrdersAsync();
+    const filePath = syncMasterExcel(orders);
+    
+    if (!filePath || !fs.existsSync(filePath)) {
+      return res.status(500).json({ success: false, message: 'Failed to generate Excel report' });
+    }
+
+    const filename = `FRIENDS_MOBILE_Orders_Master_${new Date().toISOString().slice(0, 10)}.csv`;
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.sendFile(path.resolve(filePath));
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to export Excel report', error: err.message });
+  }
+});
+
 // GET /api/admin/orders
 router.get('/orders', async (req, res) => {
   try {
     const orders = await getOrdersAsync();
+    syncMasterExcel(orders);
     res.json({ success: true, count: orders.length, orders });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to fetch orders', error: err.message });
@@ -107,8 +127,14 @@ router.put('/orders/:orderId', async (req, res) => {
 
     orders[orderIndex].updatedAt = new Date().toISOString();
 
-    // Save to PostgreSQL
-    await Order.updateOne({ orderId: orders[orderIndex].orderId }, { $set: orders[orderIndex] }, { upsert: true });
+    // Save to JSON file & PostgreSQL
+    writeData(ordersFilePath, orders);
+    try {
+      await Order.updateOne({ orderId: orders[orderIndex].orderId }, { $set: orders[orderIndex] }, { upsert: true });
+    } catch (_) {}
+
+    // Update Master Excel in Real Time
+    syncMasterExcel(orders);
 
     res.json({ success: true, message: `Order updated successfully!`, order: orders[orderIndex] });
   } catch (err) {
