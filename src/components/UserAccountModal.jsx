@@ -142,46 +142,47 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
     }
   }, [user]);
 
-  // ✅ Get user's orders from parent state (instant) + also try API
+  // ✅ Get user's orders from parent state (instant) + localStorage + try API
   useEffect(() => {
     if (isOpen && user) {
-      // First: instantly filter from parent orders prop
       const userPhone = (user.phone || '').replace(/\D/g, '').slice(-10);
       const userEmail = (user.email || '').toLowerCase().trim();
 
-      if (allOrders && allOrders.length > 0) {
-        const filtered = allOrders.filter(order => {
+      const combinedMap = new Map();
+
+      // 1. Add matching orders from allOrders prop
+      if (Array.isArray(allOrders)) {
+        allOrders.forEach(order => {
+          if (!order || !order.orderId) return;
           const orderPhone = (order.customer?.phone || '').replace(/\D/g, '').slice(-10);
           const orderEmail = (order.customer?.email || '').toLowerCase().trim();
-          return (
-            (userPhone && orderPhone === userPhone) ||
-            (userEmail && orderEmail === userEmail)
-          );
+          if ((userPhone && orderPhone === userPhone) || (userEmail && orderEmail === userEmail)) {
+            combinedMap.set(order.orderId, order);
+          }
         });
-        if (filtered.length > 0) {
-          setUserOrders(filtered);
-        }
       }
 
-      // Also check localStorage for session orders
+      // 2. Add matching orders from localStorage
       try {
         const stored = JSON.parse(localStorage.getItem('fm_user_orders') || '[]');
-        if (stored.length > 0) {
-          const sessionFiltered = stored.filter(order => {
+        if (Array.isArray(stored)) {
+          stored.forEach(order => {
+            if (!order || !order.orderId) return;
             const orderPhone = (order.customer?.phone || '').replace(/\D/g, '').slice(-10);
-            return userPhone && orderPhone === userPhone;
+            const orderEmail = (order.customer?.email || '').toLowerCase().trim();
+            if ((userPhone && orderPhone === userPhone) || (userEmail && orderEmail === userEmail)) {
+              if (!combinedMap.has(order.orderId)) {
+                combinedMap.set(order.orderId, order);
+              }
+            }
           });
-          if (sessionFiltered.length > 0) {
-            setUserOrders(prev => {
-              const existingIds = new Set(prev.map(o => o.orderId));
-              const newOnes = sessionFiltered.filter(o => !existingIds.has(o.orderId));
-              return [...newOnes, ...prev];
-            });
-          }
         }
-      } catch {}
+      } catch (_) {}
 
-      // Also fetch from API in background
+      const initialUserOrders = Array.from(combinedMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      setUserOrders(initialUserOrders);
+
+      // 3. Fetch from API in background
       fetchUserOrders();
     }
   }, [isOpen, user, allOrders]);
@@ -193,16 +194,16 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
     try {
       const res = await fetch(`${API_BASE}/orders/user/${key}`);
       const data = await res.json();
-      if (data.success && data.orders && data.orders.length > 0) {
-        // Merge API orders with what we already have
+      if (data.success && Array.isArray(data.orders)) {
         setUserOrders(prev => {
-          const existingIds = new Set(prev.map(o => o.orderId));
-          const newFromApi = data.orders.filter(o => !existingIds.has(o.orderId));
-          return [...newFromApi, ...prev].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          const map = new Map();
+          prev.forEach(o => map.set(o.orderId, o));
+          data.orders.forEach(o => map.set(o.orderId, o));
+          return Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         });
       }
-    } catch {
-      // silently fail - we already have prop-based orders
+    } catch (_) {
+      // fallback already active
     } finally {
       setIsLoading(false);
     }

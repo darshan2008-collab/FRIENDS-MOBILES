@@ -158,10 +158,10 @@ router.get('/user/:phoneOrEmail', async (req, res) => {
     const orders = await getOrdersAsync();
 
     const userOrders = orders.filter(o => {
-      if (!o.customer) return false;
+      if (!o || !o.customer) return false;
       const phone = normalizePhone(o.customer.phone);
       const email = o.customer.email ? o.customer.email.toLowerCase().trim() : '';
-      return (cleanDigits && phone === cleanDigits) || email === rawKey;
+      return (cleanDigits && phone && (phone === cleanDigits || phone.endsWith(cleanDigits) || cleanDigits.endsWith(phone))) || (rawKey.length > 3 && email && email === rawKey);
     });
 
     res.json({

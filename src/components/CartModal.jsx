@@ -222,79 +222,6 @@ export default function CartModal({
       return;
     }
 
-    if (paymentMethod === 'UPI') {
-      /*
-        ========================================================================
-        RAZORPAY INTEGRATION MANUAL CHECKLIST:
-        ========================================================================
-        When you are ready to implement live payments, replace this block with:
-
-        const loadRazorpayScript = () => {
-          return new Promise((resolve) => {
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            script.onload = () => resolve(true);
-            script.onerror = () => resolve(false);
-            document.body.appendChild(script);
-          });
-        };
-
-        const hasLoaded = await loadRazorpayScript();
-        if (!hasLoaded) {
-          if (addToast) addToast('Failed to load payment gateway script.', '');
-          return;
-        }
-
-        // Call backend API to create secure transaction token
-        const rzpOrderResponse = await fetch(`${API_BASE}/payments/razorpay-order`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: grandTotal * 100 }) // Amount in paise
-        }).then(r => r.json());
-
-        const options = {
-          key: 'YOUR_RAZORPAY_KEY_ID', // Replace with secure env key
-          amount: rzpOrderResponse.amount,
-          currency: 'INR',
-          name: 'FRIENDS MOBILE',
-          description: 'Secure Order Payment',
-          order_id: rzpOrderResponse.id,
-          handler: async function (response) {
-            // Verify payment signature securely on backend
-            const verify = await fetch(`${API_BASE}/payments/verify`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature,
-                newOrder
-              })
-            }).then(r => r.json());
-
-            if (verify.success) {
-              setPlacedOrderDetails(newOrder);
-              setCheckoutStep('success');
-            } else {
-              if (addToast) addToast('Payment verification failed securely.', '');
-            }
-          },
-          prefill: {
-            name: sanitizedName,
-            contact: shippingDetails.phone.trim()
-          },
-          theme: {
-            color: '#FF5500'
-          }
-        };
-
-        const rzpInstance = new window.Razorpay(options);
-        rzpInstance.open();
-      */
-      if (addToast) addToast('This payment method is currently unavailable.', '');
-      return;
-    }
-
     const fullDeliveryAddress = `${sanitizedAddress} - ${shippingDetails.pincode.trim()}`;
 
     // Save entered delivery address to user profile
@@ -309,19 +236,22 @@ export default function CartModal({
       }
     }
 
+    const generatedOrderId = `FM-ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+
     const newOrder = {
-      orderId: `FM-ORD-${Math.floor(100000 + Math.random() * 900000)}`,
+      orderId: generatedOrderId,
       createdAt: new Date().toISOString(),
       customer: {
         name: sanitizedName,
         phone: shippingDetails.phone.trim(),
+        email: currentUser?.email || '',
         address: fullDeliveryAddress
       },
       items: [...cart],
       subtotal,
       shipping: shippingFeeVal,
       total: grandTotal,
-      paymentMethod,
+      paymentMethod: paymentMethod || 'COD',
       status: isFreeShipping ? 'Order Placed' : 'Pending Shipping Cost'
     };
 

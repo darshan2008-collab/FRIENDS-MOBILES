@@ -158,7 +158,16 @@ export default function App() {
     supportPhone: '+91 74485 78507',
     supportEmail: 'friendsmobile@gmail.com'
   });
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState(() => {
+    try {
+      const saved = localStorage.getItem('fm_user_orders');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+    return [];
+  });
 
   const DEFAULT_SLIDES = [
     {
@@ -292,8 +301,11 @@ export default function App() {
     fetch(`${API_BASE}/admin/orders`)
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.orders) {
+        if (data.success && Array.isArray(data.orders)) {
           setOrders(data.orders);
+          try {
+            localStorage.setItem('fm_user_orders', JSON.stringify(data.orders));
+          } catch (_) {}
         }
       })
       .catch(() => {});
@@ -397,14 +409,14 @@ export default function App() {
 
   const handleOrderPlaced = (newOrder) => {
     if (!newOrder) return;
-    // Add to global orders state immediately
-    setOrders(prev => [newOrder, ...(Array.isArray(prev) ? prev : [])]);
-    // Persist to localStorage for UserAccountModal to pick up
-    try {
-      const stored = JSON.parse(localStorage.getItem('fm_user_orders') || '[]');
-      const safeStored = Array.isArray(stored) ? stored : [];
-      localStorage.setItem('fm_user_orders', JSON.stringify([newOrder, ...safeStored]));
-    } catch {}
+    setOrders(prev => {
+      const safePrev = Array.isArray(prev) ? prev : [];
+      const updated = [newOrder, ...safePrev.filter(o => o.orderId !== newOrder.orderId)];
+      try {
+        localStorage.setItem('fm_user_orders', JSON.stringify(updated));
+      } catch (_) {}
+      return updated;
+    });
   };
 
   const handleToggleWishlist = (product) => {
