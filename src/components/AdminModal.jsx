@@ -2955,55 +2955,62 @@ export default function AdminModal({
                 </div>
 
                 <h4 style={{ margin: '0 0 16px 0', fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Database size={18} color="#3b82f6" /> Auto-Synced Database Snapshots ({(backupStatus?.backups || []).length})
+                  <Database size={18} color="#3b82f6" /> Auto-Synced Database Snapshots ({Array.isArray(backupStatus?.backups) ? backupStatus.backups.length : 0})
                 </h4>
 
-                {(!backupStatus?.backups || backupStatus.backups.length === 0) ? (
+                {(!Array.isArray(backupStatus?.backups) || backupStatus.backups.length === 0) ? (
                   <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
                     No JSON backups created yet. The system automatically creates a snapshot on every store event.
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {backupStatus.backups.map((bk, idx) => (
-                      <div
-                        key={bk.filename}
-                        style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                          padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border-color)',
-                          background: 'var(--bg-input)', flexWrap: 'wrap', gap: '10px'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <HardDrive size={20} color="#3b82f6" />
-                          <div>
-                            <strong style={{ display: 'block', fontSize: '0.88rem', color: 'var(--text-primary)' }}>
-                              {bk.filename} {idx === 0 && <span style={{ background: '#22c55e', color: '#ffffff', fontSize: '0.65rem', padding: '2px 8px', borderRadius: '10px', marginLeft: '6px', textTransform: 'uppercase', fontWeight: '900' }}>Active Auto-Restored</span>}
-                            </strong>
-                            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                              Size: {bk.sizeFormatted} • Date: {new Date(bk.createdAt).toLocaleString('en-IN')}
+                    {backupStatus.backups.map((bk, idx) => {
+                      if (!bk) return null;
+                      const fileName = bk.filename || `backup_snapshot_${idx}.json`;
+                      const sizeText = bk.sizeFormatted || '0 KB';
+                      const dateText = bk.createdAt ? new Date(bk.createdAt).toLocaleString('en-IN') : 'Recent';
+
+                      return (
+                        <div
+                          key={fileName}
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border-color)',
+                            background: 'var(--bg-input)', flexWrap: 'wrap', gap: '10px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <HardDrive size={20} color="#3b82f6" />
+                            <div>
+                              <strong style={{ display: 'block', fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                                {fileName} {idx === 0 && <span style={{ background: '#22c55e', color: '#ffffff', fontSize: '0.65rem', padding: '2px 8px', borderRadius: '10px', marginLeft: '6px', textTransform: 'uppercase', fontWeight: '900' }}>Active Auto-Restored</span>}
+                              </strong>
+                              <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                                Size: {sizeText} • Date: {dateText}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#16a34a', background: 'rgba(34, 197, 94, 0.1)', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+                              ✅ Auto-Synced
                             </span>
+                            <button
+                              onClick={() => handleRestoreBackup(fileName)}
+                              style={{
+                                padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--border-color)',
+                                background: 'var(--bg-card)', color: 'var(--text-muted)',
+                                fontWeight: '600', fontSize: '0.72rem', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '4px'
+                              }}
+                              title="Force Manual Re-Sync"
+                            >
+                              <Download size={12} /> Force Re-Sync
+                            </button>
                           </div>
                         </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#16a34a', background: 'rgba(34, 197, 94, 0.1)', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
-                            ✅ Auto-Synced
-                          </span>
-                          <button
-                            onClick={() => handleRestoreBackup(bk.filename)}
-                            style={{
-                              padding: '5px 10px', borderRadius: '6px', border: '1px solid var(--border-color)',
-                              background: 'var(--bg-card)', color: 'var(--text-muted)',
-                              fontWeight: '600', fontSize: '0.72rem', cursor: 'pointer',
-                              display: 'flex', alignItems: 'center', gap: '4px'
-                            }}
-                            title="Force Manual Re-Sync"
-                          >
-                            <Download size={12} /> Force Re-Sync
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

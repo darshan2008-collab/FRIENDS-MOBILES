@@ -44,21 +44,44 @@ export default class ErrorBoundary extends React.Component {
             <p style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '20px' }}>
               The application encountered a temporary rendering issue. Click below to refresh.
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              style={{
-                background: '#FF5500',
-                color: '#ffffff',
-                border: 'none',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                fontSize: '0.9rem'
-              }}
-            >
-              Reload Application
-            </button>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button
+                onClick={() => this.setState({ hasError: false, error: null })}
+                style={{
+                  background: 'linear-gradient(135deg, #FF5500, #E03E00)',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '12px 20px',
+                  borderRadius: '8px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  fontSize: '0.88rem',
+                  boxShadow: '0 4px 14px rgba(255, 85, 0, 0.35)'
+                }}
+              >
+                🔄 Continue / Retry UI
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  color: '#94a3b8',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  padding: '12px 20px',
+                  borderRadius: '8px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '0.88rem'
+                }}
+              >
+                Reload Page
+              </button>
+            </div>
+            {this.state.error && (
+              <div style={{ marginTop: '16px', fontSize: '0.75rem', color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '8px 12px', borderRadius: '6px', textAlign: 'left', wordBreak: 'break-word' }}>
+                Error: {this.state.error.message || String(this.state.error)}
+              </div>
+            )}
           </div>
         </div>
       );
