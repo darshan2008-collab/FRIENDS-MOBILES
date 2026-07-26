@@ -75,6 +75,16 @@ export default function AdminModal({
   });
   const [isBackingUp, setIsBackingUp] = useState(false);
 
+  const getApiHost = () => {
+    if (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== '/api') {
+      return import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '').replace(/\/api$/, '');
+    }
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '5173') {
+      return 'http://localhost:5000';
+    }
+    return '';
+  };
+
   const safeJsonFetch = async (url, options = {}) => {
     try {
       const res = await fetch(url, options);
@@ -92,7 +102,7 @@ export default function AdminModal({
 
   const fetchBackupStatus = async () => {
     try {
-      const apiHost = '';
+      const apiHost = getApiHost();
       const { ok, data } = await safeJsonFetch(`${apiHost}/api/admin/backups`);
       if (ok && data && data.success) {
         setBackupStatus({
@@ -112,7 +122,7 @@ export default function AdminModal({
   const handleTriggerBackup = async () => {
     setIsBackingUp(true);
     try {
-      const apiHost = '';
+      const apiHost = getApiHost();
       const { ok, data } = await safeJsonFetch(`${apiHost}/api/admin/backups/create`, { method: 'POST' });
       if (ok && data && data.success) {
         if (addToast) addToast(`Database backup "${data.filename}" created & synced!`, '☁️');
@@ -132,7 +142,7 @@ export default function AdminModal({
       return;
     }
     try {
-      const apiHost = '';
+      const apiHost = getApiHost();
       const { ok, data } = await safeJsonFetch(`${apiHost}/api/admin/backups/restore`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
