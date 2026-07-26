@@ -80,8 +80,17 @@ export default function AdminModal({
       const apiHost = '';
       const res = await fetch(`${apiHost}/api/admin/backups`);
       const data = await res.json();
-      if (data.success) {
-        setBackupStatus(data);
+      if (data && data.success) {
+        setBackupStatus({
+          storageQuota: data.storageQuota || '15 GB (Google Drive Free Tier)',
+          usedMB: data.usedMB || '0.00 MB',
+          percentageUsed: data.percentageUsed || '0.00%',
+          totalBackupsCount: typeof data.totalBackupsCount === 'number' ? data.totalBackupsCount : (Array.isArray(data.backups) ? data.backups.length : 0),
+          lastBackupAt: data.lastBackupAt || null,
+          folderId: data.folderId || '1d-ca4wnFG0cwyy_b0Ry-cKnhr9b_G3Yl',
+          folderUrl: data.folderUrl || `https://drive.google.com/drive/folders/${data.folderId || '1d-ca4wnFG0cwyy_b0Ry-cKnhr9b_G3Yl'}`,
+          backups: Array.isArray(data.backups) ? data.backups : []
+        });
       }
     } catch (_) {}
   };
@@ -1175,7 +1184,7 @@ export default function AdminModal({
               }}
               style={{ color: '#3b82f6', fontWeight: '800' }}
             >
-              <Cloud size={16} color="#3b82f6" /> ☁️ Google Drive Backups ({backupStatus.totalBackupsCount || 0})
+              <Cloud size={16} color="#3b82f6" /> ☁️ Google Drive Backups ({backupStatus?.totalBackupsCount || 0})
             </button>
 
           </aside>
@@ -2882,7 +2891,7 @@ export default function AdminModal({
 
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <a
-                      href={backupStatus.folderUrl || `https://drive.google.com/drive/folders/${backupStatus.folderId || '1d-ca4wnFG0cwyy_b0Ry-cKnhr9b_G3Yl'}`}
+                      href={backupStatus?.folderUrl || `https://drive.google.com/drive/folders/${backupStatus?.folderId || '1d-ca4wnFG0cwyy_b0Ry-cKnhr9b_G3Yl'}`}
                       target="_blank"
                       rel="noreferrer"
                       style={{
@@ -2921,16 +2930,16 @@ export default function AdminModal({
                   </div>
                   <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Used Storage</span>
-                    <h4 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: '900' }}>{backupStatus.usedMB}</h4>
+                    <h4 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: '900' }}>{backupStatus?.usedMB || '0.00 MB'}</h4>
                   </div>
                   <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Total JSON Backups</span>
-                    <h4 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', color: '#22c55e', fontWeight: '900' }}>{backupStatus.totalBackupsCount} Files</h4>
+                    <h4 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', color: '#22c55e', fontWeight: '900' }}>{backupStatus?.totalBackupsCount || 0} Files</h4>
                   </div>
                   <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px' }}>
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '800', textTransform: 'uppercase' }}>Last Auto JSON Backup</span>
                     <h4 style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {backupStatus.lastBackupAt ? new Date(backupStatus.lastBackupAt).toLocaleString('en-IN') : 'None'}
+                      {backupStatus?.lastBackupAt ? new Date(backupStatus.lastBackupAt).toLocaleString('en-IN') : 'None'}
                     </h4>
                   </div>
                 </div>
@@ -2946,10 +2955,10 @@ export default function AdminModal({
                 </div>
 
                 <h4 style={{ margin: '0 0 16px 0', fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Database size={18} color="#3b82f6" /> Auto-Synced Database Snapshots ({backupStatus.backups ? backupStatus.backups.length : 0})
+                  <Database size={18} color="#3b82f6" /> Auto-Synced Database Snapshots ({(backupStatus?.backups || []).length})
                 </h4>
 
-                {(!backupStatus.backups || backupStatus.backups.length === 0) ? (
+                {(!backupStatus?.backups || backupStatus.backups.length === 0) ? (
                   <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
                     No JSON backups created yet. The system automatically creates a snapshot on every store event.
                   </div>
