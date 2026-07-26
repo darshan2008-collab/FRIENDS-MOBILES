@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Gift, Award, Sparkles, CheckCircle2, Copy, ArrowRight, Tag, ShieldCheck, Zap } from 'lucide-react';
+import { Gift, Award, Sparkles, CheckCircle2, Zap } from 'lucide-react';
 
 export const REWARD_COUPONS = [
   {
