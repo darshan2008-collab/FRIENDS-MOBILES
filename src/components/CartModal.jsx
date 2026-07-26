@@ -257,6 +257,39 @@ export default function CartModal({
     setCheckoutStep('checkout');
   };
 
+  const triggerWhatsAppOrderNotification = (order) => {
+    try {
+      if (!order) return;
+      const orderIdStr = order.orderId || '';
+      const custName = order.customer?.name || '';
+      const custPhone = order.customer?.phone || '';
+      const custAddr = order.customer?.address || '';
+      const itemsList = (order.items || []).map(item => {
+        const itemTitle = item?.title || item?.name || 'Product';
+        const itemQty = item?.quantity || 1;
+        const itemPrice = item?.price || 0;
+        return `• ${itemTitle} (x${itemQty}) - ₹${itemPrice * itemQty}`;
+      }).join('\n');
+
+      const whatsappMsg = `*New Order Placed - Friends Mobile Portal*\n\n` +
+        `*Order ID:* ${orderIdStr}\n` +
+        `*Customer Name:* ${custName}\n` +
+        `*Phone Number:* ${custPhone}\n` +
+        `*Address:* ${custAddr}\n\n` +
+        `*Ordered Items:*\n` +
+        itemsList +
+        `\n\n*Subtotal:* ₹${order.subtotal || 0}\n` +
+        `*Shipping:* ${order.shipping === 'Pending' ? 'Pending verify' : `₹${order.shipping || 0}`}\n` +
+        `*Total Amount:* ₹${order.total || 0}\n` +
+        `*Payment Method:* ${order.paymentMethod || 'Cash On Delivery'}`;
+
+      const whatsappUrl = `https://wa.me/919344522086?text=${encodeURIComponent(whatsappMsg)}`;
+      window.open(whatsappUrl, '_blank');
+    } catch (err) {
+      console.error("WhatsApp redirect error", err);
+    }
+  };
+
   const awardUserPointsOnOrder = (order) => {
     if (!currentUser || !order) return;
     const earned = Math.floor((order.total || 0) / 10);
