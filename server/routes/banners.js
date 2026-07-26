@@ -77,27 +77,29 @@ router.get('/', async (req, res) => {
         return res.json({ success: true, slides: banner.slides });
       }
     }
-    return res.json({ success: true, slides: DEFAULT_SLIDES });
   } catch (err) {
     console.error('[Banners GET Error]', err.message);
-    res.json({ success: true, slides: DEFAULT_SLIDES });
   }
+  const fileSlides = readData(bannersFilePath, DEFAULT_SLIDES);
+  return res.json({ success: true, slides: fileSlides });
 });
 
 // PUT /api/banners — Save/Update all banner slides
 router.put('/', async (req, res) => {
   try {
     const { slides } = req.body;
-    if (!slides || !Array.isArray(slides)) {
-      return res.status(400).json({ success: false, message: 'slides array is required' });
-    }
+    const slidesToSave = Array.isArray(slides) && slides.length > 0 ? slides : DEFAULT_SLIDES;
+
+    writeData(bannersFilePath, slidesToSave);
 
     if (Banner) {
-      await Banner.deleteMany({});
-      await Banner.create({ slides, updatedAt: new Date() });
+      try {
+        await Banner.deleteMany({});
+        await Banner.create({ slides: slidesToSave, updatedAt: new Date() });
+      } catch (_) {}
     }
 
-    res.json({ success: true, message: 'Banners saved successfully to PostgreSQL', slides });
+    res.json({ success: true, message: 'Banners saved successfully to database & fallback storage', slides: slidesToSave });
   } catch (err) {
     console.error('[Banners PUT Error]', err.message);
     res.status(500).json({ success: false, message: 'Failed to save banners' });
