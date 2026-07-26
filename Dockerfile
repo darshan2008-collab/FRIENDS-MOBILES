@@ -1,17 +1,15 @@
-# Stage 1: Build React Frontend
-FROM node:18-alpine AS build
+# Stage 1: Build React Frontend (Debian-based Node 18 for glibc esbuild stability)
+FROM node:18-slim AS build
 
 WORKDIR /app
 
-ENV NODE_ENV=development
-
 COPY package*.json ./
-RUN npm install --include=dev --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 COPY . .
 
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN npm run build
+RUN npx vite build
 
 # Stage 2: Production High-Performance NGINX Server
 FROM nginx:alpine
