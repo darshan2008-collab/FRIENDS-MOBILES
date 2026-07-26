@@ -16,6 +16,7 @@ export default function ProductDetailModal({
   const [newReview, setNewReview] = useState({ name: '', comment: '', rating: 5 });
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [zoomPhoto, setZoomPhoto] = useState(null);
 
   const [selectedImage, setSelectedImage] = useState('');
   const [isHoveringZoom, setIsHoveringZoom] = useState(false);
