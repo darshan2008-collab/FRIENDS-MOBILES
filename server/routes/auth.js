@@ -103,13 +103,19 @@ router.post('/signup', signupLimiter, async (req, res) => {
       phone: cleanPhone,
       password: hashPassword(password),
       address: cleanAddress,
+      rewardPoints: 150,
+      claimedCoupons: [],
+      pointHistory: [
+        { id: 1, type: 'credit', points: 50, title: 'Welcome Bonus Points', date: 'Just Now' },
+        { id: 2, type: 'credit', points: 100, title: 'First Order Reward Bonus', date: 'Just Now' }
+      ],
       createdAt: new Date().toISOString()
     };
 
     await saveUserAsync(newUser);
     BackupService.triggerRealTimeBackup(`user_signup_${cleanEmail}`);
 
-    const userProfile = { id: newUser.id, name: newUser.name, email: newUser.email, phone: newUser.phone, address: newUser.address };
+    const userProfile = { id: newUser.id, name: newUser.name, email: newUser.email, phone: newUser.phone, address: newUser.address, rewardPoints: newUser.rewardPoints, claimedCoupons: newUser.claimedCoupons, pointHistory: newUser.pointHistory };
 
     res.status(201).json({
       success: true,

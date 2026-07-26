@@ -5,6 +5,7 @@ import {
   Sparkles, MessageCircle, HelpCircle, Copy, Truck, Lock
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
+import RewardsTab from './RewardsTab';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' 
   ? (window.location.port && window.location.port !== '5000' 
@@ -404,6 +405,14 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
               </button>
 
               <button 
+                onClick={() => setActiveTab('rewards')}
+                className={`dash-nav-item ${activeTab === 'rewards' ? 'active' : ''}`}
+                style={{ color: '#FF5500', fontWeight: '800' }}
+              >
+                <Sparkles size={18} color="#FF5500" /> 🎁 Friends Rewards &amp; Points ({user?.rewardPoints || 150} PTS)
+              </button>
+
+              <button 
                 onClick={() => setActiveTab('offers')}
                 className={`dash-nav-item ${activeTab === 'offers' ? 'active' : ''}`}
               >
@@ -701,6 +710,18 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                     ))}
                   </div>
                 </div>
+              )}
+
+              {/* TAB: FRIENDS REWARDS & POINTS */}
+              {activeTab === 'rewards' && (
+                <RewardsTab 
+                  currentUser={user}
+                  onUpdateUserProfile={(updatedUser) => {
+                    localStorage.setItem('fm_user', JSON.stringify(updatedUser));
+                    window.dispatchEvent(new Event('storage'));
+                  }}
+                  addToast={addToast}
+                />
               )}
 
               {/* TAB 4: COUPONS & OFFERS */}

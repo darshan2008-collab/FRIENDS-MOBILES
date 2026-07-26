@@ -177,15 +177,75 @@ export default function CartModal({
     return `https://wa.me/919344522086?text=${encodeURIComponent(whatsappMsg)}`;
   };
 
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+
+  const handleApplyCoupon = (codeToApply) => {
+    const code = (codeToApply || couponInput).trim().toUpperCase();
+    if (!code) return;
+
+    if (code === 'FRIENDS10') {
+      if (subtotal < 299) {
+        if (addToast) addToast('FRIENDS10 requires a minimum order of ₹299.', '⚠️');
+        return;
+      }
+      setAppliedCoupon({ code, discountPct: 10, flatDiscount: 0, title: '10% OFF Rewards Coupon' });
+      if (addToast) addToast('Applied 10% OFF Rewards Coupon!', '🎉');
+    } else if (code === 'FRIENDS15') {
+      if (subtotal < 499) {
+        if (addToast) addToast('FRIENDS15 requires a minimum order of ₹499.', '⚠️');
+        return;
+      }
+      setAppliedCoupon({ code, discountPct: 15, flatDiscount: 0, title: '15% OFF Rewards Coupon' });
+      if (addToast) addToast('Applied 15% OFF Rewards Coupon!', '🎉');
+    } else if (code === 'FRIENDS20') {
+      if (subtotal < 799) {
+        if (addToast) addToast('FRIENDS20 requires a minimum order of ₹799.', '⚠️');
+        return;
+      }
+      setAppliedCoupon({ code, discountPct: 20, flatDiscount: 0, title: '20% OFF Rewards Coupon' });
+      if (addToast) addToast('Applied 20% OFF Gold Rewards Coupon!', '🎉');
+    } else if (code === 'SUPER200') {
+      if (subtotal < 999) {
+        if (addToast) addToast('SUPER200 requires a minimum order of ₹999.', '⚠️');
+        return;
+      }
+      setAppliedCoupon({ code, discountPct: 0, flatDiscount: 200, title: 'Flat ₹200 OFF VIP Coupon' });
+      if (addToast) addToast('Applied Flat ₹200 OFF VIP Coupon!', '🎉');
+    } else if (code === 'FREESHIP') {
+      setAppliedCoupon({ code, discountPct: 0, flatDiscount: 0, isFreeShip: true, title: 'Free Express Shipping' });
+      if (addToast) addToast('Applied Free Express Shipping Coupon!', '🎉');
+    } else {
+      if (addToast) addToast('Invalid or expired coupon code.', '❌');
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput('');
+    if (addToast) addToast('Coupon removed.', 'ℹ️');
+  };
+
   if (!isOpen) return null;
 
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+  let couponDiscount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.flatDiscount > 0) {
+      couponDiscount = Math.min(subtotal, appliedCoupon.flatDiscount);
+    } else if (appliedCoupon.discountPct > 0) {
+      couponDiscount = Math.round((subtotal * appliedCoupon.discountPct) / 100);
+    }
+  }
+
+  const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
   const freeThreshold = shippingSettings?.freeShippingThreshold || 1000;
-  const isFreeShipping = subtotal >= freeThreshold;
+  const isFreeShipping = (appliedCoupon && appliedCoupon.isFreeShip) || discountedSubtotal >= freeThreshold;
   const shippingFeeVal = isFreeShipping ? 0 : 'Pending';
-  const grandTotal = subtotal; // Shipping cost added by admin later
-  const amountToFreeShipping = Math.max(0, freeThreshold - subtotal);
-  const progressPercent = Math.min(100, Math.round((subtotal / freeThreshold) * 100));
+  const grandTotal = discountedSubtotal;
+  const amountToFreeShipping = Math.max(0, freeThreshold - discountedSubtotal);
+  const progressPercent = Math.min(100, Math.round((discountedSubtotal / freeThreshold) * 100));
 
   const handleStartCheckout = () => {
     if (!currentUser) {
@@ -255,6 +315,31 @@ export default function CartModal({
       status: isFreeShipping ? 'Order Placed' : 'Pending Shipping Cost'
     };
 
+    const awardUserPointsOnOrder = (order) => {
+      if (!currentUser || !order) return;
+      const earned = Math.floor((order.total || 0) / 10);
+      if (earned <= 0) return;
+
+      const currentPts = currentUser.rewardPoints || 150;
+      const updatedPts = currentPts + earned;
+      const currentHist = currentUser.pointHistory || [];
+      const updatedHist = [
+        { id: Date.now(), type: 'credit', points: earned, title: `Earned from Order #${order.orderId}`, date: 'Just Now' },
+        ...currentHist
+      ];
+
+      const updatedUser = {
+        ...currentUser,
+        rewardPoints: updatedPts,
+        pointHistory: updatedHist
+      };
+
+      if (onUpdateUserProfile) {
+        onUpdateUserProfile(updatedUser);
+      }
+      if (addToast) addToast(`🎉 You earned +${earned} Friends Reward Points! Total: ${updatedPts} PTS`, '🎁');
+    };
+
     try {
       const res = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
@@ -265,57 +350,24 @@ export default function CartModal({
 
       if (data.success) {
         setPlacedOrderDetails(data.order || newOrder);
+        awardUserPointsOnOrder(data.order || newOrder);
         triggerWhatsAppOrderNotification(data.order || newOrder);
         if (onOrderPlaced) onOrderPlaced(data.order || newOrder);
         if (onClearCart) onClearCart();
         setCheckoutStep('success');
         if (addToast) addToast(`Order #${newOrder.orderId} Placed Successfully!`, '✓');
       } else {
-        // API returned unsuccessful -> fallback to resilient order placement
         executeFailSafeOrder(newOrder);
       }
     } catch (err) {
       console.warn("API order placement network fallback:", err);
-      // Fail-safe fallback so user is NEVER blocked by DB/network connection glitches
       executeFailSafeOrder(newOrder);
-    }
-  };
-
-  const triggerWhatsAppOrderNotification = (order) => {
-    try {
-      if (!order) return;
-      const orderIdStr = order.orderId || '';
-      const custName = order.customer?.name || '';
-      const custPhone = order.customer?.phone || '';
-      const custAddr = order.customer?.address || '';
-      const itemsList = (order.items || []).map(item => {
-        const itemTitle = item?.title || item?.name || 'Product';
-        const itemQty = item?.quantity || 1;
-        const itemPrice = item?.price || 0;
-        return `• ${itemTitle} (x${itemQty}) - ₹${itemPrice * itemQty}`;
-      }).join('\n');
-
-      const whatsappMsg = `*New Order Placed - Friends Mobile Portal*\n\n` +
-        `*Order ID:* ${orderIdStr}\n` +
-        `*Customer Name:* ${custName}\n` +
-        `*Phone Number:* ${custPhone}\n` +
-        `*Address:* ${custAddr}\n\n` +
-        `*Ordered Items:*\n` +
-        itemsList +
-        `\n\n*Subtotal:* ₹${order.subtotal || 0}\n` +
-        `*Shipping:* ${order.shipping === 'Pending' ? 'Pending verify' : `₹${order.shipping || 0}`}\n` +
-        `*Total Amount:* ₹${order.total || 0}\n` +
-        `*Payment Method:* ${order.paymentMethod || 'Cash On Delivery'}`;
-
-      const whatsappUrl = `https://wa.me/919344522086?text=${encodeURIComponent(whatsappMsg)}`;
-      window.open(whatsappUrl, '_blank');
-    } catch (err) {
-      console.error("WhatsApp redirect error", err);
     }
   };
 
   const executeFailSafeOrder = (order) => {
     setPlacedOrderDetails(order);
+    awardUserPointsOnOrder(order);
     triggerWhatsAppOrderNotification(order);
     if (onOrderPlaced) onOrderPlaced(order);
     if (onClearCart) onClearCart();
@@ -534,6 +586,59 @@ export default function CartModal({
                       <span>Subtotal ({cart.reduce((a, b) => a + b.quantity, 0)} items):</span>
                       <strong style={{ color: 'var(--text-primary)' }}>₹{subtotal.toLocaleString('en-IN')}</strong>
                     </div>
+
+                    {/* Rewards Coupon Input Box */}
+                    <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '10px 12px', margin: '6px 0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#FF5500', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          🎁 APPLY REWARDS COUPON
+                        </span>
+                        {currentUser?.claimedCoupons && currentUser.claimedCoupons.length > 0 && (
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                            {currentUser.claimedCoupons.length} Claimed
+                          </span>
+                        )}
+                      </div>
+
+                      {appliedCoupon ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid #22c55e', padding: '6px 10px', borderRadius: '8px' }}>
+                          <span style={{ fontSize: '0.78rem', fontWeight: '800', color: '#22c55e' }}>
+                            ✓ {appliedCoupon.code} ({appliedCoupon.title})
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleRemoveCoupon}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', fontWeight: 'bold', fontSize: '0.72rem', cursor: 'pointer' }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <input
+                            type="text"
+                            placeholder="Enter Code (e.g. FRIENDS10)"
+                            value={couponInput}
+                            onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                            style={{ flex: 1, padding: '7px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: 'bold', outline: 'none' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleApplyCoupon()}
+                            style={{ padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#FF5500', color: '#ffffff', fontWeight: '800', fontSize: '0.75rem', cursor: 'pointer' }}
+                          >
+                            Apply
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {couponDiscount > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#22c55e', fontWeight: '700' }}>
+                        <span>Coupon Discount ({appliedCoupon?.code}):</span>
+                        <span>-₹{couponDiscount.toLocaleString('en-IN')}</span>
+                      </div>
+                    )}
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
                       <span>Estimated Shipping Fee:</span>
