@@ -29,12 +29,19 @@ async function saveSettingsAsync(settingsData) {
 }
 
 async function getOrdersAsync() {
+  let dbOrders = [];
   try {
-    return await Order.find({});
+    dbOrders = await Order.find({});
   } catch (e) {
-    console.error("[Admin Orders Get Error]", e.message);
-    return [];
+    console.error("[Admin Orders DB Get Error]", e.message);
   }
+  const fileOrders = readData(ordersFilePath, []);
+
+  const map = new Map();
+  (dbOrders || []).forEach(o => { if (o && o.orderId) map.set(o.orderId.toLowerCase(), o); });
+  (fileOrders || []).forEach(o => { if (o && o.orderId && !map.has(o.orderId.toLowerCase())) map.set(o.orderId.toLowerCase(), o); });
+
+  return Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 }
 
 async function getProductsAsync() {

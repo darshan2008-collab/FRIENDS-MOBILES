@@ -9,13 +9,19 @@ const BackupService = require('../services/backupService');
 const ordersFilePath = path.join(__dirname, '../data/orders.json');
 
 async function getOrdersAsync() {
+  let dbOrders = [];
   try {
-    const dbOrders = await Order.find({});
-    if (dbOrders && dbOrders.length > 0) return dbOrders;
+    dbOrders = await Order.find({});
   } catch (e) {
     console.error("[Orders DB Get Error]", e.message);
   }
-  return readData(ordersFilePath, []);
+  const fileOrders = readData(ordersFilePath, []);
+
+  const map = new Map();
+  (dbOrders || []).forEach(o => { if (o && o.orderId) map.set(o.orderId.toLowerCase(), o); });
+  (fileOrders || []).forEach(o => { if (o && o.orderId && !map.has(o.orderId.toLowerCase())) map.set(o.orderId.toLowerCase(), o); });
+
+  return Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 }
 
 async function saveOrderAsync(orderData) {
