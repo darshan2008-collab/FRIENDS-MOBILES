@@ -3,7 +3,7 @@ import {
   X, ShieldCheck, Package, Truck, ShoppingBag, BarChart3, Plus, Trash2, Edit3, 
   Check, RefreshCw, Lock, User, Key, ArrowRight, LogOut, CheckCircle2, Clock, 
   TrendingUp, TrendingDown, Tag, Sparkles, AlertTriangle, Percent, DollarSign, Menu, MapPin, Phone, Eye, EyeOff, Upload, CreditCard, AlertCircle, MessageSquare, PhoneCall,
-  Cloud, Database, HardDrive, Download
+  Cloud, Database, HardDrive, Download, Zap
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
