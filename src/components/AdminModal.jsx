@@ -31,12 +31,6 @@ export default function AdminModal({
     }
   });
 
-  // Computed Executive Sales KPIs from orders prop
-  const safeOrders = Array.isArray(orders) ? orders : [];
-  const totalOrders = safeOrders.length;
-  const totalRevenue = safeOrders.reduce((sum, o) => sum + (parseFloat(o.total || o.subtotal || o.totalAmount) || 0), 0);
-  const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
-  const highSellingProducts = Array.isArray(products) ? products.slice().sort((a, b) => (b.reviews || 0) - (a.reviews || 0)) : [];
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
@@ -63,11 +57,7 @@ export default function AdminModal({
 
   const fetchBackupStatus = async () => {
     try {
-      const apiHost = typeof window !== 'undefined' 
-        ? (window.location.port && window.location.port !== '5000' 
-            ? `${window.location.protocol}//${window.location.hostname}:5000` 
-            : '') 
-        : '';
+      const apiHost = '';
       const res = await fetch(`${apiHost}/api/admin/backups`);
       const data = await res.json();
       if (data.success) {
@@ -79,11 +69,7 @@ export default function AdminModal({
   const handleTriggerBackup = async () => {
     setIsBackingUp(true);
     try {
-      const apiHost = typeof window !== 'undefined' 
-        ? (window.location.port && window.location.port !== '5000' 
-            ? `${window.location.protocol}//${window.location.hostname}:5000` 
-            : '') 
-        : '';
+      const apiHost = '';
       const res = await fetch(`${apiHost}/api/admin/backups/create`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
@@ -103,11 +89,7 @@ export default function AdminModal({
       return;
     }
     try {
-      const apiHost = typeof window !== 'undefined' 
-        ? (window.location.port && window.location.port !== '5000' 
-            ? `${window.location.protocol}//${window.location.hostname}:5000` 
-            : '') 
-        : '';
+      const apiHost = '';
       const res = await fetch(`${apiHost}/api/admin/backups/restore`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -127,11 +109,7 @@ export default function AdminModal({
 
   const fetchComplaints = async () => {
     try {
-      const apiHost = typeof window !== 'undefined' 
-        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? `${window.location.protocol}//${window.location.hostname}:5000` 
-            : `${window.location.protocol}//${window.location.host}`) 
-        : '';
+      const apiHost = '';
       const res = await fetch(`${apiHost}/api/admin/complaints`);
       const data = await res.json();
       if (data.success && data.complaints) {
@@ -155,11 +133,7 @@ export default function AdminModal({
 
   const handleUpdateComplaintStatus = async (ticketId, newStatus, notes = '') => {
     try {
-      const apiHost = typeof window !== 'undefined' 
-        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? `${window.location.protocol}//${window.location.hostname}:5000` 
-            : `${window.location.protocol}//${window.location.host}`) 
-        : '';
+      const apiHost = '';
       await fetch(`${apiHost}/api/admin/complaints/${ticketId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -230,11 +204,7 @@ export default function AdminModal({
     };
 
     try {
-      const apiHost = typeof window !== 'undefined' 
-        ? (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? `${window.location.protocol}//${window.location.hostname}:5000` 
-            : `${window.location.protocol}//${window.location.host}`) 
-        : '';
+      const apiHost = '';
       const res = await fetch(`${apiHost}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -391,11 +361,7 @@ export default function AdminModal({
     }
 
     try {
-      const apiHost = typeof window !== 'undefined'
-        ? (window.location.port && window.location.port !== '5000'
-            ? `${window.location.protocol}//${window.location.hostname}:5000`
-            : '')
-        : '';
+      const apiHost = '';
       const response = await fetch(`${apiHost}/api/admin/orders/export-excel`);
       if (response.ok) {
         const blob = await response.blob();

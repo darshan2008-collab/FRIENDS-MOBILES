@@ -25,11 +25,7 @@ import AIChatbotModal from './components/AIChatbotModal';
 
 import './styles/theme.css';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' 
-  ? (window.location.port && window.location.port !== '5000' 
-      ? `${window.location.protocol}//${window.location.hostname}:5000/api` 
-      : '/api') 
-  : '/api');
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const initialProducts = [
   {

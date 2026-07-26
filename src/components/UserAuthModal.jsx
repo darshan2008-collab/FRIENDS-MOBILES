@@ -2,27 +2,17 @@ import React, { useState } from 'react';
 import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, Eye, EyeOff, AlertCircle, Clock, RefreshCw } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined'
-  ? (window.location.port && window.location.port !== '5000'
-      ? `${window.location.protocol}//${window.location.hostname}:5000/api`
-      : '/api')
-  : '/api');
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 const getApiEndpoints = (endpoint) => {
   const endpoints = [];
   
+  // 1. Primary relative /api path (handled by NGINX or Vite proxy)
+  endpoints.push(`/api${endpoint}`);
+
   if (typeof window !== 'undefined') {
-    const host = window.location.hostname;
-    const protocol = window.location.protocol;
     const origin = window.location.origin;
-
-    // 1. Try relative origin API (/api)
     endpoints.push(`${origin}/api${endpoint}`);
-
-    // 2. Try direct backend container port 5000 on custom domain / host
-    endpoints.push(`${protocol}//${host}:5000/api${endpoint}`);
-
-    // 3. Try Vercel production backend cloud fallback
     endpoints.push(`https://friends-mobiles-rho.vercel.app/api${endpoint}`);
   }
 
@@ -31,7 +21,6 @@ const getApiEndpoints = (endpoint) => {
     endpoints.push(`${envBase}${endpoint}`);
   }
 
-  endpoints.push(`/api${endpoint}`);
   return [...new Set(endpoints)];
 };
 

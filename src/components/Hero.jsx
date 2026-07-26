@@ -132,12 +132,7 @@ export default function Hero({ theme, slides }) {
             key={`slide-img-${currentSlideIndex}-${theme}`}
             src={activeSlide.imgSrc} 
             onError={(e) => {
-              const current = e.target.src;
-              if (!current.startsWith('http://localhost:5000')) {
-                e.target.src = `http://localhost:5000${activeSlide.imgSrc}`;
-              } else {
-                e.target.src = 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=600&auto=format&fit=crop';
-              }
+              e.target.src = 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=600&auto=format&fit=crop';
             }}
             alt={activeSlide.titleGradient} 
             className="hero-device-img" 

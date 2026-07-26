@@ -7,11 +7,7 @@ import {
 import CompanyLogo from './CompanyLogo';
 import RewardsTab from './RewardsTab';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' 
-  ? (window.location.port && window.location.port !== '5000' 
-      ? `${window.location.protocol}//${window.location.hostname}:5000/api` 
-      : '/api') 
-  : '/api');
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export default function UserAccountModal({ isOpen, onClose, user, orders: allOrders, onLogout, addToast }) {
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile' | 'addresses' | 'offers' | 'support'

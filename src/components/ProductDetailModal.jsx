@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' 
-  ? (window.location.port && window.location.port !== '5000' 
-      ? `${window.location.protocol}//${window.location.hostname}:5000/api` 
-      : '/api') 
-  : '/api');
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export default function ProductDetailModal({
   product,

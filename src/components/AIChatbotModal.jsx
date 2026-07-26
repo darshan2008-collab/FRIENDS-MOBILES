@@ -363,13 +363,10 @@ export default function AIChatbotModal({
 
     // Post to Server API with smart multi-endpoint fallback
     const payload = JSON.stringify(newComplaint);
-    const endpoints = [];
+    const endpoints = ['/api/admin/complaints'];
     if (typeof window !== 'undefined') {
-      const host = window.location.hostname;
-      const protocol = window.location.protocol;
       const origin = window.location.origin;
       endpoints.push(`${origin}/api/admin/complaints`);
-      endpoints.push(`${protocol}//${host}:5000/api/admin/complaints`);
       endpoints.push(`https://friends-mobiles-rho.vercel.app/api/admin/complaints`);
     }
 
