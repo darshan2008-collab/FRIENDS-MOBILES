@@ -40,6 +40,25 @@ export default function AdminModal({
   const [isManualCategory, setIsManualCategory] = useState(false);
   const [isEditManualCategory, setIsEditManualCategory] = useState(false);
 
+  // Orders State (synced from API / localStorage / props)
+  const [adminOrders, setAdminOrders] = useState(() => {
+    if (Array.isArray(orders) && orders.length > 0) return orders;
+    try {
+      const saved = localStorage.getItem('fm_user_orders');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+    return [];
+  });
+
+  useEffect(() => {
+    if (Array.isArray(orders) && orders.length > 0) {
+      setAdminOrders(orders);
+    }
+  }, [orders]);
+
   // Complaints & Support Tickets State
   const [complaints, setComplaints] = useState([]);
   const [complaintFilter, setComplaintFilter] = useState('All');
@@ -126,17 +145,30 @@ export default function AdminModal({
   };
 
   const fetchOrders = async () => {
-    try {
-      const apiHost = '';
-      const res = await fetch(`${apiHost}/api/admin/orders`);
-      const data = await res.json();
-      if (data.success && Array.isArray(data.orders)) {
-        if (onUpdateOrders) {
-          onUpdateOrders(data.orders);
+    const endpoints = [
+      '/api/admin/orders',
+      '/api/orders',
+      'https://friends-mobiles-rho.vercel.app/api/admin/orders',
+      'https://friends-mobiles-rho.vercel.app/api/orders'
+    ];
+
+    for (const url of endpoints) {
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.orders) && data.orders.length > 0) {
+          setAdminOrders(data.orders);
+          if (onUpdateOrders) onUpdateOrders(data.orders);
+          try { localStorage.setItem('fm_user_orders', JSON.stringify(data.orders)); } catch (_) {}
+          return;
         }
-        try {
-          localStorage.setItem('fm_user_orders', JSON.stringify(data.orders));
-        } catch (_) {}
+      } catch (_) {}
+    }
+
+    try {
+      const saved = JSON.parse(localStorage.getItem('fm_user_orders') || '[]');
+      if (Array.isArray(saved) && saved.length > 0) {
+        setAdminOrders(saved);
       }
     } catch (_) {}
   };
@@ -373,7 +405,8 @@ export default function AdminModal({
 
   // --- Executive Order History Report (Excel CSV Export) ---
   const handleExportCSV = async () => {
-    if (!orders || orders.length === 0) {
+    const targetOrdersList = (displayOrders && displayOrders.length > 0) ? displayOrders : (orders || []);
+    if (!targetOrdersList || targetOrdersList.length === 0) {
       if (addToast) addToast('No order history available to export!', '⚠️');
       return;
     }
@@ -409,7 +442,7 @@ export default function AdminModal({
       return `"${str}"`;
     };
 
-    const rows = orders.map(o => {
+    const rows = targetOrdersList.map(o => {
       const custName = o.customer?.name || 'Walk-in Customer';
       const custPhone = o.customer?.phone || '';
       const custAddr = o.customer?.address || '';
@@ -711,14 +744,15 @@ export default function AdminModal({
   };
 
   // --- Analytics & Product Sales Performance Math ---
-  const totalOrders = orders ? orders.length : 0;
-  const totalRevenue = orders ? orders.reduce((sum, o) => sum + (o.total || 0), 0) : 0;
+  const displayOrders = (adminOrders && adminOrders.length > 0) ? adminOrders : (orders || []);
+  const totalOrders = displayOrders ? displayOrders.length : 0;
+  const totalRevenue = displayOrders ? displayOrders.reduce((sum, o) => sum + (o.total || 0), 0) : 0;
   const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
   // Build product sales map from orders with 100% precision
   const productSalesMap = {};
-  if (orders && orders.length > 0) {
-    orders.forEach(order => {
+  if (displayOrders && displayOrders.length > 0) {
+    displayOrders.forEach(order => {
       if (order.items && Array.isArray(order.items)) {
         order.items.forEach(item => {
           const pId = item.id || item.productId || item.title;
@@ -751,7 +785,7 @@ export default function AdminModal({
   const lowSellingProducts = [...enrichedProducts].sort((a, b) => a.unitsSold - b.unitsSold);
 
   // Filtered orders list for Admin Orders tab
-  const filteredOrders = (orders || []).filter(order => {
+  const filteredOrders = (displayOrders || []).filter(order => {
     const search = orderSearchTerm.toLowerCase().trim();
     const matchesSearch = !search || 
       (order.orderId || '').toLowerCase().includes(search) ||
