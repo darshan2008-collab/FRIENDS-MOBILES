@@ -3014,10 +3014,25 @@ export default function AdminModal({
                             </div>
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#16a34a', background: 'rgba(34, 197, 94, 0.1)', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
                               ✅ Auto-Synced
                             </span>
+                            <a
+                              href={`${getApiHost()}/api/admin/backups/download/${encodeURIComponent(fileName)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              download={fileName}
+                              style={{
+                                padding: '5px 10px', borderRadius: '6px', border: '1px solid #3b82f6',
+                                background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6',
+                                fontWeight: '700', fontSize: '0.72rem', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none'
+                              }}
+                              title="Download Backup JSON File to Device"
+                            >
+                              <Download size={12} /> Download JSON
+                            </a>
                             <button
                               onClick={() => handleRestoreBackup(fileName)}
                               style={{
@@ -3028,7 +3043,7 @@ export default function AdminModal({
                               }}
                               title="Force Manual Re-Sync"
                             >
-                              <Download size={12} /> Force Re-Sync
+                              <RefreshCw size={12} /> Force Re-Sync
                             </button>
                           </div>
                         </div>

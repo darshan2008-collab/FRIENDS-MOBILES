@@ -17,7 +17,7 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: process.env.VITE_BACKEND_URL || 'http://backend:5000',
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:5000',
         changeOrigin: true,
         secure: false
       }
@@ -29,7 +29,7 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/api': {
-        target: process.env.VITE_BACKEND_URL || 'http://backend:5000',
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:5000',
         changeOrigin: true,
         secure: false
       }

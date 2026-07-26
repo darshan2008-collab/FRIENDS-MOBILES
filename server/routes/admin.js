@@ -377,8 +377,22 @@ router.post('/backups/restore', async (req, res) => {
     }
     const result = await BackupService.restoreBackup(filename);
     res.json(result);
+// GET /api/admin/backups/download/:filename — Direct browser download of backup JSON snapshot
+router.get('/backups/download/:filename', (req, res) => {
+  try {
+    const filename = path.basename(req.params.filename);
+    const backupsDir = path.join(__dirname, '../data/backups');
+    const filePath = path.join(backupsDir, filename);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ success: false, message: `Backup file "${filename}" not found.` });
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.sendFile(filePath);
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to restore database backup', error: err.message });
+    res.status(500).json({ success: false, message: 'Failed to download backup snapshot file', error: err.message });
   }
 });
 
