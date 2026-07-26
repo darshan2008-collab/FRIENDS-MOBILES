@@ -9,6 +9,14 @@ const { connectDB } = require('./config/db');
 const migrateData = require('./scripts/migrateToPostgres');
 const BackupService = require('./services/backupService');
 
+process.on('uncaughtException', (err) => {
+  console.error('[Uncaught Exception Guard]', err?.stack || err?.message || err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Unhandled Rejection Guard]', reason?.stack || reason?.message || reason);
+});
+
 // Connect Database & Auto-Restore Latest Backup Snapshot
 (async () => {
   const isConnected = await connectDB();
