@@ -23,7 +23,13 @@ export default function AdminModal({
   slides,
   onUpdateSlides
 }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    try {
+      return sessionStorage.getItem('fm_admin_auth') === 'true' || localStorage.getItem('fm_admin_auth') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
@@ -355,6 +361,10 @@ export default function AdminModal({
       (u === 'admin' && (p === 'fm@1234' || p === '1234'))
     ) {
       setIsAuthenticated(true);
+      try {
+        sessionStorage.setItem('fm_admin_auth', 'true');
+        localStorage.setItem('fm_admin_auth', 'true');
+      } catch (_) {}
       if (addToast) addToast('Admin Access Granted. Welcome, Super Admin!', '🔐');
     } else {
       if (addToast) addToast('Invalid credentials! Check username & password.', '❌');
@@ -837,7 +847,14 @@ export default function AdminModal({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           {isAuthenticated && (
             <button 
-              onClick={() => setIsAuthenticated(false)}
+              onClick={() => {
+                setIsAuthenticated(false);
+                try {
+                  sessionStorage.removeItem('fm_admin_auth');
+                  localStorage.removeItem('fm_admin_auth');
+                } catch (_) {}
+                if (addToast) addToast('Admin Portal Locked.', '🔒');
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -2586,8 +2603,12 @@ export default function AdminModal({
                   <button
                     type="button"
                     onClick={() => {
+                      try {
+                        localStorage.removeItem('fm_slides');
+                        localStorage.removeItem('fm_slides_cache');
+                      } catch (_) {}
                       if (onUpdateSlides) onUpdateSlides(null);
-                      window.location.reload();
+                      if (addToast) addToast('Cache cleared & Default Banners restored!', '✨');
                     }}
                     style={{
                       padding: '6px 12px',
