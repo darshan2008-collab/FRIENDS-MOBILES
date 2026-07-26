@@ -207,8 +207,56 @@ router.put('/:orderId/status', async (req, res) => {
       message: `Order #${targetOrder.orderId} updated successfully!`,
       order: targetOrder
     });
+// POST /api/orders/:orderId/cancel (Cancel Order by Customer)
+router.post('/:orderId/cancel', async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const orderIdParam = req.params.orderId.toLowerCase().trim();
+    const orders = await getOrdersAsync();
+
+    const orderIndex = orders.findIndex(o => o.orderId && o.orderId.toLowerCase().trim() === orderIdParam);
+    if (orderIndex === -1) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const targetOrder = { ...orders[orderIndex] };
+
+    // Check if order is eligible for cancellation
+    const nonCancellableStatuses = ['shipped', 'out for delivery', 'delivered', 'cancelled'];
+    const currentStatusLower = (targetOrder.status || '').toLowerCase();
+    if (nonCancellableStatuses.some(s => currentStatusLower.includes(s))) {
+      return res.status(400).json({
+        success: false,
+        message: `Order #${targetOrder.orderId} cannot be cancelled because it is already ${targetOrder.status}.`
+      });
+    }
+
+    const cancelReason = reason ? sanitizeInput(reason) : 'Cancelled by customer';
+    targetOrder.status = 'Cancelled';
+    targetOrder.cancellationReason = cancelReason;
+    targetOrder.cancelledAt = new Date().toISOString();
+    targetOrder.updatedAt = new Date().toISOString();
+
+    await saveOrderAsync(targetOrder);
+
+    // Trigger instant backup sync
+    BackupService.triggerRealTimeBackup(`cancel_order_${targetOrder.orderId}`);
+
+    // Send Cancellation Email Notification
+    try {
+      const { sendOrderEmail } = require('../utils/email');
+      if (sendOrderEmail && targetOrder.customer && targetOrder.customer.email) {
+        sendOrderEmail(targetOrder.customer.email, targetOrder, 'Order Cancellation Confirmation').catch(() => {});
+      }
+    } catch (_) {}
+
+    res.json({
+      success: true,
+      message: `Order #${targetOrder.orderId} cancelled successfully!`,
+      order: targetOrder
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to update order status', error: err.message });
+    res.status(500).json({ success: false, message: 'Failed to cancel order', error: err.message });
   }
 });
 

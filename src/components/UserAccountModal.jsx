@@ -15,6 +15,35 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
   const [isLoading, setIsLoading] = useState(false);
   const [copiedCoupon, setCopiedCoupon] = useState('');
 
+  // Cancel Order Modal State
+  const [cancelTargetOrder, setCancelTargetOrder] = useState(null);
+  const [cancelReasonText, setCancelReasonText] = useState('Ordered by mistake / wrong item selected');
+  const [isCancellingOrder, setIsCancellingOrder] = useState(false);
+
+  const handleConfirmCancelOrder = async () => {
+    if (!cancelTargetOrder) return;
+    setIsCancellingOrder(true);
+    try {
+      const res = await fetch(`${API_BASE}/orders/${cancelTargetOrder.orderId}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: cancelReasonText })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (addToast) addToast(`Order #${cancelTargetOrder.orderId} cancelled successfully!`, '🔴');
+        setUserOrders(prev => prev.map(o => o.orderId === cancelTargetOrder.orderId ? { ...o, status: 'Cancelled', cancellationReason: cancelReasonText } : o));
+        setCancelTargetOrder(null);
+      } else {
+        if (addToast) addToast(data.message || 'Failed to cancel order', '⚠️');
+      }
+    } catch (err) {
+      if (addToast) addToast('Network error while cancelling order', '⚠️');
+    } finally {
+      setIsCancellingOrder(false);
+    }
+  };
+
   // Address management state
   const [addresses, setAddresses] = useState(() => {
     if (user?.address && !user.address.includes('Double Tank')) {
@@ -481,10 +510,22 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                   <strong style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>
                                     {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                   </strong>
-                                  <span style={{ fontSize: '0.75rem', background: 'var(--orange-light)', color: '#FF5500', padding: '3px 10px', borderRadius: '12px', fontWeight: '800' }}>
-                                    {order.status || 'Order Placed'}
+                                  <span style={{
+                                    fontSize: '0.75rem',
+                                    background: (order.status || '').toLowerCase().includes('cancel') ? 'rgba(239, 68, 68, 0.15)' : 'var(--orange-light)',
+                                    color: (order.status || '').toLowerCase().includes('cancel') ? '#ef4444' : '#FF5500',
+                                    padding: '3px 10px',
+                                    borderRadius: '12px',
+                                    fontWeight: '800'
+                                  }}>
+                                    {(order.status || '').toLowerCase().includes('cancel') ? '🔴 Cancelled' : (order.status || 'Order Placed')}
                                   </span>
                                 </div>
+                                {order.cancellationReason && (
+                                  <div style={{ fontSize: '0.74rem', color: '#ef4444', marginTop: '4px', fontStyle: 'italic', fontWeight: '600' }}>
+                                    Reason: {order.cancellationReason}
+                                  </div>
+                                )}
                               </div>
 
                               <div style={{ textAlign: 'right' }}>
@@ -537,8 +578,29 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                               </div>
                             </div>
 
-                            {/* E-Bill Download Action for Online Payments */}
-                            <div style={{ marginTop: '14px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }}>
+                            {/* Action Row: Cancel Order + Download E-Bill */}
+                            <div style={{ marginTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                              {/* Cancel Order Action Button */}
+                              {(!order.status || !['shipped', 'out for delivery', 'delivered', 'cancelled'].some(s => (order.status || '').toLowerCase().includes(s))) ? (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setCancelTargetOrder(order);
+                                    setCancelReasonText('Ordered by mistake / wrong item selected');
+                                  }}
+                                  style={{
+                                    padding: '8px 16px', borderRadius: '10px',
+                                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                                    background: 'rgba(239, 68, 68, 0.08)',
+                                    color: '#ef4444', fontWeight: '800', fontSize: '0.8rem',
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                >
+                                  🚫 Cancel Order
+                                </button>
+                              ) : <div />}
+
                               {String(order.paymentMethod || '').toLowerCase().includes('cod') || String(order.paymentMethod || '').toLowerCase().includes('cash') ? (
                                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic', background: 'var(--bg-card)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                                   📦 Cash on Delivery (E-Bill unavailable for COD)
@@ -834,6 +896,82 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
 
         </div>
       </div>
+      {/* Cancellation Reason Choice Modal */}
+      {cancelTargetOrder && (
+        <div 
+          style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(0,0,0,0.8)', zIndex: 100035, display: 'flex',
+            alignItems: 'center', justifyContent: 'center', padding: '20px',
+            backdropFilter: 'blur(8px)', boxSizing: 'border-box'
+          }}
+          onClick={() => setCancelTargetOrder(null)}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+              borderRadius: '20px', padding: '24px', maxWidth: '440px', width: '100%',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.6)'
+            }}
+          >
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🚫 Cancel Order #{cancelTargetOrder.orderId}
+            </h3>
+            <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.5' }}>
+              Are you sure you want to cancel this order? Please select a reason below to process your cancellation:
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+              {[
+                'Ordered by mistake / wrong item selected',
+                'Delivery taking too long',
+                'Found a better price elsewhere',
+                'Incorrect shipping address / phone number',
+                'Changed my mind / Other reason'
+              ].map(reason => (
+                <label 
+                  key={reason}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px',
+                    borderRadius: '10px', border: cancelReasonText === reason ? '2px solid #ef4444' : '1px solid var(--border-color)',
+                    background: cancelReasonText === reason ? 'rgba(239,68,68,0.08)' : 'var(--bg-input)',
+                    color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <input 
+                    type="radio" 
+                    name="cancelReason" 
+                    checked={cancelReasonText === reason} 
+                    onChange={() => setCancelReasonText(reason)}
+                    style={{ accentColor: '#ef4444' }}
+                  />
+                  {reason}
+                </label>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setCancelTargetOrder(null)}
+                style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-muted)', fontWeight: '700', fontSize: '0.84rem', cursor: 'pointer' }}
+              >
+                Keep Order
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCancelOrder}
+                disabled={isCancellingOrder}
+                style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#ffffff', fontWeight: '800', fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(239,68,68,0.35)' }}
+              >
+                {isCancellingOrder ? 'Cancelling...' : 'Confirm Cancellation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

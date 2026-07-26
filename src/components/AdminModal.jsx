@@ -2172,7 +2172,7 @@ export default function AdminModal({
 
                 {/* Status Filter Buttons */}
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {['All', 'Order Placed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'].map(st => (
+                  {['All', 'Order Placed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'].map(st => (
                     <button
                       key={st}
                       type="button"
