@@ -7,16 +7,21 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '929652702793-
 
 const getApiEndpoints = (endpoint) => {
   const endpoints = [];
-  
-  // 1. Primary relative /api path (handled by NGINX or Vite proxy)
+
+  // 1. Always try relative /api first (works for same-origin: NGINX proxy, Docker, etc.)
   endpoints.push(`/api${endpoint}`);
 
   if (typeof window !== 'undefined') {
     const origin = window.location.origin;
-    endpoints.push(`${origin}/api${endpoint}`);
-    endpoints.push(`https://friends-mobiles-rho.vercel.app/api${endpoint}`);
+    // 2. Absolute origin-based path
+    if (!origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+      endpoints.push(`${origin}/api${endpoint}`);
+    }
+    // 3. Local backend direct
+    endpoints.push(`http://localhost:5000/api${endpoint}`);
   }
 
+  // 4. Custom VITE_API_BASE_URL if set
   if (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== '/api') {
     const envBase = import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '');
     endpoints.push(`${envBase}${endpoint}`);
@@ -32,7 +37,10 @@ const safeFetchApi = async (endpoint, options = {}) => {
 
   for (const url of urlList) {
     try {
-      const res = await fetch(url, options);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeout);
       try {
         const data = await res.json();
         return { ok: res.ok, status: res.status, data };
@@ -40,17 +48,14 @@ const safeFetchApi = async (endpoint, options = {}) => {
         if (res.ok) {
           return { ok: true, status: res.status, data: { success: true } };
         }
-        const friendlyMsg = (res.status === 404 || res.status === 500 || res.status === 502 || res.status === 503)
-          ? "Backend API server (port 5000) is offline. Please start backend using 'docker compose up' or 'node server/server.js'."
-          : `Server HTTP ${res.status} error`;
-        return { ok: false, status: res.status, data: { success: false, message: friendlyMsg } };
+        return { ok: false, status: res.status, data: { success: false, message: `Server error (${res.status}). Please try again.` } };
       }
     } catch (err) {
       lastError = err;
     }
   }
 
-  throw lastError || new Error("Unable to connect to backend server");
+  throw lastError || new Error('Unable to connect to server. Please check your internet connection.');
 };
 
 export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToast, redirectMessage }) {
