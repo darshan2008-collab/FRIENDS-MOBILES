@@ -384,6 +384,15 @@ export default function App() {
       }
     }
 
+    // MANDATORY AUTHENTICATION GUARD: Guest users cannot add items to cart directly
+    if (!currentUser) {
+      setPendingCartItem(product);
+      setAuthRedirectMessage('🔒 Login Required: Please sign in or create an account to add items to your shopping cart.');
+      setOpenCartAfterLogin(true);
+      setIsAuthOpen(true);
+      return;
+    }
+
     setCart(prev => {
       const safePrev = Array.isArray(prev) ? prev : [];
       const existingIndex = safePrev.findIndex(p => p && (String(p.id || p._id) === safeId));
@@ -453,16 +462,17 @@ export default function App() {
     if (pendingCartItem) {
       const itemToCart = pendingCartItem;
       setPendingCartItem(null);
+      const safeId = String(itemToCart.id || itemToCart._id || Date.now());
       const safeTitle = itemToCart.title || itemToCart.name || 'Item';
       setCart(prev => {
         const safePrev = Array.isArray(prev) ? prev : [];
-        const existing = safePrev.find(p => p && p.id === itemToCart.id);
-        if (existing) {
-          return safePrev.map(p => (p && p.id === itemToCart.id) ? { ...p, quantity: (p.quantity || 1) + 1 } : p);
+        const existingIndex = safePrev.findIndex(p => p && (String(p.id || p._id) === safeId));
+        if (existingIndex !== -1) {
+          return safePrev.map((p, idx) => idx === existingIndex ? { ...p, quantity: (p.quantity || 1) + 1 } : p);
         }
-        return [...safePrev, { ...itemToCart, quantity: 1 }];
+        return [...safePrev, { ...itemToCart, id: itemToCart.id || itemToCart._id || safeId, quantity: 1 }];
       });
-      addToast(`Added "${String(safeTitle).slice(0, 18)}..." to Cart!`, '🛍️');
+      addToast(`Signed in & added "${String(safeTitle).slice(0, 18)}..." to Cart!`, '🛍️');
       setIsCartOpen(true);
     } else if (openCartAfterLogin) {
       setIsCartOpen(true);
