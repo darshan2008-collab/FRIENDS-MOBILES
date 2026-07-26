@@ -1,3 +1,11 @@
+process.on('uncaughtException', (err) => {
+  console.error('[Uncaught Exception Guard]', err?.stack || err?.message || err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Unhandled Rejection Guard]', reason?.stack || reason?.message || reason);
+});
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -8,14 +16,6 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { connectDB } = require('./config/db');
 const migrateData = require('./scripts/migrateToPostgres');
 const BackupService = require('./services/backupService');
-
-process.on('uncaughtException', (err) => {
-  console.error('[Uncaught Exception Guard]', err?.stack || err?.message || err);
-});
-
-process.on('unhandledRejection', (reason) => {
-  console.error('[Unhandled Rejection Guard]', reason?.stack || reason?.message || reason);
-});
 
 // Connect Database & Auto-Restore Latest Backup Snapshot
 (async () => {
