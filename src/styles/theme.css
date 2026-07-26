@@ -2342,14 +2342,17 @@ img {
   left: 0;
   right: 0;
   bottom: 0;
-  width: 100vw;
+  width: 100%;
+  max-width: 100vw;
   height: 100vh;
   z-index: 10000;
   background-color: #0b0e14;
   color: var(--text-primary);
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 [data-theme="light"] .full-page-user-auth-portal {
@@ -2364,6 +2367,10 @@ img {
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background-image: 
@@ -2687,8 +2694,10 @@ img {
   .auth-main-card {
     grid-template-columns: 1fr !important;
     border-radius: 20px;
-    margin: 10px auto;
-    max-width: 500px;
+    margin: 0 auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .auth-brand-banner {
@@ -2696,12 +2705,18 @@ img {
   }
 
   .auth-workspace {
-    padding: 24px 18px !important;
+    padding: 20px 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .auth-portal-bg {
-    padding: 16px 10px !important;
+    padding: 12px 8px !important;
     align-items: flex-start !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
   }
 
   .auth-header-bar {

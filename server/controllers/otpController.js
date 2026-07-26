@@ -48,11 +48,26 @@ exports.sendOtp = async (req, res) => {
       });
     }
 
-    // 2. Find user if exists (to retrieve name for email header)
-    let existingUser = {};
+    // 2. Check if email is registered in User database / JSON file
+    let existingUser = null;
     try {
-      existingUser = (await User.findOne({ email: cleanEmail })) || {};
+      existingUser = await User.findOne({ email: cleanEmail });
     } catch (_) {}
+
+    if (!existingUser) {
+      const path = require('path');
+      const { readData } = require('../utils/db');
+      const usersFilePath = path.join(__dirname, '../data/users.json');
+      const fileUsers = readData(usersFilePath, []);
+      existingUser = fileUsers.find(u => u && u.email && u.email.toLowerCase().trim() === cleanEmail);
+    }
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        message: `The email address "${cleanEmail}" is not registered in FRIENDS MOBILE database. Please check your email or click "Create Account" to register.`
+      });
+    }
 
 
     // 3. Generate secure random 6-digit OTP

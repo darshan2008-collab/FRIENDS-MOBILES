@@ -973,7 +973,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                       <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-secondary)', display: 'block', marginBottom: '12px', textAlign: 'center' }}>
                         Enter 6-Digit Gmail OTP Code
                       </label>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }} onPaste={handlePasteOtp}>
+                      <div style={{ display: 'flex', gap: 'clamp(3px, 1.5vw, 8px)', justifyContent: 'center', width: '100%', boxSizing: 'border-box' }} onPaste={handlePasteOtp}>
                         {[0, 1, 2, 3, 4, 5].map((idx) => {
                           const isFocused = focusedOtpIndex === idx;
                           const isFilled = Boolean(otpDigits[idx]);
@@ -993,12 +993,13 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                               onChange={(e) => handleDigitChange(idx, e.target.value)}
                               onKeyDown={(e) => handleKeyDown(idx, e)}
                               style={{
-                                width: '46px',
-                                height: '52px',
+                                width: 'clamp(32px, 12.5vw, 46px)',
+                                height: 'clamp(42px, 13.5vw, 52px)',
+                                padding: 0,
                                 textAlign: 'center',
-                                fontSize: '1.45rem',
+                                fontSize: 'clamp(1.1rem, 5vw, 1.45rem)',
                                 fontWeight: '900',
-                                borderRadius: '12px',
+                                borderRadius: '10px',
                                 border: isActive 
                                   ? '2.5px solid #FF5500' 
                                   : '2px solid #94a3b8',
@@ -1014,7 +1015,8 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                                 outline: 'none',
                                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                                 opacity: resendTimer === 0 ? 0.6 : 1,
-                                cursor: resendTimer === 0 ? 'not-allowed' : 'text'
+                                cursor: resendTimer === 0 ? 'not-allowed' : 'text',
+                                boxSizing: 'border-box'
                               }}
                             />
                           );

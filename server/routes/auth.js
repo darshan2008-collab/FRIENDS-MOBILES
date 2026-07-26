@@ -14,26 +14,59 @@ const signupLimiter = rateLimiter({ windowMs: 60 * 60 * 1000, max: 30, message: 
 const resetLimiter = rateLimiter({ windowMs: 15 * 60 * 1000, max: 30, message: 'Too many password reset attempts. Please wait before trying again.' });
 
 async function getUsersAsync() {
+  let dbUsers = [];
   try {
-    return await User.find({});
+    dbUsers = await User.find({});
   } catch (e) {
     console.error("[User PostgreSQL Get Error]", e.message);
-    return [];
   }
+  const fileUsers = readData(usersFilePath, []);
+
+  const map = new Map();
+  (dbUsers || []).forEach(u => {
+    const k = u.email ? u.email.toLowerCase().trim() : (u.phone ? String(u.phone).trim() : String(u.id));
+    if (k) map.set(k, u);
+  });
+  (fileUsers || []).forEach(u => {
+    const k = u.email ? u.email.toLowerCase().trim() : (u.phone ? String(u.phone).trim() : String(u.id));
+    if (k && !map.has(k)) map.set(k, u);
+  });
+
+  return Array.from(map.values());
 }
 
 async function saveUserAsync(userData) {
   try {
+    const users = readData(usersFilePath, []);
     const cleanEmail = userData.email ? userData.email.toLowerCase().trim() : '';
     const cleanPhone = userData.phone ? normalizePhone(userData.phone) : '';
-    const query = cleanEmail
-      ? { email: cleanEmail }
-      : (cleanPhone ? { phone: cleanPhone } : { id: userData.id });
 
-    return await User.updateOne(query, { $set: userData }, { upsert: true });
+    const index = users.findIndex(u => 
+      (cleanEmail && u.email && u.email.toLowerCase().trim() === cleanEmail) ||
+      (cleanPhone && u.phone && normalizePhone(u.phone) === cleanPhone) ||
+      (u.id && userData.id && u.id === userData.id)
+    );
+
+    if (index !== -1) {
+      users[index] = { ...users[index], ...userData, updatedAt: new Date().toISOString() };
+    } else {
+      users.push({ ...userData, createdAt: userData.createdAt || new Date().toISOString() });
+    }
+    writeData(usersFilePath, users);
+  } catch (e) {
+    console.error("[User JSON Save Error]", e.message);
+  }
+
+  try {
+    const cleanEmail = userData.email ? userData.email.toLowerCase().trim() : '';
+    const cleanPhone = userData.phone ? normalizePhone(userData.phone) : '';
+    const q = cleanEmail ? { email: cleanEmail } : (cleanPhone ? { phone: cleanPhone } : { id: userData.id });
+    await User.updateOne(q, { $set: userData }, { upsert: true });
   } catch (e) {
     console.error("[User PostgreSQL Save Error]", e.message);
   }
+
+  BackupService.triggerRealTimeBackup(`user_sync_${userData.email || userData.id}`);
 }
 
 // Secure PBKDF2 password hashing (100,000 iterations for production strength)
