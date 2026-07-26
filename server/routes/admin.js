@@ -78,6 +78,114 @@ const updateSettingsHandler = async (req, res) => {
 router.put('/settings', updateSettingsHandler);
 router.post('/settings', updateSettingsHandler);
 
+function syncMasterExcel(orders = []) {
+  try {
+    const dataDir = path.join(__dirname, '../data');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    const filePath = path.join(dataDir, 'master_orders_report.xls');
+
+    const escapeXml = (str) => {
+      if (str === undefined || str === null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    };
+
+    const rowsXml = (orders || []).map((o, idx) => {
+      const custName = o.customer?.name || 'Walk-in Customer';
+      const custPhone = o.customer?.phone || '';
+      const custAddr = o.customer?.address || '';
+      const itemsFormatted = (o.items || []).map(i => `${i.title || 'Product'} (x${i.quantity || 1}) - Rs.${i.price || 0}`).join('; ');
+      const subtotal = parseFloat(o.subtotal || o.total || 0);
+      const shipping = (o.shipping === 0 || o.shipping === '0' || o.shipping === 'FREE' || subtotal >= 1000) ? 0 : (typeof o.shipping === 'number' ? o.shipping : 60);
+      const total = parseFloat(o.total || (subtotal + shipping));
+      const payMethod = o.paymentMethod || 'COD';
+      const payStatus = o.paymentStatus || (payMethod === 'COD' ? 'Pending' : 'Paid');
+      const orderStatus = o.status || 'Order Placed';
+      const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
+      const bg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+
+      return `
+        <tr style="background-color: ${bg};">
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: bold; color: #ff5500;">${escapeXml(o.orderId)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(dateStr)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; font-weight: 600;">${escapeXml(custName)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(custPhone)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px;">${escapeXml(custAddr)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px;">${escapeXml(itemsFormatted)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: right;">Rs. ${subtotal.toLocaleString('en-IN')}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: right; color: ${shipping === 0 ? '#16a34a' : '#1e293b'};">${shipping === 0 ? 'FREE' : `Rs. ${shipping}`}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: right; font-weight: bold; color: #ff5500;">Rs. ${total.toLocaleString('en-IN')}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(payMethod)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(payStatus)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: 600;">${escapeXml(orderStatus)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    const htmlContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <!--[if gte mso 9]>
+        <xml>
+          <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+              <x:ExcelWorksheet>
+                <x:Name>Master Order History</x:Name>
+                <x:WorksheetOptions>
+                  <x:DisplayGridlines/>
+                </x:WorksheetOptions>
+              </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+          </x:ExcelWorkbook>
+        </xml>
+        <![endif]-->
+        <style>
+          table { border-collapse: collapse; width: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; }
+          th { background-color: #FF5500; color: #ffffff; font-weight: bold; padding: 10px; border: 1px solid #ea580c; text-align: center; font-size: 13px; }
+          td { padding: 8px; border: 1px solid #cbd5e1; vertical-align: middle; }
+        </style>
+      </head>
+      <body>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 150px;">Order ID</th>
+              <th style="width: 180px;">Order Date &amp; Time</th>
+              <th style="width: 180px;">Customer Name</th>
+              <th style="width: 140px;">Phone Number</th>
+              <th style="width: 320px;">Delivery Address</th>
+              <th style="width: 380px;">Products Added &amp; Quantity</th>
+              <th style="width: 130px;">Subtotal (INR)</th>
+              <th style="width: 140px;">Shipping Fee (INR)</th>
+              <th style="width: 140px;">Grand Total (INR)</th>
+              <th style="width: 130px;">Payment Method</th>
+              <th style="width: 130px;">Payment Status</th>
+              <th style="width: 140px;">Order Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsXml}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    fs.writeFileSync(filePath, '\uFEFF' + htmlContent, 'utf8');
+    return filePath;
+  } catch (err) {
+    console.error("[Master Excel Sync Error]", err.message);
+    return null;
+  }
+}
+
 // GET /api/admin/orders/export-excel (Download Master Excel Order History Report)
 router.get('/orders/export-excel', async (req, res) => {
   try {
