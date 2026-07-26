@@ -700,9 +700,38 @@ export default function CartModal({
                 <CheckCircle2 size={36} />
               </div>
 
-              <h4 style={{ margin: '0 0 16px 0', fontSize: '1.2rem', fontWeight: '900', color: '#22c55e' }}>
+              <h4 style={{ margin: '0 0 10px 0', fontSize: '1.2rem', fontWeight: '900', color: '#22c55e' }}>
                 Order Successfully Placed!
               </h4>
+
+              {/* Prominent Order Number Display */}
+              <div style={{ 
+                background: 'var(--orange-light)', 
+                border: '1.5px dashed #FF5500', 
+                borderRadius: '12px', 
+                padding: '10px 16px', 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '10px', 
+                marginBottom: '18px' 
+              }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)' }}>ORDER NUMBER:</span>
+                <strong style={{ fontSize: '1.1rem', fontWeight: '900', color: '#FF5500', letterSpacing: '0.5px' }}>
+                  {placedOrderDetails.orderId || 'FM-ORD-PENDING'}
+                </strong>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (placedOrderDetails.orderId) {
+                      navigator.clipboard.writeText(placedOrderDetails.orderId);
+                      if (addToast) addToast(`Copied Order Number: ${placedOrderDetails.orderId}`, '📋');
+                    }
+                  }}
+                  style={{ background: '#FF5500', color: '#fff', border: 'none', borderRadius: '6px', padding: '4px 10px', fontSize: '0.72rem', fontWeight: '800', cursor: 'pointer' }}
+                >
+                  Copy ID
+                </button>
+              </div>
 
               <div style={{
                 background: 'var(--bg-input)',
