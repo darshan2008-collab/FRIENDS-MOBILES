@@ -14,7 +14,7 @@ setInterval(() => {
  * Rate Limiter Middleware for OTP Generation (Max 5 requests per hour)
  */
 const sendOtpLimiter = (req, res, next) => {
-  const email = req.body.email ? req.body.email.toLowerCase().trim() : '';
+  const email = req.body?.email ? String(req.body.email).toLowerCase().trim() : '';
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
   const key = `send_otp_${email || ip}`;
   const now = Date.now();
@@ -49,7 +49,7 @@ const sendOtpLimiter = (req, res, next) => {
  * Rate Limiter Middleware for OTP Verification (Max 5 verification attempts per window)
  */
 const verifyOtpLimiter = (req, res, next) => {
-  const email = req.body.email ? req.body.email.toLowerCase().trim() : '';
+  const email = req.body?.email ? String(req.body.email).toLowerCase().trim() : '';
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
   const key = `verify_otp_${email || ip}`;
   const now = Date.now();
