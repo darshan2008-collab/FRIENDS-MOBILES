@@ -206,7 +206,7 @@ const connectDB = async () => {
 };
 
 const safeQuery = async (text, params) => {
-  if (!pool) {
+  if (!pool || !isInitialized) {
     return { rows: [], rowCount: 0 };
   }
   try {
