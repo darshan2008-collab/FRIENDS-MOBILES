@@ -345,13 +345,14 @@ export default function App() {
   const handleSelectProduct = (product) => {
     if (!product) return;
     const safeTitle = (product.title || product.name || '').toLowerCase();
-    const cat = (product.category || '').toLowerCase();
+    const isExplicitCustomCover = (safeTitle.includes('customized back cover') || safeTitle.includes('custom print cover') || safeTitle === 'custom cover') && !safeTitle.includes('water proof');
+    const isExplicitCustomFrame = (safeTitle.includes('custom photo frame') || safeTitle.includes('customized photo frame'));
 
-    if (safeTitle.includes('customized back cover') || safeTitle.includes('custom cover') || cat.includes('customized back cover')) {
+    if (isExplicitCustomCover) {
       setIsCustomCoverOpen(true);
       return;
     }
-    if (safeTitle.includes('photo frame') || cat.includes('photo frame')) {
+    if (isExplicitCustomFrame) {
       setIsCustomFrameOpen(true);
       return;
     }
@@ -362,12 +363,14 @@ export default function App() {
     if (!product) return;
     const safeId = String(product.id || product._id || Date.now());
     const safeTitle = product.title || product.name || 'Item';
-    const cat = (product.category || '').toLowerCase();
     const titleLower = safeTitle.toLowerCase();
 
-    // Redirect to Customization Studio if this customizable product has not been customized yet
+    const isExplicitCustomCover = (titleLower.includes('customized back cover') || titleLower.includes('custom print cover') || titleLower === 'custom cover') && !titleLower.includes('water proof');
+    const isExplicitCustomFrame = (titleLower.includes('custom photo frame') || titleLower.includes('customized photo frame'));
+
+    // Redirect to Customization Studio only for explicit 3D customizable products
     if (!product.isCustomized && !product.customizationDetails) {
-      if (titleLower.includes('customized back cover') || titleLower.includes('custom cover') || cat.includes('customized back cover')) {
+      if (isExplicitCustomCover) {
         setIsCustomCoverOpen(true);
         if (selectedProduct) setSelectedProduct(null);
         if (isShopOpen) setIsShopOpen(false);
@@ -375,7 +378,7 @@ export default function App() {
         return;
       }
 
-      if (titleLower.includes('photo frame') || cat.includes('photo frame')) {
+      if (isExplicitCustomFrame) {
         setIsCustomFrameOpen(true);
         if (selectedProduct) setSelectedProduct(null);
         if (isShopOpen) setIsShopOpen(false);
