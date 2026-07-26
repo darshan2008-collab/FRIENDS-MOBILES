@@ -30,6 +30,13 @@ export default function AdminModal({
       return false;
     }
   });
+
+  // Computed Executive Sales KPIs from orders prop
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  const totalOrders = safeOrders.length;
+  const totalRevenue = safeOrders.reduce((sum, o) => sum + (parseFloat(o.total || o.subtotal || o.totalAmount) || 0), 0);
+  const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+  const highSellingProducts = Array.isArray(products) ? products.slice().sort((a, b) => (b.reviews || 0) - (a.reviews || 0)) : [];
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
