@@ -6,14 +6,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    chunkSizeWarningLimit: 3000,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'lucide-react']
-        }
-      }
-    }
+    chunkSizeWarningLimit: 5000
   },
   server: {
     port: 3000,
