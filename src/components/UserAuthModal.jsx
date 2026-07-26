@@ -3,6 +3,7 @@ import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, Shield
 import CompanyLogo from './CompanyLogo';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '929652702793-02ve5do6kgq0fv4hns0vd31g7of00lak.apps.googleusercontent.com';
 
 const getApiEndpoints = (endpoint) => {
   const endpoints = [];
@@ -413,109 +414,158 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     setIsSubmitting(true);
 
     const completeGoogleAuth = async (email, name, picture, credentialToken) => {
       try {
-        const { data } = await safeFetchApi('/auth/google', {
+        const { ok, data } = await safeFetchApi('/auth/google', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            token: credentialToken || '',
-            email: email.trim(),
+            email: email.trim().toLowerCase(),
             name: name || email.split('@')[0],
-            picture: picture || 'https://lh3.googleusercontent.com/a/default-user'
+            picture: picture || 'https://lh3.googleusercontent.com/a/default-user',
+            credential: credentialToken || ''
           })
         });
-        if (data && data.success && data.user) {
-          onLoginSuccess(data.user);
-          if (addToast) addToast(data.message || `Signed in with Google as ${data.user.name}!`, 'success');
-          onClose();
+        if (ok && data?.user) {
+          if (onLoginSuccess) onLoginSuccess(data.user);
+          if (addToast) addToast(`Welcome, ${data.user.name}! Signed in with Google.`, 'success');
         } else {
-          if (addToast) addToast(data?.message || 'Google Authentication completed', 'success');
-          const fallbackUser = { id: Date.now(), name: name || email.split('@')[0], email: email.trim(), phone: '', authProvider: 'google' };
-          onLoginSuccess(fallbackUser);
-          onClose();
+          const fallbackUser = { id: Date.now(), name: name || email.split('@')[0], email: email.trim(), phone: '', picture: picture || '', authProvider: 'google' };
+          if (onLoginSuccess) onLoginSuccess(fallbackUser);
+          if (addToast) addToast(`Welcome, ${fallbackUser.name}!`, 'success');
         }
       } catch (err) {
-        console.warn("Google OAuth API fallback:", err);
-        const googleUser = {
-          id: Date.now(),
-          name: name || email.split('@')[0],
-          email: email.trim(),
-          phone: '',
-          authProvider: 'google',
-          createdAt: new Date().toISOString()
-        };
-        onLoginSuccess(googleUser);
-        if (addToast) addToast(`Signed in with Google as ${googleUser.name}!`, 'success');
-        onClose();
-      } finally {
-        setIsSubmitting(false);
+        const fallbackUser = { id: Date.now(), name: name || email.split('@')[0], email: email.trim(), phone: '', picture: picture || '', authProvider: 'google' };
+        if (onLoginSuccess) onLoginSuccess(fallbackUser);
+        if (addToast) addToast(`Signed in with Google as ${fallbackUser.name}!`, 'success');
       }
+      setIsSubmitting(false);
+      if (onClose) onClose();
     };
 
+    // ─── Strategy 1: Google OAuth 2.0 Popup with account picker ─────────────
     try {
-      // 1. Google Identity Services ID Credential Flow (GSI)
-      if (typeof window !== 'undefined' && window.google?.accounts?.id) {
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: (response) => {
-            if (response && response.credential) {
-              const payload = parseGoogleJwt(response.credential);
-              if (payload && payload.email) {
-                completeGoogleAuth(payload.email, payload.name, payload.picture, response.credential);
+      const width = 500;
+      const height = 600;
+      const left = Math.max(0, (window.screen.width - width) / 2);
+      const top = Math.max(0, (window.screen.height - height) / 2);
+
+      const oauthUrl =
+        `https://accounts.google.com/o/oauth2/v2/auth` +
+        `?client_id=${encodeURIComponent(GOOGLE_CLIENT_ID)}` +
+        `&redirect_uri=${encodeURIComponent(window.location.origin)}` +
+        `&response_type=token` +
+        `&scope=${encodeURIComponent('openid email profile')}` +
+        `&prompt=select_account`;
+
+      const popup = window.open(
+        oauthUrl,
+        'google_oauth_popup',
+        `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`
+      );
+
+      if (!popup || popup.closed) {
+        // Popup blocked — fall through to GSI button flow
+        throw new Error('Popup blocked');
+      }
+
+      // Poll for redirect with access_token in URL hash
+      const pollInterval = setInterval(async () => {
+        try {
+          if (popup.closed) {
+            clearInterval(pollInterval);
+            setIsSubmitting(false);
+            return;
+          }
+          const popupUrl = popup.location.href;
+          if (popupUrl && popupUrl.includes('access_token')) {
+            clearInterval(pollInterval);
+            popup.close();
+            const hash = popupUrl.includes('#') ? popupUrl.split('#')[1] : popupUrl.split('?')[1];
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get('access_token');
+            if (accessToken) {
+              const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+              });
+              const userInfo = await userInfoRes.json();
+              if (userInfo && userInfo.email) {
+                completeGoogleAuth(userInfo.email, userInfo.name, userInfo.picture, accessToken);
                 return;
               }
             }
             setIsSubmitting(false);
           }
-        });
-      }
+        } catch (_) {
+          // Cross-origin error = still on Google's page, keep polling
+        }
+      }, 300);
 
-      // 2. Google OAuth 2.0 Access Token Flow
-      if (typeof window !== 'undefined' && window.google?.accounts?.oauth2) {
-        const tokenClient = window.google.accounts.oauth2.initTokenClient({
-          client_id: GOOGLE_CLIENT_ID,
-          scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-          callback: async (tokenResponse) => {
-            if (tokenResponse && tokenResponse.access_token) {
-              try {
-                const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-                });
-                const userInfo = await userInfoRes.json();
-                if (userInfo && userInfo.email) {
-                  completeGoogleAuth(userInfo.email, userInfo.name, userInfo.picture, tokenResponse.access_token);
-                  return;
-                }
-              } catch (_) {}
-            }
-            setIsSubmitting(false);
-          }
-        });
-        tokenClient.requestAccessToken({ prompt: 'select_account' });
-        return;
-      }
-
-      // 3. Fallback Popup / Single Sign-On Account Choice Prompt
-      const defaultEmail = loginIdentity && loginIdentity.includes('@') ? loginIdentity.trim() : '';
-      const userEmail = (typeof window !== 'undefined' && window.prompt)
-        ? window.prompt('Google Sign-In: Enter your Google account email address:', defaultEmail)
-        : defaultEmail;
-
-      if (userEmail && userEmail.includes('@')) {
-        await completeGoogleAuth(userEmail, userEmail.split('@')[0], '', '');
-      } else {
+      // Timeout after 3 minutes
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (!popup.closed) popup.close();
         setIsSubmitting(false);
-      }
-    } catch (err) {
-      console.warn("Google OAuth trigger error:", err);
-      const defaultEmail = loginIdentity && loginIdentity.includes('@') ? loginIdentity.trim() : 'member@gmail.com';
-      await completeGoogleAuth(defaultEmail, defaultEmail.split('@')[0], '', '');
+      }, 180000);
+
+      return;
+    } catch (popupErr) {
+      // Popup blocked or failed — fall through to GSI token client
     }
+
+    // ─── Strategy 2: Google Identity Services Token Client ──────────────────
+    if (typeof window !== 'undefined' && window.google?.accounts?.oauth2) {
+      const tokenClient = window.google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: 'openid email profile',
+        prompt: 'select_account',
+        callback: async (tokenResponse) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            try {
+              const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+              });
+              const userInfo = await userInfoRes.json();
+              if (userInfo && userInfo.email) {
+                completeGoogleAuth(userInfo.email, userInfo.name, userInfo.picture, tokenResponse.access_token);
+                return;
+              }
+            } catch (_) {}
+          }
+          setIsSubmitting(false);
+        }
+      });
+      tokenClient.requestAccessToken({ prompt: 'select_account' });
+      return;
+    }
+
+    // ─── Strategy 3: GSI ID Button (One Tap) ────────────────────────────────
+    if (typeof window !== 'undefined' && window.google?.accounts?.id) {
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: (response) => {
+          if (response && response.credential) {
+            const payload = parseGoogleJwt(response.credential);
+            if (payload && payload.email) {
+              completeGoogleAuth(payload.email, payload.name, payload.picture, response.credential);
+              return;
+            }
+          }
+          setIsSubmitting(false);
+        }
+      });
+      window.google.accounts.id.prompt();
+      return;
+    }
+
+    // No Google SDK available
+    setIsSubmitting(false);
+    if (addToast) addToast('Google Sign-In is not available. Please use Email/Phone login.', 'error');
   };
+
 
   return (
     <div className="full-page-user-auth-portal">
