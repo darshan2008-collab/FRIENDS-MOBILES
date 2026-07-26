@@ -14,9 +14,17 @@ try {
   }
 }
 
-// Ensure IPv4 address 127.0.0.1 instead of localhost ::1 DNS resolution
-const rawUrl = process.env.DATABASE_URL || 'postgres://postgres:postgres@127.0.0.1:5432/friends_mobile';
-const connectionString = rawUrl.replace(/@localhost:/g, '@127.0.0.1:');
+// Auto-detect Docker environment and set host to 'postgres' container or 127.0.0.1
+const isDocker = fs.existsSync('/.dockerenv') || process.env.DATABASE_URL?.includes('@postgres');
+const defaultHost = isDocker ? 'postgres' : '127.0.0.1';
+let rawUrl = process.env.DATABASE_URL || `postgres://postgres:postgres@${defaultHost}:5432/friends_mobile`;
+
+if (isDocker) {
+  rawUrl = rawUrl.replace(/@(localhost|127\.0\.0\.1):/g, '@postgres:');
+} else {
+  rawUrl = rawUrl.replace(/@localhost:/g, '@127.0.0.1:');
+}
+const connectionString = rawUrl;
 
 let pool = null;
 if (pg && pg.Pool) {
