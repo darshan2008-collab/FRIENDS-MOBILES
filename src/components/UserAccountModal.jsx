@@ -528,16 +528,12 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                 <strong>₹{order.subtotal?.toLocaleString('en-IN')}</strong>
                               </div>
                               <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                                <span>Shipping:</span>
-                                {order.shipping === 'Pending' ? (
-                                  <strong style={{ color: 'var(--primary-orange)' }}>Pending Calculation (Admin checking Pincode)</strong>
-                                ) : (
-                                  <strong>{order.shipping === 0 ? 'FREE' : `₹${order.shipping}`}</strong>
-                                )}
+                                <span>Delivery Charge:</span>
+                                <strong>{(order.shipping === 0 || order.shipping === 'FREE') ? 'FREE' : `₹${(order.shipping === 'Pending' || order.shipping === undefined || order.shipping === null) ? 60 : order.shipping}`}</strong>
                               </div>
                               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.92rem', fontWeight: '800', borderTop: '1px dashed var(--border-color)', paddingTop: '6px', marginTop: '4px', color: 'var(--text-primary)' }}>
                                 <span>Total Amount:</span>
-                                <span>₹{order.total?.toLocaleString('en-IN')}{order.shipping === 'Pending' && ' + Shipping (TBD)'}</span>
+                                <span>₹{order.total?.toLocaleString('en-IN')}</span>
                               </div>
                             </div>
 

@@ -237,9 +237,10 @@ export default function CartModal({
 
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
   const freeThreshold = shippingSettings?.freeShippingThreshold || 1000;
+  const standardFee = shippingSettings?.standardShippingFee || 60;
   const isFreeShipping = (appliedCoupon && appliedCoupon.isFreeShip) || discountedSubtotal >= freeThreshold;
-  const shippingFeeVal = isFreeShipping ? 0 : 'Pending';
-  const grandTotal = discountedSubtotal;
+  const shippingFeeVal = isFreeShipping ? 0 : standardFee;
+  const grandTotal = discountedSubtotal + shippingFeeVal;
   const amountToFreeShipping = Math.max(0, freeThreshold - discountedSubtotal);
   const progressPercent = Math.min(100, Math.round((discountedSubtotal / freeThreshold) * 100));
 
@@ -275,7 +276,7 @@ export default function CartModal({
         `*Ordered Items:*\n` +
         itemsList +
         `\n\n*Subtotal:* ₹${order.subtotal || 0}\n` +
-        `*Shipping:* ${order.shipping === 'Pending' ? 'Pending verify' : `₹${order.shipping || 0}`}\n` +
+        `*Shipping Fee:* ${(order.shipping === 0 || order.shipping === 'FREE') ? 'FREE' : `₹${order.shipping || 60}`}\n` +
         `*Total Amount:* ₹${order.total || 0}\n` +
         `*Payment Method:* ${order.paymentMethod || 'Cash On Delivery'}`;
 
@@ -366,7 +367,7 @@ export default function CartModal({
       shipping: shippingFeeVal,
       total: grandTotal,
       paymentMethod: paymentMethod || 'COD',
-      status: isFreeShipping ? 'Order Placed' : 'Pending Shipping Cost'
+      status: 'Order Placed'
     };
 
     try {
@@ -670,9 +671,9 @@ export default function CartModal({
                     )}
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                      <span>Estimated Shipping Fee:</span>
+                      <span>Delivery Charge:</span>
                       <strong style={{ color: isFreeShipping ? '#22c55e' : 'var(--text-primary)' }}>
-                        {isFreeShipping ? 'FREE' : 'Pending Verification'}
+                        {isFreeShipping ? 'FREE' : `₹${shippingFeeVal}`}
                       </strong>
                     </div>
 
@@ -686,7 +687,7 @@ export default function CartModal({
                       color: 'var(--text-primary)'
                     }}>
                       <span>Total Amount:</span>
-                      <span style={{ color: '#FF5500' }}>₹{grandTotal.toLocaleString('en-IN')}{!isFreeShipping && ' + Shipping (TBD)'}</span>
+                      <span style={{ color: '#FF5500' }}>₹{grandTotal.toLocaleString('en-IN')}</span>
                     </div>
                   </div>
                 </>

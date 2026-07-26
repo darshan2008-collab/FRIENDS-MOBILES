@@ -2236,7 +2236,7 @@ export default function AdminModal({
                           </div>
                           <div style={{ marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
                             <span style={{ color: 'var(--text-muted)' }}>Delivery Charge:</span>
-                            <strong>{order.shipping === 'Pending' ? 'Pending' : `₹${order.shipping}`}</strong>
+                            <strong>{(order.shipping === 0 || order.shipping === 'FREE') ? 'FREE' : `₹${(order.shipping === 'Pending' || order.shipping === undefined || order.shipping === null) ? ((order.subtotal || order.total || 0) >= 1000 ? 0 : 60) : order.shipping}`}</strong>
                           </div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '6px', borderTop: '1px solid var(--border-color)' }}>
                             <span style={{ fontWeight: 'bold' }}>Grand Total:</span>

@@ -1,5 +1,5 @@
 {
-  "standardShippingFee": 70,
+  "standardShippingFee": 60,
   "freeShippingThreshold": 1000,
   "expressShippingFee": 99,
   "storeName": "FRIENDS MOBILE",
