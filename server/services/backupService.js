@@ -1,4 +1,17 @@
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const User = require('../models/User');
+const Product = require('../models/Product');
+const Order = require('../models/Order');
+const Complaint = require('../models/Complaint');
+const Banner = require('../models/Banner');
+const Setting = require('../models/Setting');
+const Subscriber = require('../models/Subscriber');
+const GoogleDriveService = require('./googleDriveService');
 const { readData } = require('../utils/db');
+
+const backupsDir = path.join(__dirname, '../data/backups');
 const usersFilePath = path.join(__dirname, '../data/users.json');
 const ordersFilePath = path.join(__dirname, '../data/orders.json');
 const productsFilePath = path.join(__dirname, '../data/products.json');
