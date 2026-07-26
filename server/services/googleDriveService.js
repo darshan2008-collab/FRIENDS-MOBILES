@@ -77,34 +77,40 @@ const GoogleDriveService = {
         try {
           const payloadData = JSON.parse(fileContent);
           const postData = JSON.stringify({ filename, folderId, payload: payloadData });
-          const parsed = new URL(webhookUrl);
-
-          return new Promise((resolve) => {
-            const req = https.request({
-              hostname: parsed.hostname,
-              path: parsed.pathname + parsed.search,
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(postData)
-              }
-            }, (res) => {
-              let body = '';
-              res.on('data', chunk => { body += chunk; });
-              res.on('end', () => {
-                console.log(`[Google Drive Webhook Success] Snapshot ${filename} created in Google Drive!`);
-                resolve({ success: true, filename, webhookSynced: true });
+          const sendWebhookRequest = (targetUrl) => {
+            return new Promise((resolve) => {
+              const parsed = new URL(targetUrl);
+              const req = https.request({
+                hostname: parsed.hostname,
+                path: parsed.pathname + parsed.search,
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Content-Length': Buffer.byteLength(postData)
+                }
+              }, (res) => {
+                if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                  return sendWebhookRequest(res.headers.location).then(resolve);
+                }
+                let body = '';
+                res.on('data', chunk => { body += chunk; });
+                res.on('end', () => {
+                  console.log(`[Google Drive Webhook Success] Snapshot ${filename} uploaded to Google Drive!`);
+                  resolve({ success: true, filename, webhookSynced: true });
+                });
               });
-            });
 
-            req.on('error', (err) => {
-              console.error('[Google Drive Webhook Error]', err.message);
-              resolve({ success: true, localOnly: true, filename });
-            });
+              req.on('error', (err) => {
+                console.error('[Google Drive Webhook Error]', err.message);
+                resolve({ success: true, localOnly: true, filename });
+              });
 
-            req.write(postData);
-            req.end();
-          });
+              req.write(postData);
+              req.end();
+            });
+          };
+
+          return await sendWebhookRequest(webhookUrl);
         } catch (e) {
           console.error('[Google Drive Webhook Parsing Error]', e.message);
         }

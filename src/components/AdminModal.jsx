@@ -21,7 +21,8 @@ export default function AdminModal({
   onUpdateShippingCost,
   addToast,
   slides,
-  onUpdateSlides
+  onUpdateSlides,
+  onUpdateOrders
 }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
@@ -124,8 +125,25 @@ export default function AdminModal({
     } catch {}
   };
 
+  const fetchOrders = async () => {
+    try {
+      const apiHost = '';
+      const res = await fetch(`${apiHost}/api/admin/orders`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.orders)) {
+        if (onUpdateOrders) {
+          onUpdateOrders(data.orders);
+        }
+        try {
+          localStorage.setItem('fm_user_orders', JSON.stringify(data.orders));
+        } catch (_) {}
+      }
+    } catch (_) {}
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
+      fetchOrders();
       fetchComplaints();
       fetchBackupStatus();
     }

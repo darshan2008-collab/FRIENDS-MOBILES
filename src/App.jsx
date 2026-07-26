@@ -758,6 +758,7 @@ export default function App() {
         addToast={addToast}
         slides={heroSlides}
         onUpdateSlides={handleUpdateSlides}
+        onUpdateOrders={setOrders}
       />
 
       <UserAuthModal 
