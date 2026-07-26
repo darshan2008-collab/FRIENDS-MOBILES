@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight, ZoomIn, Check } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -16,10 +16,36 @@ export default function ProductDetailModal({
   const [newReview, setNewReview] = useState({ name: '', comment: '', rating: 5 });
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
-  const [zoomPhoto, setZoomPhoto] = useState(null);
 
   const [selectedImage, setSelectedImage] = useState('');
+  const [isHoveringZoom, setIsHoveringZoom] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
   const horizontalScrollRef = useRef(null);
+
+  const defaultSizesList = product?.sizes && product.sizes.length > 0
+    ? product.sizes
+    : (product?.category === 'covers' || product?.title?.toLowerCase().includes('cover') || product?.title?.toLowerCase().includes('pouch') || product?.title?.toLowerCase().includes('water proof')
+        ? ['Universal (Up to 6.8")', 'Standard (5.5" - 6.1")', 'Pro / Max (6.7" - 6.9")']
+        : (product?.category === 'tshirts' || product?.title?.toLowerCase().includes('shirt')
+            ? ['S (36")', 'M (38")', 'L (40")', 'XL (42")', 'XXL (44")']
+            : ['Standard Pack (1 Metre)', 'Pro Pack (2 Metres)', 'Extended Pack (3 Metres)']
+          )
+      );
+
+  const [selectedSize, setSelectedSize] = useState(defaultSizesList[0]);
+
+  const galleryImages = (product?.images && product.images.length > 0)
+    ? product.images
+    : [
+        product?.img,
+        product?.img,
+        'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=600&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?q=80&w=600&auto=format&fit=crop'
+      ].filter(Boolean);
 
   const scrollHorizontal = (direction) => {
     if (horizontalScrollRef.current) {
@@ -32,14 +58,21 @@ export default function ProductDetailModal({
     if (!product) return;
     setReviewsList(product.reviewsList || []);
     setSelectedPhoto(null);
-    setZoomPhoto(null);
     setSelectedImage(product.img || '');
+    setSelectedSize(defaultSizesList[0]);
   }, [product]);
 
   if (!product) return null;
 
   const isLiked = wishlist.includes(product.id);
   const exploreProducts = (products || []).filter(p => p.id !== product.id);
+
+  const handleMouseMove = (e) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomPos({ x, y });
+  };
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
@@ -75,7 +108,6 @@ export default function ProductDetailModal({
       (updatedReviewsList.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)
     );
 
-    // Persist to server JSON database
     try {
       await fetch(`${API_BASE}/products/${product.id}`, {
         method: 'PUT',
@@ -87,7 +119,6 @@ export default function ProductDetailModal({
         })
       });
 
-      // Keep local reference updated in-memory
       product.reviewsList = updatedReviewsList;
       product.reviews = totalReviews;
       product.rating = averageRating;
@@ -139,30 +170,107 @@ export default function ProductDetailModal({
         {/* Scrollable Details Body */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '32px', maxWidth: '1100px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
           
-          {/* Main Detail Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+          {/* Main Detail Row: Amazon/Flipkart Layout */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px' }}>
             
-             {/* Left Column: Image wrapper */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{
-                background: 'var(--bg-input)',
-                borderRadius: '20px',
-                padding: '24px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-                minHeight: '260px',
-                border: '1px solid var(--border-color)',
-                overflow: 'hidden'
-              }}>
-                <span className="discount-badge" style={{ top: '16px', left: '16px' }}>{product.discount}</span>
+             {/* Left Column: Amazon/Flipkart Multi-Image Gallery + Magnifier Lens */}
+            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+              
+              {/* Vertical Side Thumbnails Strip (Desktop & Mobile) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '380px', overflowY: 'auto' }}>
+                {galleryImages.map((imgUrl, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setSelectedImage(imgUrl);
+                      setLightboxIndex(idx);
+                    }}
+                    onMouseEnter={() => setSelectedImage(imgUrl)}
+                    style={{
+                      background: 'var(--bg-card)',
+                      border: selectedImage === imgUrl ? '2.5px solid #FF5500' : '1px solid var(--border-color)',
+                      borderRadius: '10px',
+                      padding: '4px',
+                      width: '60px',
+                      height: '60px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: selectedImage === imgUrl ? '0 4px 12px rgba(255, 85, 0, 0.2)' : 'none',
+                      outline: 'none'
+                    }}
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={`Thumbnail ${idx + 1}`}
+                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=600&auto=format&fit=crop';
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              {/* Main Hero Product Image + Hover Magnifier Lens */}
+              <div 
+                style={{
+                  flex: 1,
+                  minWidth: '240px',
+                  background: 'var(--bg-input)',
+                  borderRadius: '20px',
+                  padding: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  minHeight: '340px',
+                  border: '1px solid var(--border-color)',
+                  overflow: 'hidden',
+                  cursor: 'zoom-in'
+                }}
+                onMouseEnter={() => setIsHoveringZoom(true)}
+                onMouseLeave={() => setIsHoveringZoom(false)}
+                onMouseMove={handleMouseMove}
+                onClick={() => setIsLightboxOpen(true)}
+              >
+                <span className="discount-badge" style={{ top: '16px', left: '16px', zIndex: 3 }}>{product.discount}</span>
+                
+                {/* Hover to Zoom Helper Badge */}
+                <span style={{
+                  position: 'absolute',
+                  bottom: '12px',
+                  right: '12px',
+                  background: 'rgba(0,0,0,0.65)',
+                  color: '#ffffff',
+                  fontSize: '0.7rem',
+                  fontWeight: '700',
+                  padding: '4px 10px',
+                  borderRadius: '20px',
+                  backdropFilter: 'blur(4px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  zIndex: 3
+                }}>
+                  <ZoomIn size={12} /> Hover to Zoom • Click for Fullscreen
+                </span>
+
                 <img 
-                  src={selectedImage} 
+                  src={selectedImage || product.img} 
                   alt={product.title} 
-                  style={{ maxHeight: '220px', objectFit: 'contain', width: '100%', transition: 'transform 0.3s ease' }}
-                  onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-                  onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                  style={{
+                    maxHeight: '300px',
+                    objectFit: 'contain',
+                    width: '100%',
+                    transition: isHoveringZoom ? 'none' : 'transform 0.3s ease',
+                    transform: isHoveringZoom ? 'scale(2.2)' : 'scale(1)',
+                    transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`
+                  }}
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=600&auto=format&fit=crop';
@@ -170,52 +278,15 @@ export default function ProductDetailModal({
                 />
               </div>
 
-              {/* Multiple Images Thumbnails row */}
-              {product.images && product.images.length > 1 && (
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                  {product.images.map((imgUrl, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setSelectedImage(imgUrl)}
-                      style={{
-                        background: 'var(--bg-card)',
-                        border: selectedImage === imgUrl ? '2.5px solid #FF5500' : '1px solid var(--border-color)',
-                        borderRadius: '10px',
-                        padding: '4px',
-                        width: '52px',
-                        height: '52px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        boxShadow: selectedImage === imgUrl ? '0 4px 10px rgba(255, 85, 0, 0.15)' : 'none',
-                        outline: 'none'
-                      }}
-                    >
-                      <img
-                        src={imgUrl}
-                        alt={`Thumbnail ${idx + 1}`}
-                        style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=600&auto=format&fit=crop';
-                        }}
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* Right Column: Meta Info */}
+            {/* Right Column: Meta Info & Amazon Size Selector */}
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 650, letterSpacing: '-0.02em', marginBottom: '8px', lineHeight: 1.25 }}>
+              <h2 style={{ fontSize: '1.45rem', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '8px', lineHeight: 1.25 }}>
                 {product.title}
               </h2>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', color: '#ffb800', gap: '2px' }}>
                   {Array.from({ length: 5 }, (_, i) => (
                     <Star key={i} size={15} fill={i < Math.floor(product.rating || 5) ? '#ffb800' : 'none'} stroke="currentColor" />
@@ -236,8 +307,8 @@ export default function ProductDetailModal({
                 </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '20px' }}>
-                <span style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)' }}>₹{product.price.toLocaleString('en-IN')}</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '16px' }}>
+                <span style={{ fontSize: '1.85rem', fontWeight: 900, color: 'var(--text-primary)' }}>₹{product.price.toLocaleString('en-IN')}</span>
                 {product.originalPrice && (
                   <span style={{ fontSize: '1rem', color: 'var(--text-dim)', textDecoration: 'line-through' }}>
                     ₹{product.originalPrice.toLocaleString('en-IN')}
@@ -248,27 +319,67 @@ export default function ProductDetailModal({
                 </span>
               </div>
 
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.5, marginBottom: '24px' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.5, marginBottom: '20px' }}>
                 {product.description || "Premium mobile electronics & customized studio accessories from FRIENDS MOBILE. High durability with standard local brand warranty."}
               </p>
+
+              {/* Amazon / Flipkart Style Size / Specification Selector */}
+              <div style={{ background: 'var(--bg-input)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-color)', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                    Select Size / Model Spec:
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: '#FF5500', fontWeight: '800' }}>
+                    Selected: {selectedSize}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {defaultSizesList.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => setSelectedSize(size)}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '10px',
+                        border: selectedSize === size ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                        background: selectedSize === size ? 'rgba(255, 85, 0, 0.1)' : 'var(--bg-card)',
+                        color: selectedSize === size ? '#FF5500' : 'var(--text-primary)',
+                        fontWeight: '800',
+                        fontSize: '0.78rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        outline: 'none'
+                      }}
+                    >
+                      {size}
+                      {selectedSize === size && <Check size={14} color="#FF5500" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* Action Buttons */}
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button 
                   className="btn btn-primary" 
-                  style={{ flex: 1, gap: '10px' }} 
+                  style={{ flex: 1, gap: '10px', height: '48px', fontSize: '0.95rem' }} 
                   onClick={() => {
-                    onAddToCart(product);
+                    onAddToCart({ ...product, selectedSize });
                     onClose();
                   }}
                   disabled={!product.inStock}
                 >
-                  <ShoppingBag size={18} /> ADD TO CART
+                  <ShoppingBag size={18} /> ADD TO CART ({selectedSize})
                 </button>
                 <button 
                   className={`wishlist-icon-btn ${isLiked ? 'liked' : ''}`}
                   onClick={() => onToggleWishlist(product)}
-                  style={{ width: '46px', height: '46px', border: '1px solid var(--border-color)', borderRadius: '12px' }}
+                  style={{ width: '48px', height: '48px', border: '1px solid var(--border-color)', borderRadius: '12px' }}
                 >
                   <Heart size={20} fill={isLiked ? '#FF5500' : 'none'} color={isLiked ? '#FF5500' : 'currentColor'} />
                 </button>
@@ -606,6 +717,101 @@ export default function ProductDetailModal({
             <X size={32} />
           </button>
           <img src={zoomPhoto} alt="Review Zoom" style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain', borderRadius: '12px' }} />
+        </div>
+      )}
+
+      {/* Amazon / Flipkart Style Fullscreen Lightbox Modal */}
+      {isLightboxOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0, 0, 0, 0.94)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100020,
+            backdropFilter: 'blur(10px)',
+            padding: '20px',
+            boxSizing: 'border-box'
+          }}
+          onClick={() => setIsLightboxOpen(false)}
+        >
+          {/* Top Bar Header */}
+          <div style={{ position: 'absolute', top: '20px', left: '24px', right: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#ffffff', zIndex: 2 }}>
+            <span style={{ fontSize: '0.92rem', fontWeight: '800', letterSpacing: '0.5px' }}>
+              {product.title} • <span style={{ color: '#FF5500' }}>Photo {lightboxIndex + 1} of {galleryImages.length}</span>
+            </span>
+            <button 
+              onClick={() => setIsLightboxOpen(false)}
+              style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#ffffff', borderRadius: '50%', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Navigation Arrows */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const newIdx = lightboxIndex === 0 ? galleryImages.length - 1 : lightboxIndex - 1;
+              setLightboxIndex(newIdx);
+              setSelectedImage(galleryImages[newIdx]);
+            }}
+            style={{ position: 'absolute', left: '24px', top: '50%', transform: 'translateY(-50%)', background: 'linear-gradient(135deg, #FF5500, #E03E00)', color: '#ffffff', border: 'none', borderRadius: '50%', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 6px 20px rgba(255,85,0,0.5)', zIndex: 3 }}
+          >
+            <ChevronLeft size={28} />
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const newIdx = lightboxIndex === galleryImages.length - 1 ? 0 : lightboxIndex + 1;
+              setLightboxIndex(newIdx);
+              setSelectedImage(galleryImages[newIdx]);
+            }}
+            style={{ position: 'absolute', right: '24px', top: '50%', transform: 'translateY(-50%)', background: 'linear-gradient(135deg, #FF5500, #E03E00)', color: '#ffffff', border: 'none', borderRadius: '50%', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 6px 20px rgba(255,85,0,0.5)', zIndex: 3 }}
+          >
+            <ChevronRight size={28} />
+          </button>
+
+          {/* Center High-Res Image */}
+          <div onClick={(e) => e.stopPropagation()} style={{ maxWidth: '85vw', maxHeight: '72vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img 
+              src={galleryImages[lightboxIndex] || selectedImage || product.img} 
+              alt={product.title} 
+              style={{ maxWidth: '100%', maxHeight: '72vh', objectFit: 'contain', borderRadius: '16px', boxShadow: '0 25px 50px rgba(0,0,0,0.6)' }}
+            />
+          </div>
+
+          {/* Bottom Thumbnails Navigation Bar */}
+          <div onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', bottom: '24px', display: 'flex', gap: '10px', background: 'rgba(0,0,0,0.7)', padding: '10px 18px', borderRadius: '30px', backdropFilter: 'blur(8px)', zIndex: 2 }}>
+            {galleryImages.map((img, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setLightboxIndex(idx);
+                  setSelectedImage(img);
+                }}
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: '10px',
+                  border: lightboxIndex === idx ? '2.5px solid #FF5500' : '1px solid rgba(255,255,255,0.3)',
+                  background: '#000',
+                  overflow: 'hidden',
+                  padding: '2px',
+                  cursor: 'pointer'
+                }}
+              >
+                <img src={img} alt={`Thumb ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
