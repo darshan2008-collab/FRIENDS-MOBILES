@@ -51,7 +51,8 @@ services:
       - backend_data:/app/data
       - backend_images:/app/public/images
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   frontend:
     build:

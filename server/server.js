@@ -19,6 +19,9 @@ process.on('unhandledRejection', (reason) => {
 
 // Connect Database & Auto-Restore Latest Backup Snapshot
 (async () => {
+  // Small startup delay — ensures PostgreSQL is fully ready inside Docker
+  await new Promise(r => setTimeout(r, 2000));
+
   const isConnected = await connectDB();
   if (isConnected) {
     await migrateData().catch(() => {});
