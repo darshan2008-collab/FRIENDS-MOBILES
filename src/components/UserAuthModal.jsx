@@ -42,6 +42,7 @@ const getApiEndpoints = (endpoint) => {
 
 const safeFetchApi = async (endpoint, options = {}) => {
   const urlList = getApiEndpoints(endpoint);
+  let lastResult = null;
   let lastError = null;
 
   for (const url of urlList) {
@@ -52,10 +53,22 @@ const safeFetchApi = async (endpoint, options = {}) => {
       clearTimeout(timeout);
       try {
         const data = await res.json();
-        return { ok: res.ok, status: res.status, data };
+        if (res.ok) {
+          return { ok: true, status: res.status, data };
+        }
+        // If 502 Bad Gateway / 503 Service Unavailable, try next URL in urlList
+        if (res.status === 502 || res.status === 503 || res.status === 504) {
+          lastResult = { ok: false, status: res.status, data };
+          continue;
+        }
+        return { ok: false, status: res.status, data };
       } catch (jsonErr) {
         if (res.ok) {
           return { ok: true, status: res.status, data: { success: true } };
+        }
+        if (res.status === 502 || res.status === 503 || res.status === 504) {
+          lastResult = { ok: false, status: res.status, data: { success: false, message: `Gateway HTTP ${res.status} error` } };
+          continue;
         }
         return { ok: false, status: res.status, data: { success: false, message: `Server error (${res.status}). Please try again.` } };
       }
@@ -64,6 +77,7 @@ const safeFetchApi = async (endpoint, options = {}) => {
     }
   }
 
+  if (lastResult) return lastResult;
   throw lastError || new Error('Unable to connect to server. Please check your internet connection.');
 };
 
