@@ -360,6 +360,7 @@ export default function App() {
 
   const handleAddToCart = (product) => {
     if (!product) return;
+    const safeId = String(product.id || product._id || Date.now());
     const safeTitle = product.title || product.name || 'Item';
     const cat = (product.category || '').toLowerCase();
     const titleLower = safeTitle.toLowerCase();
@@ -383,21 +384,15 @@ export default function App() {
       }
     }
 
-    if (!currentUser) {
-      setPendingCartItem(product);
-      setAuthRedirectMessage('Login Required: Please sign in or create an account to add items to your cart.');
-      setOpenCartAfterLogin(true);
-      setIsAuthOpen(true);
-      return;
-    }
     setCart(prev => {
       const safePrev = Array.isArray(prev) ? prev : [];
-      const existing = safePrev.find(p => p && p.id === product.id);
-      if (existing) {
-        return safePrev.map(p => (p && p.id === product.id) ? { ...p, quantity: (p.quantity || 1) + 1 } : p);
+      const existingIndex = safePrev.findIndex(p => p && (String(p.id || p._id) === safeId));
+      if (existingIndex !== -1) {
+        return safePrev.map((p, idx) => idx === existingIndex ? { ...p, quantity: (p.quantity || 1) + 1 } : p);
       }
-      return [...safePrev, { ...product, quantity: 1 }];
+      return [...safePrev, { ...product, id: product.id || product._id || safeId, quantity: 1 }];
     });
+
     addToast(`Added "${String(safeTitle).slice(0, 18)}..." to Cart!`, '🛍️');
   };
 
