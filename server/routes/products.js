@@ -8,14 +8,30 @@ const productsFilePath = path.join(__dirname, '../data/products.json');
 
 async function getProductsAsync() {
   try {
-    return await Product.find({});
+    const dbProducts = await Product.find({});
+    if (dbProducts && dbProducts.length > 0) {
+      return dbProducts;
+    }
   } catch (e) {
     console.error("[Products DB Get Error]", e.message);
-    return [];
   }
+  return readData(productsFilePath, []);
 }
 
 async function saveProductAsync(productData) {
+  try {
+    const products = readData(productsFilePath, []);
+    const index = products.findIndex(p => p.id === productData.id);
+    if (index !== -1) {
+      products[index] = { ...products[index], ...productData };
+    } else {
+      products.push(productData);
+    }
+    writeData(productsFilePath, products);
+  } catch (e) {
+    console.error("[Products JSON Save Error]", e.message);
+  }
+
   try {
     await Product.updateOne({ id: productData.id }, { $set: productData }, { upsert: true });
   } catch (e) {
@@ -185,10 +201,24 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const productId = parseInt(req.params.id);
-    const result = await Product.deleteOne({ id: productId });
-    
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ success: false, message: 'Product not found in database' });
+
+    // Delete from JSON file
+    const products = readData(productsFilePath, []);
+    const filtered = products.filter(p => p.id !== productId);
+    const wasInJson = filtered.length < products.length;
+    if (wasInJson) {
+      writeData(productsFilePath, filtered);
+    }
+
+    // Try deleting from PostgreSQL database
+    let dbDeleted = 0;
+    try {
+      const result = await Product.deleteOne({ id: productId });
+      dbDeleted = result.deletedCount;
+    } catch (_) {}
+
+    if (!wasInJson && dbDeleted === 0) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
     res.json({
