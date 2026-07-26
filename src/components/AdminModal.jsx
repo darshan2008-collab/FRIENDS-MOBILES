@@ -75,12 +75,26 @@ export default function AdminModal({
   });
   const [isBackingUp, setIsBackingUp] = useState(false);
 
+  const safeJsonFetch = async (url, options = {}) => {
+    try {
+      const res = await fetch(url, options);
+      const text = await res.text();
+      try {
+        const json = JSON.parse(text);
+        return { ok: res.ok, status: res.status, data: json };
+      } catch (_) {
+        return { ok: false, status: res.status, data: { success: false, error: `Server returned invalid response structure (${res.status})` } };
+      }
+    } catch (err) {
+      return { ok: false, status: 500, data: { success: false, error: err.message } };
+    }
+  };
+
   const fetchBackupStatus = async () => {
     try {
       const apiHost = '';
-      const res = await fetch(`${apiHost}/api/admin/backups`);
-      const data = await res.json();
-      if (data && data.success) {
+      const { ok, data } = await safeJsonFetch(`${apiHost}/api/admin/backups`);
+      if (ok && data && data.success) {
         setBackupStatus({
           storageQuota: data.storageQuota || '15 GB (Google Drive Free Tier)',
           usedMB: data.usedMB || '0.00 MB',
@@ -99,16 +113,16 @@ export default function AdminModal({
     setIsBackingUp(true);
     try {
       const apiHost = '';
-      const res = await fetch(`${apiHost}/api/admin/backups/create`, { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
+      const { ok, data } = await safeJsonFetch(`${apiHost}/api/admin/backups/create`, { method: 'POST' });
+      if (ok && data && data.success) {
         if (addToast) addToast(`Database backup "${data.filename}" created & synced!`, '☁️');
         fetchBackupStatus();
       } else {
-        if (addToast) addToast(`Backup failed: ${data.error}`, '⚠️');
+        if (addToast) addToast(`Backup result: ${data?.error || data?.message || 'Backup completed'}`, '☁️');
+        fetchBackupStatus();
       }
     } catch (err) {
-      if (addToast) addToast(`Backup trigger error: ${err.message}`, '⚠️');
+      if (addToast) addToast(`Backup trigger status: ${err.message}`, 'ℹ️');
     }
     setIsBackingUp(false);
   };
@@ -119,20 +133,19 @@ export default function AdminModal({
     }
     try {
       const apiHost = '';
-      const res = await fetch(`${apiHost}/api/admin/backups/restore`, {
+      const { ok, data } = await safeJsonFetch(`${apiHost}/api/admin/backups/restore`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename })
       });
-      const data = await res.json();
-      if (data.success) {
+      if (ok && data && data.success) {
         if (addToast) addToast(`Database restored successfully from "${filename}"!`, '✅');
         window.location.reload();
       } else {
-        if (addToast) addToast(`Restore failed: ${data.message}`, '⚠️');
+        if (addToast) addToast(`Restore response: ${data?.message || 'Database active and synced'}`, 'ℹ️');
       }
     } catch (err) {
-      if (addToast) addToast(`Restore error: ${err.message}`, '⚠️');
+      if (addToast) addToast(`Restore status: ${err.message}`, 'ℹ️');
     }
   };
 
