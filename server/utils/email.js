@@ -115,7 +115,41 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
     }
   }
 
-  return { success: false, error: lastError || 'Failed to connect to Gmail SMTP server' };
+async function dispatchOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') {
+  // 1. Try dedicated Mail Microservice container
+  const mailEndpoints = [
+    process.env.MAIL_SERVICE_URL ? `${process.env.MAIL_SERVICE_URL}/send-otp` : 'http://backend_mail:5001/send-otp',
+    'http://localhost:5001/send-otp',
+    'http://127.0.0.1:5001/send-otp'
+  ];
+
+  for (const url of mailEndpoints) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ toEmail, otpCode, customerName }),
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.success) {
+          console.log(`[Mail Dispatcher] Email sent via dedicated Mail Microservice (${url})`);
+          return data;
+        }
+      }
+    } catch (_) {
+      // Microservice endpoint unreachable — try next or fallback to local SMTP
+    }
+  }
+
+  // 2. Direct local Nodemailer SMTP fallback if microservice is offline
+  return await sendOTPEmail(toEmail, otpCode, customerName);
 }
 
-module.exports = { sendOTPEmail };
+module.exports = { sendOTPEmail, dispatchOTPEmail };
+

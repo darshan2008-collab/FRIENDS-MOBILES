@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const OtpVerification = require('../models/OtpVerification');
 const User = require('../models/User');
-const { sendOTPEmail } = require('../utils/email');
+const { sendOTPEmail, dispatchOTPEmail } = require('../utils/email');
 
 // In-memory verification token cache for password reset session bridging
 const verifiedTokens = new Map();
@@ -128,9 +128,9 @@ exports.sendOtp = async (req, res) => {
     // 8. Log Request
     console.log(`[OTP Info] OTP Requested for ${cleanEmail}`);
 
-    // 9. Send Email via Nodemailer SMTP (or dev console fallback)
+    // 9. Send Email via dedicated Mail Microservice or Nodemailer SMTP fallback
     const customerName = existingUser.name || 'Valued Customer';
-    const emailResult = await sendOTPEmail(cleanEmail, rawOtp, customerName);
+    const emailResult = await dispatchOTPEmail(cleanEmail, rawOtp, customerName);
 
     if (!emailResult || !emailResult.success) {
       console.error(`[OTP Error] Email dispatch failed for ${cleanEmail}:`, emailResult?.error);
