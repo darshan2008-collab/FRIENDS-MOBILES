@@ -38,6 +38,14 @@ dirsToEnsure.forEach(dir => {
   }
 });
 
+// Initialize OTP log file
+const otpLogPath = path.join(__dirname, 'data/otp_debug.log');
+if (!fs.existsSync(otpLogPath)) {
+  try {
+    fs.writeFileSync(otpLogPath, `=== FRIENDS MOBILE OTP Debug Log initialized at ${new Date().toISOString()} ===\n`, 'utf8');
+  } catch (_) {}
+}
+
 // ─── Bootstrap Default Data Files ─────────────────────────────────────────────
 const defaultFiles = {
   'data/users.json': [],
