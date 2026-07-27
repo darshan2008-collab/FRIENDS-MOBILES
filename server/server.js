@@ -197,6 +197,25 @@ app.get('/api/store-info', (req, res) => {
   }
 });
 
+// ─── Diagnostic Mail Service Connection API ────────────────────────────────────
+app.get('/api/health-mail', async (req, res) => {
+  try {
+    const mailUrl = process.env.MAIL_SERVICE_URL || 'http://backend_mail:5001';
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const response = await fetch(`${mailUrl}/health`, { signal: controller.signal });
+    clearTimeout(timeout);
+    
+    if (response.ok) {
+      const data = await response.json();
+      return res.json({ success: true, mailServer: data });
+    }
+    return res.status(response.status).json({ success: false, message: `Mail server responded with status: ${response.status}` });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ─── Production SPA Fallback Routing ─────────────────────────────────────────
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api') || req.path.startsWith('/images')) return next();
