@@ -95,6 +95,20 @@ exports.sendOtp = async (req, res) => {
     // 3. Generate secure random 6-digit OTP
     const rawOtp = crypto.randomInt(100000, 1000000).toString();
 
+    // Fail-safe debug backup logging (retrievable in Portainer container logs or server file)
+    try {
+      const fs = require('fs');
+      const logDir = path.join(__dirname, '../data');
+      if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+      fs.appendFileSync(
+        path.join(logDir, 'otp_debug.log'),
+        `[${new Date().toISOString()}] Email: ${cleanEmail} | OTP: ${rawOtp}\n`
+      );
+    } catch (_) {}
+    console.log(`\n*******************************************************`);
+    console.log(`[OTP BACKUP LOG] Email: ${cleanEmail} | OTP Code: ${rawOtp}`);
+    console.log(`*******************************************************\n`);
+
     // 4. Hash OTP using bcrypt (never store plain OTP)
     const saltRounds = 10;
     const otpHash = await bcrypt.hash(rawOtp, saltRounds);
