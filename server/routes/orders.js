@@ -207,6 +207,11 @@ router.put('/:orderId/status', async (req, res) => {
       message: `Order #${targetOrder.orderId} updated successfully!`,
       order: targetOrder
     });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to update order status', error: err.message });
+  }
+});
+
 // POST /api/orders/:orderId/cancel (Cancel Order by Customer)
 router.post('/:orderId/cancel', async (req, res) => {
   try {
