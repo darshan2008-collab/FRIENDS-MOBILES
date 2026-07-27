@@ -48,7 +48,7 @@ services:
       context: .
       dockerfile: server/Dockerfile
     container_name: friends_mobile_mail
-    command: ["node", "mailServer.js"]
+    command: ["node", "/app/mailServer.js"]
     restart: always
     expose:
       - "5001"
@@ -69,7 +69,7 @@ services:
       context: .
       dockerfile: server/Dockerfile
     container_name: friends_mobile_worker
-    command: ["node", "worker.js"]
+    command: ["node", "/app/worker.js"]
     restart: always
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/friends_mobile}
