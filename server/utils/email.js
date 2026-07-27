@@ -115,6 +115,9 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
     }
   }
 
+  return { success: false, error: lastError || 'Failed to connect to Gmail SMTP server' };
+}
+
 async function dispatchOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') {
   // 1. Try dedicated Mail Microservice container
   const mailEndpoints = [
