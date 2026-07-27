@@ -378,6 +378,11 @@ router.post('/backups/restore', async (req, res) => {
     }
     const result = await BackupService.restoreBackup(filename);
     res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to restore database from backup file', error: err.message });
+  }
+});
+
 // GET /api/admin/backups/download/:filename — Direct browser download of backup JSON snapshot
 router.get('/backups/download/:filename', (req, res) => {
   try {
