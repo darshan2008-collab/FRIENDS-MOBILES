@@ -8,30 +8,16 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '929652702793-
 const getApiEndpoints = (endpoint) => {
   const endpoints = [];
 
-  // Primary relative path
+  // Primary: relative /api path (works in Docker via nginx proxy and Vercel)
   endpoints.push(`/api${endpoint}`);
 
-  // Alternate route path fallback (e.g. /auth/send-otp <-> /otp/send)
+  // One fallback alternate route
   if (endpoint.startsWith('/auth/send-otp')) {
     endpoints.push('/api/otp/send');
   } else if (endpoint.startsWith('/auth/verify-otp')) {
     endpoints.push('/api/otp/verify');
   } else if (endpoint.startsWith('/auth/reset-password')) {
     endpoints.push('/api/otp/reset-password');
-  }
-
-  if (typeof window !== 'undefined') {
-    const origin = window.location.origin;
-    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      endpoints.push(`http://localhost:5000/api${endpoint}`);
-    } else {
-      endpoints.push(`${origin}/api${endpoint}`);
-    }
-  }
-
-  if (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== '/api') {
-    const envBase = import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '');
-    endpoints.push(`${envBase}${endpoint}`);
   }
 
   return [...new Set(endpoints)];
@@ -46,7 +32,7 @@ const safeFetchApi = async (endpoint, options = {}) => {
   for (const url of urlList) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 3000);
+      const timeout = setTimeout(() => controller.abort(), 10000);
       const res = await fetch(url, { ...options, signal: controller.signal });
       clearTimeout(timeout);
       try {
@@ -54,7 +40,6 @@ const safeFetchApi = async (endpoint, options = {}) => {
         if (res.ok) {
           return { ok: true, status: res.status, data };
         }
-        // If 502 Bad Gateway / 503 Service Unavailable, try next URL in urlList
         if (res.status === 502 || res.status === 503 || res.status === 504) {
           lastResult = { ok: false, status: res.status, data };
           continue;
