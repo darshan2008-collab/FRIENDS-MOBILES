@@ -22,13 +22,11 @@ const getApiEndpoints = (endpoint) => {
 
   if (typeof window !== 'undefined') {
     const origin = window.location.origin;
-    if (!origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      endpoints.push(`http://localhost:5000/api${endpoint}`);
+    } else {
       endpoints.push(`${origin}/api${endpoint}`);
-      if (endpoint.startsWith('/auth/send-otp')) {
-        endpoints.push(`${origin}/api/otp/send`);
-      }
     }
-    endpoints.push(`http://localhost:5000/api${endpoint}`);
   }
 
   if (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== '/api') {
@@ -48,7 +46,7 @@ const safeFetchApi = async (endpoint, options = {}) => {
   for (const url of urlList) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
+      const timeout = setTimeout(() => controller.abort(), 3000);
       const res = await fetch(url, { ...options, signal: controller.signal });
       clearTimeout(timeout);
       try {
@@ -156,7 +154,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
   const triggerAutoVerifyIfComplete = (digitsArray) => {
     const fullCode = digitsArray.join('');
-    if (fullCode.length === 6) {
+    if (fullCode.length === 6 && !isSubmitting) {
       setTimeout(() => {
         executeVerifyOtp(fullCode);
       }, 150);
@@ -348,6 +346,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
   // Step 2 Core: Execute Verify Gmail OTP
   const executeVerifyOtp = async (codeToVerify) => {
+    if (isSubmitting) return;
     const code = codeToVerify || otpInput;
     if (!code || code.trim().length < 6) {
       if (addToast) addToast('Please enter the full 6-digit OTP code sent to your Gmail inbox', 'warning');
