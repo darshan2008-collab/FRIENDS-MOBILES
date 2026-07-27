@@ -11,6 +11,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-friends_mobile}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-friends_mobile}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   # 1. Core Store REST API & Auth Microservice
   backend:
@@ -41,7 +47,14 @@ services:
       - backend_data:/app/data
       - backend_images:/app/public/images
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 30s
 
   # 2. Dedicated Mail Microservice (Gmail SMTP & OTP Dispatch)
   backend_mail:
@@ -63,6 +76,12 @@ services:
       FROM_EMAIL: ${FROM_EMAIL:-noreplyfriendsmobiles@gmail.com}
       GMAIL_USER: ${GMAIL_USER:-noreplyfriendsmobiles@gmail.com}
       GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:-fsthwswldbblrslw}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
 
   # 3. Dedicated Background Worker Process (Database Snapshots & Cloud Backup Sync)
   backend_worker:
@@ -85,7 +104,8 @@ services:
       - backend_data:/app/data
       - backend_images:/app/public/images
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   frontend:
     build:
@@ -102,7 +122,14 @@ services:
       VITE_BACKEND_URL: "http://backend:5000"
       VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 volumes:
   postgres_data:
