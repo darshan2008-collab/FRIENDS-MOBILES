@@ -9,10 +9,16 @@ try {
   console.warn('[Email Warning] nodemailer module not loaded yet.');
 }
 
-const getSmtpHost = () => (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
+const getSmtpHost = () => {
+  const host = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
+  if (host.includes('@')) {
+    return 'smtp.gmail.com';
+  }
+  return host;
+};
 const getSmtpPort = () => parseInt(process.env.SMTP_PORT || '465', 10);
 const getGmailUser = () => (process.env.SMTP_USER || process.env.GMAIL_USER || 'noreplyfriendsmobiles@gmail.com').trim();
-const getGmailPassword = () => (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || 'vunzytjoeceaxnar').replace(/\s+/g, '').trim();
+const getGmailPassword = () => (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || 'zgetebgtkwghiucy').replace(/\s+/g, '').trim();
 
 const getSmtpAccounts = () => [
   {
@@ -21,7 +27,7 @@ const getSmtpAccounts = () => [
   },
   {
     user: 'noreplyfriendsmobiles@gmail.com',
-    pass: 'vunzytjoeceaxnar'
+    pass: 'zgetebgtkwghiucy'
   },
   {
     user: 'xunitary@gmail.com',
@@ -59,9 +65,14 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
         if (!transporter) continue;
 
         const mailOptions = {
-          from: `"FRIENDS MOBILE Security" <${account.user}>`,
+          from: `"Friends Mobiles Store" <${account.user}>`,
           to: toEmail,
           subject: `FRIENDS MOBILE - ${otpCode} is your Password Reset Code`,
+          text: `Hello ${customerName},\n\nYour 6-digit verification code to reset your password is: ${otpCode}\n\nThis code is valid for 5 minutes. Please do not share this code with anyone.\n\nRegards,\nFriends Mobiles Store`,
+          headers: {
+            'X-Priority': '1',
+            'Importance': 'high'
+          },
           html: `
             <div style="font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif; max-width: 540px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 36px rgba(0,0,0,0.1);">
               <div style="background: linear-gradient(135deg, #FF5500 0%, #E03E00 100%); padding: 28px 24px; text-align: center; color: #ffffff;">
