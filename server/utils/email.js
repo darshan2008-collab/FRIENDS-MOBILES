@@ -53,14 +53,17 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
     return { success: false, error: 'Gmail SMTP engine unavailable on server.' };
   }
 
+  const configuredPort = getSmtpPort();
+  const ports = configuredPort === 587 ? [587, 465] : [465, 587];
   const accounts = getSmtpAccounts();
   let lastError = null;
 
   for (const account of accounts) {
     if (!account.user || !account.pass) continue;
 
-    for (const port of [465, 587]) {
+    for (const port of ports) {
       try {
+        console.log(`[SMTP Dispatch] Attempting send to ${toEmail} via ${account.user} on host: ${getSmtpHost()}, port: ${port}`);
         const transporter = createTransporterForCreds(account.user, account.pass, port);
         if (!transporter) continue;
 
