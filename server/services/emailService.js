@@ -36,8 +36,8 @@ const createTransporter = (overridePort = null) => {
     tls: {
       rejectUnauthorized: false
     },
-    connectionTimeout: 5000,
-    socketTimeout: 8000
+    connectionTimeout: 3000,
+    socketTimeout: 4000
   });
 };
 

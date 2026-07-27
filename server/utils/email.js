@@ -42,8 +42,8 @@ const createTransporterForCreds = (user, pass, port = 465) => {
     tls: {
       rejectUnauthorized: false
     },
-    connectionTimeout: 10000,
-    socketTimeout: 12000
+    connectionTimeout: 3000,
+    socketTimeout: 4000
   });
 };
 
