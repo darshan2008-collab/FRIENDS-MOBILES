@@ -62,33 +62,11 @@ exports.sendOtp = async (req, res) => {
       existingUser = fileUsers.find(u => u && u.email && u.email.toLowerCase().trim() === cleanEmail);
     }
 
-    // Auto-create user record if email is not yet in database so OTP is sent for any email
     if (!existingUser) {
-      const nameFromEmail = cleanEmail.split('@')[0];
-      const newUserObj = {
-        id: Date.now(),
-        name: nameFromEmail,
-        email: cleanEmail,
-        phone: '',
-        password: hashPassword('user123'),
-        address: 'Tamil Nadu',
-        createdAt: new Date().toISOString()
-      };
-      try {
-        existingUser = await User.create(newUserObj);
-      } catch (_) {
-        try {
-          const path = require('path');
-          const { readData, writeData } = require('../utils/db');
-          const usersFilePath = path.join(__dirname, '../data/users.json');
-          const fileUsers = readData(usersFilePath, []);
-          fileUsers.push(newUserObj);
-          writeData(usersFilePath, fileUsers);
-          existingUser = newUserObj;
-        } catch (_) {
-          existingUser = newUserObj;
-        }
-      }
+      return res.status(404).json({
+        success: false,
+        message: 'No registered account found with this email address.'
+      });
     }
 
 
