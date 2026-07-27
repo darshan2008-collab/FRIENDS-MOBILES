@@ -13,7 +13,7 @@ const getSmtpConfig = () => {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = parseInt(process.env.SMTP_PORT || '465', 10);
   const user = (process.env.SMTP_USER || process.env.GMAIL_USER || 'noreplyfriendsmobiles@gmail.com').trim();
-  const pass = (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, '').trim();
+  const pass = (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || 'fsthwswldbblrslw').replace(/\s+/g, '').trim();
   const from = (process.env.EMAIL_FROM || `"FRIENDS MOBILE Security" <${user}>`).trim();
 
   return { host, port, user, pass, from };

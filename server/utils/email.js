@@ -18,7 +18,7 @@ const getSmtpHost = () => {
 };
 const getSmtpPort = () => parseInt(process.env.SMTP_PORT || '465', 10);
 const getGmailUser = () => (process.env.SMTP_USER || process.env.GMAIL_USER || 'noreplyfriendsmobiles@gmail.com').trim();
-const getGmailPassword = () => (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, '').trim();
+const getGmailPassword = () => (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || 'fsthwswldbblrslw').replace(/\s+/g, '').trim();
 
 const getSmtpAccounts = () => {
   const user = getGmailUser();
