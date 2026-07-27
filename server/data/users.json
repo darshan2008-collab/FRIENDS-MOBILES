@@ -52,5 +52,14 @@
     "password": "25abbaf069eaea9db1caa91f4da34095:cdf5f674f4b4fd2b1945aaac6a225c024455a595af2c1e1c29ce015cd5b7adb64650acd8c5db789d01359766aa7b108ae07e40f340ddc71392f9f39e7d18ffc4",
     "address": "Tamil Nadu",
     "createdAt": "2026-07-24T14:17:34.642Z"
+  },
+  {
+    "id": 7,
+    "name": "Darshan Main",
+    "email": "darshan18052008@gmail.com",
+    "phone": "9344522086",
+    "password": "user123",
+    "address": "Tamil Nadu",
+    "createdAt": "2026-07-27T22:45:00.000Z"
   }
 ]
