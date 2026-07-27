@@ -98,6 +98,14 @@ const placeOrderHandler = async (req, res) => {
     // Trigger real-time instant backup sync
     BackupService.triggerRealTimeBackup(`new_order_${newOrder.orderId}`);
 
+    // Send Order Confirmation Email Notification
+    try {
+      const { sendOrderEmail } = require('../utils/email');
+      if (sendOrderEmail && sanitizedCustomer.email) {
+        sendOrderEmail(sanitizedCustomer.email, newOrder, 'FRIENDS MOBILE - Order Confirmation').catch(() => {});
+      }
+    } catch (_) {}
+
     res.status(201).json({
       success: true,
       message: 'Order placed successfully!',

@@ -8,7 +8,8 @@ RUN npm install --production --legacy-peer-deps
 
 COPY server/ ./
 
-EXPOSE 5000
+EXPOSE 5000 5001
 
 CMD ["node", "server.js"]
+
 

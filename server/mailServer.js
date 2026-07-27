@@ -13,7 +13,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-const { sendOTPEmail } = require('./utils/email');
+const { sendOTPEmail, sendOrderEmail } = require('./utils/email');
 
 const app = express();
 const PORT = process.env.MAIL_PORT || 5001;
@@ -66,15 +66,19 @@ app.post(['/send-otp', '/api/mail/send-otp'], async (req, res) => {
 // POST /send-order-confirmation
 app.post(['/send-order-confirmation', '/api/mail/send-order-confirmation'], async (req, res) => {
   try {
-    const { toEmail, orderDetails } = req.body || {};
+    const { toEmail, orderDetails, subjectTitle } = req.body || {};
     if (!toEmail || !orderDetails) {
       return res.status(400).json({ success: false, message: 'toEmail and orderDetails are required' });
     }
 
     console.log(`[Mail Microservice] Dispatching order receipt to: ${toEmail} (Order #${orderDetails.orderId || ''})`);
     
-    // Asynchronous receipt dispatch
-    return res.json({ success: true, message: 'Order receipt queued for delivery' });
+    const result = await sendOrderEmail(toEmail, orderDetails, subjectTitle || 'FRIENDS MOBILE - Order Confirmation');
+    if (result && result.success) {
+      return res.json({ success: true, messageId: result.messageId, message: 'Order email dispatched successfully' });
+    } else {
+      return res.status(500).json({ success: false, error: result?.error || 'Order email dispatch failed' });
+    }
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
