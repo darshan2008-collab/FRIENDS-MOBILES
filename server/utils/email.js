@@ -37,14 +37,24 @@ const getSmtpAccounts = () => [
 
 const createTransporterForCreds = (user, pass, port = 465) => {
   if (!nodemailer) return null;
+  const host = getSmtpHost();
+  if (host.includes('gmail.com')) {
+    console.log(`[SMTP Config] Using optimized built-in Gmail service configuration for: ${user}`);
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user, pass },
+      connectionTimeout: 10000,
+      socketTimeout: 12000
+    });
+  }
   return nodemailer.createTransport({
-    host: getSmtpHost(),
+    host: host,
     port: port,
     secure: port === 465,
     auth: { user, pass },
     tls: { rejectUnauthorized: false },
-    connectionTimeout: 5000,
-    socketTimeout: 8000
+    connectionTimeout: 10000,
+    socketTimeout: 12000
   });
 };
 
