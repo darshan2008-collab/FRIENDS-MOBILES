@@ -239,6 +239,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!signupForm.name || !signupForm.email || !signupForm.phone || !signupForm.password) {
       if (addToast) addToast('Full name, email address, mobile phone number, and password are required', 'warning');
       return;
@@ -249,6 +250,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const { data, ok } = await safeFetchApi('/auth/signup', {
         method: 'POST',
@@ -256,16 +258,18 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         body: JSON.stringify(signupForm)
       });
 
-      if (data && data.success && data.user) {
+      if (ok && data && data.success && data.user) {
         onLoginSuccess(data.user);
         if (addToast) addToast(data.message || `Account created! Welcome, ${data.user.name}`, 'success');
         onClose();
       } else {
-        if (addToast) addToast((data && data.message) || 'Registration failed', 'error');
+        if (addToast) addToast((data && data.message) || 'Registration failed. Please try again.', 'error');
       }
     } catch (err) {
       console.warn("Signup connection error:", err);
-      if (addToast) addToast('Failed to connect to registration server. Please try again.', 'error');
+      if (addToast) addToast('Cannot reach server. Please check your internet connection or try again later.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -842,8 +846,9 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                 <button 
                   type="submit" 
                   className="auth-submit-btn"
+                  disabled={isSubmitting}
                 >
-                  Create Account &amp; Continue <ArrowRight size={16} />
+                  {isSubmitting ? 'Creating Account...' : 'Create Account & Continue'} <ArrowRight size={16} />
                 </button>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '2px 0' }}>

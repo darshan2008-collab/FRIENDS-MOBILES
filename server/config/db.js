@@ -34,6 +34,7 @@ if (pg && pg.Pool) {
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 3000,
+    statement_timeout: 4000
   });
 
   pool.on('error', (err) => {
