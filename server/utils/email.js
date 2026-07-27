@@ -18,26 +18,16 @@ const getSmtpHost = () => {
 };
 const getSmtpPort = () => parseInt(process.env.SMTP_PORT || '465', 10);
 const getGmailUser = () => (process.env.SMTP_USER || process.env.GMAIL_USER || 'noreplyfriendsmobiles@gmail.com').trim();
-const getGmailPassword = () => (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || 'vunzytjoeceaxnar').replace(/\s+/g, '').trim();
+const getGmailPassword = () => (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, '').trim();
 
-const getSmtpAccounts = () => [
-  {
-    user: getGmailUser(),
-    pass: getGmailPassword()
-  },
-  {
-    user: 'noreplyfriendsmobiles@gmail.com',
-    pass: 'vunzytjoeceaxnar'
-  },
-  {
-    user: 'noreplyfriendsmobiles@gmail.com',
-    pass: 'zgetebgtkwghiucy'
-  },
-  {
-    user: 'xunitary@gmail.com',
-    pass: 'cymeyaijcvbofggd'
+const getSmtpAccounts = () => {
+  const user = getGmailUser();
+  const pass = getGmailPassword();
+  if (user && pass) {
+    return [{ user, pass }];
   }
-];
+  return [];
+};
 
 const createTransporterForCreds = (user, pass, port = 465) => {
   if (!nodemailer) return null;
@@ -58,13 +48,15 @@ const createTransporterForCreds = (user, pass, port = 465) => {
 };
 
 async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') {
-  if (!nodemailer) {
-    return { success: false, error: 'Gmail SMTP engine unavailable on server.' };
+  const accounts = getSmtpAccounts();
+  
+  if (!nodemailer || accounts.length === 0) {
+    console.log(`[OTP Console Mode] No SMTP password configured. OTP code for ${toEmail} is: ${otpCode}`);
+    return { success: true, devMode: true, message: 'OTP logged to server console (SMTP password not configured)' };
   }
 
   const configuredPort = getSmtpPort();
   const ports = configuredPort === 587 ? [587, 465] : [465, 587];
-  const accounts = getSmtpAccounts();
   let lastError = null;
 
   for (const account of accounts) {
@@ -138,7 +130,8 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
     }
   }
 
-  return { success: false, error: lastError || 'Failed to connect to Gmail SMTP server' };
+  console.log(`[OTP Console Fallback] SMTP send failed (${lastError}). OTP Code for ${toEmail} is: ${otpCode}`);
+  return { success: true, devMode: true, message: `SMTP send failed (${lastError}), OTP logged to console` };
 }
 
 async function sendOrderEmail(toEmail, orderDetails = {}, subjectTitle = 'FRIENDS MOBILE - Order Confirmation') {

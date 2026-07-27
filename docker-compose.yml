@@ -52,10 +52,10 @@ services:
       SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
       SMTP_PORT: ${SMTP_PORT:-465}
       SMTP_USER: ${SMTP_USER:-noreplyfriendsmobiles@gmail.com}
-      SMTP_PASS: ${SMTP_PASS:-vunzytjoeceaxnar}
+      SMTP_PASS: ${SMTP_PASS:-fsthwswldbblrslw}
       FROM_EMAIL: ${FROM_EMAIL:-noreplyfriendsmobiles@gmail.com}
       GMAIL_USER: ${GMAIL_USER:-noreplyfriendsmobiles@gmail.com}
-      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:-vunzytjoeceaxnar}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:-fsthwswldbblrslw}
 
   # 3. Dedicated Background Worker Process (Database Snapshots & Cloud Backup Sync)
   backend_worker:

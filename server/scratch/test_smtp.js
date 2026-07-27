@@ -6,7 +6,7 @@ require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 const getSmtpHost = () => (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
 const getSmtpPort = () => parseInt(process.env.SMTP_PORT || '465', 10);
 const getGmailUser = () => (process.env.SMTP_USER || process.env.GMAIL_USER || 'noreplyfriendsmobiles@gmail.com').trim();
-const getGmailPassword = () => (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || 'vunzytjoeceaxnar').replace(/\s+/g, '').trim();
+const getGmailPassword = () => (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, '').trim();
 
 const user = getGmailUser();
 const pass = getGmailPassword();
