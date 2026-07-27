@@ -49,10 +49,10 @@ const createTransporterForCreds = (user, pass, port = 465) => {
 
 async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') {
   const accounts = getSmtpAccounts();
-  
+
   if (!nodemailer || accounts.length === 0) {
-    console.log(`[OTP Console Mode] No SMTP password configured. OTP code for ${toEmail} is: ${otpCode}`);
-    return { success: true, devMode: true, message: 'OTP logged to server console (SMTP password not configured)' };
+    console.error(`[OTP Email Error] No SMTP credentials configured. Cannot send OTP to ${toEmail}.`);
+    return { success: false, error: 'SMTP email service is not configured on this server. Please contact support.' };
   }
 
   const configuredPort = getSmtpPort();
@@ -130,8 +130,8 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
     }
   }
 
-  console.log(`[OTP Console Fallback] SMTP send failed (${lastError}). OTP Code for ${toEmail} is: ${otpCode}`);
-  return { success: true, devMode: true, message: `SMTP send failed (${lastError}), OTP logged to console` };
+  console.error(`[OTP Email Failed] Could not send OTP to ${toEmail}. Last error: ${lastError}`);
+  return { success: false, error: lastError || 'Failed to connect to Gmail SMTP server. Please check SMTP credentials.' };
 }
 
 async function sendOrderEmail(toEmail, orderDetails = {}, subjectTitle = 'FRIENDS MOBILE - Order Confirmation') {

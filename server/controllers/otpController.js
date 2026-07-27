@@ -250,8 +250,8 @@ exports.verifyOtp = async (req, res) => {
       });
     }
 
-    // 5. Compare bcrypt hash (or master fallback code 123456)
-    const isMatch = (cleanOtp === '123456') || await bcrypt.compare(cleanOtp, record.otpHash);
+    // 5. Compare bcrypt hash — only accept real generated OTP
+    const isMatch = await bcrypt.compare(cleanOtp, record.otpHash);
 
     if (!isMatch) {
       record.attempts += 1;

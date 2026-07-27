@@ -301,29 +301,15 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         setResendTimer(120);
         if (addToast) addToast(data.message || `6-digit OTP sent to ${data.email || targetVal}! Valid for 2 mins.`, 'success');
       } else {
-        // If Gateway 502/503 or server connection issue, activate Resilient Recovery Mode
-        if (status === 502 || status === 503 || status === 504 || !data || data.message?.includes('502') || data.message?.includes('Gateway')) {
-          setSentEmail(targetVal);
-          setVerifiedName('Member');
-          setEmailCheckError('');
-          setForgotStep(2);
-          setResendTimer(120);
-          if (addToast) addToast(`OTP sent to ${targetVal}! (Fallback code: 123456)`, 'info');
-        } else {
-          const sendFailedMsg = (data && data.message) || `Failed to send OTP to ${targetVal}. Please try again.`;
-          setEmailCheckError(sendFailedMsg);
-          if (addToast) addToast(sendFailedMsg, 'error');
-        }
+        const sendFailedMsg = (data && data.message) || `Failed to send OTP to ${targetVal}. Please try again.`;
+        setEmailCheckError(sendFailedMsg);
+        if (addToast) addToast(sendFailedMsg, 'error');
       }
     } catch (err) {
       console.error("Send OTP API Error:", err);
-      // Fallback on network failure
-      setSentEmail(targetVal);
-      setVerifiedName('Member');
-      setEmailCheckError('');
-      setForgotStep(2);
-      setResendTimer(120);
-      if (addToast) addToast(`OTP sent to ${targetVal}! (Fallback code: 123456)`, 'info');
+      const netErrMsg = 'Cannot reach server. Please check your internet connection and try again.';
+      setEmailCheckError(netErrMsg);
+      if (addToast) addToast(netErrMsg, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -346,22 +332,16 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         body: JSON.stringify({ email: sentEmail, phone: forgotPhone, otp: code.trim() })
       });
 
-      if ((ok && data && data.success) || code.trim() === '123456') {
-        setResetToken(data?.resetToken || 'fallback_token_' + Date.now());
+      if (ok && data && data.success) {
+        setResetToken(data.resetToken);
         setForgotStep(3);
-        if (addToast) addToast('OTP code verified successfully! Please set your new password.', 'success');
+        if (addToast) addToast('OTP verified successfully! Please set your new password.', 'success');
       } else {
-        if (addToast) addToast((data && data.message) || 'Invalid 6-digit OTP code. Please check your Gmail inbox and try again.', 'error');
+        if (addToast) addToast((data && data.message) || 'Invalid OTP code. Please check your email and try again.', 'error');
       }
     } catch (err) {
       console.error("Verify OTP API Error:", err);
-      if (code.trim() === '123456') {
-        setResetToken('fallback_token_' + Date.now());
-        setForgotStep(3);
-        if (addToast) addToast('OTP code verified successfully!', 'success');
-      } else {
-        if (addToast) addToast('Failed to verify OTP with server. Please check your network and try again.', 'error');
-      }
+      if (addToast) addToast('Cannot reach server. Please check your internet connection and try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -400,8 +380,8 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         })
       });
 
-      if ((ok && data && data.success) || resetToken.startsWith('fallback_token_')) {
-        if (addToast) addToast(data?.message || 'Password reset successfully! Please log in with your new password.', 'success');
+      if (ok && data && data.success) {
+        if (addToast) addToast(data.message || 'Password reset successfully! Please log in with your new password.', 'success');
         setLoginIdentity(forgotPhone.trim());
         setLoginPassword(newPassword);
         setActiveTab('login');
@@ -412,18 +392,10 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         setNewPassword('');
         setConfirmPassword('');
       } else {
-        if (addToast) addToast((data && data.message) || 'Password reset failed', 'error');
+        if (addToast) addToast((data && data.message) || 'Password reset failed. Please try again.', 'error');
       }
     } catch (err) {
-      if (resetToken.startsWith('fallback_token_')) {
-        if (addToast) addToast('Password reset successfully! Please log in with your new password.', 'success');
-        setLoginIdentity(forgotPhone.trim());
-        setLoginPassword(newPassword);
-        setActiveTab('login');
-        setForgotStep(1);
-      } else {
-        if (addToast) addToast('Password reset failed. Please check your network and try again.', 'error');
-      }
+      if (addToast) addToast('Cannot reach server. Please check your internet connection and try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }
