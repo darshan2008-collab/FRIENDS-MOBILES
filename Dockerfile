@@ -1,5 +1,5 @@
-# Stage 1: High-Performance Frontend Build Stage (Debian glibc for 100% esbuild / Vite stability)
-FROM node:18-slim AS build
+# Stage 1: High-Performance Frontend Build Stage (Node 18)
+FROM node:18 AS build
 
 WORKDIR /app
 
@@ -7,10 +7,11 @@ ENV NODE_ENV=development
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 COPY package*.json ./
-RUN npm install --legacy-peer-deps --include=dev
+RUN npm install --legacy-peer-deps
 
 COPY . .
 
+# Build React bundle with Vite
 RUN npm run build
 
 # Stage 2: Production High-Performance NGINX Web Server
