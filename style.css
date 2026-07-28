@@ -3,8 +3,8 @@
    ========================================================================== */
 
 :root {
-  --bg-darker: #060708;
-  --bg-dark: #0b0c0e;
+  --bg-page: #060708;
+  --bg-header: #0b0c0e;
   --bg-card: #121418;
   --bg-card-hover: #181b21;
   --bg-input: #17191e;
@@ -14,7 +14,9 @@
   --orange-glow: rgba(255, 85, 0, 0.35);
   --orange-light: rgba(255, 85, 0, 0.12);
 
-  --text-white: #ffffff;
+  --text-primary: #ffffff;
+  --text-white: var(--text-primary);
+  --text-secondary: #d1d5db;
   --text-muted: #959ca6;
   --text-dim: #656c76;
   --border-color: #20242b;
@@ -31,6 +33,20 @@
   --radius-full: 9999px;
 }
 
+[data-theme="light"] {
+  --bg-page: #f8fafc;
+  --bg-header: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-input: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+  --border-color: #e2e8f0;
+  --border-glow: rgba(255, 85, 0, 0.2);
+}
+
 /* Reset & Global Styles */
 * {
   margin: 0;
@@ -44,8 +60,8 @@ html {
 
 body {
   font-family: var(--font-body);
-  background-color: var(--bg-darker);
-  color: var(--text-white);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
   line-height: 1.5;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
