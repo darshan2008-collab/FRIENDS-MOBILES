@@ -212,6 +212,19 @@ export default function App() {
   });
 
   const [toasts, setToasts] = useState([]);
+
+  const handleRemoveToast = (id) => {
+    setToasts((prev) => (Array.isArray(prev) ? prev.filter(t => t.id !== id) : []));
+  };
+
+  const addToast = (message, icon = '✨') => {
+    if (!message) return;
+    const id = Date.now() + '-' + Math.random().toString(36).substr(2, 6);
+    setToasts((prev) => [...(Array.isArray(prev) ? prev : []), { id, message, icon }]);
+    setTimeout(() => {
+      handleRemoveToast(id);
+    }, 3000);
+  };
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [products, setProducts] = useState(() => {
     try {
@@ -401,19 +414,6 @@ export default function App() {
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
-  };
-
-  const handleRemoveToast = (id) => {
-    setToasts((prev) => (Array.isArray(prev) ? prev.filter(t => t.id !== id) : []));
-  };
-
-  const addToast = (message, icon = '✨') => {
-    if (!message) return;
-    const id = Date.now() + '-' + Math.random().toString(36).substr(2, 6);
-    setToasts((prev) => [...(Array.isArray(prev) ? prev : []), { id, message, icon }]);
-    setTimeout(() => {
-      handleRemoveToast(id);
-    }, 3000);
   };
 
   const [pendingCartItem, setPendingCartItem] = useState(null);
