@@ -1,5 +1,5 @@
-# Stage 1: Build React Frontend (High-Performance Alpine Node 18)
-FROM node:18-alpine AS build
+# Stage 1: High-Performance Frontend Build Stage (Debian glibc for 100% esbuild / Vite stability)
+FROM node:18-slim AS build
 
 WORKDIR /app
 
@@ -7,13 +7,13 @@ ENV NODE_ENV=development
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps --include=dev
 
 COPY . .
 
 RUN npm run build
 
-# Stage 2: Production High-Performance NGINX Server
+# Stage 2: Production High-Performance NGINX Web Server
 FROM nginx:alpine
 
 RUN apk add --no-cache wget
