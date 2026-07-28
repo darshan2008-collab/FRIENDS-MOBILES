@@ -11,8 +11,8 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-# Build React bundle with Vite (100% fail-safe execution guarantee)
-RUN npx vite build || npm run build || (mkdir -p dist && echo '<!DOCTYPE html><html><head><title>FRIENDS MOBILE</title></head><body><div id="root"></div></body></html>' > dist/index.html)
+# Build React production bundle into /app/dist
+RUN npm run build
 
 # Stage 2: Production High-Performance NGINX Web Server
 FROM nginx:alpine
