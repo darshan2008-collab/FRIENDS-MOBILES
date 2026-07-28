@@ -205,14 +205,14 @@ export default function Header({
       <nav className="main-nav">
         <div className="container">
           <ul className="nav-links">
-            <li><a href="#" className="nav-link active">Home</a></li>
+            <li><a href="#" className="nav-link active">{t('navHome')}</a></li>
             <li>
               <button 
                 type="button"
                 onClick={() => onOpenShop && onOpenShop('Mobile Phones')}
                 className="nav-link"
               >
-                Mobile Phones
+                {t('navPhones')}
               </button>
             </li>
             <li>
@@ -221,22 +221,22 @@ export default function Header({
                 onClick={() => onOpenShop && onOpenShop('Chargers & Cables')}
                 className="nav-link"
               >
-                Chargers &amp; Accessories
+                {t('navChargers')}
               </button>
             </li>
-            <li><a href="#photo-frames" className="nav-link">Photo Frames</a></li>
-            <li><a href="#customized-covers" className="nav-link">Customized Back Covers</a></li>
+            <li><a href="#photo-frames" className="nav-link">{t('navPhotoFrames')}</a></li>
+            <li><a href="#customized-covers" className="nav-link">{t('navCustomCovers')}</a></li>
             <li>
               <button 
                 type="button"
                 onClick={() => onOpenShop && onOpenShop('All')}
                 className="nav-link"
               >
-                Shop All Store
+                {t('navShopAll')}
               </button>
             </li>
-            <li><a href="#offers" className="nav-link">Offers</a></li>
-            <li><a href="#contact" className="nav-link">Contact Us</a></li>
+            <li><a href="#offers" className="nav-link">{t('navOffers')}</a></li>
+            <li><a href="#contact" className="nav-link">{t('navContact')}</a></li>
           </ul>
         </div>
       </nav>

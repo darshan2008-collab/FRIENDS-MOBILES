@@ -6,6 +6,7 @@ import {
   Cloud, Database, HardDrive, Download, Zap
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
+import { autoTranslateToTamil } from '../data/translations';
 
 export default function AdminModal({ 
   isOpen, 
@@ -435,9 +436,10 @@ export default function AdminModal({
     if (addToast) addToast('Banner slide deleted successfully.', '🗑️');
   };
 
-  // New Product Form State (with Auto Discount Calculator)
+  // New Product Form State (with Auto Discount Calculator & Tamil Live Translator)
   const [newProduct, setNewProduct] = useState({
     title: '',
+    tamilTitle: '',
     category: 'Accessories',
     originalPrice: '1499',
     discountPct: '20',
@@ -446,7 +448,8 @@ export default function AdminModal({
     inStock: true,
     img: '',
     images: [],
-    description: 'High quality mobile accessory from FRIENDS MOBILE.'
+    description: 'High quality mobile accessory from FRIENDS MOBILE.',
+    tamilDesc: ''
   });
 
   // Shipping Form State
@@ -1692,16 +1695,41 @@ export default function AdminModal({
 
                   <form onSubmit={handleAddProductSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {/* Product Title - full width */}
-                    <div>
-                      <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Product Title *</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. Samsung Galaxy S24 Ultra / boAt Airdopes 141"
-                        value={newProduct.title}
-                        onChange={e => setNewProduct({...newProduct, title: e.target.value})}
-                        required 
-                        style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', boxSizing: 'border-box' }} 
-                      />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Product Title (English) *</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. Samsung Galaxy S24 Ultra / boAt Airdopes 141"
+                          value={newProduct.title}
+                          onChange={e => {
+                            const val = e.target.value;
+                            const autoTa = autoTranslateToTamil(val);
+                            setNewProduct({
+                              ...newProduct, 
+                              title: val,
+                              tamilTitle: autoTa
+                            });
+                          }}
+                          required 
+                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', boxSizing: 'border-box' }} 
+                        />
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '0.74rem', fontWeight: '700', color: '#FF5500' }}>Tamil Title / தமிழ் பெயர் 🇮🇳</label>
+                          <span style={{ fontSize: '0.62rem', background: 'rgba(255, 85, 0, 0.15)', color: '#FF5500', padding: '1px 5px', borderRadius: '5px', fontWeight: '800' }}>
+                            ✨ Auto-Translated
+                          </span>
+                        </div>
+                        <input 
+                          type="text" 
+                          placeholder="தானாக தமிழில் மொழிபெயர்க்கப்படும்..."
+                          value={newProduct.tamilTitle || ''}
+                          onChange={e => setNewProduct({...newProduct, tamilTitle: e.target.value})}
+                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #FF5500', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 'bold', boxSizing: 'border-box' }} 
+                        />
+                      </div>
                     </div>
 
                     {/* Product Description */}
@@ -1710,7 +1738,15 @@ export default function AdminModal({
                       <textarea 
                         placeholder="Enter detailed product specifications, features, and description..."
                         value={newProduct.description || ''}
-                        onChange={e => setNewProduct({...newProduct, description: e.target.value})}
+                        onChange={e => {
+                          const val = e.target.value;
+                          const autoTaDesc = autoTranslateToTamil(val);
+                          setNewProduct({
+                            ...newProduct, 
+                            description: val,
+                            tamilDesc: autoTaDesc
+                          });
+                        }}
                         rows={2}
                         style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }} 
                       />
@@ -1971,16 +2007,41 @@ export default function AdminModal({
                   </div>
 
                   <form onSubmit={saveEditProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {/* Title - full width */}
-                    <div>
-                      <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Product Title</label>
-                      <input 
-                        type="text" 
-                        value={editProductForm.title || ''}
-                        onChange={e => setEditProductForm({...editProductForm, title: e.target.value})}
-                        required 
-                        style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', boxSizing: 'border-box' }} 
-                      />
+                    {/* Title & Tamil Title */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Product Title (English)</label>
+                        <input 
+                          type="text" 
+                          value={editProductForm.title || ''}
+                          onChange={e => {
+                            const val = e.target.value;
+                            const autoTa = autoTranslateToTamil(val);
+                            setEditProductForm({
+                              ...editProductForm, 
+                              title: val,
+                              tamilTitle: autoTa
+                            });
+                          }}
+                          required 
+                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', boxSizing: 'border-box' }} 
+                        />
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <label style={{ fontSize: '0.74rem', fontWeight: '700', color: '#3b82f6' }}>Tamil Title / தமிழ் பெயர் 🇮🇳</label>
+                          <span style={{ fontSize: '0.62rem', background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', padding: '1px 5px', borderRadius: '5px', fontWeight: '800' }}>
+                            ✨ Auto-Translated
+                          </span>
+                        </div>
+                        <input 
+                          type="text" 
+                          placeholder="தானாக தமிழில் மொழிபெயர்க்கப்படும்..."
+                          value={editProductForm.tamilTitle || ''}
+                          onChange={e => setEditProductForm({...editProductForm, tamilTitle: e.target.value})}
+                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #3b82f6', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 'bold', boxSizing: 'border-box' }} 
+                        />
+                      </div>
                     </div>
 
                     {/* Product Description */}
@@ -1989,7 +2050,15 @@ export default function AdminModal({
                       <textarea 
                         placeholder="Enter detailed product specifications, features, and description..."
                         value={editProductForm.description || ''}
-                        onChange={e => setEditProductForm({...editProductForm, description: e.target.value})}
+                        onChange={e => {
+                          const val = e.target.value;
+                          const autoTaDesc = autoTranslateToTamil(val);
+                          setEditProductForm({
+                            ...editProductForm, 
+                            description: val,
+                            tamilDesc: autoTaDesc
+                          });
+                        }}
                         rows={2}
                         style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }} 
                       />

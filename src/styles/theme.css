@@ -4717,6 +4717,30 @@ img {
   transform: scale(1.08);
 }
 
+.ai-lang-pill-btn {
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.ai-lang-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.38);
+  transform: scale(1.04);
+}
+
+
 .ai-chips-ribbon {
   display: flex;
   gap: 8px;

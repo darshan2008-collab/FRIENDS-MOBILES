@@ -379,7 +379,7 @@ export default function AIChatbotModal({
           <div className="ai-chatbot-header-right">
             {/* Inline Language Selection Switcher */}
             <button 
-              className="ai-reset-btn"
+              className="ai-lang-pill-btn"
               onClick={() => {
                 const nextLang = botLang === 'ta' ? 'en' : 'ta';
                 setBotLang(nextLang);
@@ -388,20 +388,11 @@ export default function AIChatbotModal({
                 }
               }}
               title="Switch Language / மொழி மாற்றம்"
-              style={{ 
-                display: 'inline-flex', 
-                alignItems: 'center', 
-                gap: '5px', 
-                fontWeight: '800', 
-                fontSize: '0.78rem',
-                background: 'rgba(255, 255, 255, 0.25)',
-                padding: '4px 10px',
-                borderRadius: '20px'
-              }}
             >
               <Languages size={15} color="#ffffff" />
-              <span>{botLang === 'ta' ? '🇮🇳 தமிழ் (பெண் குரல்)' : '🇬🇧 English (Male)'}</span>
+              <span>{botLang === 'ta' ? 'தமிழ் (Female Voice)' : 'English (Male Voice)'}</span>
             </button>
+
 
             <button 
               className="ai-reset-btn"

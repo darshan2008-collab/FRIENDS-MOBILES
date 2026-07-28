@@ -22,7 +22,7 @@ import BrandMarquee from './components/BrandMarquee';
 import ShoppingPortal from './components/ShoppingPortal';
 import SEOManager from './components/SEOManager';
 import AIChatbotModal from './components/AIChatbotModal';
-import { translations } from './data/translations';
+import { translations, autoTranslateToTamil } from './data/translations';
 
 import './styles/theme.css';
 
@@ -561,9 +561,14 @@ export default function App() {
 
   // Admin Actions — Guaranteed Resilient Products Catalog Operations
   const handleAddProduct = (newProd) => {
+    const autoTaTitle = newProd.tamilTitle || autoTranslateToTamil(newProd.title || '');
+    const autoTaDesc = newProd.tamilDesc || autoTranslateToTamil(newProd.description || newProd.title || '');
+
     const prodWithId = {
       ...newProd,
-      id: newProd.id || Date.now()
+      id: newProd.id || Date.now(),
+      tamilTitle: autoTaTitle,
+      tamilDesc: autoTaDesc
     };
 
     setProducts(prev => {
@@ -595,17 +600,26 @@ export default function App() {
   };
 
   const handleUpdateProduct = (updatedProd) => {
+    const autoTaTitle = updatedProd.tamilTitle || autoTranslateToTamil(updatedProd.title || '');
+    const autoTaDesc = updatedProd.tamilDesc || autoTranslateToTamil(updatedProd.description || updatedProd.title || '');
+
+    const finalProd = {
+      ...updatedProd,
+      tamilTitle: autoTaTitle,
+      tamilDesc: autoTaDesc
+    };
+
     setProducts(prev => {
-      const next = (Array.isArray(prev) ? prev : []).map(p => p.id === updatedProd.id ? updatedProd : p);
+      const next = (Array.isArray(prev) ? prev : []).map(p => p.id === finalProd.id ? finalProd : p);
       try { localStorage.setItem('fm_products', JSON.stringify(next)); } catch (_) {}
       return next;
     });
-    addToast(`Updated product "${(updatedProd.title || '').slice(0, 15)}..."`, '✏️');
+    addToast(`Updated product "${(finalProd.title || '').slice(0, 15)}..."`, '✏️');
 
-    fetch(`${API_BASE}/products/${updatedProd.id}`, {
+    fetch(`${API_BASE}/products/${finalProd.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedProd)
+      body: JSON.stringify(finalProd)
     }).catch(() => {});
   };
 

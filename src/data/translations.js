@@ -8,7 +8,117 @@ export const productTranslations = {
   'Realme Wireless 2S Neckband': 'ரியல்மி வயர்லெஸ் 2S நெக்பேண்ட்',
   'Customized Back Cover': '3D கஸ்டமைஸ் பேக் கவர்',
   'Personalized Wooden Frame': 'கஸ்டமைஸ் மர போட்டோ பிரேம்',
-  'Premium Glass Frame': 'பிரீமியம் அக்ரிலிக் கிளாஸ் பிரேம்'
+  'Premium Glass Frame': 'பிரீமியம் அக்ரிலிக் கிளாஸ் பிரேம்',
+  'Portronics Bridge Y USB 3.0 to Type C OTG Adaptor': 'போர்ட்ரானிக்ஸ் பாஸ்ட் USB 3.0 டைப்-சி OTG அடாப்டர்',
+  'mobile water proof cover': 'மொபைல் வாட்டர்ப்ரூப் நீர்ப்புகா கவர்',
+  'Mobile Waterproof Cover': 'மொபைல் வாட்டர்ப்ரூப் நீர்ப்புகா கவர்',
+  'boAt Airdopes 141': 'போட் ஏர்டோப்ஸ் 141 புளூடூத் இயர்பட்ஸ்',
+  'Portronics OTG Adapter': 'போர்ட்ரானிக்ஸ் OTG அடாப்டர்'
+};
+
+const brandMap = {
+  'boat': 'போட்',
+  'mi': 'மி',
+  'xiaomi': 'சியோமி',
+  'realme': 'ரியல்மி',
+  'portronics': 'போர்ட்ரானிக்ஸ்',
+  'apple': 'ஆப்பிள்',
+  'iphone': 'ஐபோன்',
+  'samsung': 'சாம்சங்',
+  'oneplus': 'ஒன்பிளஸ்',
+  'vivo': 'விவோ',
+  'oppo': 'ஓப்போ',
+  'poco': 'போகோ',
+  'nokia': 'நோக்கியா',
+  'motorola': 'மோட்டோரோலா',
+  'moto': 'மோட்டோ',
+  'redmi': 'ரெட்மி',
+  'infinix': 'இன்பினிக்ஸ்',
+  'techno': 'டெக்னோ',
+  'noise': 'நாய்ஸ்',
+  'fire-boltt': 'பயர்-போல்ட்',
+  'fireboltt': 'பயர்-போல்ட்',
+  'boult': 'போல்ட்'
+};
+
+const termMap = {
+  'airdopes': 'ஏர்டோப்ஸ்',
+  'earbuds': 'இயர்பட்ஸ்',
+  'earphone': 'இயர்போன்',
+  'earphones': 'இயர்போன்கள்',
+  'bluetooth': 'புளூடூத்',
+  'wireless': 'வயர்லெஸ்',
+  'neckband': 'நெக்பேண்ட்',
+  'power': 'பவர்',
+  'bank': 'பேங்க்',
+  'powerbank': 'பவர் பேங்க்',
+  'charger': 'சார்ஜர்',
+  'fast': 'வேகமான',
+  'quick': 'விரைவு',
+  'adapter': 'அடாப்டர்',
+  'adaptor': 'அடாப்டர்',
+  'cable': 'கேபிள்',
+  'otg': 'OTG',
+  'type-c': 'டைப்-சி',
+  'type': 'டைப்',
+  'usb': 'USB',
+  'bridge': 'பிரிட்ஜ்',
+  'customized': 'கஸ்டமைஸ்',
+  'custom': 'கஸ்டமைஸ்',
+  'back': 'பேக்',
+  'cover': 'கவர்',
+  'covers': 'கவர்கள்',
+  'case': 'கேஸ்',
+  'pouch': 'பவுச்',
+  'mobile': 'மொபைல்',
+  'phone': 'போன்',
+  'waterproof': 'வாட்டர்ப்ரூப் நீர்ப்புகா',
+  'water': 'நீர்ப்புகா',
+  'proof': 'கவர்',
+  'photo': 'போட்டோ',
+  'frame': 'பிரேம்',
+  'frames': 'பிரேம்கள்',
+  'wooden': 'மர',
+  'glass': 'அக்ரிலிக் கிளாஸ்',
+  'tempered': 'டெம்பர்டு',
+  'screen': 'ஸ்கிரீன்',
+  'guard': 'கார்டு',
+  'protector': 'பாதுகாப்பு',
+  'display': 'டிஸ்பிளே',
+  'speaker': 'ஸ்பீக்கர்',
+  'smartwatch': 'ஸ்மார்ட்வாட்ச்',
+  'watch': 'வாட்ச்',
+  'stand': 'ஸ்டாண்ட்',
+  'holder': 'ஹோல்டர்',
+  'mount': 'மவுண்ட்',
+  'car': 'கார்'
+};
+
+export const autoTranslateToTamil = (text) => {
+  if (!text || typeof text !== 'string') return '';
+  const trimmed = text.trim();
+  if (!trimmed) return '';
+
+  if (productTranslations[trimmed]) {
+    return productTranslations[trimmed];
+  }
+
+  // Case insensitive dictionary check
+  const matchKey = Object.keys(productTranslations).find(
+    k => k.toLowerCase() === trimmed.toLowerCase()
+  );
+  if (matchKey) return productTranslations[matchKey];
+
+  // Tokenize and translate dynamic words
+  const words = trimmed.split(/\s+/);
+  const translated = words.map(word => {
+    const cleanWord = word.toLowerCase().replace(/[^a-z0-9\-]/g, '');
+    if (brandMap[cleanWord]) return brandMap[cleanWord];
+    if (termMap[cleanWord]) return termMap[cleanWord];
+    return word;
+  });
+
+  return translated.join(' ');
 };
 
 export const getProductTitle = (product, lang = 'en') => {
@@ -17,18 +127,26 @@ export const getProductTitle = (product, lang = 'en') => {
   if (!title) return '';
   if (lang !== 'ta') return title;
 
-  const taTitle = (typeof product === 'object' && product.tamilTitle) || productTranslations[title];
-  if (taTitle) {
-    return taTitle;
+  if (typeof product === 'object' && product.tamilTitle) {
+    return product.tamilTitle;
   }
-  return title;
+
+  return autoTranslateToTamil(title);
 };
 
 export const getProductDesc = (product, lang = 'en') => {
   if (!product) return '';
   const desc = (typeof product === 'object' && product.description) || '';
   if (lang !== 'ta') return desc;
-  return (typeof product === 'object' && product.tamilDesc) || '100% அசல் உத்திரவாதத்துடன் கூடிய உயர்தர பிரண்ட்ஸ் மொபைல் தயாரிப்பு.';
+
+  if (typeof product === 'object' && product.tamilDesc) {
+    return product.tamilDesc;
+  }
+
+  const title = typeof product === 'object' ? (product.title || product.name || '') : product;
+  const translatedTitle = autoTranslateToTamil(title || desc);
+
+  return `${translatedTitle} - 100% அசல் உத்திரவாதத்துடன் கூடிய உயர்தர பிரண்ட்ஸ் மொபைல் தயாரிப்பு.`;
 };
 
 export const translations = {
@@ -42,10 +160,12 @@ export const translations = {
     navHome: 'Home',
     navPhones: 'Mobile Phones',
     navAccessories: 'Accessories',
+    navChargers: 'Chargers & Accessories',
     navPhotoFrames: 'Photo Frames',
-    navCustomCovers: 'Custom Back Covers',
+    navCustomCovers: 'Customized Back Covers',
+    navShopAll: 'Shop All Store',
     navServices: 'Services',
-    navOffers: 'Offers & Discounts',
+    navOffers: 'Offers',
     navContact: 'Contact Us',
     searchPlaceholder: 'Search products, brands and accessories...',
     cart: 'Cart',
@@ -161,12 +281,14 @@ export const translations = {
 
     // Header & Navigation
     navHome: 'முகப்பு',
-    navPhones: 'மொபைல்கள்',
+    navPhones: 'மொபைல் போன்கள்',
     navAccessories: 'அக்சஸரீஸ்',
+    navChargers: 'சார்ஜர் & அக்சஸரீஸ்',
     navPhotoFrames: 'போட்டோ பிரேம்கள்',
-    navCustomCovers: 'கஸ்டம் பேக் கவர்',
+    navCustomCovers: 'கஸ்டமைஸ் பேக் கவர்',
+    navShopAll: 'அனைத்து பொருட்கள்',
     navServices: 'சேவைகள்',
-    navOffers: 'சலுகைகள் & தள்ளுபடி',
+    navOffers: 'சலுகைகள்',
     navContact: 'தொடர்புகொள்ள',
     searchPlaceholder: 'மொபைல் பொருட்கள், பிராண்டுகளை தேடவும்...',
     cart: 'கார்ட்',
