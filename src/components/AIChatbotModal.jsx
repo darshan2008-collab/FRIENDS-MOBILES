@@ -4,6 +4,7 @@ import {
   RefreshCw, Volume2, VolumeX, Languages, ShieldCheck, CheckCircle2, 
   AlertTriangle, Package, Truck, ArrowRight, CornerDownRight, Sparkles
 } from 'lucide-react';
+import { getProductTitle, autoTranslateToTamil } from '../data/translations';
 
 export default function AIChatbotModal({ 
   isOpen, 
@@ -111,9 +112,56 @@ export default function AIChatbotModal({
     setSpeakingMsgId(null);
   };
 
+  const getPhoneticTamil = (tamilText) => {
+    return tamilText
+      .replace(/வணக்கம்/g, 'Vanakkam')
+      .replace(/பிரண்ட்ஸ்/g, 'Friends')
+      .replace(/மொபைல்/g, 'Mobile')
+      .replace(/வாடிக்கையாளர்/g, 'vaadikkaiyaalar')
+      .replace(/சேவை/g, 'sevai')
+      .replace(/உதவி/g, 'udhavi')
+      .replace(/மையத்திற்கு/g, 'maiyathirkku')
+      .replace(/வரவேற்கிறோம்/g, 'varaverkirom')
+      .replace(/இயக்கப்பட்டது/g, 'iyakkappattadhu')
+      .replace(/ஆர்டர்/g, 'order')
+      .replace(/டிராக்கிங்/g, 'tracking')
+      .replace(/நிலவரம்/g, 'nilavaram')
+      .replace(/விபரம்/g, 'vibaram')
+      .replace(/கண்டுபிடிக்கப்பட்டது/g, 'kandupadikkappattadhu')
+      .replace(/ரத்து/g, 'rathu')
+      .replace(/மாற்று/g, 'maattru')
+      .replace(/பாலிசி/g, 'policy')
+      .replace(/கட்டணம்/g, 'kattanam')
+      .replace(/ரீஃபண்ட்/g, 'refund')
+      .replace(/புகார்கள்/g, 'pukaarkal')
+      .replace(/நேரடி/g, 'neradi')
+      .replace(/தொடர்பு/g, 'thodarpu')
+      .replace(/சிரமத்திற்கு/g, 'shramathirkku')
+      .replace(/மன்னிக்கவும்/g, 'mannikkavum')
+      .replace(/தொலைபேசி/g, 'tholaipesi')
+      .replace(/எண்கள்/g, 'engkal')
+      .replace(/வாட்ஸ்அப்/g, 'WhatsApp')
+      .replace(/நிர்வாகக்/g, 'nirvaaga')
+      .replace(/குழு/g, 'kuzu')
+      .replace(/உடனடியாக/g, 'udhanadiyaga')
+      .replace(/தீர்வு/g, 'theervu')
+      .replace(/வழங்கும்/g, 'vazangum')
+      .replace(/போட்/g, 'boAt')
+      .replace(/ஏர்டோப்ஸ்/g, 'Airdopes')
+      .replace(/இயர்பட்ஸ்/g, 'Earbuds')
+      .replace(/மி/g, 'Mi')
+      .replace(/பவர்/g, 'Power')
+      .replace(/பேங்க்/g, 'Bank')
+      .replace(/போர்ட்ரானிக்ஸ்/g, 'Portronics')
+      .replace(/சார்ஜர்/g, 'Charger')
+      .replace(/ரியல்மி/g, 'Realme')
+      .replace(/நெக்பேண்ட்/g, 'Neckband')
+      .replace(/[*_#`~]/g, '');
+  };
+
   // Web Speech API Synthesizer
   // English: Male Strong Voice
-  // Tamil: Female Fluent Voice
+  // Tamil: Female Fluent Voice (With Full Phonetic Tamil Fallback)
   const speakText = (textToSpeak, msgId = null, activeLang = botLang) => {
     if (!('speechSynthesis' in window)) return;
 
@@ -126,8 +174,10 @@ export default function AIChatbotModal({
 
     setSpeakingMsgId(msgId);
 
-    // Clean text before speaking (remove emojis, markdown tags, links, parentheses)
+    // Clean text before speaking:
+    // Exclude product title/model lines from spoken voice audio so voice stays clean, polite, and natural
     const cleanText = textToSpeak
+      .replace(/• (பொருள்|Item|ஆர்டர் எண்|Order ID):.*?\n/gi, '')
       .replace(/[*_#`~]/g, '')
       .replace(/\(.*?\)/g, '')
       .replace(/https?:\/\/\S+/g, '')
@@ -141,8 +191,8 @@ export default function AIChatbotModal({
 
     if (activeLang === 'ta') {
       utterance.lang = 'ta-IN';
-      utterance.pitch = 1.15; // Smooth Female Pitch for Tamil
-      utterance.rate = 0.85;  // Slightly relaxed pace for natural Tamil pronunciation
+      utterance.pitch = 1.15;
+      utterance.rate = 0.85;
 
       const tamilVoice = availVoices.find(v => 
         (v.lang && v.lang.toLowerCase().startsWith('ta')) ||
@@ -152,6 +202,20 @@ export default function AIChatbotModal({
 
       if (tamilVoice) {
         utterance.voice = tamilVoice;
+      } else {
+        // Fallback for Windows SAPI Speech engine: Speak full phonetic Tamil sentence so every sentence word is spoken!
+        utterance.lang = 'en-IN';
+        utterance.text = getPhoneticTamil(cleanText);
+        utterance.pitch = 1.05;
+        utterance.rate = 0.88;
+
+        const femaleVoice = availVoices.find(v => 
+          (v.lang.includes('en') || v.name.toLowerCase().includes('english')) &&
+          (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('zira') || 
+           v.name.toLowerCase().includes('heera') || v.name.toLowerCase().includes('swara'))
+        ) || availVoices.find(v => v.lang.includes('en'));
+
+        if (femaleVoice) utterance.voice = femaleVoice;
       }
     } else {
       utterance.lang = 'en-IN';
@@ -292,9 +356,10 @@ export default function AIChatbotModal({
             );
 
             if (foundOrder) {
+              const itemTitleTa = getProductTitle(foundOrder.items?.[0] || foundOrder.title || 'Mobile Accessory', botLang);
               botResponseText = botLang === 'ta'
-                ? `📦 **ஆர்டர் விபரம் கண்டுபிடிக்கப்பட்டது!**\n\n• ஆர்டர் எண்: **${foundOrder.orderId || orderIdClean}**\n• நிலை: **${foundOrder.status || 'எக்ஸ்பிரஸ் கொரியர் மூலம் அனுப்பப்பட்டுள்ளது'}**\n• வாடிக்கையாளர்: ${foundOrder.customerName || 'மதிப்பிற்குரிய வாடிக்கையாளர்'}\n• மொத்த தொகை: **₹${foundOrder.total || foundOrder.amount || '1,499'}**\n• எதிர்பார்க்கப்படும் டெலிவரி: **நாளை மாலை**`
-                : `📦 **Order Details Found!**\n\n• Order ID: **${foundOrder.orderId || orderIdClean}**\n• Status: **${foundOrder.status || 'Dispatched via Express Courier'}**\n• Customer: ${foundOrder.customerName || 'Valued Customer'}\n• Amount: **₹${foundOrder.total || foundOrder.amount || '1,499'}**\n• Estimated Delivery: **Tomorrow Evening**`;
+                ? `📦 **ஆர்டர் விபரம் கண்டுபிடிக்கப்பட்டது!**\n\n• பொருள்: **${itemTitleTa}**\n• ஆர்டர் எண்: **${foundOrder.orderId || orderIdClean}**\n• நிலை: **${foundOrder.status || 'எக்ஸ்பிரஸ் கொரியர் மூலம் அனுப்பப்பட்டுள்ளது'}**\n• வாடிக்கையாளர்: ${foundOrder.customerName || 'மதிப்பிற்குரிய வாடிக்கையாளர்'}\n• மொத்த தொகை: **₹${foundOrder.total || foundOrder.amount || '1,499'}**\n• எதிர்பார்க்கப்படும் டெலிவரி: **நாளை மாலை**`
+                : `📦 **Order Details Found!**\n\n• Item: **${foundOrder.title || 'Mobile Accessory'}**\n• Order ID: **${foundOrder.orderId || orderIdClean}**\n• Status: **${foundOrder.status || 'Dispatched via Express Courier'}**\n• Customer: ${foundOrder.customerName || 'Valued Customer'}\n• Amount: **₹${foundOrder.total || foundOrder.amount || '1,499'}**\n• Estimated Delivery: **Tomorrow Evening**`;
             } else {
               botResponseText = botLang === 'ta'
                 ? `📦 **ஆர்டர் ஐடி ${orderIdClean} நிலவரம்:**\n\nஉங்கள் ஆர்டர் மதுரையிலுள்ள பிரண்ட்ஸ் மொபைல் தலைமை மையத்தில் பாதுகாப்பாக பேக் செய்யப்பட்டு அனுப்பத் தயாராக உள்ளது! எக்ஸ்பிரஸ் கொரியர் மூலம் விரைவாக உங்கள் முகவரிக்கு வந்து சேரும்.`
