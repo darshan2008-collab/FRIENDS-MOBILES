@@ -47,8 +47,7 @@ services:
       - backend_data:/app/data
       - backend_images:/app/public/images
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:5000/api/health || exit 1"]
       interval: 15s
@@ -104,8 +103,7 @@ services:
       - backend_data:/app/data
       - backend_images:/app/public/images
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
 
   frontend:
     build:
@@ -122,8 +120,7 @@ services:
       VITE_BACKEND_URL: "http://backend:5000"
       VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
       interval: 20s

@@ -24,17 +24,31 @@ export default function AdminModal({
   onUpdateSlides,
   onUpdateOrders
 }) {
+  const [adminToken, setAdminToken] = useState(() => {
+    try {
+      return sessionStorage.getItem('fm_admin_token') || '';
+    } catch {
+      return '';
+    }
+  });
+
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
-      return sessionStorage.getItem('fm_admin_auth') === 'true' || localStorage.getItem('fm_admin_auth') === 'true';
+      const token = sessionStorage.getItem('fm_admin_token');
+      return Boolean(token);
     } catch {
       return false;
     }
   });
 
+  const [authStep, setAuthStep] = useState(1); // 1: Credentials, 2: Security PIN (2FA)
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+  const [adminPin, setAdminPin] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [sessionTimeLeft, setSessionTimeLeft] = useState(15 * 60); // 15-minute inactivity session countdown
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'products' | 'orders' | 'shipping' | 'slides'
   const [isAdminSidebarOpen, setIsAdminSidebarOpen] = useState(false);
   const [isManualCategory, setIsManualCategory] = useState(false);
@@ -58,6 +72,69 @@ export default function AdminModal({
       setAdminOrders(orders);
     }
   }, [orders]);
+
+  // Handle Admin Logout & Session Revocation
+  const handleAdminLogout = (reason = 'Admin session locked.') => {
+    try {
+      const apiHost = getApiHost();
+      const currentToken = adminToken || sessionStorage.getItem('fm_admin_token');
+      if (currentToken) {
+        fetch(`${apiHost}/api/admin/logout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          }
+        }).catch(() => {});
+      }
+    } catch (_) {}
+
+    setIsAuthenticated(false);
+    setAdminToken('');
+    setAuthStep(1);
+    setAdminUsername('');
+    setAdminPassword('');
+    setAdminPin('');
+    setAuthError('');
+    try {
+      sessionStorage.removeItem('fm_admin_token');
+      sessionStorage.removeItem('fm_admin_auth');
+      localStorage.removeItem('fm_admin_auth');
+    } catch (_) {}
+
+    if (addToast) addToast(reason, '🔒');
+  };
+
+  // 15-Minute Inactivity Session Timer & Auto Logout
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const timer = setInterval(() => {
+      setSessionTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleAdminLogout('Session expired due to 15 minutes of inactivity.');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    const resetActivityTimer = () => {
+      setSessionTimeLeft(15 * 60);
+    };
+
+    window.addEventListener('mousemove', resetActivityTimer);
+    window.addEventListener('keydown', resetActivityTimer);
+    window.addEventListener('click', resetActivityTimer);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('mousemove', resetActivityTimer);
+      window.removeEventListener('keydown', resetActivityTimer);
+      window.removeEventListener('click', resetActivityTimer);
+    };
+  }, [isAuthenticated]);
 
   // Complaints & Support Tickets State
   const [complaints, setComplaints] = useState([]);
@@ -87,7 +164,17 @@ export default function AdminModal({
 
   const safeJsonFetch = async (url, options = {}) => {
     try {
-      const res = await fetch(url, options);
+      const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
+      const headers = { ...(options.headers || {}) };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const res = await fetch(url, { ...options, headers });
+      
+      if (res.status === 401 && isAuthenticated) {
+        handleAdminLogout('Session expired or unauthorized request. Please re-authenticate.');
+      }
+
       const text = await res.text();
       try {
         const json = JSON.parse(text);
@@ -161,8 +248,11 @@ export default function AdminModal({
 
   const fetchComplaints = async () => {
     try {
-      const apiHost = '';
-      const res = await fetch(`${apiHost}/api/admin/complaints`);
+      const apiHost = getApiHost();
+      const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
+      const res = await fetch(`${apiHost}/api/admin/complaints`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       if (data.success && data.complaints) {
         setComplaints(data.complaints);
@@ -177,16 +267,20 @@ export default function AdminModal({
   };
 
   const fetchOrders = async () => {
+    const apiHost = getApiHost();
+    const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
+
     const endpoints = [
+      `${apiHost}/api/admin/orders`,
       '/api/admin/orders',
-      '/api/orders',
-      'https://friends-mobiles-rho.vercel.app/api/admin/orders',
-      'https://friends-mobiles-rho.vercel.app/api/orders'
+      '/api/orders'
     ];
 
     for (const url of endpoints) {
       try {
-        const res = await fetch(url);
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         const data = await res.json();
         if (data && data.success && Array.isArray(data.orders) && data.orders.length > 0) {
           setAdminOrders(data.orders);
@@ -215,10 +309,14 @@ export default function AdminModal({
 
   const handleUpdateComplaintStatus = async (ticketId, newStatus, notes = '') => {
     try {
-      const apiHost = '';
+      const apiHost = getApiHost();
+      const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
       await fetch(`${apiHost}/api/admin/complaints/${ticketId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ status: newStatus, adminNotes: notes })
       });
     } catch (_) {}
@@ -411,28 +509,89 @@ export default function AdminModal({
 
   if (!isOpen) return null;
 
-  const handleLoginSubmit = (e) => {
+  // --- High Security Server-Side Authentication Handlers ---
+  const handleStep1LoginSubmit = async (e) => {
     e.preventDefault();
-    const u = adminUsername.trim().toLowerCase();
-    const p = adminPassword.trim();
-    if (
-      (u === 'friendsmobile' && (p === 'fm@1234' || p === 'Friendsmobile@123' || p === 'fm1234')) ||
-      (u === 'admin' && (p === 'fm@1234' || p === '1234'))
-    ) {
-      setIsAuthenticated(true);
-      try {
-        sessionStorage.setItem('fm_admin_auth', 'true');
-        localStorage.setItem('fm_admin_auth', 'true');
-      } catch (_) {}
-      if (addToast) addToast('Admin Access Granted. Welcome, Super Admin!', '🔐');
-    } else {
-      if (addToast) addToast('Invalid credentials! Check username & password.', '❌');
+    setAuthError('');
+    setIsSubmittingAuth(true);
+
+    try {
+      const apiHost = getApiHost();
+      const res = await fetch(`${apiHost}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: adminUsername.trim(),
+          password: adminPassword.trim(),
+          pin: adminPin.trim() || undefined
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data && data.success) {
+        if (data.requiresPin) {
+          setAuthStep(2);
+          if (addToast) addToast('Primary credentials verified. Enter 6-digit Security PIN.', '🔐');
+        } else if (data.token) {
+          setAdminToken(data.token);
+          setIsAuthenticated(true);
+          try {
+            sessionStorage.setItem('fm_admin_token', data.token);
+            sessionStorage.setItem('fm_admin_auth', 'true');
+          } catch (_) {}
+          if (addToast) addToast('Admin High-Security Access Granted. Welcome Super Admin!', '🛡️');
+        }
+      } else {
+        const errorMsg = data?.message || 'Invalid Admin Username or Password.';
+        setAuthError(errorMsg);
+        if (addToast) addToast(errorMsg, '❌');
+      }
+    } catch (err) {
+      setAuthError('Authentication server offline or network connection error.');
+      if (addToast) addToast('Authentication server connection failed.', '❌');
+    } finally {
+      setIsSubmittingAuth(false);
     }
   };
 
-  const handleDemoFill = () => {
-    setAdminUsername('Friendsmobile');
-    setAdminPassword('fm@1234');
+  const handleStep2PinSubmit = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    setIsSubmittingAuth(true);
+
+    try {
+      const apiHost = getApiHost();
+      const res = await fetch(`${apiHost}/api/admin/verify-pin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: adminUsername.trim(),
+          pin: adminPin.trim()
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data && data.success && data.token) {
+        setAdminToken(data.token);
+        setIsAuthenticated(true);
+        try {
+          sessionStorage.setItem('fm_admin_token', data.token);
+          sessionStorage.setItem('fm_admin_auth', 'true');
+        } catch (_) {}
+        if (addToast) addToast('2FA Security Passed! Welcome, Super Admin.', '🔐');
+      } else {
+        const errorMsg = data?.message || 'Invalid 6-Digit Admin Security PIN.';
+        setAuthError(errorMsg);
+        if (addToast) addToast(errorMsg, '❌');
+      }
+    } catch (err) {
+      setAuthError('PIN verification failed. Server connection error.');
+      if (addToast) addToast('PIN verification error.', '❌');
+    } finally {
+      setIsSubmittingAuth(false);
+    }
   };
 
   // --- Executive Order History Report (Excel CSV Export) ---
@@ -444,8 +603,11 @@ export default function AdminModal({
     }
 
     try {
-      const apiHost = '';
-      const response = await fetch(`${apiHost}/api/admin/orders/export-excel`);
+      const apiHost = getApiHost();
+      const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
+      const response = await fetch(`${apiHost}/api/admin/orders/export-excel`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -953,32 +1115,57 @@ export default function AdminModal({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           {isAuthenticated && (
-            <button 
-              onClick={() => {
-                setIsAuthenticated(false);
-                try {
-                  sessionStorage.removeItem('fm_admin_auth');
-                  localStorage.removeItem('fm_admin_auth');
-                } catch (_) {}
-                if (addToast) addToast('Admin Portal Locked.', '🔒');
-              }}
-              style={{
+            <>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '8px',
+                background: 'rgba(34, 197, 94, 0.1)',
+                border: '1px solid rgba(34, 197, 94, 0.3)',
+                color: '#16a34a',
+                fontSize: '0.74rem',
+                fontWeight: '700'
+              }}>
+                <ShieldCheck size={14} /> 2FA Active
+              </div>
+
+              <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                padding: '6px 10px',
+                padding: '4px 10px',
                 borderRadius: '8px',
-                border: '1px solid var(--border-color)',
                 background: 'var(--bg-input)',
-                color: 'var(--text-secondary)',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '0.78rem'
-              }}
-              title="Lock Admin Portal"
-            >
-              <LogOut size={15} /> <span className="close-btn-label">Lock</span>
-            </button>
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-muted)',
+                fontSize: '0.74rem',
+                fontWeight: '700'
+              }} title="Inactivity Auto-Logout Countdown">
+                <Clock size={13} /> {Math.floor(sessionTimeLeft / 60)}:{String(sessionTimeLeft % 60).padStart(2, '0')}
+              </div>
+
+              <button 
+                onClick={() => handleAdminLogout('Admin session locked.')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '6px 10px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-input)',
+                  color: 'var(--text-secondary)',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '0.78rem'
+                }}
+                title="Lock Admin Session"
+              >
+                <LogOut size={15} /> <span className="close-btn-label">Lock Session</span>
+              </button>
+            </>
           )}
 
           <button 
@@ -1005,7 +1192,7 @@ export default function AdminModal({
 
       {/* Main Content Area */}
       {!isAuthenticated ? (
-        /* Full Page Admin Login Screen */
+        /* Full Page High Security Admin Login Screen */
         <div style={{
           flex: 1,
           display: 'flex',
@@ -1039,96 +1226,203 @@ export default function AdminModal({
               <ShieldCheck size={32} />
             </div>
 
-            <h3 style={{ fontSize: '1.45rem', fontWeight: '800', margin: '0 0 6px 0' }}>Admin Portal Access</h3>
-            <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', margin: '0 0 24px 0' }}>
-              Sign in with executive admin credentials to manage products, pricing, discounts and shipping rates.
+            <h3 style={{ fontSize: '1.45rem', fontWeight: '800', margin: '0 0 6px 0' }}>
+              {authStep === 1 ? 'High-Security Admin Login' : '2FA Security PIN Verification'}
+            </h3>
+            <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: '0 0 20px 0' }}>
+              {authStep === 1 
+                ? 'Enter your executive administrative credentials to authenticate.' 
+                : 'Enter your 6-digit Security PIN to complete two-factor authentication.'}
             </p>
 
-            <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Username</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <User size={18} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
-                  <input 
-                    type="text" 
-                    placeholder="Username" 
-                    value={adminUsername}
-                    onChange={(e) => setAdminUsername(e.target.value)}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '12px 12px 12px 40px',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-input)',
-                      color: 'var(--text-primary)',
-                      outline: 'none',
-                      fontSize: '0.95rem'
-                    }}
-                  />
-                </div>
+            {authError && (
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#ef4444',
+                padding: '10px 14px',
+                borderRadius: '10px',
+                fontSize: '0.82rem',
+                fontWeight: '700',
+                marginBottom: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                textAlign: 'left'
+              }}>
+                <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                <span>{authError}</span>
               </div>
+            )}
 
-              <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Password</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <Key size={18} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
-                  <input 
-                    type={showAdminPassword ? "text" : "password"} 
-                    placeholder="••••••••" 
-                    value={adminPassword}
-                    onChange={(e) => setAdminPassword(e.target.value)}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '12px 40px 12px 40px',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-input)',
-                      color: 'var(--text-primary)',
-                      outline: 'none',
-                      fontSize: '0.95rem'
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowAdminPassword(!showAdminPassword)}
-                    style={{
-                      position: 'absolute',
-                      right: '12px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: 'var(--text-muted)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '4px'
-                    }}
-                    title={showAdminPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showAdminPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+            {authStep === 1 ? (
+              /* Step 1: Username & Password Form */
+              <form onSubmit={handleStep1LoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Admin Username</label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <User size={18} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
+                    <input 
+                      type="text" 
+                      placeholder="Username" 
+                      value={adminUsername}
+                      onChange={(e) => setAdminUsername(e.target.value)}
+                      required
+                      style={{
+                        width: '100%',
+                        padding: '12px 12px 12px 40px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-input)',
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                        fontSize: '0.95rem'
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <button 
-                type="submit" 
-                className="btn btn-orange" 
-                style={{ 
-                  width: '100%', 
-                  padding: '14px', 
-                  fontSize: '0.95rem', 
-                  fontWeight: 'bold', 
-                  borderRadius: '10px',
-                  justifyContent: 'center',
-                  marginTop: '8px'
-                }}
-              >
-                UNLOCK ADMIN PANEL <ArrowRight size={18} />
-              </button>
-            </form>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Password</label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Key size={18} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
+                    <input 
+                      type={showAdminPassword ? "text" : "password"} 
+                      placeholder="••••••••" 
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      required
+                      style={{
+                        width: '100%',
+                        padding: '12px 40px 12px 40px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-input)',
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                        fontSize: '0.95rem'
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAdminPassword(!showAdminPassword)}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--text-muted)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '4px'
+                      }}
+                      title={showAdminPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showAdminPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', color: 'var(--text-muted)', margin: '2px 0' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#16a34a', fontWeight: '700' }}>
+                    <Lock size={12} /> 256-Bit Encrypted
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '600' }}>
+                    <ShieldCheck size={12} color="#FF5500" /> 2FA PIN Required
+                  </span>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingAuth}
+                  className="btn btn-orange" 
+                  style={{ 
+                    width: '100%', 
+                    padding: '14px', 
+                    fontSize: '0.95rem', 
+                    fontWeight: 'bold', 
+                    borderRadius: '10px',
+                    justifyContent: 'center',
+                    marginTop: '8px',
+                    opacity: isSubmittingAuth ? 0.7 : 1,
+                    cursor: isSubmittingAuth ? 'wait' : 'pointer'
+                  }}
+                >
+                  {isSubmittingAuth ? 'VERIFYING CREDENTIALS...' : 'CONTINUE TO 2FA STEP'} <ArrowRight size={18} />
+                </button>
+              </form>
+            ) : (
+              /* Step 2: 6-Digit PIN Form */
+              <form onSubmit={handleStep2PinSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
+                <div>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>6-Digit Security PIN</label>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Lock size={18} style={{ position: 'absolute', left: '12px', color: '#FF5500' }} />
+                    <input 
+                      type="password" 
+                      maxLength={6}
+                      placeholder="••••••" 
+                      value={adminPin}
+                      onChange={(e) => setAdminPin(e.target.value)}
+                      required
+                      autoFocus
+                      style={{
+                        width: '100%',
+                        padding: '12px 12px 12px 40px',
+                        borderRadius: '10px',
+                        border: '2px solid #FF5500',
+                        background: 'var(--bg-input)',
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                        fontSize: '1.2rem',
+                        letterSpacing: '6px',
+                        fontWeight: 'bold',
+                        textAlign: 'center'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={isSubmittingAuth}
+                  className="btn btn-orange" 
+                  style={{ 
+                    width: '100%', 
+                    padding: '14px', 
+                    fontSize: '0.95rem', 
+                    fontWeight: 'bold', 
+                    borderRadius: '10px',
+                    justifyContent: 'center',
+                    marginTop: '8px',
+                    opacity: isSubmittingAuth ? 0.7 : 1,
+                    cursor: isSubmittingAuth ? 'wait' : 'pointer'
+                  }}
+                >
+                  {isSubmittingAuth ? 'UNLOCKING PORTAL...' : 'UNLOCK ADMIN PORTAL'} <ArrowRight size={18} />
+                </button>
+
+                <button 
+                  type="button" 
+                  onClick={() => { setAuthStep(1); setAuthError(''); }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    textAlign: 'center',
+                    marginTop: '4px'
+                  }}
+                >
+                  ← Back to Username & Password Login
+                </button>
+              </form>
+            )}
           </div>
         </div>
       ) : (
