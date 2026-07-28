@@ -32,6 +32,7 @@ const initialProducts = [
   {
     id: 1,
     title: 'boAt Airdopes 141 Bluetooth Earbuds',
+    tamilTitle: 'போட் ஏர்டோப்ஸ் 141 புளூடூத் இயர்பட்ஸ்',
     category: 'Earphones',
     discount: '-20%',
     price: 1199,
@@ -41,11 +42,13 @@ const initialProducts = [
     inStock: true,
     img: 'images/prod_airdopes.png',
     fallback: 'http://localhost:5000/images/prod_airdopes.png',
-    description: 'True Wireless Earbuds with up to 42H Playtime, Beast Mode for Low Latency Gaming, and ENx Technology for crystal clear calls.'
+    description: 'True Wireless Earbuds with up to 42H Playtime, Beast Mode for Low Latency Gaming, and ENx Technology for crystal clear calls.',
+    tamilDesc: 'உயர் தரமான 42 மணிநேரம் இயங்கும் வயர்லெஸ் ப்ளூடூத் இயர்பட்ஸ்.'
   },
   {
     id: 2,
     title: 'Mi 20000mAh Power Bank 3i',
+    tamilTitle: 'மி 20000mAh பாஸ்ட் பவர் பேங்க் 3i',
     category: 'Power Banks',
     discount: '-15%',
     price: 1699,
@@ -55,11 +58,13 @@ const initialProducts = [
     inStock: true,
     img: 'images/prod_powerbank.png',
     fallback: 'http://localhost:5000/images/prod_powerbank.png',
-    description: 'High capacity 20000mAh lithium polymer battery with 18W fast charging and triple port output.'
+    description: 'High capacity 20000mAh lithium polymer battery with 18W fast charging and triple port output.',
+    tamilDesc: '20000mAh அதிவேக பவர் பேங்க் 3 போர்ட் வசதியுடன்.'
   },
   {
     id: 3,
     title: 'Portronics 20W Fast Charger',
+    tamilTitle: 'போர்ட்ரானிக்ஸ் 20W வேகமான சார்ஜர்',
     category: 'Chargers & Cables',
     discount: '-25%',
     price: 599,
@@ -69,11 +74,13 @@ const initialProducts = [
     inStock: true,
     img: 'images/prod_charger.png',
     fallback: 'http://localhost:5000/images/prod_charger.png',
-    description: 'Ultra fast 20W Type-C Power Delivery wall charger compatible with iPhone, Samsung, and Android devices.'
+    description: 'Ultra fast 20W Type-C Power Delivery wall charger compatible with iPhone, Samsung, and Android devices.',
+    tamilDesc: '20W டைப்-சி அதிவேக சார்ஜர்.'
   },
   {
     id: 4,
     title: 'Realme Wireless 2S Neckband',
+    tamilTitle: 'ரியல்மி வயர்லெஸ் 2S நெக்பேண்ட்',
     category: 'Earphones',
     discount: '-10%',
     price: 1349,
@@ -83,11 +90,13 @@ const initialProducts = [
     inStock: true,
     img: 'images/prod_neckband.png',
     fallback: 'http://localhost:5000/images/prod_neckband.png',
-    description: 'Flexible neckband earphones with 11.2mm dynamic bass boost drivers, magnetic instant connect, and fast charging.'
+    description: 'Flexible neckband earphones with 11.2mm dynamic bass boost drivers, magnetic instant connect, and fast charging.',
+    tamilDesc: 'ரியல்மி ஃப்ளெக்சிபிள் வயர்லெஸ் நெக்பேண்ட்.'
   },
   {
     id: 5,
     title: 'Customized Back Cover',
+    tamilTitle: '3D கஸ்டமைஸ் பேக் கவர்',
     category: 'Back Covers',
     discount: '-15%',
     price: 399,
@@ -97,7 +106,8 @@ const initialProducts = [
     inStock: true,
     img: 'images/prod_custom_cover.png',
     fallback: 'http://localhost:5000/images/prod_custom_cover.png',
-    description: 'High resolution custom printed back cover with scratch-resistant coating for all mobile phone models.'
+    description: 'High resolution custom printed back cover with scratch-resistant coating for all mobile phone models.',
+    tamilDesc: '3D உயர்தர போட்டோ அச்சிடப்பட்ட மொபைல் கவர்.'
   }
 ];
 
@@ -110,6 +120,29 @@ export default function App() {
       return 'en';
     }
   });
+
+  // GOD MODE LEVEL SEO OPTIMIZATION FOR ENGLISH & TAMIL
+  useEffect(() => {
+    if (language === 'ta') {
+      document.title = 'பிரண்ட்ஸ் மொபைல் | மொபைல் அசெஸரீஸ், சார்ஜர்கள், 3D கஸ்டம் கவர் & பிரேம்கள் ஆன்லைன் ஷாப்பிங்';
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content', 'பிரண்ட்ஸ் மொபைல் ஆன்லைன் கடையில் 100% ஒரிஜினல் மொபைல் அசெஸரீஸ், அதிவேக சார்ஜர்கள், புளூடூத் இயர்பட்ஸ், பவர் பேங்க் மற்றும் 3D போட்டோ கஸ்டமைஸ் பேக் கவர்களை வாங்கவும். 24/7 குரல் உதவி மையம் & எக்ஸ்பிரஸ் டெலிவரி.');
+      }
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.setAttribute('content', 'பிரண்ட்ஸ் மொபைல் | மொபைல் அசெஸரீஸ் & 3D போட்டோ கவர் ஆன்லைன் ஷாப்பிங்');
+      document.documentElement.lang = 'ta-IN';
+    } else {
+      document.title = 'FRIENDS MOBILE - Customized Back Covers, Phone Cases & Mobile Accessories Store India';
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content', 'Shop 3D Customized Phone Back Covers, iPhone Cases, boAt Bluetooth Earbuds, Fast Chargers, Power Banks & Custom Photo Frames at FRIENDS MOBILE. Best Prices, Premium Quality & Express Cash on Delivery Across India.');
+      }
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.setAttribute('content', 'FRIENDS MOBILE - Custom Phone Cases & Accessories Store India');
+      document.documentElement.lang = 'en-IN';
+    }
+  }, [language]);
 
   const toggleLanguage = (lang) => {
     const targetLang = lang || (language === 'en' ? 'ta' : 'en');
@@ -779,8 +812,9 @@ export default function App() {
           onSelectProduct={handleSelectProduct}
           onOpenShop={handleOpenShop}
           t={t}
+          language={language}
         />
-        <ServicesSection t={t} />
+        <ServicesSection t={t} language={language} />
       </main>
 
       <ProductDetailModal 

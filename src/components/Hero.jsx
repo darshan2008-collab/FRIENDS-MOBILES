@@ -84,21 +84,29 @@ export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
 
           <div className="hero-tag-wrapper" style={{ marginBottom: '16px' }}>
             <span className="hero-tag" style={{ 
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px'
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              background: 'rgba(255, 85, 0, 0.12)', 
+              color: 'var(--text-primary)', 
+              padding: '5px 12px', 
+              borderRadius: '20px', 
+              fontSize: '0.72rem', 
+              fontWeight: '800', 
+              letterSpacing: '0.5px',
+              border: '1px solid rgba(255, 85, 0, 0.25)'
             }}>
-              <Sparkles size={13} style={{ color: '#FF5500' }} /> {activeSlide.tag || "WELCOME TO FRIENDS MOBILE"}
+              <Sparkles size={13} style={{ color: '#FF5500' }} /> {language === 'ta' ? 'பிரண்ட்ஸ் மொபைல் ஷோரூம் 🖐️' : (activeSlide.tag || "WELCOME TO FRIENDS MOBILE")}
             </span>
           </div>
 
           <h1 className="hero-title" style={{ marginBottom: '16px' }}>
             <span className="hero-heading-white" style={{ fontWeight: '900' }}>
-              {activeSlide.titleWhite || "Your One Stop"}
+              {language === 'ta' ? 'மொபைல் போன் அக்சஸரீஸ் &' : (activeSlide.titleWhite || "Your One Stop")}
             </span>
             <br />
             <span className="hero-heading-gradient" style={{ fontWeight: '900' }}>
-              {activeSlide.titleGradient || "Mobile Destination"}
+              {language === 'ta' ? '3D போட்டோ கவர் ஷாப் 🚀' : (activeSlide.titleGradient || "Mobile Destination")}
             </span>
           </h1>
 
@@ -109,15 +117,15 @@ export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
             marginBottom: '20px',
             color: 'var(--text-secondary)'
           }}>
-            {activeSlide.desc || "Premium Accessories, Custom Covers & Wall Photo Frames Crafted for Your Style."}
+            {language === 'ta' ? 'போட், மி, ரியல்மி, போர்ட்ரானிக்ஸ் ஒரிஜினல் பொருட்கள், 3D போட்டோ கவர்கள் & போட்டோ பிரேம்கள்.' : (activeSlide.desc || "Premium Accessories, Custom Covers & Wall Photo Frames Crafted for Your Style.")}
           </p>
 
           <div className="hero-buttons">
             <a href={activeSlide.btnLink} className="btn btn-primary btn-sm">
-              {activeSlide.btnText} <ArrowRight size={16} />
+              {language === 'ta' ? (activeSlide.btnText === 'CUSTOMIZE COVER' ? 'போட்டோ கவர் டிசைன் பண்ண' : activeSlide.btnText === 'CREATE FRAME' ? 'போட்டோ பிரேம் தயாரிக்க' : activeSlide.btnText === 'EXPLORE OFFERS' ? 'தள்ளுபடி சலுகைகள் பார்க்க' : 'இப்போதே வாங்க') : activeSlide.btnText} <ArrowRight size={16} />
             </a>
             <a href="#products" className="btn btn-secondary btn-sm">
-              EXPLORE STORE
+              {language === 'ta' ? 'பொருட்களை பார்க்க' : 'EXPLORE STORE'}
             </a>
           </div>
 
