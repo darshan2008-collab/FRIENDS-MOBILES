@@ -52,9 +52,12 @@ export default function AIChatbotModal({
     setBotLang(language);
   }, [language]);
 
-  // Initialize welcome message & fixed chart menu when opened or language switches
+  const hasInitializedRef = useRef(false);
+
+  // Initialize welcome message & fixed chart menu when opened
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
       const welcomeText = botLang === 'ta'
         ? `வணக்கம்! 🖐️ பிரண்ட்ஸ் மொபைல் 24/7 வாடிக்கையாளர் உதவி மையத்திற்கு வரவேற்கிறோம்.\n\nகீழே உள்ள **பிரதான உதவி வரைபடத்தை (Fixed Support Chart)** பயன்படுத்தவும் அல்லது உங்கள் ஆர்டர் எண் / கேள்விகளை உள்ளிடவும்:`
         : `Welcome to FRIENDS MOBILE 24/7 Support Center! 🚀\n\nPlease select an option from our **Fixed Support Chart** below or enter your Order ID / query:`;
@@ -71,11 +74,11 @@ export default function AIChatbotModal({
       };
 
       setMessages([welcomeMsg]);
-      if (isVoiceEnabled) {
-        speakText(botLang === 'ta' ? "வணக்கம்! பிரண்ட்ஸ் மொபைல் வாடிக்கையாளர் சேவைக்கு வரவேற்கிறோம்." : "Welcome to FRIENDS MOBILE 24/7 Customer Care!", 'welcome-1', botLang);
-      }
     }
-  }, [isOpen, botLang]);
+    if (!isOpen) {
+      hasInitializedRef.current = false;
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -84,7 +87,6 @@ export default function AIChatbotModal({
   }, [messages, isTyping, isOpen]);
 
   const [voices, setVoices] = useState([]);
-  const currentAudioRef = useRef(null);
 
   // Pre-load Web Speech voices & listen for voice availability
   useEffect(() => {
@@ -101,12 +103,6 @@ export default function AIChatbotModal({
   }, []);
 
   const stopAllAudio = () => {
-    if (currentAudioRef.current) {
-      try {
-        currentAudioRef.current.pause();
-        currentAudioRef.current = null;
-      } catch (_) {}
-    }
     if ('speechSynthesis' in window) {
       try {
         window.speechSynthesis.cancel();
@@ -115,10 +111,30 @@ export default function AIChatbotModal({
     setSpeakingMsgId(null);
   };
 
-  const speakNativeUtterance = (cleanText, msgId, activeLang) => {
+  // Web Speech API Synthesizer
+  // English: Male Strong Voice
+  // Tamil: Female Fluent Voice
+  const speakText = (textToSpeak, msgId = null, activeLang = botLang) => {
     if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
+
+    try {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+      window.speechSynthesis.cancel();
+    } catch (_) {}
+
     setSpeakingMsgId(msgId);
+
+    // Clean text before speaking (remove emojis, markdown tags, links, parentheses)
+    const cleanText = textToSpeak
+      .replace(/[*_#`~]/g, '')
+      .replace(/\(.*?\)/g, '')
+      .replace(/https?:\/\/\S+/g, '')
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+      .trim();
+
+    if (!cleanText) return;
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     const availVoices = voices.length > 0 ? voices : (window.speechSynthesis.getVoices() || []);
@@ -126,16 +142,17 @@ export default function AIChatbotModal({
     if (activeLang === 'ta') {
       utterance.lang = 'ta-IN';
       utterance.pitch = 1.15; // Smooth Female Pitch for Tamil
-      utterance.rate = 0.90;  // Natural Polite Speed for Tamil speech
+      utterance.rate = 0.85;  // Slightly relaxed pace for natural Tamil pronunciation
 
       const tamilVoice = availVoices.find(v => 
-        (v.lang.toLowerCase().includes('ta') || v.name.toLowerCase().includes('tamil')) &&
-        (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('zira') || 
-         v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('heera') || 
-         v.name.toLowerCase().includes('kalpana') || v.name.toLowerCase().includes('swara'))
-      ) || availVoices.find(v => v.lang.toLowerCase().includes('ta') || v.name.toLowerCase().includes('tamil'));
+        (v.lang && v.lang.toLowerCase().startsWith('ta')) ||
+        (v.name && v.name.toLowerCase().includes('tamil')) ||
+        (v.name && v.name.toLowerCase().includes('தமிழ்'))
+      );
 
-      if (tamilVoice) utterance.voice = tamilVoice;
+      if (tamilVoice) {
+        utterance.voice = tamilVoice;
+      }
     } else {
       utterance.lang = 'en-IN';
       utterance.pitch = 0.88; // Deep Strong Male Pitch for English
@@ -156,69 +173,6 @@ export default function AIChatbotModal({
     utterance.onerror = () => setSpeakingMsgId(null);
 
     window.speechSynthesis.speak(utterance);
-  };
-
-  const speakTamilAudioStream = (cleanText, msgId) => {
-    try {
-      const textChunk = cleanText.slice(0, 180);
-      const encodedText = encodeURIComponent(textChunk);
-      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ta&client=tw-ob&q=${encodedText}`;
-
-      stopAllAudio();
-
-      const audio = new Audio(ttsUrl);
-      currentAudioRef.current = audio;
-      setSpeakingMsgId(msgId);
-
-      audio.play()
-        .then(() => {
-          setSpeakingMsgId(msgId);
-        })
-        .catch(() => {
-          speakNativeUtterance(cleanText, msgId, 'ta');
-        });
-
-      audio.onended = () => {
-        setSpeakingMsgId(null);
-      };
-      audio.onerror = () => {
-        speakNativeUtterance(cleanText, msgId, 'ta');
-      };
-    } catch (_) {
-      speakNativeUtterance(cleanText, msgId, 'ta');
-    }
-  };
-
-  // Web Speech API Synthesizer
-  // English: Male Strong Voice
-  // Tamil: Female Fluent Voice (Dual-Engine: Native WebSpeech + Audio Stream Fallback)
-  const speakText = (textToSpeak, msgId = null, activeLang = botLang) => {
-    stopAllAudio();
-
-    const cleanText = textToSpeak
-      .replace(/[*_#`~]/g, '')
-      .replace(/https?:\/\/\S+/g, '')
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
-      .trim();
-
-    if (!cleanText) return;
-
-    if (activeLang === 'ta') {
-      const availVoices = voices.length > 0 ? voices : (window.speechSynthesis?.getVoices() || []);
-      const nativeTamilVoice = availVoices.find(v => 
-        v.lang.toLowerCase().includes('ta') || 
-        v.name.toLowerCase().includes('tamil') || 
-        v.name.toLowerCase().includes('தமிழ்')
-      );
-
-      if (nativeTamilVoice) {
-        speakNativeUtterance(cleanText, msgId, 'ta');
-      } else {
-        speakTamilAudioStream(cleanText, msgId);
-      }
-    } else {
-      speakNativeUtterance(cleanText, msgId, 'en');
-    }
   };
 
   // Toggle voice recording (Microphone Speech Recognition)
@@ -467,8 +421,27 @@ export default function AIChatbotModal({
               onClick={() => {
                 const nextLang = botLang === 'ta' ? 'en' : 'ta';
                 setBotLang(nextLang);
+                const switchMsgId = `welcome-${Date.now()}`;
+                const announceText = nextLang === 'ta'
+                  ? "வணக்கம்! தமிழ் குரல் சேவை இயக்கப்பட்டது. பிரண்ட்ஸ் மொபைல் உதவி மையத்திற்கு வரவேற்கிறோம்."
+                  : "English male voice support activated. Welcome to FRIENDS MOBILE support.";
+
+                const switchMsg = {
+                  id: switchMsgId,
+                  sender: 'bot',
+                  text: nextLang === 'ta'
+                    ? `வணக்கம்! 🖐️ தமிழ் குரல் சேவை இயக்கப்பட்டது.\n\nபிரண்ட்ஸ் மொபைல் 24/7 வாடிக்கையாளர் உதவி மையத்திற்கு வரவேற்கிறோம். கீழே உள்ள **பிரதான உதவி வரைபடத்தை (Fixed Support Chart)** பயன்படுத்தவும் அல்லது கேள்விகளை உள்ளிடவும்:`
+                    : `English voice support activated! 🚀\n\nWelcome to FRIENDS MOBILE 24/7 Support Center. Please select an option from our **Fixed Support Chart** below or enter your query:`,
+                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  isChartMenu: true,
+                  quickReplies: nextLang === 'ta' 
+                    ? ['📦 ஆர்டர் டிராக்கிங்', '🔄 ரத்து & மாற்று பாலிசி', '💳 கட்டணம் & ரீஃபண்ட்', '🎨 கஸ்டமைஸ் கவர்', '⚠️ புகார்கள் & நேரடி உதவி']
+                    : ['📦 Track My Order', '🔄 Returns & Cancellation', '💳 Payments & Refund', '🎨 Custom Covers', '⚠️ Report Complaint']
+                };
+
+                setMessages(prev => [...prev, switchMsg]);
                 if (isVoiceEnabled) {
-                  speakText(nextLang === 'ta' ? "தமிழ் குரல் சேவை இயக்கப்பட்டது" : "English male voice support activated", null, nextLang);
+                  speakText(announceText, switchMsgId, nextLang);
                 }
               }}
               title="Switch Language / மொழி மாற்றம்"
