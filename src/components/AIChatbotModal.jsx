@@ -7,6 +7,22 @@ import {
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
+// Bold and inline code formatting helper
+const renderFormattedText = (str) => {
+  if (!str) return '';
+  const BT = String.fromCharCode(96);
+  const parts = str.split(new RegExp('(\\*{2}.*?\\*{2}|' + BT + '.*?' + BT + ')', 'g'));
+  return parts.map((part, pIdx) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith(BT) && part.endsWith(BT)) {
+      return <code key={pIdx} className="ai-code-inline">{part.slice(1, -1)}</code>;
+    }
+    return part;
+  });
+};
+
 export default function AIChatbotModal({ 
   isOpen, 
   onClose, 
@@ -715,27 +731,9 @@ export default function AIChatbotModal({
                     </button>
                   )}
                   <div className="ai-msg-text">
-                    {msg.text.split('\n').map((line, idx) => {
-                      if (!line.trim()) return <br key={idx} />;
-                      
-                      // Bold and inline code formatting renderer
-                      const renderFormatted = (str) => {
-                        if (!str) return '';
-                        const BT = String.fromCharCode(96);
-                        const parts = str.split(new RegExp('(\\*{2}.*?\\*{2}|' + BT + '.*?' + BT + ')', 'g'));
-                        return parts.map((part, pIdx) => {
-                          if (part.startsWith('**') && part.endsWith('**')) {
-                            return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
-                          }
-                          if (part.startsWith(BT) && part.endsWith(BT)) {
-                            return <code key={pIdx} className="ai-code-inline">{part.slice(1, -1)}</code>;
-                          }
-                          return part;
-                        });
-                      };
-
-                      return <p key={idx}>{renderFormatted(line)}</p>;
-                    })}
+                    {msg.text.split('\n').map((line, idx) => 
+                      !line.trim() ? <br key={idx} /> : <p key={idx}>{renderFormattedText(line)}</p>
+                    )}
                   </div>
 
                   {/* Rich Order Card inside Chat Bubble */}
