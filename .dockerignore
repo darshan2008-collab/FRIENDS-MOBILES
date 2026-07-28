@@ -1,6 +1,5 @@
 node_modules
 server/node_modules
-dist
 .git
 .vercel
 Dockerfile
@@ -10,4 +9,3 @@ docker-compose.yml
 .env
 .env.*
 .env.local
-

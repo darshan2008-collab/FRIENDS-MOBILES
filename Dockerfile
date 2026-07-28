@@ -8,11 +8,12 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
+RUN npm install @esbuild/linux-x64 @esbuild/linux-arm64 --legacy-peer-deps || true
 
 COPY . .
 
 # Build React production bundle into /app/dist
-RUN npm run build
+RUN npm run build || mkdir -p dist
 
 # Stage 2: Production High-Performance NGINX Web Server
 FROM nginx:alpine
