@@ -753,6 +753,7 @@ export default function App() {
           onOpenCustomCover={() => setIsCustomCoverOpen(true)}
           onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
           t={t}
+          language={language}
         />
         <BrandMarquee />
         <TrendingProducts 
