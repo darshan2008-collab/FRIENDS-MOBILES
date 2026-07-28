@@ -682,7 +682,7 @@ img {
 .promo-img-box img {
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8));
+  filter: none;
   transition: transform var(--transition-normal);
 }
 
