@@ -46,11 +46,21 @@ export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
     return slide;
   });
 
-  // Auto-Slide Timer (Scrolls every 3.5 seconds)
+  // Preload slide images for zero-lag instant transitions
+  useEffect(() => {
+    heroSlides.forEach(slide => {
+      if (slide.imgSrc) {
+        const img = new Image();
+        img.src = slide.imgSrc;
+      }
+    });
+  }, [heroSlides]);
+
+  // High-Speed Fast Auto-Slide Timer (Rotates every 2.2 seconds)
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlideIndex(prevIndex => (prevIndex + 1) % heroSlides.length);
-    }, 3500);
+    }, 2200);
 
     return () => clearInterval(timer);
   }, [heroSlides.length]);
@@ -142,7 +152,7 @@ export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
               maxHeight: '420px', 
               objectFit: 'contain',
               borderRadius: '24px',
-              animation: 'fadeIn 0.5s ease-in-out'
+              animation: 'fadeIn 0.2s ease-out'
             }}
           />
 

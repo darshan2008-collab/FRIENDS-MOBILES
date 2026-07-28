@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Heart, ShoppingBag, ArrowRight } from 'lucide-react';
 import { getProductTitle } from '../data/translations';
 
@@ -11,6 +11,20 @@ const defaultUnsplashMap = {
 };
 
 export default function TrendingProducts({ products, wishlist, onToggleWishlist, onAddToCart, searchQuery, onSelectProduct, onOpenShop, language = 'en', t = (k) => k }) {
+  // Preload all product images into memory for instant rendering
+  useEffect(() => {
+    products.forEach(p => {
+      if (p.img) {
+        const img = new Image();
+        img.src = p.img;
+      }
+      if (defaultUnsplashMap[p.id]) {
+        const fallback = new Image();
+        fallback.src = defaultUnsplashMap[p.id];
+      }
+    });
+  }, [products]);
+
   const filteredProducts = products.filter(p => 
     p.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -56,6 +70,8 @@ export default function TrendingProducts({ products, wishlist, onToggleWishlist,
                       src={prod.img} 
                       onError={(e) => handleProductImgError(e, prod)} 
                       alt={prod.title} 
+                      loading="eager"
+                      decoding="async"
                     />
                   </div>
 
