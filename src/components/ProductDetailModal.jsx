@@ -15,38 +15,43 @@ export default function ProductDetailModal({
   language = 'en',
   t = (k) => k
 }) {
-  const [reviewsList, setReviewsList] = useState([]);
+  if (!product) return null;
+
+  const productTitleLower = product && product.title ? String(product.title).toLowerCase() : '';
+  const productCategoryLower = product && product.category ? String(product.category).toLowerCase() : '';
+
+  const defaultSizesList = product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0
+    ? product.sizes
+    : (productCategoryLower === 'covers' || productTitleLower.includes('cover') || productTitleLower.includes('pouch') || productTitleLower.includes('water proof') || productTitleLower.includes('waterproof')
+        ? ['Universal (Up to 6.8")', 'Standard (5.5" - 6.1")', 'Pro / Max (6.7" - 6.9")']
+        : (productCategoryLower === 'tshirts' || productTitleLower.includes('shirt')
+            ? ['S (36")', 'M (38")', 'L (40")', 'XL (42")', 'XXL (44")']
+            : ['Standard Pack (1 Metre)', 'Pro Pack (2 Metres)', 'Extended Pack (3 Metres)']
+          )
+      );
+
+  const [reviewsList, setReviewsList] = useState(product.reviewsList || []);
   const [newReview, setNewReview] = useState({ name: '', comment: '', rating: 5 });
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [zoomPhoto, setZoomPhoto] = useState(null);
 
-  const [selectedImage, setSelectedImage] = useState('');
+  const [selectedImage, setSelectedImage] = useState(product.img || '');
   const [isHoveringZoom, setIsHoveringZoom] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
 
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  const [selectedSize, setSelectedSize] = useState(defaultSizesList[0] || 'Standard');
+
   const horizontalScrollRef = useRef(null);
 
-  const defaultSizesList = product?.sizes && product.sizes.length > 0
-    ? product.sizes
-    : (product?.category === 'covers' || product?.title?.toLowerCase().includes('cover') || product?.title?.toLowerCase().includes('pouch') || product?.title?.toLowerCase().includes('water proof')
-        ? ['Universal (Up to 6.8")', 'Standard (5.5" - 6.1")', 'Pro / Max (6.7" - 6.9")']
-        : (product?.category === 'tshirts' || product?.title?.toLowerCase().includes('shirt')
-            ? ['S (36")', 'M (38")', 'L (40")', 'XL (42")', 'XXL (44")']
-            : ['Standard Pack (1 Metre)', 'Pro Pack (2 Metres)', 'Extended Pack (3 Metres)']
-          )
-      );
-
-  const [selectedSize, setSelectedSize] = useState(defaultSizesList[0]);
-
-  const galleryImages = (product?.images && product.images.length > 0)
+  const galleryImages = (product.images && Array.isArray(product.images) && product.images.length > 0)
     ? product.images
     : [
-        product?.img,
-        product?.img,
+        product.img,
+        product.img,
         'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=600&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?q=80&w=600&auto=format&fit=crop'
       ].filter(Boolean);
@@ -63,13 +68,11 @@ export default function ProductDetailModal({
     setReviewsList(product.reviewsList || []);
     setSelectedPhoto(null);
     setSelectedImage(product.img || '');
-    setSelectedSize(defaultSizesList[0]);
+    setSelectedSize(defaultSizesList[0] || 'Standard');
   }, [product]);
 
-  if (!product) return null;
-
-  const isLiked = wishlist.includes(product.id);
-  const exploreProducts = (products || []).filter(p => p.id !== product.id);
+  const isLiked = wishlist && Array.isArray(wishlist) ? wishlist.includes(product.id) : false;
+  const exploreProducts = (products || []).filter(p => p && p.id !== product.id);
 
   const handleMouseMove = (e) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
