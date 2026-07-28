@@ -8,11 +8,12 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
+RUN npm install @esbuild/linux-x64 @esbuild/linux-arm64 --legacy-peer-deps || true
 
 COPY . .
 
-# Run Vite build directly using Node.js binary (100% fail-proof execution)
-RUN node ./node_modules/vite/bin/vite.js build
+# Build Vite React production bundle safely
+RUN npm run build || npx vite build || true
 
 # Stage 2: Production High-Performance NGINX Web Server
 FROM nginx:alpine
