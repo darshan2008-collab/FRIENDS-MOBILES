@@ -95,6 +95,20 @@ function rateLimiter({ windowMs = 15 * 60 * 1000, max = 20, message = 'Too many 
     
     next();
   };
+// Mask Email for User Privacy (e.g., d***n@gmail.com)
+function maskEmail(email) {
+  if (!email || typeof email !== 'string' || !email.includes('@')) return email;
+  const [name, domain] = email.split('@');
+  if (name.length <= 2) return `${name[0]}*@${domain}`;
+  return `${name[0]}${'*'.repeat(name.length - 2)}${name[name.length - 1]}@${domain}`;
+}
+
+// Mask Phone Number for User Privacy (e.g., 98****3210)
+function maskPhone(phone) {
+  if (!phone) return '';
+  const str = String(phone).replace(/\D/g, '');
+  if (str.length < 10) return '**********';
+  return str.slice(0, 2) + '****' + str.slice(-4);
 }
 
 module.exports = {
@@ -102,5 +116,7 @@ module.exports = {
   writeData,
   sanitizeInput,
   normalizePhone,
+  maskEmail,
+  maskPhone,
   rateLimiter
 };

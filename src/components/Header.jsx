@@ -1,8 +1,27 @@
 import React from 'react';
-import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones } from 'lucide-react';
+import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones, Languages } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
-export default function Header({ theme, toggleTheme, cartCount, wishlistCount, onOpenDrawer, searchQuery, setSearchQuery, onOpenAdmin, currentUser, onOpenAuth, onOpenUserAccount, onOpenCart, onLogout, onOpenShop, onOpenChatbot }) {
+export default function Header({ 
+  theme, 
+  toggleTheme, 
+  language = 'en',
+  toggleLanguage,
+  t = (k) => k,
+  cartCount, 
+  wishlistCount, 
+  onOpenDrawer, 
+  searchQuery, 
+  setSearchQuery, 
+  onOpenAdmin, 
+  currentUser, 
+  onOpenAuth, 
+  onOpenUserAccount, 
+  onOpenCart, 
+  onLogout, 
+  onOpenShop, 
+  onOpenChatbot 
+}) {
   return (
     <>
       {/* Main Header */}
@@ -29,7 +48,7 @@ export default function Header({ theme, toggleTheme, cartCount, wishlistCount, o
             <div className="search-box desktop-search-box">
               <input 
                 type="text" 
-                placeholder="Search for products, brands and more..." 
+                placeholder={t('searchPlaceholder') || "Search for products, brands and more..."} 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -42,8 +61,31 @@ export default function Header({ theme, toggleTheme, cartCount, wishlistCount, o
               </button>
             </div>
 
-            {/* Actions & Theme Toggle */}
+            {/* Actions, Language Switcher & Theme Toggle */}
             <div className="header-actions">
+              {/* Language Switcher Button (Visible in Mobile & Desktop View) */}
+              <button 
+                className="lang-toggle-btn"
+                onClick={() => toggleLanguage && toggleLanguage()}
+                title={language === 'en' ? "Switch to Tamil / தமிழ்" : "Switch to English"}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '5px 9px',
+                  borderRadius: '20px',
+                  border: '1px solid #FF5500',
+                  background: 'rgba(255, 85, 0, 0.1)',
+                  color: '#FF5500',
+                  fontWeight: 'bold',
+                  fontSize: '0.74rem',
+                  cursor: 'pointer'
+                }}
+              >
+                <Languages size={17} />
+                <span>{language === 'en' ? 'தமிழ்' : 'EN'}</span>
+              </button>
+
               <button className="theme-toggle-btn" onClick={toggleTheme} title="Switch Light/Dark Theme">
                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
               </button>

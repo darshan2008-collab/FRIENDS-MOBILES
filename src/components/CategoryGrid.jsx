@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Smartphone, Cable, Headphones, Watch, BatteryCharging, Speaker, Image, Shield, Grid, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function CategoryGrid({ onOpenShop }) {
+export default function CategoryGrid({ onOpenShop, t = (k) => k }) {
   const scrollContainerRef = useRef(null);
 
   const categories = [
@@ -104,7 +104,7 @@ export default function CategoryGrid({ onOpenShop }) {
               fontSize: 'clamp(1.1rem, 4vw, 1.45rem)',
               fontWeight: '800'
             }}>
-              Browse Categories
+              {t('categoriesTitle') || 'Browse Categories'}
             </h2>
           </div>
 

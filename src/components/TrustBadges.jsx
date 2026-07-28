@@ -1,13 +1,13 @@
 import React from 'react';
 import { CheckCircle2, Truck, CreditCard, RefreshCw, Headphones } from 'lucide-react';
 
-export default function TrustBadges() {
+export default function TrustBadges({ t = (k) => k }) {
   const badges = [
-    { title: '100% Original', desc: 'Genuine Products', icon: CheckCircle2 },
-    { title: 'Fast Delivery', desc: 'Across India', icon: Truck },
-    { title: 'Secure Payment', desc: '100% Secure', icon: CreditCard },
-    { title: '7 Days Return', desc: 'Easy Returns', icon: RefreshCw },
-    { title: 'Best Support', desc: '24/7 Support', icon: Headphones },
+    { title: t('genuineProducts') || '100% Original', desc: 'Genuine Products', icon: CheckCircle2 },
+    { title: t('fastShipping') || 'Fast Delivery', desc: 'Across India', icon: Truck },
+    { title: t('securePayment') || 'Secure Payment', desc: '100% Secure', icon: CreditCard },
+    { title: t('easyReturns') || '7 Days Return', desc: 'Easy Returns', icon: RefreshCw },
+    { title: t('care247') || 'Best Support', desc: '24/7 Support', icon: Headphones },
   ];
 
   return (

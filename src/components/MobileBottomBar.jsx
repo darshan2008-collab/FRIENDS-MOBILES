@@ -5,6 +5,9 @@ export default function MobileBottomBar({
   cartCount, 
   wishlistCount = 0,
   currentUser, 
+  language = 'en',
+  toggleLanguage,
+  t = (k) => k,
   onOpenAuth, 
   onOpenUserAccount, 
   onOpenCustomCover, 
@@ -63,7 +66,7 @@ export default function MobileBottomBar({
           <div className="custom-quick-popup" onClick={(e) => e.stopPropagation()}>
             <div className="popup-handle"></div>
             <h4 className="popup-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-              <Sparkles size={18} color="#FF5500" /> Customize &amp; Personalize
+              <Sparkles size={18} color="#FF5500" /> {t('customCoverStudioTitle') || 'Customize & Personalize'}
             </h4>
             <div className="popup-buttons">
               <button 
@@ -105,7 +108,7 @@ export default function MobileBottomBar({
       <nav className="mobile-bottom-bar" aria-label="Mobile Navigation">
         <button className="bottom-nav-item" onClick={handleSupportClick} title="24/7 Customer Care" aria-label="24/7 Customer Care">
           <Headphones size={20} />
-          <span>24/7 Care</span>
+          <span>{t('care247') || '24/7 Care'}</span>
         </button>
 
         <button className="bottom-nav-item" onClick={handleWishlistClick}>
@@ -113,7 +116,7 @@ export default function MobileBottomBar({
             <Heart size={20} color={wishlistCount > 0 ? '#FF5500' : 'currentColor'} fill={wishlistCount > 0 ? '#FF5500' : 'none'} />
             {wishlistCount > 0 && <span className="nav-badge">{wishlistCount}</span>}
           </div>
-          <span>Wishlist</span>
+          <span>{t('wishlist') || 'Wishlist'}</span>
         </button>
 
         <button 
@@ -123,7 +126,7 @@ export default function MobileBottomBar({
           <div className="custom-icon-ring">
             <Paintbrush size={20} />
           </div>
-          <span>Customize</span>
+          <span>{t('customize') || 'Customize'}</span>
         </button>
 
         <button className="bottom-nav-item" onClick={handleCartClick}>
@@ -131,12 +134,12 @@ export default function MobileBottomBar({
             <ShoppingBag size={20} />
             {cartCount > 0 && <span className="nav-badge">{cartCount}</span>}
           </div>
-          <span>Cart</span>
+          <span>{t('cart') || 'Cart'}</span>
         </button>
 
         <button className="bottom-nav-item" onClick={handleAccountClick}>
           <User size={20} />
-          <span>{currentUser ? 'Account' : 'Login'}</span>
+          <span>{currentUser ? (t('myAccount') || 'Account') : (t('loginSignUp') ? t('loginSignUp').split('/')[0].trim() : 'Login')}</span>
         </button>
       </nav>
     </>

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Wrench, Smartphone, RefreshCw, Image, Printer, MapPin } from 'lucide-react';
 
-export default function ServicesSection() {
+export default function ServicesSection({ t = (k) => k }) {
   const scrollContainerRef = useRef(null);
 
   const services = [
@@ -80,7 +80,7 @@ export default function ServicesSection() {
       <div className="container">
         
         <div className="section-header">
-          <h2 className="section-title">OUR <span className="orange-text">SERVICES</span></h2>
+          <h2 className="section-title">{t('servicesTitle') || 'OUR SERVICES'}</h2>
         </div>
 
         <div 

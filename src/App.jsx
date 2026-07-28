@@ -22,6 +22,7 @@ import BrandMarquee from './components/BrandMarquee';
 import ShoppingPortal from './components/ShoppingPortal';
 import SEOManager from './components/SEOManager';
 import AIChatbotModal from './components/AIChatbotModal';
+import { translations } from './data/translations';
 
 import './styles/theme.css';
 
@@ -102,6 +103,32 @@ const initialProducts = [
 
 export default function App() {
   const [theme, setTheme] = useState('light');
+  const [language, setLanguage] = useState(() => {
+    try {
+      return localStorage.getItem('fm_language') || 'en';
+    } catch {
+      return 'en';
+    }
+  });
+
+  const toggleLanguage = (lang) => {
+    const targetLang = lang || (language === 'en' ? 'ta' : 'en');
+    setLanguage(targetLang);
+    try {
+      localStorage.setItem('fm_language', targetLang);
+    } catch (_) {}
+    if (addToast) {
+      addToast(targetLang === 'ta' ? 'தமிழ் மொழி தேர்வு செய்யப்பட்டது 🌐' : 'English language selected 🌐', '🌐');
+    }
+  };
+
+  const t = (key) => {
+    if (translations[language] && translations[language][key]) {
+      return translations[language][key];
+    }
+    return (translations.en && translations.en[key]) || key;
+  };
+
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem('fm_cart');
@@ -682,6 +709,9 @@ export default function App() {
       <Header 
         theme={theme}
         toggleTheme={toggleTheme}
+        language={language}
+        toggleLanguage={toggleLanguage}
+        t={t}
         cartCount={cartCount}
         wishlistCount={wishlist.length}
         onOpenDrawer={() => setIsDrawerOpen(true)}
@@ -703,6 +733,9 @@ export default function App() {
       <MobileDrawer 
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
+        language={language}
+        toggleLanguage={toggleLanguage}
+        t={t}
         currentUser={currentUser}
         onOpenAuth={() => {
           setAuthRedirectMessage('');
@@ -713,12 +746,13 @@ export default function App() {
       />
 
       <main>
-        <Hero theme={theme} slides={heroSlides} />
-        <CategoryGrid onOpenShop={handleOpenShop} />
-        <TrustBadges shippingSettings={shippingSettings} />
+        <Hero theme={theme} slides={heroSlides} t={t} language={language} />
+        <CategoryGrid onOpenShop={handleOpenShop} t={t} />
+        <TrustBadges shippingSettings={shippingSettings} t={t} />
         <PromoBanners 
           onOpenCustomCover={() => setIsCustomCoverOpen(true)}
           onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+          t={t}
         />
         <BrandMarquee />
         <TrendingProducts 
@@ -729,8 +763,9 @@ export default function App() {
           searchQuery={searchQuery}
           onSelectProduct={handleSelectProduct}
           onOpenShop={handleOpenShop}
+          t={t}
         />
-        <ServicesSection />
+        <ServicesSection t={t} />
       </main>
 
       <ProductDetailModal 
@@ -741,6 +776,7 @@ export default function App() {
         onToggleWishlist={handleToggleWishlist}
         onAddToCart={handleAddToCart}
         onSelectProduct={handleSelectProduct}
+        t={t}
       />
 
       <ShoppingPortal 
@@ -754,9 +790,10 @@ export default function App() {
         initialCategory={shopCategory}
         cartCount={cartCount}
         onOpenCart={handleOpenCartClick}
+        t={t}
       />
 
-      <Footer />
+      <Footer t={t} language={language} toggleLanguage={toggleLanguage} />
       
       <AdminModal 
         isOpen={isAdminOpen}
@@ -782,6 +819,7 @@ export default function App() {
         onLoginSuccess={handleLoginSuccess}
         addToast={addToast}
         redirectMessage={authRedirectMessage}
+        t={t}
       />
 
       <UserAccountModal 
@@ -791,6 +829,7 @@ export default function App() {
         orders={orders}
         onLogout={handleLogout}
         addToast={addToast}
+        t={t}
       />
 
       <CustomBackCoverModal 
@@ -798,6 +837,7 @@ export default function App() {
         onClose={() => setIsCustomCoverOpen(false)}
         onAddToCart={handleAddToCart}
         addToast={addToast}
+        t={t}
       />
 
       <CustomPhotoFrameModal 
@@ -805,6 +845,7 @@ export default function App() {
         onClose={() => setIsCustomFrameOpen(false)}
         onAddToCart={handleAddToCart}
         addToast={addToast}
+        t={t}
       />
 
       <CartModal 
@@ -820,12 +861,16 @@ export default function App() {
         addToast={addToast}
         onOrderPlaced={handleOrderPlaced}
         onUpdateUserProfile={handleUpdateUserProfile}
+        t={t}
       />
 
       <MobileBottomBar 
         cartCount={cartCount}
         wishlistCount={wishlist.length}
         currentUser={currentUser}
+        language={language}
+        toggleLanguage={toggleLanguage}
+        t={t}
         onOpenAuth={() => {
           setAuthRedirectMessage('');
           setIsAuthOpen(true);

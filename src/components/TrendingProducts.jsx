@@ -9,7 +9,7 @@ const defaultUnsplashMap = {
   5: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=600&auto=format&fit=crop'
 };
 
-export default function TrendingProducts({ products, wishlist, onToggleWishlist, onAddToCart, searchQuery, onSelectProduct, onOpenShop }) {
+export default function TrendingProducts({ products, wishlist, onToggleWishlist, onAddToCart, searchQuery, onSelectProduct, onOpenShop, t = (k) => k }) {
   const filteredProducts = products.filter(p => 
     p.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -23,14 +23,14 @@ export default function TrendingProducts({ products, wishlist, onToggleWishlist,
       <div className="container">
         
         <div className="section-header">
-          <h2 className="section-title">TRENDING <span className="orange-text">PRODUCTS</span></h2>
+          <h2 className="section-title">{t('trendingTitle') || 'TRENDING PRODUCTS'}</h2>
           <button 
             type="button" 
             onClick={() => onOpenShop && onOpenShop('All')} 
             className="view-all-link"
             style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
           >
-            View All <ArrowRight size={16} />
+            {t('viewAll') || 'View All'} <ArrowRight size={16} />
           </button>
         </div>
 

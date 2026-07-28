@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function Hero({ theme, slides }) {
+export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const isDark = theme === 'dark';
 

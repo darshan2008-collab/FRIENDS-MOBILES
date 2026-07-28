@@ -1,8 +1,8 @@
 import React from 'react';
-import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, MessageSquare, Clock, ShieldCheck, Sparkles, Navigation, Award, CheckCircle2, ArrowRight, Smartphone, Palette, Frame, Watch, Headphones, Zap } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, MessageSquare, Clock, ShieldCheck, Sparkles, Navigation, Award, CheckCircle2, ArrowRight, Smartphone, Palette, Frame, Watch, Headphones, Zap, Languages } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
-export default function Footer() {
+export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }) {
   return (
     <footer className="main-footer" id="contact" style={{
       background: 'var(--bg-card)',
@@ -421,6 +421,28 @@ export default function Footer() {
                 <span style={{ fontSize: '0.6rem', fontWeight: '900', color: '#15803d', letterSpacing: '0.3px' }}>COD</span>
               </div>
 
+              {/* Language Switcher Footer Widget */}
+              <button
+                onClick={() => toggleLanguage && toggleLanguage()}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '4px 12px',
+                  borderRadius: '16px',
+                  border: '1px solid #FF5500',
+                  background: 'rgba(255, 85, 0, 0.1)',
+                  color: '#FF5500',
+                  fontWeight: 'bold',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer'
+                }}
+                title={language === 'en' ? 'Switch to Tamil / தமிழ்' : 'Switch to English'}
+              >
+                <Languages size={14} />
+                <span>{language === 'en' ? 'தமிழ் (Tamil)' : 'English'}</span>
+              </button>
+
             </div>
           </div>
 
@@ -429,7 +451,7 @@ export default function Footer() {
 
           {/* COPYRIGHT LINE (BOTTOM) */}
           <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-            © 2026 <strong style={{ color: 'var(--text-primary)' }}>Friends Mobile</strong>. All rights reserved by <strong style={{ color: 'var(--text-primary)' }}>UnitaryX</strong>.
+            © 2026 <strong style={{ color: 'var(--text-primary)' }}>{t('brandName') || 'Friends Mobile'}</strong>. {t('rightsReserved') || 'All rights reserved.'}
           </p>
         </div>
 
