@@ -83,50 +83,71 @@ export default function AIChatbotModal({
     }
   }, [messages, isTyping, isOpen]);
 
-  // Web Speech API Synthesizer
-  // English: Male Strong Voice
-  // Tamil: Female Fluent Voice
-  const speakText = (textToSpeak, msgId = null, activeLang = botLang) => {
+  const [voices, setVoices] = useState([]);
+  const currentAudioRef = useRef(null);
+
+  // Pre-load Web Speech voices & listen for voice availability
+  useEffect(() => {
+    const updateVoices = () => {
+      if ('speechSynthesis' in window) {
+        const availableVoices = window.speechSynthesis.getVoices() || [];
+        setVoices(availableVoices);
+      }
+    };
+    updateVoices();
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = updateVoices;
+    }
+  }, []);
+
+  const stopAllAudio = () => {
+    if (currentAudioRef.current) {
+      try {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
+      } catch (_) {}
+    }
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch (_) {}
+    }
+    setSpeakingMsgId(null);
+  };
+
+  const speakNativeUtterance = (cleanText, msgId, activeLang) => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     setSpeakingMsgId(msgId);
 
-    // Clean text before speaking (remove emojis, markdown tags, links)
-    const cleanText = textToSpeak
-      .replace(/[*_#`~]/g, '')
-      .replace(/https?:\/\/\S+/g, '')
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
-
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    const voices = window.speechSynthesis.getVoices() || [];
+    const availVoices = voices.length > 0 ? voices : (window.speechSynthesis.getVoices() || []);
 
     if (activeLang === 'ta') {
       utterance.lang = 'ta-IN';
       utterance.pitch = 1.15; // Smooth Female Pitch for Tamil
       utterance.rate = 0.90;  // Natural Polite Speed for Tamil speech
 
-      // Prioritize female Tamil voice
-      const tamilFemaleVoice = voices.find(v => 
-        (v.lang.includes('ta') || v.name.toLowerCase().includes('tamil')) &&
+      const tamilVoice = availVoices.find(v => 
+        (v.lang.toLowerCase().includes('ta') || v.name.toLowerCase().includes('tamil')) &&
         (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('zira') || 
          v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('heera') || 
          v.name.toLowerCase().includes('kalpana') || v.name.toLowerCase().includes('swara'))
-      ) || voices.find(v => v.lang.includes('ta'));
+      ) || availVoices.find(v => v.lang.toLowerCase().includes('ta') || v.name.toLowerCase().includes('tamil'));
 
-      if (tamilFemaleVoice) utterance.voice = tamilFemaleVoice;
+      if (tamilVoice) utterance.voice = tamilVoice;
     } else {
       utterance.lang = 'en-IN';
       utterance.pitch = 0.88; // Deep Strong Male Pitch for English
       utterance.rate = 0.95;  // Confident Male Speed
 
-      // Prioritize male English voice
-      const englishMaleVoice = voices.find(v => 
+      const englishMaleVoice = availVoices.find(v => 
         (v.lang.includes('en') || v.name.toLowerCase().includes('english')) &&
         (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || 
          v.name.toLowerCase().includes('ravi') || v.name.toLowerCase().includes('george') || 
          v.name.toLowerCase().includes('mark') || v.name.toLowerCase().includes('guy') || 
          v.name.toLowerCase().includes('james'))
-      ) || voices.find(v => v.lang.includes('en'));
+      ) || availVoices.find(v => v.lang.includes('en'));
 
       if (englishMaleVoice) utterance.voice = englishMaleVoice;
     }
@@ -135,6 +156,69 @@ export default function AIChatbotModal({
     utterance.onerror = () => setSpeakingMsgId(null);
 
     window.speechSynthesis.speak(utterance);
+  };
+
+  const speakTamilAudioStream = (cleanText, msgId) => {
+    try {
+      const textChunk = cleanText.slice(0, 180);
+      const encodedText = encodeURIComponent(textChunk);
+      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ta&client=tw-ob&q=${encodedText}`;
+
+      stopAllAudio();
+
+      const audio = new Audio(ttsUrl);
+      currentAudioRef.current = audio;
+      setSpeakingMsgId(msgId);
+
+      audio.play()
+        .then(() => {
+          setSpeakingMsgId(msgId);
+        })
+        .catch(() => {
+          speakNativeUtterance(cleanText, msgId, 'ta');
+        });
+
+      audio.onended = () => {
+        setSpeakingMsgId(null);
+      };
+      audio.onerror = () => {
+        speakNativeUtterance(cleanText, msgId, 'ta');
+      };
+    } catch (_) {
+      speakNativeUtterance(cleanText, msgId, 'ta');
+    }
+  };
+
+  // Web Speech API Synthesizer
+  // English: Male Strong Voice
+  // Tamil: Female Fluent Voice (Dual-Engine: Native WebSpeech + Audio Stream Fallback)
+  const speakText = (textToSpeak, msgId = null, activeLang = botLang) => {
+    stopAllAudio();
+
+    const cleanText = textToSpeak
+      .replace(/[*_#`~]/g, '')
+      .replace(/https?:\/\/\S+/g, '')
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+      .trim();
+
+    if (!cleanText) return;
+
+    if (activeLang === 'ta') {
+      const availVoices = voices.length > 0 ? voices : (window.speechSynthesis?.getVoices() || []);
+      const nativeTamilVoice = availVoices.find(v => 
+        v.lang.toLowerCase().includes('ta') || 
+        v.name.toLowerCase().includes('tamil') || 
+        v.name.toLowerCase().includes('தமிழ்')
+      );
+
+      if (nativeTamilVoice) {
+        speakNativeUtterance(cleanText, msgId, 'ta');
+      } else {
+        speakTamilAudioStream(cleanText, msgId);
+      }
+    } else {
+      speakNativeUtterance(cleanText, msgId, 'en');
+    }
   };
 
   // Toggle voice recording (Microphone Speech Recognition)
@@ -400,7 +484,7 @@ export default function AIChatbotModal({
                 const nextState = !isVoiceEnabled;
                 setIsVoiceEnabled(nextState);
                 if (nextState) speakText(botLang === 'ta' ? "குரல் ஒலி இயக்கப்பட்டது" : "Voice speech enabled", null, botLang);
-                else window.speechSynthesis?.cancel();
+                else stopAllAudio();
               }}
               title={isVoiceEnabled ? "Mute Voice Speech" : "Enable Voice Speech"}
               style={{ color: isVoiceEnabled ? '#22c55e' : 'var(--text-muted)' }}
@@ -408,7 +492,14 @@ export default function AIChatbotModal({
               {isVoiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
             </button>
 
-            <button className="ai-close-btn" onClick={onClose} aria-label="Close Assistant">
+            <button 
+              className="ai-close-btn" 
+              onClick={() => {
+                stopAllAudio();
+                onClose();
+              }} 
+              aria-label="Close Assistant"
+            >
               <X size={20} />
             </button>
           </div>
