@@ -18,6 +18,7 @@ export default function AIChatbotModal({
   onOpenShop,
   onOpenUserAccount
 }) {
+  const [botLang, setBotLang] = useState(language);
   const [messages, setMessages] = useState([]);
   const [inputQuery, setInputQuery] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -25,10 +26,15 @@ export default function AIChatbotModal({
   const [speakingMsgId, setSpeakingMsgId] = useState(null);
   const messagesEndRef = useRef(null);
 
+  // Sync initial language when prop updates
+  useEffect(() => {
+    setBotLang(language);
+  }, [language]);
+
   // Initialize language-aware welcome message when opened or language switches
   useEffect(() => {
     if (isOpen) {
-      const welcomeText = language === 'ta'
+      const welcomeText = botLang === 'ta'
         ? 'வணக்கம்! 🖐️ பிரண்ட்ஸ் மொபைல் 24/7 AI குரல் சேவைக்கு வரவேற்கிறோம். உங்கள் ஆர்டர் நிலையை (எ.கா: FM-1001) அறிய அல்லது சந்தேகங்களை கேட்க கீழே தட்டச்சு செய்யவும்:'
         : 'Welcome to FRIENDS MOBILE 24/7 AI Voice Care! 🚀 Enter your Order ID (e.g. FM-1001) or query below:';
 
@@ -37,12 +43,12 @@ export default function AIChatbotModal({
         sender: 'bot',
         text: welcomeText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        quickReplies: language === 'ta' 
+        quickReplies: botLang === 'ta' 
           ? ['📦 ஆர்டர் டிராக்கிங்', '🎨 3D கஸ்டம் கவர்', '🖼️ போட்டோ பிரேம்கள்', '💬 வாட்ஸ்அப் நேரலை']
           : ['📦 Track My Order', '🎨 Custom Cover Studio', '🖼️ Photo Frames', '💬 Chat on WhatsApp']
       }]);
     }
-  }, [isOpen, language]);
+  }, [isOpen, botLang]);
 
   useEffect(() => {
     if (isOpen) {
@@ -52,19 +58,39 @@ export default function AIChatbotModal({
 
   if (!isOpen) return null;
 
-  // Web Speech API Text-to-Speech Synthesizer (Tamil ta-IN & English en-IN)
-  const speakText = (textToSpeak, msgId = null) => {
+  // Web Speech API Synthesizer (Tamil Female Voice / English Male Voice)
+  const speakText = (textToSpeak, msgId = null, activeLang = botLang) => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     setSpeakingMsgId(msgId);
 
     const cleanText = textToSpeak.replace(/[*_#`]/g, '');
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    
-    // Select Tamil voice engine if language is ta
-    utterance.lang = language === 'ta' ? 'ta-IN' : 'en-IN';
-    utterance.rate = 0.92;
-    utterance.pitch = 1.0;
+    const voices = window.speechSynthesis.getVoices() || [];
+
+    if (activeLang === 'ta') {
+      utterance.lang = 'ta-IN';
+      utterance.pitch = 1.15; // Smooth Female Pitch for Tamil
+      utterance.rate = 0.90;  // Polite Speaking Speed
+
+      const tamilFemaleVoice = voices.find(v => 
+        (v.lang.includes('ta') || v.name.toLowerCase().includes('tamil')) &&
+        (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('heera') || v.name.toLowerCase().includes('kalpana'))
+      ) || voices.find(v => v.lang.includes('ta'));
+
+      if (tamilFemaleVoice) utterance.voice = tamilFemaleVoice;
+    } else {
+      utterance.lang = 'en-IN';
+      utterance.pitch = 0.90; // Natural Male Pitch for English
+      utterance.rate = 0.95;
+
+      const englishMaleVoice = voices.find(v => 
+        (v.lang.includes('en') || v.name.toLowerCase().includes('english')) &&
+        (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('ravi') || v.name.toLowerCase().includes('george') || v.name.toLowerCase().includes('mark'))
+      ) || voices.find(v => v.lang.includes('en'));
+
+      if (englishMaleVoice) utterance.voice = englishMaleVoice;
+    }
 
     utterance.onend = () => setSpeakingMsgId(null);
     utterance.onerror = () => setSpeakingMsgId(null);
@@ -93,7 +119,7 @@ export default function AIChatbotModal({
       const queryLower = textToSend.toLowerCase().trim();
       const botMsgId = `bot-${Date.now()}`;
 
-      // Check for Order ID pattern (e.g., FM-1001, 1001, order)
+      // Check for Order ID pattern (e.g., FM-1001, 1001)
       const orderMatch = queryLower.match(/(fm-?\d{3,6}|\b\d{4}\b)/i);
 
       if (orderMatch) {
@@ -104,32 +130,32 @@ export default function AIChatbotModal({
         );
 
         if (foundOrder) {
-          botResponseText = language === 'ta'
+          botResponseText = botLang === 'ta'
             ? `📦 ஆர்டர் விபரம் கண்டுபிடிக்கப்பட்டது! \n\n• ஆர்டர் எண்: **${foundOrder.orderId || orderIdClean}**\n• நிலை: **${foundOrder.status || 'எக்ஸ்பிரஸ் கொரியர் மூலம் அனுப்பப்பட்டுள்ளது'}**\n• வாடிக்கையாளர்: ${foundOrder.customerName || 'மதிப்பிற்குரிய வாடிக்கையாளர்'}\n• மொத்த தொகை: **₹${foundOrder.total || foundOrder.amount || '1,499'}**\n• எதிர்பார்க்கப்படும் டெலிவரி: **நாளை மாலை**`
             : `📦 Order Details Found! \n\n• Order ID: **${foundOrder.orderId || orderIdClean}**\n• Status: **${foundOrder.status || 'Dispatched via Express Courier'}**\n• Customer: ${foundOrder.customerName || 'Valued Customer'}\n• Amount: **₹${foundOrder.total || foundOrder.amount || '1,499'}**\n• Estimated Delivery: **Tomorrow Evening**`;
         } else {
-          botResponseText = language === 'ta'
+          botResponseText = botLang === 'ta'
             ? `📦 ஆர்டர் ஐடி **${orderIdClean}** நிலவரம்: \n\nஉங்கள் ஆர்டர் மதுரையிலுள்ள பிரண்ட்ஸ் மொபைல் தலைமை மையத்தில் பாதுகாப்பாக பேக் செய்யப்பட்டுள்ளது! எக்ஸ்பிரஸ் கொரியர் மூலம் விரைவாக உங்கள் முகவரிக்கு வந்து சேரும். நேரடி உதவிக்கு வாட்ஸ்அப் (+91 93445 22086) தொடர்புகொள்ளவும்.`
             : `📦 Order ID **${orderIdClean}** Status: \n\nYour order has been safely packed at FRIENDS MOBILE Madurai hub! It will be delivered via Express Shipping. For live agent help, contact WhatsApp (+91 93445 22086).`;
         }
       } else if (queryLower.includes('order') || queryLower.includes('track') || queryLower.includes('ஆர்டர்') || queryLower.includes('டிராக்கிங்')) {
-        botResponseText = language === 'ta'
+        botResponseText = botLang === 'ta'
           ? '📦 உங்கள் ஆர்டர் நிலையை அறிய உங்கள் Order ID (எ.கா: **FM-1001**) உள்ளிடவும்.'
           : '📦 Please enter your Order ID (e.g. **FM-1001**) to get live parcel status!';
       } else if (queryLower.includes('cover') || queryLower.includes('case') || queryLower.includes('கவர்')) {
-        botResponseText = language === 'ta'
+        botResponseText = botLang === 'ta'
           ? '🎨 உங்கள் ஸ்மார்ட்போனிற்கு 3D புகைப்பட பேக் கவர் உருவாக்க **Custom Cover Studio** பயன்படுத்தவும். ஆப்பிள், ரியல்மி, போகோ, சாம்சங், விவோ, ஓப்போ மாடல்கள் உள்ளன!'
           : '🎨 We print 3D HD Custom Phone Covers for Apple, Samsung, Vivo, Oppo, OnePlus & Realme!';
       } else if (queryLower.includes('frame') || queryLower.includes('photo') || queryLower.includes('பிரேம்')) {
-        botResponseText = language === 'ta'
+        botResponseText = botLang === 'ta'
           ? '🖼️ உயர்தர அக்ரிலிக் கிளாஸ் மற்றும் மர போட்டோ பிரேம்களை உருவாக்க **Photo Frame Studio** பயன்படுத்தவும்.'
           : '🖼️ Create personalized Walnut Wood and Premium Glass Photo Frames for your memories!';
       } else if (queryLower.includes('repair') || queryLower.includes('screen') || queryLower.includes('சர்வீஸ்')) {
-        botResponseText = language === 'ta'
+        botResponseText = botLang === 'ta'
           ? '🛠️ மதுரை & கரூர் பிரண்ட்ஸ் மொபைல் ஷோரூமில் 30 நிமிடங்களில் விரைவு மொபைல் டிஸ்பிளே மற்றும் மதர்போர்டு சர்வீஸ் செய்யப்படும்!'
           : '🛠️ Express 30-minute display repair & battery replacement available at Madurai showroom!';
       } else {
-        botResponseText = language === 'ta'
+        botResponseText = botLang === 'ta'
           ? 'வணக்கம்! பிரண்ட்ஸ் மொபைல் ஷோரூம் நேரடி உதவிக்கு வாட்ஸ்அப் (+91 93445 22086) வழியாக தொடர்பு கொள்ளவும்.'
           : 'Thank you for reaching out to FRIENDS MOBILE! Connect directly with our Madurai store team on WhatsApp (+91 93445 22086).';
       }
@@ -139,7 +165,7 @@ export default function AIChatbotModal({
         sender: 'bot',
         text: botResponseText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        quickReplies: language === 'ta' 
+        quickReplies: botLang === 'ta' 
           ? ['📦 ஆர்டர் டிராக்கிங்', '🎨 3D கஸ்டமைஸ் கவர்', '🖼️ போட்டோ பிரேம்கள்', '💬 வாட்ஸ்அப் உதவி'] 
           : ['📦 Track My Order', '🎨 Custom Cover Studio', '🖼️ Photo Frames', '💬 Chat on WhatsApp']
       };
@@ -148,7 +174,7 @@ export default function AIChatbotModal({
       setIsTyping(false);
       
       if (isVoiceEnabled) {
-        speakText(botResponseText, botMsgId);
+        speakText(botResponseText, botMsgId, botLang);
       }
     }, 500);
   };
@@ -166,29 +192,47 @@ export default function AIChatbotModal({
             </div>
             <div>
               <div className="ai-bot-title">
-                <strong>{language === 'ta' ? 'பிரண்ட்ஸ் மொபைல் AI' : 'FRIENDS MOBILE AI'}</strong>
-                <span className="ai-badge">{language === 'ta' ? '24/7 குரல் சேவை' : '24/7 Support'}</span>
+                <strong>{botLang === 'ta' ? 'பிரண்ட்ஸ் மொபைல் AI' : 'FRIENDS MOBILE AI'}</strong>
+                <span className="ai-badge">{botLang === 'ta' ? '24/7 குரல் சேவை' : '24/7 Support'}</span>
               </div>
               <div className="ai-bot-status">
-                {language === 'ta' ? 'ஆர்டர் டிராக்கிங் & வாடிக்கையாளர் உதவி' : 'Order Tracking & Customer Care'}
+                {botLang === 'ta' ? 'ஆர்டர் டிராக்கிங் & வாடிக்கையாளர் உதவி' : 'Order Tracking & Customer Care'}
               </div>
             </div>
           </div>
 
           <div className="ai-chatbot-header-right">
+            {/* Inline Language Selection Option */}
+            <button 
+              className="ai-reset-btn"
+              onClick={() => {
+                const nextLang = botLang === 'ta' ? 'en' : 'ta';
+                setBotLang(nextLang);
+                if (isVoiceEnabled) {
+                  speakText(nextLang === 'ta' ? "தமிழ் குரல் சேவை இயக்கப்பட்டது" : "English voice support activated", null, nextLang);
+                }
+              }}
+              title="Switch Chatbot Language / மொழி மாற்றம்"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: '800', fontSize: '0.78rem' }}
+            >
+              <Languages size={15} color="#FF5500" />
+              <span>{botLang === 'ta' ? 'தமிழ்' : 'EN'}</span>
+            </button>
+
             <button 
               className="ai-reset-btn"
               onClick={() => {
                 const nextState = !isVoiceEnabled;
                 setIsVoiceEnabled(nextState);
-                if (nextState) speakText(language === 'ta' ? "தமிழ் குரல் ஒலி இயக்கப்பட்டது" : "Voice speech enabled");
+                if (nextState) speakText(botLang === 'ta' ? "குரல் ஒலி இயக்கப்பட்டது" : "Voice speech enabled", null, botLang);
                 else window.speechSynthesis?.cancel();
               }}
-              title={isVoiceEnabled ? "Mute Tamil Voice Speech" : "Enable Tamil Voice Speech"}
+              title={isVoiceEnabled ? "Mute Voice Speech" : "Enable Voice Speech"}
               style={{ color: isVoiceEnabled ? '#22c55e' : 'var(--text-muted)' }}
             >
               {isVoiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
             </button>
+
             <button className="ai-close-btn" onClick={onClose} aria-label="Close AI Assistant">
               <X size={20} />
             </button>
@@ -212,9 +256,9 @@ export default function AIChatbotModal({
                     <span className="ai-msg-timestamp">{msg.timestamp}</span>
                     {msg.sender === 'bot' && (
                       <button 
-                        onClick={() => speakText(msg.text, msg.id)}
+                        onClick={() => speakText(msg.text, msg.id, botLang)}
                         style={{ background: 'none', border: 'none', color: speakingMsgId === msg.id ? '#22c55e' : 'var(--text-muted)', cursor: 'pointer', padding: '2px' }}
-                        title="Listen to Tamil Voice Speech"
+                        title="Listen to Voice Speech"
                       >
                         <Volume2 size={13} />
                       </button>
@@ -273,7 +317,7 @@ export default function AIChatbotModal({
         >
           <input 
             type="text"
-            placeholder={language === 'ta' ? 'ஆர்டர் ஐடி (FM-1001) அல்லது கேள்விகளை உள்ளிடவும்...' : 'Type your Order ID or ask a query...'}
+            placeholder={botLang === 'ta' ? 'ஆர்டர் ஐடி (FM-1001) அல்லது கேள்விகளை உள்ளிடவும்...' : 'Type your Order ID or ask a query...'}
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
           />
@@ -288,9 +332,9 @@ export default function AIChatbotModal({
 
         {/* Footer Hint */}
         <div className="ai-chatbot-footer-hint">
-          <span>{language === 'ta' ? 'உடனடி மனித உதவி வேண்டுமா?' : 'Need immediate human help?'}</span>
+          <span>{botLang === 'ta' ? 'உடனடி மனித உதவி வேண்டுமா?' : 'Need immediate human help?'}</span>
           <a href="https://wa.me/919344522086" target="_blank" rel="noreferrer">
-            <MessageSquare size={13} color="#22c55e" /> {language === 'ta' ? 'வாட்ஸ்அப் ஆதரவு (+91 93445 22086)' : 'WhatsApp Support (+91 93445 22086)'}
+            <MessageSquare size={13} color="#22c55e" /> {botLang === 'ta' ? 'வாட்ஸ்அப் ஆதரவு (+91 93445 22086)' : 'WhatsApp Support (+91 93445 22086)'}
           </a>
         </div>
 
