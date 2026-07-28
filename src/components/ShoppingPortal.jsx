@@ -437,7 +437,7 @@ export default function ShoppingPortal({
                             onToggleWishlist={onToggleWishlist}
                             onSelectProduct={onSelectProduct}
                             handleImgError={handleImgError}
-                      language={language}
+                            language={language}
                           />
                         ))}
                       </div>

@@ -9,7 +9,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN npx vite build
+RUN npm run build
 
 # Stage 2: Production High-Performance NGINX Server
 FROM nginx:alpine
