@@ -31,13 +31,13 @@ export default function AIChatbotModal({
 
   // Amazon / Flipkart style Fixed Chart categories
   const FIXED_CHART_CATEGORIES = botLang === 'ta' ? [
-    { id: 'track_order', label: '📦 என் ஆர்டர் எங்கே?', desc: 'பார்சல் டிராக்கிங் நிலவரம்' },
-    { id: 'returns_cancel', label: '🔄 பொருட்கள் ரத்து & மாற்றித்தர', desc: '7 நாள் ஈசி மாற்றித்தரும் வசதி' },
-    { id: 'payments_refund', label: '💳 பணம் செலுத்துதல் & ரீஃபண்ட்', desc: 'COD, UPI & பணம் திரும்புதல்' },
-    { id: 'custom_studio', label: '🎨 போட்டோ போட்ட கவர் & பிரேம்', desc: '3D கஸ்டமைஸ் கவர்கள்' },
-    { id: 'mobile_repair', label: '🛠️ 30 நிமிட மொபைல் சர்வீஸ்', desc: 'டிஸ்பிளே & பேட்டரி மாற்றுதல்' },
-    { id: 'offers_rewards', label: '🎁 தள்ளுபடி சலுகைகள்', desc: 'கூப்பன்கள் & ரிவார்ட்ஸ்' },
-    { id: 'complaint_escalate', label: '⚠️ புகார்கள் & ஓனர் நேரடி தொடர்பு', desc: 'நேரடி எண்கள் & வாட்ஸ்அப்' }
+    { id: 'track_order', label: '📦 ஆர்டர் கண்காணிப்பு', desc: 'உங்கள் பார்சல் நிலவரத்தை அறிய' },
+    { id: 'returns_cancel', label: '🔄 ரத்து & மாற்று பாலிசி', desc: '7 நாட்கள் இலவச மாற்று பாலிசி' },
+    { id: 'payments_refund', label: '💳 கட்டணம் & ரீஃபண்ட்', desc: 'COD, UPI & பணம் திரும்பப்பெறுதல்' },
+    { id: 'custom_studio', label: '🎨 கஸ்டமைஸ் கவர் & பிரேம்', desc: '3D போட்டோ கவர்கள் & பிரேம்கள்' },
+    { id: 'mobile_repair', label: '🛠️ 30 நிமிட பழுதுநீக்கம்', desc: 'டிஸ்பிளே & பேட்டரி மாற்றுதல்' },
+    { id: 'offers_rewards', label: '🎁 சிறப்புச் சலுகைகள்', desc: 'கூப்பன்கள் & ரிவார்ட்ஸ் புள்ளிகள்' },
+    { id: 'complaint_escalate', label: '⚠️ புகார்கள் & மேலாண்மைத் தொடர்பு', desc: 'நேரடித் தொலைபேசி எண்கள் & வாட்ஸ்அப்' }
   ] : [
     { id: 'track_order', label: '📦 Order Tracking', desc: 'Where is my parcel?' },
     { id: 'returns_cancel', label: '🔄 Returns & Cancellation', desc: 'Cancel order / 7 days replacement' },
@@ -60,7 +60,7 @@ export default function AIChatbotModal({
     if (isOpen && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
       const welcomeText = botLang === 'ta'
-        ? `வணக்கம்! 🖐️ பிரண்ட்ஸ் மொபைல் வாடிக்கையாளர் சேவைக்கு உங்களை அன்போடு வரவேற்கிறோம்!\n\nஉங்களுக்கு என்ன உதவி வேணும்? கீழே உள்ள ஆப்ஷனை கிளிக் பண்ணுங்க அல்லது உங்கள் கேள்விகளை டைப் பண்ணுங்க:`
+        ? `வணக்கம்! 🖐️ பிரண்ட்ஸ் மொபைல் உங்களை அன்போடு வரவேற்கின்றது.\n\nகீழே உள்ள பிரதான சேவை வரைபடத்தைப் பயன்படுத்தி உங்களின் ஆர்டர் மற்றும் வினாக்களுக்கு உடனடித் தீர்வைப் பெறலாம்:`
         : `Welcome to FRIENDS MOBILE 24/7 Support Center! 🚀\n\nPlease select an option from our **Fixed Support Chart** below or enter your Order ID / query:`;
 
       const welcomeMsg = {
@@ -112,56 +112,9 @@ export default function AIChatbotModal({
     setSpeakingMsgId(null);
   };
 
-  const getPhoneticTamil = (tamilText) => {
-    return tamilText
-      .replace(/வணக்கம்/g, 'Vanakkam')
-      .replace(/பிரண்ட்ஸ்/g, 'Friends')
-      .replace(/மொபைல்/g, 'Mobile')
-      .replace(/வாடிக்கையாளர்/g, 'vaadikkaiyaalar')
-      .replace(/சேவை/g, 'sevai')
-      .replace(/உதவி/g, 'udhavi')
-      .replace(/மையத்திற்கு/g, 'maiyathirkku')
-      .replace(/வரவேற்கிறோம்/g, 'varaverkirom')
-      .replace(/இயக்கப்பட்டது/g, 'iyakkappattadhu')
-      .replace(/ஆர்டர்/g, 'order')
-      .replace(/டிராக்கிங்/g, 'tracking')
-      .replace(/நிலவரம்/g, 'nilavaram')
-      .replace(/விபரம்/g, 'vibaram')
-      .replace(/கண்டுபிடிக்கப்பட்டது/g, 'kandupadikkappattadhu')
-      .replace(/ரத்து/g, 'rathu')
-      .replace(/மாற்று/g, 'maattru')
-      .replace(/பாலிசி/g, 'policy')
-      .replace(/கட்டணம்/g, 'kattanam')
-      .replace(/ரீஃபண்ட்/g, 'refund')
-      .replace(/புகார்கள்/g, 'pukaarkal')
-      .replace(/நேரடி/g, 'neradi')
-      .replace(/தொடர்பு/g, 'thodarpu')
-      .replace(/சிரமத்திற்கு/g, 'shramathirkku')
-      .replace(/மன்னிக்கவும்/g, 'mannikkavum')
-      .replace(/தொலைபேசி/g, 'tholaipesi')
-      .replace(/எண்கள்/g, 'engkal')
-      .replace(/வாட்ஸ்அப்/g, 'WhatsApp')
-      .replace(/நிர்வாகக்/g, 'nirvaaga')
-      .replace(/குழு/g, 'kuzu')
-      .replace(/உடனடியாக/g, 'udhanadiyaga')
-      .replace(/தீர்வு/g, 'theervu')
-      .replace(/வழங்கும்/g, 'vazangum')
-      .replace(/போட்/g, 'boAt')
-      .replace(/ஏர்டோப்ஸ்/g, 'Airdopes')
-      .replace(/இயர்பட்ஸ்/g, 'Earbuds')
-      .replace(/மி/g, 'Mi')
-      .replace(/பவர்/g, 'Power')
-      .replace(/பேங்க்/g, 'Bank')
-      .replace(/போர்ட்ரானிக்ஸ்/g, 'Portronics')
-      .replace(/சார்ஜர்/g, 'Charger')
-      .replace(/ரியல்மி/g, 'Realme')
-      .replace(/நெக்பேண்ட்/g, 'Neckband')
-      .replace(/[*_#`~]/g, '');
-  };
-
   // Web Speech API Synthesizer
-  // English: Male Strong Voice
-  // Tamil: Female Fluent Voice (With Full Phonetic Tamil Fallback)
+  // English: Male Strong Voice (en-IN)
+  // Tamil: Pure Professional Female Native Speech (ta-IN)
   const speakText = (textToSpeak, msgId = null, activeLang = botLang) => {
     if (!('speechSynthesis' in window)) return;
 
@@ -175,7 +128,7 @@ export default function AIChatbotModal({
     setSpeakingMsgId(msgId);
 
     // Clean text before speaking:
-    // Exclude product title/model lines from spoken voice audio so voice stays clean, polite, and natural
+    // Exclude product model numbers from spoken voice audio so voice speaks pure, elegant Tamil
     const cleanText = textToSpeak
       .replace(/• (பொருள்|Item|ஆர்டர் எண்|Order ID):.*?\n/gi, '')
       .replace(/[*_#`~]/g, '')
@@ -191,33 +144,32 @@ export default function AIChatbotModal({
 
     if (activeLang === 'ta') {
       utterance.lang = 'ta-IN';
-      utterance.pitch = 1.15;
-      utterance.rate = 0.85;
+      utterance.pitch = 1.1; // Smooth Professional Female Pitch
+      utterance.rate = 0.85;  // Elegant Natural Spoken Rate
 
       const tamilVoice = availVoices.find(v => 
-        (v.lang && v.lang.toLowerCase().startsWith('ta')) ||
-        (v.name && v.name.toLowerCase().includes('tamil')) ||
-        (v.name && v.name.toLowerCase().includes('தமிழ்'))
+        (v.lang && (v.lang.toLowerCase().includes('ta-in') || v.lang.toLowerCase().includes('ta_in') || v.lang.toLowerCase().startsWith('ta'))) ||
+        (v.name && (v.name.toLowerCase().includes('tamil') || v.name.toLowerCase().includes('தமிழ்') || v.name.toLowerCase().includes('valluvar')))
       );
 
       if (tamilVoice) {
         utterance.voice = tamilVoice;
-      } else {
-        // Fallback for Windows SAPI Speech engine: Speak full phonetic Tamil sentence so every sentence word is spoken!
-        utterance.lang = 'en-IN';
-        utterance.text = getPhoneticTamil(cleanText);
-        utterance.pitch = 1.05;
-        utterance.rate = 0.88;
-
-        const femaleVoice = availVoices.find(v => 
-          (v.lang.includes('en') || v.name.toLowerCase().includes('english')) &&
-          (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('zira') || 
-           v.name.toLowerCase().includes('heera') || v.name.toLowerCase().includes('swara'))
-        ) || availVoices.find(v => v.lang.includes('en'));
-
-        if (femaleVoice) utterance.voice = femaleVoice;
       }
     } else {
+      utterance.lang = 'en-IN';
+      utterance.pitch = 0.88; // Deep Strong Male Pitch for English
+      utterance.rate = 0.95;  // Confident Male Speed
+
+      const englishMaleVoice = availVoices.find(v => 
+        (v.lang.includes('en') || v.name.toLowerCase().includes('english')) &&
+        (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || 
+         v.name.toLowerCase().includes('ravi') || v.name.toLowerCase().includes('george') || 
+         v.name.toLowerCase().includes('mark') || v.name.toLowerCase().includes('guy') || 
+         v.name.toLowerCase().includes('james'))
+      ) || availVoices.find(v => v.lang.includes('en'));
+
+      if (englishMaleVoice) utterance.voice = englishMaleVoice;
+    }
       utterance.lang = 'en-IN';
       utterance.pitch = 0.88; // Deep Strong Male Pitch for English
       utterance.rate = 0.95;  // Confident Male Speed

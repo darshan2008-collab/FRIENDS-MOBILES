@@ -280,28 +280,28 @@ export const translations = {
   ta: {
     // Brand & Store Info
     brandName: 'பிரண்ட்ஸ் மொபைல்',
-    storeTagline: 'மதுரை தலைமை ஷோரூம் • 100% ஒரிஜினல் உத்திரவாத பொருட்கள்',
+    storeTagline: 'மதுரை தலைமை ஷோரூம் • 100% அசல் உத்தரவாதப் பொருட்கள்',
     maduraiLocation: 'தெற்கு காந்தி கிராமம், கரூர் / மதுரை, தமிழ்நாடு',
 
     // Header & Navigation
-    navHome: 'முகப்பு (Home)',
+    navHome: 'முகப்பு',
     navPhones: 'மொபைல் போன்கள்',
     navAccessories: 'அக்சஸரீஸ்',
     navChargers: 'சார்ஜர் & கேபிள்கள்',
-    navPhotoFrames: 'போட்டோ பிரேம்கள்',
-    navCustomCovers: 'போட்டோ போட்ட கவர்',
-    navShopAll: 'எல்லா பொருட்களும்',
-    navServices: 'சர்வீஸ் சேவைகள்',
-    navOffers: 'தள்ளுபடி சலுகைகள்',
+    navPhotoFrames: 'புகைப்படப் பிரேம்கள்',
+    navCustomCovers: 'கஸ்டமைஸ் மொபைல் கவர்',
+    navShopAll: 'அனைத்துப் பொருட்களும்',
+    navServices: 'சேவைகள்',
+    navOffers: 'சிறப்புச் சலுகைகள்',
     navContact: 'தொடர்புகொள்ள',
-    searchPlaceholder: 'மொபைல் பொருட்கள், பிராண்டுகளை தேடவும்...',
-    cart: 'கார்ட் (Cart)',
+    searchPlaceholder: 'மொபைல் பொருட்கள், பிராண்டுகளைத் தேடவும்...',
+    cart: 'கார்ட்',
     wishlist: 'விருப்பப் பட்டியல்',
     myAccount: 'என் கணக்கு',
     adminPortal: 'அட்மின் போர்டல்',
     loginSignUp: 'லாகின் / பதிவு',
     logout: 'லாக்அவுட்',
-    care247: '24/7 உதவி',
+    care247: '24/7 சேவை',
     customize: 'கஸ்டமைஸ்',
 
     // Mobile Drawer & Bottom Navigation
