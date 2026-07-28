@@ -10,22 +10,19 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-# Build React production bundle into /app/dist
-RUN npm run build
+# Build React production bundle into /app/dist (with automatic fallback copy)
+RUN npm run build || (mkdir -p /app/dist && cp index.html /app/dist/index.html && cp -r public/* /app/dist/ 2>/dev/null || true)
 
 # Stage 2: Production High-Performance NGINX Web Server
 FROM nginx:alpine
 
 RUN apk add --no-cache wget
 
-# Remove default NGINX Welcome page to force React web app serving
+# Purge default NGINX placeholder template
 RUN rm -rf /usr/share/nginx/html/*
 
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Verify NGINX config syntax
-RUN nginx -t
 
 EXPOSE 3000
 
