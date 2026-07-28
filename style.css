@@ -502,7 +502,7 @@ img {
 .categories-section {
   padding: 36px 0;
   border-bottom: 1px solid var(--border-color);
-  background-color: #090a0c;
+  background-color: var(--bg-page);
 }
 
 .category-grid {
@@ -541,7 +541,7 @@ img {
 .cat-name {
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--text-white);
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
@@ -550,7 +550,7 @@ img {
    ========================================================================== */
 .guarantees-section {
   padding: 24px 0;
-  background-color: #07080a;
+  background-color: var(--bg-page);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -564,6 +564,11 @@ img {
   display: flex;
   align-items: center;
   gap: 12px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .guarantee-icon {
