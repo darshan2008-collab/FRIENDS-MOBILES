@@ -842,6 +842,7 @@ export default function App() {
         onAddToCart={handleAddToCart}
         addToast={addToast}
         t={t}
+        language={language}
       />
 
       <CustomPhotoFrameModal 
@@ -850,6 +851,7 @@ export default function App() {
         onAddToCart={handleAddToCart}
         addToast={addToast}
         t={t}
+        language={language}
       />
 
       <CartModal 

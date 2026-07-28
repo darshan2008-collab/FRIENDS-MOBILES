@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield, Ruler, Maximize2, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
 
-export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, addToast, t = (k) => k }) {
+export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, addToast, t = (k) => k, language = 'en' }) {
   const fileInputRef = useRef(null);
   const [frameSize, setFrameSize] = useState('6 x 8 inches (Standard Desk / Wall)'); // 4x6 | 6x8 | 8x10 | 12x18 | 18x24 | Custom / Manual
   const [isSizeMenuOpen, setIsSizeMenuOpen] = useState(false); // Open/Close toggle for frame sizes guide
@@ -670,7 +670,9 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
             {/* Add to Cart Submit */}
             <div style={{ paddingTop: '10px', borderTop: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>Custom Frame Price:</span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>
+                  {language === 'ta' ? 'கஸ்டம் பிரேம் விலை:' : 'Custom Frame Price:'}
+                </span>
                 <span style={{ fontSize: '1.4rem', fontWeight: '900', color: '#FF5500' }}>₹{getSelectedPrice()}</span>
               </div>
 
@@ -686,7 +688,7 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
                   justifyContent: 'center'
                 }}
               >
-                <ShoppingBag size={18} /> ADD CUSTOM PHOTO FRAME TO CART (₹{getSelectedPrice()})
+                <ShoppingBag size={18} /> {language === 'ta' ? `கஸ்டமைஸ் போட்டோ பிரேமை கார்ட்டில் சேர்க்கவும் (₹${getSelectedPrice()})` : `ADD CUSTOM PHOTO FRAME TO CART (₹${getSelectedPrice()})`}
               </button>
             </div>
 

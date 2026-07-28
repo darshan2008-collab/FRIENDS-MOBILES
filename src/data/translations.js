@@ -3,12 +3,12 @@
 
 export const productTranslations = {
   'boAt Airdopes 141 Bluetooth Earbuds': 'போட் ஏர்டோப்ஸ் 141 புளூடூத் இயர்பட்ஸ்',
-  'Mi 20000mAh Power Bank 3i': 'மி 20000mAh பவர் பேங்க் 3i',
-  'Portronics 20W Fast Charger': 'போர்ட்ரானிக்ஸ் 20W பாஸ்ட் சார்ஜர்',
+  'Mi 20000mAh Power Bank 3i': 'மி 20000mAh பாஸ்ட் பவர் பேங்க் 3i',
+  'Portronics 20W Fast Charger': 'போர்ட்ரானிக்ஸ் 20W வேகமான சார்ஜர்',
   'Realme Wireless 2S Neckband': 'ரியல்மி வயர்லெஸ் 2S நெக்பேண்ட்',
-  'Customized Back Cover': 'கஸ்டமைஸ் செய்யப்பட்ட 3D பேக் கவர்',
+  'Customized Back Cover': '3D கஸ்டமைஸ் பேக் கவர்',
   'Personalized Wooden Frame': 'கஸ்டமைஸ் மர போட்டோ பிரேம்',
-  'Premium Glass Frame': 'பிரீமியம் அக்ரிலிக் கிளாஸ் போட்டோ பிரேம்'
+  'Premium Glass Frame': 'பிரீமியம் அக்ரிலிக் கிளாஸ் பிரேம்'
 };
 
 export const getProductTitle = (product, lang = 'en') => {
@@ -19,7 +19,7 @@ export const getProductTitle = (product, lang = 'en') => {
 
   const taTitle = (typeof product === 'object' && product.tamilTitle) || productTranslations[title];
   if (taTitle) {
-    return `${title} (${taTitle})`;
+    return taTitle;
   }
   return title;
 };

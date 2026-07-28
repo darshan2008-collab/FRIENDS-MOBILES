@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Smartphone, Upload, Plus, AlertCircle, ShoppingCart, Camera, Image, Search, Shield, Sparkles, Type, MessageSquare, ShoppingBag, RefreshCw, CheckCircle2, Crown, Zap, Edit3, ChevronDown, ChevronUp, Move, ZoomIn, RotateCw, Sliders } from 'lucide-react';
 import { PHONE_BRANDS, PHONE_MODELS_REGISTRY, findModelSpecs } from '../data/phoneCameraRegistry';
 
-export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, addToast, t = (k) => k }) {
+export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, addToast, t = (k) => k, language = 'en' }) {
   const fileInputRef = useRef(null);
   const [selectedBrand, setSelectedBrand] = useState('Apple');
   const [isBrandListOpen, setIsBrandListOpen] = useState(false);
@@ -1408,7 +1408,9 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
             {/* Submit Button */}
             <div style={{ paddingTop: '10px', borderTop: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>Custom Cover Price:</span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>
+                  {language === 'ta' ? 'கஸ்டம் கவர் விலை:' : 'Custom Cover Price:'}
+                </span>
                 <span style={{ fontSize: '1.4rem', fontWeight: '900', color: '#FF5500' }}>₹399 <s style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>₹499</s></span>
               </div>
 
@@ -1424,7 +1426,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
                   justifyContent: 'center'
                 }}
               >
-                <ShoppingBag size={18} /> ADD CUSTOM BACK COVER TO CART (₹399)
+                <ShoppingBag size={18} /> {language === 'ta' ? 'கஸ்டமைஸ் பேக் கவரை கார்ட்டில் சேர்க்கவும் (₹399)' : 'ADD CUSTOM BACK COVER TO CART (₹399)'}
               </button>
             </div>
 
