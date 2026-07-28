@@ -31,13 +31,13 @@ export default function AIChatbotModal({
 
   // Amazon / Flipkart style Fixed Chart categories
   const FIXED_CHART_CATEGORIES = botLang === 'ta' ? [
-    { id: 'track_order', label: '📦 ஆர்டர் டிராக்கிங்', desc: 'உங்கள் பார்சல் எங்கே உள்ளது?' },
-    { id: 'returns_cancel', label: '🔄 ரத்து & மாற்று பாலிசி', desc: 'ஆர்டர் ரத்து / 7 நாள் மாற்றுதல்' },
-    { id: 'payments_refund', label: '💳 கட்டணம் & ரீஃபண்ட்', desc: 'COD, UPI & பணம் திரும்புதல்' },
-    { id: 'custom_studio', label: '🎨 கஸ்டமைஸ் கவர் & பிரேம்', desc: '3D போட்டோ கவர் & பிரேம்கள்' },
-    { id: 'mobile_repair', label: '🛠️ மொபைல் சர்வீஸ்', desc: '30 நிமிட டிஸ்பிளே சர்வீஸ்' },
-    { id: 'offers_rewards', label: '🎁 சலுகைகள் & புள்ளிகள்', desc: 'கூப்பன்கள் & ரிவார்ட்ஸ்' },
-    { id: 'complaint_escalate', label: '⚠️ புகார்கள் & மேலாளர் உதவி', desc: 'நேரடி எண்கள் & வாட்ஸ்அப்' }
+    { id: 'track_order', label: '📦 என் ஆர்டர் எங்கே?', desc: 'பார்சல் டிராக்கிங் நிலவரம்' },
+    { id: 'returns_cancel', label: '🔄 பொருட்கள் ரத்து & மாற்றித்தர', desc: '7 நாள் ஈசி மாற்றித்தரும் வசதி' },
+    { id: 'payments_refund', label: '💳 பணம் செலுத்துதல் & ரீஃபண்ட்', desc: 'COD, UPI & பணம் திரும்புதல்' },
+    { id: 'custom_studio', label: '🎨 போட்டோ போட்ட கவர் & பிரேம்', desc: '3D கஸ்டமைஸ் கவர்கள்' },
+    { id: 'mobile_repair', label: '🛠️ 30 நிமிட மொபைல் சர்வீஸ்', desc: 'டிஸ்பிளே & பேட்டரி மாற்றுதல்' },
+    { id: 'offers_rewards', label: '🎁 தள்ளுபடி சலுகைகள்', desc: 'கூப்பன்கள் & ரிவார்ட்ஸ்' },
+    { id: 'complaint_escalate', label: '⚠️ புகார்கள் & ஓனர் நேரடி தொடர்பு', desc: 'நேரடி எண்கள் & வாட்ஸ்அப்' }
   ] : [
     { id: 'track_order', label: '📦 Order Tracking', desc: 'Where is my parcel?' },
     { id: 'returns_cancel', label: '🔄 Returns & Cancellation', desc: 'Cancel order / 7 days replacement' },
@@ -60,7 +60,7 @@ export default function AIChatbotModal({
     if (isOpen && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
       const welcomeText = botLang === 'ta'
-        ? `வணக்கம்! 🖐️ பிரண்ட்ஸ் மொபைல் 24/7 வாடிக்கையாளர் உதவி மையத்திற்கு வரவேற்கிறோம்.\n\nகீழே உள்ள **பிரதான உதவி வரைபடத்தை (Fixed Support Chart)** பயன்படுத்தவும் அல்லது உங்கள் ஆர்டர் எண் / கேள்விகளை உள்ளிடவும்:`
+        ? `வணக்கம்! 🖐️ பிரண்ட்ஸ் மொபைல் வாடிக்கையாளர் சேவைக்கு உங்களை அன்போடு வரவேற்கிறோம்!\n\nஉங்களுக்கு என்ன உதவி வேணும்? கீழே உள்ள ஆப்ஷனை கிளிக் பண்ணுங்க அல்லது உங்கள் கேள்விகளை டைப் பண்ணுங்க:`
         : `Welcome to FRIENDS MOBILE 24/7 Support Center! 🚀\n\nPlease select an option from our **Fixed Support Chart** below or enter your Order ID / query:`;
 
       const welcomeMsg = {
@@ -70,7 +70,7 @@ export default function AIChatbotModal({
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isChartMenu: true,
         quickReplies: botLang === 'ta' 
-          ? ['📦 ஆர்டர் டிராக்கிங்', '🔄 ரத்து & மாற்று பாலிசி', '💳 கட்டணம் & ரீஃபண்ட்', '🎨 கஸ்டமைஸ் கவர்', '⚠️ புகார்கள் & நேரடி உதவி']
+          ? ['📦 என் ஆர்டர் எங்கே?', '🔄 பொருட்கள் ரத்து & மாற்றித்தர', '💳 பணம் செலுத்துதல் & ரீஃபண்ட்', '🎨 போட்டோ கவர்', '⚠️ புகார்கள் & ஓனர் தொடர்பு']
           : ['📦 Track My Order', '🔄 Returns & Cancellation', '💳 Payments & Refund', '🎨 Custom Covers', '⚠️ Report Complaint']
       };
 

@@ -127,8 +127,10 @@ export const getProductTitle = (product, lang = 'en') => {
   if (!title) return '';
   if (lang !== 'ta') return title;
 
-  if (typeof product === 'object' && product.tamilTitle) {
-    return product.tamilTitle;
+  if (typeof product === 'object' && product.tamilTitle && typeof product.tamilTitle === 'string' && product.tamilTitle.trim()) {
+    if (/[\u0B80-\u0BFF]/.test(product.tamilTitle)) {
+      return product.tamilTitle;
+    }
   }
 
   return autoTranslateToTamil(title);
@@ -139,8 +141,10 @@ export const getProductDesc = (product, lang = 'en') => {
   const desc = (typeof product === 'object' && product.description) || '';
   if (lang !== 'ta') return desc;
 
-  if (typeof product === 'object' && product.tamilDesc) {
-    return product.tamilDesc;
+  if (typeof product === 'object' && product.tamilDesc && typeof product.tamilDesc === 'string' && product.tamilDesc.trim()) {
+    if (/[\u0B80-\u0BFF]/.test(product.tamilDesc)) {
+      return product.tamilDesc;
+    }
   }
 
   const title = typeof product === 'object' ? (product.title || product.name || '') : product;
@@ -276,22 +280,22 @@ export const translations = {
   ta: {
     // Brand & Store Info
     brandName: 'பிரண்ட்ஸ் மொபைல்',
-    storeTagline: 'மதுரை தலைமை ஷோரூம் • 100% அசல் உத்திரவாத பொருட்கள்',
+    storeTagline: 'மதுரை தலைமை ஷோரூம் • 100% ஒரிஜினல் உத்திரவாத பொருட்கள்',
     maduraiLocation: 'தெற்கு காந்தி கிராமம், கரூர் / மதுரை, தமிழ்நாடு',
 
     // Header & Navigation
-    navHome: 'முகப்பு',
+    navHome: 'முகப்பு (Home)',
     navPhones: 'மொபைல் போன்கள்',
     navAccessories: 'அக்சஸரீஸ்',
-    navChargers: 'சார்ஜர் & அக்சஸரீஸ்',
+    navChargers: 'சார்ஜர் & கேபிள்கள்',
     navPhotoFrames: 'போட்டோ பிரேம்கள்',
-    navCustomCovers: 'கஸ்டமைஸ் பேக் கவர்',
-    navShopAll: 'அனைத்து பொருட்கள்',
-    navServices: 'சேவைகள்',
-    navOffers: 'சலுகைகள்',
+    navCustomCovers: 'போட்டோ போட்ட கவர்',
+    navShopAll: 'எல்லா பொருட்களும்',
+    navServices: 'சர்வீஸ் சேவைகள்',
+    navOffers: 'தள்ளுபடி சலுகைகள்',
     navContact: 'தொடர்புகொள்ள',
     searchPlaceholder: 'மொபைல் பொருட்கள், பிராண்டுகளை தேடவும்...',
-    cart: 'கார்ட்',
+    cart: 'கார்ட் (Cart)',
     wishlist: 'விருப்பப் பட்டியல்',
     myAccount: 'என் கணக்கு',
     adminPortal: 'அட்மின் போர்டல்',
@@ -301,14 +305,13 @@ export const translations = {
     customize: 'கஸ்டமைஸ்',
 
     // Mobile Drawer & Bottom Navigation
-    mobileMenu: 'பட்டி பொருளடக்கம்',
-    switchLanguage: 'மொழி மாற்றம் / Language',
+    mobileMenu: 'பொருளடக்கம்',
+    switchLanguage: 'மொழி மாற்றம் / Switch Language',
     english: 'English (ஆங்கிலம்)',
-    tamil: 'தமிழ்',
+    tamil: 'தமிழ் (Tamil)',
 
     // Hero Banners
     heroTitle1: 'உயர்தர மொபைல் அக்சஸரீஸ் & சாதனங்கள்',
-    heroSub1: 'போட், மி, ரியல்மி, போர்ட்ரானிக்ஸ் பிராண்டுகளுக்கு 50% வரை சிறப்பு தள்ளுபடி!',
     heroTitle2: 'உங்கள் புகைப்படத்துடன் 3D மொபைல் கவர்',
     heroSub2: 'உங்களுக்கு பிடித்த புகைப்படங்களை மொபைல் கவரில் உயர்தரத்தில் பிரிண்ட் செய்யுங்கள்!',
     heroTitle3: 'கஸ்டம் போட்டோ பிரேம்கள்',
