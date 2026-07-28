@@ -7,7 +7,7 @@ ENV NODE_ENV=development
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 COPY package*.json ./
-RUN npm install --legacy-peer-deps --include=dev
+RUN npm install --legacy-peer-deps
 
 COPY . .
 
