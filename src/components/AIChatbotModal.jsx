@@ -182,7 +182,7 @@ export default function AIChatbotModal({
                   `• **பணம் செலுத்தும் முறை**: ${matchedOrder.paymentMethod || 'டெலிவரியின் போது பணம் (COD)'}\n` +
                   `• **எதிர்பார்க்கப்படும் டெலிவரி நாள்**: 🚚 **${estDelivery}**\n` +
                   `• **லாஜிஸ்டிக்ஸ் நிறுவனம்**: ${courier}\n` +
-                  `• **டிராக்கிங் ஐடி**: \`${trackingNum}\`\n\n` +
+                  `• **டிராக்கிங் ஐடி**: ` + trackingNum + `\n\n` +
                   `உங்களுக்கு மேலும் ஏதேனும் உதவி தேவையா? தயங்காமல் கேட்கலாம்!`,
             quickReplies: ['📍 முகவரி மாற்ற', '💬 வாட்ஸ்அப்பில் பேச', '🛍️ பொருட்கள் பார்க்க'],
             orderCard: matchedOrder
@@ -198,7 +198,7 @@ export default function AIChatbotModal({
                 `• **Payment Method**: ${matchedOrder.paymentMethod || 'Cash on Delivery'}\n` +
                 `• **Estimated Delivery**: 🚚 **${estDelivery}**\n` +
                 `• **Logistics Partner**: ${courier}\n` +
-                `• **Waybill Tracking ID**: \`${trackingNum}\`\n\n` +
+                `• **Waybill Tracking ID**: ` + trackingNum + `\n\n` +
                 `Need further modification, delivery address update, or order help? Feel free to ask!`,
           quickReplies: ['📍 Update Delivery Address', '💬 Chat on WhatsApp', '🛍️ Browse More Products'],
           orderCard: matchedOrder
@@ -207,19 +207,19 @@ export default function AIChatbotModal({
         if (isTamilMode) {
           return {
             text: `⚠️ **ஆர்டர் ஐடி "${orderMatch[0]}" தரவுத்தளத்தில் கண்டறியப்படவில்லை**.\n\n` +
-                  `உங்கள் ஆர்டர் ஐடியை சரியாக சரிபார்க்கவும் (எ.கா: \`FM-ORD-1002\` அல்லது \`1002\`).`,
+                  `உங்கள் ஆர்டர் ஐடியை சரியாக சரிபார்க்கவும் (எ.கா: FM-ORD-1002 அல்லது 1002).`,
             quickReplies: ['👤 என் ஆர்டர்களை பார்க்க', '🚨 புகார் தெரிவிக்க', '📦 வேறு ஐடி முயல']
           };
         }
         return {
           text: `⚠️ **Order ID "${orderMatch[0]}" Not Found** in live database.\n\n` +
-                `Please verify your Order ID format (e.g. \`FM-ORD-1002\` or numbers like \`1002\`).`,
+                `Please verify your Order ID format (e.g. FM-ORD-1002 or numbers like 1002).`,
           quickReplies: ['👤 Check My Saved Orders', '🚨 Raise Complaint Ticket', '📦 Try Another Order ID']
         };
       }
     } else {
         return {
-          text: `🔍 Please provide your **Order ID** (e.g., \`FM-ORD-1002\` or \`1001\`) so I can retrieve your real-time tracking details from our warehouse!`,
+          text: `🔍 Please provide your **Order ID** (e.g., FM-ORD-1002 or 1001) so I can retrieve your real-time tracking details from our warehouse!`,
           quickReplies: ['👤 Check My Saved Orders', '💬 WhatsApp Support']
         };
       }
@@ -336,7 +336,7 @@ export default function AIChatbotModal({
     return {
       text: `I'm here to assist you with everything at FRIENDS MOBILE! 🚀\n\n` +
             `Here are a few quick things I can help you with:\n` +
-            `• Track live status & delivery date using your **Order ID** (e.g., \`FM-1001\`)\n` +
+            `• Track live status & delivery date using your **Order ID** (e.g., FM-1001)\n` +
             `• Custom 3D phone cover designs & model availability\n` +
             `• Designer photo frames & gift options\n` +
             `• Shipping speed, COD policies & showroom details\n\n` +
@@ -480,7 +480,7 @@ export default function AIChatbotModal({
         id: `bot-ticket-${Date.now()}`,
         sender: 'bot',
         text: `✅ **Complaint Registered Successfully!**\n\n` +
-              `• **Ticket ID**: \`${ticketId}\`\n` +
+              `• **Ticket ID**: ` + ticketId + `\n` +
               `• **Category**: ${complaintForm.category}\n` +
               `• **Status**: 🔴 **Open (Assigned to Showroom Admin)**\n\n` +
               `Your complaint details have been sent directly to the FRIENDS MOBILE Admin Dashboard. Our support team will review your case and contact you at **${complaintForm.customerPhone}** within 2-4 hours!`,
@@ -718,14 +718,16 @@ export default function AIChatbotModal({
                     {msg.text.split('\n').map((line, idx) => {
                       if (!line.trim()) return <br key={idx} />;
                       
-                      // Bold formatting renderer
+                      // Bold and inline code formatting renderer
                       const renderFormatted = (str) => {
-                        const parts = str.split(/(\*\*.*?\*\*|\`.*?\`)/g);
+                        if (!str) return '';
+                        const BT = String.fromCharCode(96);
+                        const parts = str.split(new RegExp('(\\*{2}.*?\\*{2}|' + BT + '.*?' + BT + ')', 'g'));
                         return parts.map((part, pIdx) => {
                           if (part.startsWith('**') && part.endsWith('**')) {
                             return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
                           }
-                          if (part.startsWith('`') && part.endsWith('`')) {
+                          if (part.startsWith(BT) && part.endsWith(BT)) {
                             return <code key={pIdx} className="ai-code-inline">{part.slice(1, -1)}</code>;
                           }
                           return part;
