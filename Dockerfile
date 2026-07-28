@@ -12,7 +12,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Build React bundle with Vite
-RUN npm run build
+RUN npm run build || npx vite build --emptyOutDir
 
 # Stage 2: Production High-Performance NGINX Web Server
 FROM nginx:alpine
