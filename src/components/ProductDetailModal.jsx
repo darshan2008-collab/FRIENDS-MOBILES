@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight, ZoomIn, Check } from 'lucide-react';
+import { getProductTitle, getProductDesc } from '../data/translations';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -10,7 +11,9 @@ export default function ProductDetailModal({
   onClose,
   onToggleWishlist,
   onAddToCart,
-  onSelectProduct
+  onSelectProduct,
+  language = 'en',
+  t = (k) => k
 }) {
   const [reviewsList, setReviewsList] = useState([]);
   const [newReview, setNewReview] = useState({ name: '', comment: '', rating: 5 });
@@ -178,26 +181,18 @@ export default function ProductDetailModal({
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
               
               {/* Vertical Side Thumbnails Strip (Desktop & Mobile) */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '380px', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {galleryImages.map((imgUrl, idx) => (
                   <button
                     key={idx}
-                    type="button"
-                    onClick={() => {
-                      setSelectedImage(imgUrl);
-                      setLightboxIndex(idx);
-                    }}
-                    onMouseEnter={() => setSelectedImage(imgUrl)}
+                    onClick={() => setSelectedImage(imgUrl)}
                     style={{
-                      background: 'var(--bg-card)',
-                      border: selectedImage === imgUrl ? '2.5px solid #FF5500' : '1px solid var(--border-color)',
-                      borderRadius: '10px',
+                      width: '54px',
+                      height: '54px',
+                      borderRadius: '8px',
+                      border: (selectedImage || product.img) === imgUrl ? '2px solid var(--primary-orange)' : '1px solid var(--border-color)',
+                      background: 'var(--bg-input)',
                       padding: '4px',
-                      width: '60px',
-                      height: '60px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
                       boxShadow: selectedImage === imgUrl ? '0 4px 12px rgba(255, 85, 0, 0.2)' : 'none',

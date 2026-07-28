@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Smartphone, Upload, Plus, AlertCircle, ShoppingCart, Camera, Image, Search, Shield, Sparkles, Type, MessageSquare, ShoppingBag, RefreshCw, CheckCircle2, Crown, Zap, Edit3, ChevronDown, ChevronUp, Move, ZoomIn, RotateCw, Sliders } from 'lucide-react';
 import { PHONE_BRANDS, PHONE_MODELS_REGISTRY, findModelSpecs } from '../data/phoneCameraRegistry';
 
-export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, addToast }) {
+export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, addToast, t = (k) => k }) {
   const fileInputRef = useRef(null);
   const [selectedBrand, setSelectedBrand] = useState('Apple');
   const [isBrandListOpen, setIsBrandListOpen] = useState(false);

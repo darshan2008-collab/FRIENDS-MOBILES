@@ -48,7 +48,6 @@ export default function AdminModal({
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
   const [authError, setAuthError] = useState('');
-  const [sessionTimeLeft, setSessionTimeLeft] = useState(15 * 60); // 15-minute inactivity session countdown
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'products' | 'orders' | 'shipping' | 'slides'
   const [isAdminSidebarOpen, setIsAdminSidebarOpen] = useState(false);
   const [isManualCategory, setIsManualCategory] = useState(false);
@@ -104,37 +103,6 @@ export default function AdminModal({
 
     if (addToast) addToast(reason, '🔒');
   };
-
-  // 15-Minute Inactivity Session Timer & Auto Logout
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const timer = setInterval(() => {
-      setSessionTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleAdminLogout('Session expired due to 15 minutes of inactivity.');
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    const resetActivityTimer = () => {
-      setSessionTimeLeft(15 * 60);
-    };
-
-    window.addEventListener('mousemove', resetActivityTimer);
-    window.addEventListener('keydown', resetActivityTimer);
-    window.addEventListener('click', resetActivityTimer);
-
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener('mousemove', resetActivityTimer);
-      window.removeEventListener('keydown', resetActivityTimer);
-      window.removeEventListener('click', resetActivityTimer);
-    };
-  }, [isAuthenticated]);
 
   // Complaints & Support Tickets State
   const [complaints, setComplaints] = useState([]);
@@ -1129,21 +1097,6 @@ export default function AdminModal({
                 fontWeight: '700'
               }}>
                 <ShieldCheck size={14} /> 2FA Active
-              </div>
-
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '4px 10px',
-                borderRadius: '8px',
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-muted)',
-                fontSize: '0.74rem',
-                fontWeight: '700'
-              }} title="Inactivity Auto-Logout Countdown">
-                <Clock size={13} /> {Math.floor(sessionTimeLeft / 60)}:{String(sessionTimeLeft % 60).padStart(2, '0')}
               </div>
 
               <button 

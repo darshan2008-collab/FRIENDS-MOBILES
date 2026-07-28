@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart, ShoppingBag, ArrowRight } from 'lucide-react';
+import { getProductTitle } from '../data/translations';
 
 const defaultUnsplashMap = {
   1: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=600&auto=format&fit=crop',
@@ -9,7 +10,7 @@ const defaultUnsplashMap = {
   5: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=600&auto=format&fit=crop'
 };
 
-export default function TrendingProducts({ products, wishlist, onToggleWishlist, onAddToCart, searchQuery, onSelectProduct, onOpenShop, t = (k) => k }) {
+export default function TrendingProducts({ products, wishlist, onToggleWishlist, onAddToCart, searchQuery, onSelectProduct, onOpenShop, language = 'en', t = (k) => k }) {
   const filteredProducts = products.filter(p => 
     p.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -63,7 +64,7 @@ export default function TrendingProducts({ products, wishlist, onToggleWishlist,
                     onClick={() => onOpenShop ? onOpenShop(prod.category || 'All') : onSelectProduct(prod)}
                     style={{ cursor: 'pointer' }}
                   >
-                    {prod.title}
+                    {getProductTitle(prod, language)}
                   </h3>
                   
                   {prod.reviews > 0 && (

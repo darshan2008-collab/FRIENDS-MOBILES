@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield, Ruler, Maximize2, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
 
-export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, addToast }) {
+export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, addToast, t = (k) => k }) {
   const fileInputRef = useRef(null);
   const [frameSize, setFrameSize] = useState('6 x 8 inches (Standard Desk / Wall)'); // 4x6 | 6x8 | 8x10 | 12x18 | 18x24 | Custom / Manual
   const [isSizeMenuOpen, setIsSizeMenuOpen] = useState(false); // Open/Close toggle for frame sizes guide

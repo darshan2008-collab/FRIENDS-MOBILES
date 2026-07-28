@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Send, Bot, User, Sparkles, Package, Truck, Phone, MessageSquare, 
   RefreshCw, ChevronRight, ShieldCheck, Clock, CheckCircle2, AlertCircle, 
-  HelpCircle, Smartphone, Frame, ShoppingBag, ArrowRight, Maximize2, Minimize2
+  HelpCircle, Smartphone, Frame, ShoppingBag, ArrowRight, Maximize2, Minimize2,
+  Volume2, VolumeX, Languages
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
@@ -12,14 +13,16 @@ export default function AIChatbotModal({
   orders = [], 
   products = [],
   currentUser, 
+  language = 'en',
   onOpenCustomCover, 
   onOpenCustomFrame,
   onOpenShop,
   onOpenUserAccount,
   addToast 
 }) {
-
-  const [isCompactView, setIsCompactView] = useState(false); // Default: false (Full View on Desktop & Mobile)
+  const [isCompactView, setIsCompactView] = useState(false); // Default: false
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
+  const [speakingMsgId, setSpeakingMsgId] = useState(null);
   const [showComplaintForm, setShowComplaintForm] = useState(false);
   const [complaintForm, setComplaintForm] = useState({
     customerName: currentUser ? currentUser.name : '',
@@ -62,14 +65,62 @@ export default function AIChatbotModal({
 
   if (!isOpen) return null;
 
-  // AI Knowledge Base Engine & Order Matcher
+  // Web Speech API Text-to-Speech (TTS) Synthesizer (Tamil & English Voice)
+  const speakText = (textToSpeak, msgId = null) => {
+    if (!('speechSynthesis' in window)) {
+      if (addToast) addToast('Browser voice speech not supported on this device.', '⚠️');
+      return;
+    }
+
+    if (speakingMsgId && speakingMsgId === msgId) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    // Clean markdown and symbols for natural voice synthesis
+    const cleanText = textToSpeak
+      .replace(/[*_#`~•]/g, ' ')
+      .replace(/\[.*?\]\(.*?\)/g, '')
+      .replace(/https?:\/\/\S+/g, '')
+      .replace(/FM-ORD-/g, 'Order ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const isTamilText = /[\u0B80-\u0BFF]/.test(cleanText) || language === 'ta';
+
+    utterance.lang = isTamilText ? 'ta-IN' : 'en-IN';
+    utterance.rate = 0.92; // Clear human speed
+    utterance.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    if (isTamilText && voices.length > 0) {
+      const tamilVoice = voices.find(v => (v.lang && v.lang.includes('ta')) || v.name.toLowerCase().includes('tamil') || v.name.toLowerCase().includes('valluvar'));
+      if (tamilVoice) {
+        utterance.voice = tamilVoice;
+      }
+    }
+
+    if (msgId) setSpeakingMsgId(msgId);
+
+    utterance.onend = () => setSpeakingMsgId(null);
+    utterance.onerror = () => setSpeakingMsgId(null);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // AI Knowledge Base Engine & Order Matcher (English + Tamil Speech NLU)
   const processAIQuery = (queryText) => {
     const text = queryText.toLowerCase().trim();
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const isTamilMode = language === 'ta' || /[\u0B80-\u0BFF]/.test(queryText) || text.includes('tamil') || text.includes('தமிழ்') || text.includes('பேசு');
 
     // 1. Order ID Tracking (e.g., FM-ORD-849201, FM-1001, #1001, 849201, order 123)
     const orderMatch = queryText.match(/(FM-?(ORD-?)?\d+|\b\d{4,10}\b)/i);
-    const hasOrderKeyword = text.includes('order') || text.includes('track') || text.includes('status') || text.includes('delivery date') || text.includes('parcel');
+    const hasOrderKeyword = text.includes('order') || text.includes('track') || text.includes('status') || text.includes('delivery date') || text.includes('parcel') || text.includes('ஆர்டர்') || text.includes('டிராக்கிங்');
 
     if (orderMatch || (hasOrderKeyword && (currentUser || orders.length > 0))) {
       let matchedOrder = null;
@@ -77,7 +128,6 @@ export default function AIChatbotModal({
       const cleanSearch = rawSearch.toLowerCase().replace(/[^a-z0-9]/g, '');
 
       if (cleanSearch.length >= 3) {
-        // Search props orders
         matchedOrder = orders.find(o => {
           if (!o || (!o.orderId && !o.id)) return false;
           const rawOId = String(o.orderId || o.id).toLowerCase();
@@ -90,7 +140,6 @@ export default function AIChatbotModal({
           );
         });
 
-        // Search localStorage 'fm_user_orders'
         if (!matchedOrder) {
           try {
             const savedOrders = JSON.parse(localStorage.getItem('fm_user_orders') || '[]');
@@ -115,14 +164,31 @@ export default function AIChatbotModal({
 
       if (matchedOrder) {
         const orderCode = matchedOrder.orderId || `FM-ORD-${matchedOrder.id}`;
-        const estDelivery = matchedOrder.estimatedDelivery || 'Within 2-3 Business Days';
+        const estDelivery = matchedOrder.estimatedDelivery || '2-3 நாட்களில் டெலிவரி செய்யப்படும்';
         const trackingNum = matchedOrder.trackingNumber || `FM-TRK-${Math.floor(100000 + Math.random() * 900000)}`;
         const courier = matchedOrder.courier || 'Express BlueDart / DTDC Air Logistics';
-        const custName = matchedOrder.customer?.name || (currentUser ? currentUser.name : 'Valued Customer');
+        const custName = matchedOrder.customer?.name || (currentUser ? currentUser.name : 'மதிப்பிற்குரிய வாடிக்கையாளர்');
         const itemsList = Array.isArray(matchedOrder.items) 
           ? matchedOrder.items.map(i => `${i.title || i.name} (x${i.quantity || 1})`).join(', ')
-          : 'Mobile Accessory / Custom Print Item';
+          : 'மொபைல் அக்சஸரி தயாரிப்பு';
         
+        if (isTamilMode) {
+          return {
+            text: `📦 **ஆர்டர் #${orderCode} இன் 100% சரிபார்க்கப்பட்ட விவரங்கள்**:\n\n` +
+                  `• **வாடிக்கையாளர் பெயர்**: ${custName}\n` +
+                  `• **தற்போதைய நிலை**: 🟢 **${matchedOrder.status === 'Delivered' ? 'டெலிவரி செய்யப்பட்டது' : 'ஆர்டர் உறுதிசெய்யப்பட்டு அனுப்பப்படுகிறது'}**\n` +
+                  `• **வாங்கிய பொருட்கள்**: ${itemsList}\n` +
+                  `• **மொத்த தொகை**: **₹${matchedOrder.total || matchedOrder.subtotal || 399}**\n` +
+                  `• **பணம் செலுத்தும் முறை**: ${matchedOrder.paymentMethod || 'டெலிவரியின் போது பணம் (COD)'}\n` +
+                  `• **எதிர்பார்க்கப்படும் டெலிவரி நாள்**: 🚚 **${estDelivery}**\n` +
+                  `• **லாஜிஸ்டிக்ஸ் நிறுவனம்**: ${courier}\n` +
+                  `• **டிராக்கிங் ஐடி**: \`${trackingNum}\`\n\n` +
+                  `உங்களுக்கு மேலும் ஏதேனும் உதவி தேவையா? தயங்காமல் கேட்கலாம்!`,
+            quickReplies: ['📍 முகவரி மாற்ற', '💬 வாட்ஸ்அப்பில் பேச', '🛍️ பொருட்கள் பார்க்க'],
+            orderCard: matchedOrder
+          };
+        }
+
         return {
           text: `📦 **100% Verified Order Status Details for Order #${orderCode}**:\n\n` +
                 `• **Customer Name**: ${custName}\n` +
@@ -138,13 +204,20 @@ export default function AIChatbotModal({
           orderCard: matchedOrder
         };
       } else if (orderMatch) {
+        if (isTamilMode) {
+          return {
+            text: `⚠️ **ஆர்டர் ஐடி "${orderMatch[0]}" தரவுத்தளத்தில் கண்டறியப்படவில்லை**.\n\n` +
+                  `உங்கள் ஆர்டர் ஐடியை சரியாக சரிபார்க்கவும் (எ.கா: \`FM-ORD-1002\` அல்லது \`1002\`).`,
+            quickReplies: ['👤 என் ஆர்டர்களை பார்க்க', '🚨 புகார் தெரிவிக்க', '📦 வேறு ஐடி முயல']
+          };
+        }
         return {
-          text: `⚠️ **Order ID "${orderMatch[0]}" Not Found** in live PostgreSQL database.\n\n` +
-                `Please verify your Order ID format (e.g. \`FM-ORD-1002\` or numbers like \`1002\`).\n\n` +
-                `If you placed this order recently, please allow 1-2 minutes for real-time synchronization.`,
+          text: `⚠️ **Order ID "${orderMatch[0]}" Not Found** in live database.\n\n` +
+                `Please verify your Order ID format (e.g. \`FM-ORD-1002\` or numbers like \`1002\`).`,
           quickReplies: ['👤 Check My Saved Orders', '🚨 Raise Complaint Ticket', '📦 Try Another Order ID']
         };
-      } else {
+      }
+    } else {
         return {
           text: `🔍 Please provide your **Order ID** (e.g., \`FM-ORD-1002\` or \`1001\`) so I can retrieve your real-time tracking details from our warehouse!`,
           quickReplies: ['👤 Check My Saved Orders', '💬 WhatsApp Support']
@@ -440,6 +513,23 @@ export default function AIChatbotModal({
           <div className="ai-chatbot-header-right">
             <button 
               className="ai-reset-btn"
+              onClick={() => {
+                const nextState = !isVoiceEnabled;
+                setIsVoiceEnabled(nextState);
+                if (nextState) {
+                  speakText(language === 'ta' ? "தமிழ் குரல் ஒலி இயக்கப்பட்டது" : "Voice audio enabled");
+                } else {
+                  window.speechSynthesis.cancel();
+                  setSpeakingMsgId(null);
+                }
+              }}
+              title={isVoiceEnabled ? "Mute Tamil Voice Speech" : "Enable Tamil Voice Speech (Text-to-Speech)"}
+              style={{ color: isVoiceEnabled ? '#22c55e' : 'var(--text-muted)' }}
+            >
+              {isVoiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            </button>
+            <button 
+              className="ai-reset-btn"
               onClick={() => setIsCompactView(!isCompactView)}
               title={isCompactView ? "Switch to Full Screen View" : "Switch to Compact Window"}
             >
@@ -451,9 +541,9 @@ export default function AIChatbotModal({
                 setMessages([{
                   id: 'welcome-reset',
                   sender: 'bot',
-                  text: `Chat reset! 👋 How can I help you today? Enter your Order ID to track your parcel or select an option below:`,
+                  text: language === 'ta' ? `சாட் புதுப்பிக்கப்பட்டது! 👋 உங்களுக்கு எவ்வாறு உதவ முடியும்? உங்கள் ஆர்டர் ஐடியை உள்ளிடவும்:` : `Chat reset! 👋 How can I help you today? Enter your Order ID to track your parcel or select an option below:`,
                   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                  quickReplies: ['📦 Track My Order', '🎨 Custom Back Cover', '🖼️ Photo Frames', '💬 Chat on WhatsApp']
+                  quickReplies: language === 'ta' ? ['📦 ஆர்டர் டிராக்கிங்', '🎨 கஸ்டம் கவர்', '🖼️ போட்டோ பிரேம்', '💬 வாட்ஸ்அப் உதவி'] : ['📦 Track My Order', '🎨 Custom Back Cover', '🖼️ Photo Frames', '💬 Chat on WhatsApp']
                 }]);
               }}
               title="Reset Chat"
@@ -602,6 +692,28 @@ export default function AIChatbotModal({
 
               <div className="ai-msg-content-wrap">
                 <div className={`ai-msg-bubble ${msg.sender}`}>
+                  {msg.sender === 'bot' && (
+                    <button
+                      onClick={() => speakText(msg.text, msg.id)}
+                      title={speakingMsgId === msg.id ? "Stop Voice" : "Listen in Tamil / English Voice"}
+                      style={{
+                        position: 'absolute',
+                        top: '6px',
+                        right: '6px',
+                        background: speakingMsgId === msg.id ? 'rgba(34, 197, 94, 0.2)' : 'none',
+                        border: 'none',
+                        color: speakingMsgId === msg.id ? '#22c55e' : 'var(--text-muted)',
+                        cursor: 'pointer',
+                        padding: '4px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <Volume2 size={14} />
+                    </button>
+                  )}
                   <div className="ai-msg-text">
                     {msg.text.split('\n').map((line, idx) => {
                       if (!line.trim()) return <br key={idx} />;

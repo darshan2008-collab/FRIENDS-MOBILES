@@ -6,10 +6,11 @@ import {
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 import RewardsTab from './RewardsTab';
+import { getProductTitle } from '../data/translations';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
-export default function UserAccountModal({ isOpen, onClose, user, orders: allOrders, onLogout, addToast }) {
+export default function UserAccountModal({ isOpen, onClose, user, orders: allOrders, onLogout, addToast, language = 'en', t = (k) => k }) {
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile' | 'addresses' | 'offers' | 'support'
   const [userOrders, setUserOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);

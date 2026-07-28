@@ -4,6 +4,7 @@ import {
   Zap, Headphones, Watch, Frame, Palette, CheckCircle2, SlidersHorizontal, 
   Sparkles, ShieldCheck, ArrowUpDown, ChevronRight, Tag, RefreshCw, DollarSign
 } from 'lucide-react';
+import { getProductTitle } from '../data/translations';
 
 export default function ShoppingPortal({ 
   isOpen, 
@@ -15,7 +16,9 @@ export default function ShoppingPortal({
   onSelectProduct,
   initialCategory = 'All',
   cartCount = 0,
-  onOpenCart
+  onOpenCart,
+  language = 'en',
+  t = (k) => k
 }) {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState('');
@@ -401,6 +404,7 @@ export default function ShoppingPortal({
                       onToggleWishlist={onToggleWishlist}
                       onSelectProduct={onSelectProduct}
                       handleImgError={handleImgError}
+                      language={language}
                     />
                   ))}
                 </div>
@@ -433,6 +437,7 @@ export default function ShoppingPortal({
                             onToggleWishlist={onToggleWishlist}
                             onSelectProduct={onSelectProduct}
                             handleImgError={handleImgError}
+                      language={language}
                           />
                         ))}
                       </div>
@@ -453,7 +458,7 @@ export default function ShoppingPortal({
 }
 
 /* Individual Product Card Component */
-function ProductCard({ product, onAddToCart, isLiked, onToggleWishlist, onSelectProduct, handleImgError }) {
+function ProductCard({ product, onAddToCart, isLiked, onToggleWishlist, onSelectProduct, handleImgError, language = 'en' }) {
   return (
     <div className="shop-product-card">
       
@@ -495,7 +500,7 @@ function ProductCard({ product, onAddToCart, isLiked, onToggleWishlist, onSelect
           className="card-product-title"
           onClick={() => onSelectProduct(product)}
         >
-          {product.title}
+          {getProductTitle(product, language)}
         </h4>
 
         {/* Rating Row */}

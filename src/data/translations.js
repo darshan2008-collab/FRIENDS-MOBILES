@@ -1,6 +1,36 @@
 // FRIENDS MOBILE - English ↔ Tamil Comprehensive Translation Dictionary
 // தமிழ் மற்றும் ஆங்கில மொழிபெயர்ப்பு தரவுத்தளம்
 
+export const productTranslations = {
+  'boAt Airdopes 141 Bluetooth Earbuds': 'போட் ஏர்டோப்ஸ் 141 புளூடூத் இயர்பட்ஸ்',
+  'Mi 20000mAh Power Bank 3i': 'மி 20000mAh பவர் பேங்க் 3i',
+  'Portronics 20W Fast Charger': 'போர்ட்ரானிக்ஸ் 20W பாஸ்ட் சார்ஜர்',
+  'Realme Wireless 2S Neckband': 'ரியல்மி வயர்லெஸ் 2S நெக்பேண்ட்',
+  'Customized Back Cover': 'கஸ்டமைஸ் செய்யப்பட்ட 3D பேக் கவர்',
+  'Personalized Wooden Frame': 'கஸ்டமைஸ் மர போட்டோ பிரேம்',
+  'Premium Glass Frame': 'பிரீமியம் அக்ரிலிக் கிளாஸ் போட்டோ பிரேம்'
+};
+
+export const getProductTitle = (product, lang = 'en') => {
+  if (!product) return '';
+  const title = typeof product === 'string' ? product : (product.title || product.name || '');
+  if (!title) return '';
+  if (lang !== 'ta') return title;
+
+  const taTitle = (typeof product === 'object' && product.tamilTitle) || productTranslations[title];
+  if (taTitle) {
+    return `${title} (${taTitle})`;
+  }
+  return title;
+};
+
+export const getProductDesc = (product, lang = 'en') => {
+  if (!product) return '';
+  const desc = (typeof product === 'object' && product.description) || '';
+  if (lang !== 'ta') return desc;
+  return (typeof product === 'object' && product.tamilDesc) || '100% அசல் உத்திரவாதத்துடன் கூடிய உயர்தர பிரண்ட்ஸ் மொபைல் தயாரிப்பு.';
+};
+
 export const translations = {
   en: {
     // Brand & Store Info

@@ -776,6 +776,7 @@ export default function App() {
         onToggleWishlist={handleToggleWishlist}
         onAddToCart={handleAddToCart}
         onSelectProduct={handleSelectProduct}
+        language={language}
         t={t}
       />
 
@@ -790,6 +791,7 @@ export default function App() {
         initialCategory={shopCategory}
         cartCount={cartCount}
         onOpenCart={handleOpenCartClick}
+        language={language}
         t={t}
       />
 
@@ -829,6 +831,7 @@ export default function App() {
         orders={orders}
         onLogout={handleLogout}
         addToast={addToast}
+        language={language}
         t={t}
       />
 
@@ -861,6 +864,7 @@ export default function App() {
         addToast={addToast}
         onOrderPlaced={handleOrderPlaced}
         onUpdateUserProfile={handleUpdateUserProfile}
+        language={language}
         t={t}
       />
 
@@ -891,6 +895,8 @@ export default function App() {
         orders={orders}
         products={products}
         currentUser={currentUser}
+        language={language}
+        t={t}
         onOpenCustomCover={() => setIsCustomCoverOpen(true)}
         onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
         onOpenShop={handleOpenShop}

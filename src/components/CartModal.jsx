@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, CheckCircle2, CreditCard } from 'lucide-react';
+import { getProductTitle } from '../data/translations';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -15,7 +16,9 @@ export default function CartModal({
   onTriggerAuth,
   addToast,
   onOrderPlaced,
-  onUpdateUserProfile
+  onUpdateUserProfile,
+  language = 'en',
+  t = (k) => k
 }) {
   const [checkoutStep, setCheckoutStep] = useState('cart'); // 'cart' | 'checkout' | 'success'
   const [paymentMethod, setPaymentMethod] = useState('UPI');
@@ -557,7 +560,7 @@ export default function CartModal({
 
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <h4 style={{ margin: '0 0 4px 0', fontSize: '0.84rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {item.title}
+                            {getProductTitle(item, language)}
                           </h4>
                           <div style={{ fontSize: '0.82rem', fontWeight: '800', color: '#FF5500' }}>
                             ₹{item.price.toLocaleString('en-IN')}
