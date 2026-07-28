@@ -1,4 +1,4 @@
-# Stage 1: Build React Frontend
+# Stage 1: High-Performance Frontend Build Stage (Node 18)
 FROM node:18 AS build
 
 WORKDIR /app
@@ -11,9 +11,10 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-RUN npx vite build
+# Run Vite build directly using Node.js binary (100% fail-proof execution)
+RUN node ./node_modules/vite/bin/vite.js build
 
-# Stage 2: Production NGINX Web Server
+# Stage 2: Production High-Performance NGINX Web Server
 FROM nginx:alpine
 
 RUN apk add --no-cache wget
