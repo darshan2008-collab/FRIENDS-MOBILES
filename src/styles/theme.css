@@ -757,8 +757,8 @@ img {
 
 .guarantees-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 
 .guarantee-item {
@@ -1997,35 +1997,56 @@ img {
   }
 
   .guarantees-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .guarantees-grid .guarantee-item {
-    padding: 8px 12px;
-    gap: 10px;
-    border-radius: 10px;
+    padding: 10px 10px !important;
+    gap: 8px !important;
+    border-radius: 14px !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
   }
 
   .guarantees-grid .guarantee-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    flex-shrink: 0 !important;
   }
 
   .guarantees-grid .guarantee-svg {
-    width: 16px !important;
-    height: 16px !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .guarantees-grid .guarantee-text {
+    min-width: 0 !important;
+    flex: 1 !important;
+    overflow: hidden !important;
   }
 
   .guarantees-grid .guarantee-text h4 {
-    font-size: 0.78rem;
-    font-weight: 700;
+    font-size: clamp(0.7rem, 2.5vw, 0.8rem) !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    margin-bottom: 2px !important;
+    word-break: break-word !important;
+    white-space: normal !important;
   }
 
   .guarantees-grid .guarantee-text p {
-    font-size: 0.65rem;
+    font-size: clamp(0.6rem, 2vw, 0.68rem) !important;
+    line-height: 1.15 !important;
+    margin: 0 !important;
+    word-break: break-word !important;
+    white-space: normal !important;
   }
 
   .products-grid {

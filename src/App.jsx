@@ -802,7 +802,7 @@ export default function App() {
       <main>
         <Hero theme={theme} slides={heroSlides} t={t} language={language} />
         <CategoryGrid onOpenShop={handleOpenShop} t={t} />
-        <TrustBadges shippingSettings={shippingSettings} t={t} />
+        <TrustBadges shippingSettings={shippingSettings} t={t} language={language} />
         <PromoBanners 
           onOpenCustomCover={() => setIsCustomCoverOpen(true)}
           onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
