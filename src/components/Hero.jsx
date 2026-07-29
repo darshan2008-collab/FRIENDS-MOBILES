@@ -100,12 +100,16 @@ export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
             </span>
           </div>
 
-          <h1 className="hero-title" style={{ marginBottom: '16px' }}>
-            <span className="hero-heading-white" style={{ fontWeight: '900' }}>
+          <h1 className="hero-title" style={{ 
+            marginBottom: '14px',
+            fontSize: 'clamp(1.25rem, 4.2vw, 2.3rem)',
+            lineHeight: '1.2'
+          }}>
+            <span className="hero-heading-white" style={{ fontWeight: '900', fontSize: 'inherit' }}>
               {language === 'ta' ? 'மொபைல் போன் அக்சஸரீஸ் &' : (activeSlide.titleWhite || "Your One Stop")}
             </span>
             <br />
-            <span className="hero-heading-gradient" style={{ fontWeight: '900' }}>
+            <span className="hero-heading-gradient" style={{ fontWeight: '900', fontSize: 'inherit' }}>
               {language === 'ta' ? '3D போட்டோ கவர் ஷாப் 🚀' : (activeSlide.titleGradient || "Mobile Destination")}
             </span>
           </h1>

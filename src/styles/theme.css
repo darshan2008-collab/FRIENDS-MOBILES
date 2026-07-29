@@ -1912,9 +1912,15 @@ img {
   }
 
   .hero-title {
-    font-size: clamp(1.5rem, 5vw, 2.2rem);
-    line-height: 1.2;
-    margin-bottom: 10px;
+    font-size: clamp(1.2rem, 4.5vw, 1.7rem) !important;
+    line-height: 1.2 !important;
+    margin-bottom: 10px !important;
+  }
+
+  .hero-heading-white,
+  .hero-heading-gradient {
+    font-size: clamp(1.2rem, 4.5vw, 1.7rem) !important;
+    line-height: 1.2 !important;
   }
 
   .hero-desc {

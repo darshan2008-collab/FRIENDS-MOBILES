@@ -1304,6 +1304,18 @@ img {
     border-radius: 10px !important;
   }
 
+  .hero-title {
+    font-size: clamp(1.2rem, 4.5vw, 1.7rem) !important;
+    line-height: 1.2 !important;
+    margin-bottom: 10px !important;
+  }
+
+  .hero-heading-white,
+  .hero-heading-gradient {
+    font-size: clamp(1.2rem, 4.5vw, 1.7rem) !important;
+    line-height: 1.2 !important;
+  }
+
   .hero-container { grid-template-columns: 1fr; text-align: center; }
   .hero-buttons { justify-content: center; }
   .products-grid { grid-template-columns: repeat(2, 1fr); }
