@@ -1105,32 +1105,34 @@ export default function AdminModal({
         zIndex: 100,
         gap: '10px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
-          {isAuthenticated && (
-            <button 
-              className="admin-hamburger-btn"
-              onClick={() => setIsAdminSidebarOpen(!isAdminSidebarOpen)}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, overflow: 'hidden' }}>
+          {isSidebarOpen === false && (
+            <button
+              onClick={() => setIsSidebarOpen(true)}
               style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
+                background: 'var(--bg-input)',
+                border: '1px solid var(--border-color)',
                 color: 'var(--text-primary)',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: '6px',
                 borderRadius: '6px',
-                marginRight: '4px'
+                marginRight: '4px',
+                flexShrink: 0
               }}
               title="Toggle Menu Sidebar"
             >
               <Menu size={20} />
             </button>
           )}
-          <CompanyLogo size={32} />
+          <div className="admin-logo-mobile-hide" style={{ flexShrink: 0 }}>
+            <CompanyLogo size={30} />
+          </div>
           <div style={{ minWidth: 0, overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0, fontSize: 'clamp(0.88rem, 3.5vw, 1.15rem)', fontWeight: '800', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'nowrap' }}>
+              <h2 style={{ margin: 0, fontSize: 'clamp(0.85rem, 3vw, 1.1rem)', fontWeight: '800', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 FRIENDS <span style={{ color: '#FF5500' }}>MOBILE</span> ADMIN
               </h2>
               <span className="admin-badge-mobile-hide" style={{ background: '#FF5500', color: '#fff', fontSize: '0.6rem', fontWeight: 'bold', padding: '2px 6px', borderRadius: '10px', whiteSpace: 'nowrap' }}>
@@ -1143,22 +1145,24 @@ export default function AdminModal({
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
           {isAuthenticated && (
             <>
               <div style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '4px 10px',
+                gap: '4px',
+                padding: '4px 8px',
                 borderRadius: '8px',
                 background: 'rgba(34, 197, 94, 0.1)',
                 border: '1px solid rgba(34, 197, 94, 0.3)',
                 color: '#16a34a',
-                fontSize: '0.74rem',
-                fontWeight: '700'
+                fontSize: '0.72rem',
+                fontWeight: '700',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
               }}>
-                <ShieldCheck size={14} /> 2FA Active
+                <ShieldCheck size={14} /> <span className="admin-badge-mobile-hide">2FA Active</span>
               </div>
 
               <button 
@@ -2412,7 +2416,7 @@ export default function AdminModal({
                                 onClick={() => startEditProduct(prod)}
                                 style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #3b82f6', background: 'rgba(59,130,246,0.1)', color: '#3b82f6', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
                               >
-                                <Edit3 size={14} /> Edit Rate
+                                <Edit3 size={14} /> Edit Product
                               </button>
                               <button 
                                 onClick={() => onDeleteProduct(prod.id)}
