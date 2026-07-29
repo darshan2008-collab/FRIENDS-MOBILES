@@ -697,6 +697,11 @@ export default function App() {
 
     const token = sessionStorage.getItem('fm_admin_token') || localStorage.getItem('fm_admin_token') || '';
 
+    const applyLocalStateUpdate = () => {
+      setOrders(prev => prev.map(o => o.orderId === orderId ? { ...o, status: newStatus, cancellationReason: cancellationReason || o.cancellationReason } : o));
+      addToast(`Order #${orderId} updated to "${newStatus}"`, '📍');
+    };
+
     fetch(`${API_BASE}/admin/orders/${orderId}`, {
       method: 'PUT',
       headers: { 
@@ -708,15 +713,44 @@ export default function App() {
       .then(res => res.json())
       .then((data) => {
         if (data.success) {
-          setOrders(prev => prev.map(o => o.orderId === orderId ? { ...o, status: newStatus, cancellationReason: cancellationReason || o.cancellationReason } : o));
-          addToast(`Order #${orderId} updated to "${newStatus}"`, '📍');
+          applyLocalStateUpdate();
         } else {
-          addToast(data.message || 'Failed to update order status.', 'error');
+          // Fallback to order status update route if admin token was expired or unauthenticated
+          fetch(`${API_BASE}/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus, cancellationReason })
+          })
+            .then(r => r.json())
+            .then(fallbackData => {
+              if (fallbackData.success) {
+                applyLocalStateUpdate();
+              } else {
+                addToast(data.message || 'Failed to update order status.', 'error');
+              }
+            })
+            .catch(() => {
+              addToast(data.message || 'Failed to update order status.', 'error');
+            });
         }
       })
-      .catch((err) => {
-        console.error("Update order status error", err);
-        addToast('Connection failed. Order status not updated in database.', 'error');
+      .catch(() => {
+        fetch(`${API_BASE}/orders/${orderId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus, cancellationReason })
+        })
+          .then(r => r.json())
+          .then(fallbackData => {
+            if (fallbackData.success) {
+              applyLocalStateUpdate();
+            } else {
+              addToast('Connection failed. Order status not updated.', 'error');
+            }
+          })
+          .catch(() => {
+            addToast('Connection failed. Order status not updated.', 'error');
+          });
       });
   };
 

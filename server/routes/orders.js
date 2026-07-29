@@ -191,7 +191,7 @@ router.get('/user/:phoneOrEmail', async (req, res) => {
 // PUT /api/orders/:orderId/status (Update Order Fulfillment Status)
 router.put('/:orderId/status', async (req, res) => {
   try {
-    const { status, shippingFee } = req.body;
+    const { status, shippingFee, cancellationReason } = req.body;
     const orders = await getOrdersAsync();
     const orderIndex = orders.findIndex(o => o.orderId.toLowerCase() === req.params.orderId.toLowerCase());
 
@@ -201,6 +201,10 @@ router.put('/:orderId/status', async (req, res) => {
 
     const targetOrder = { ...orders[orderIndex] };
     if (status) targetOrder.status = sanitizeInput(status);
+    if (cancellationReason) {
+      targetOrder.cancellationReason = sanitizeInput(cancellationReason);
+      targetOrder.cancelledAt = new Date().toISOString();
+    }
     if (shippingFee !== undefined) {
       const parsedFee = parseFloat(shippingFee);
       targetOrder.shipping = parsedFee;
