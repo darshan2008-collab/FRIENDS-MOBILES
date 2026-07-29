@@ -23,8 +23,6 @@ export default function AIChatbotModal({
   const [messages, setMessages] = useState([]);
   const [inputQuery, setInputQuery] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
-  const [speakingMsgId, setSpeakingMsgId] = useState(null);
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -87,109 +85,15 @@ export default function AIChatbotModal({
     }
   }, [messages, isTyping, isOpen]);
 
-  const [voices, setVoices] = useState([]);
-
-  // Pre-load Web Speech voices & listen for voice availability
-  useEffect(() => {
-    const updateVoices = () => {
-      if ('speechSynthesis' in window) {
-        const availableVoices = window.speechSynthesis.getVoices() || [];
-        setVoices(availableVoices);
-      }
-    };
-    updateVoices();
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = updateVoices;
-    }
-  }, []);
-
   const stopAllAudio = () => {
     if ('speechSynthesis' in window) {
       try {
         window.speechSynthesis.cancel();
       } catch (_) {}
     }
-    setSpeakingMsgId(null);
   };
 
-  // Web Speech API Synthesizer
-  // English: Male Strong Voice (en-IN)
-  // Tamil: Pure Professional Female Native Speech (ta-IN)
-  const speakText = (textToSpeak, msgId = null, activeLang = botLang) => {
-    if (!('speechSynthesis' in window)) return;
-
-    try {
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-      }
-      window.speechSynthesis.cancel();
-    } catch (_) {}
-
-    setSpeakingMsgId(msgId);
-
-    // Clean text before speaking:
-    // Exclude product model numbers from spoken voice audio so voice speaks pure, elegant Tamil
-    const cleanText = textToSpeak
-      .replace(/• (பொருள்|Item|ஆர்டர் எண்|Order ID):.*?\n/gi, '')
-      .replace(/[*_#`~]/g, '')
-      .replace(/\(.*?\)/g, '')
-      .replace(/https?:\/\/\S+/g, '')
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
-      .trim();
-
-    if (!cleanText) return;
-
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    const availVoices = voices.length > 0 ? voices : (window.speechSynthesis.getVoices() || []);
-
-    if (activeLang === 'ta') {
-      utterance.lang = 'ta-IN';
-      utterance.pitch = 1.1; // Smooth Professional Female Pitch
-      utterance.rate = 0.85;  // Elegant Natural Spoken Rate
-
-      const tamilVoice = availVoices.find(v => 
-        (v.lang && (v.lang.toLowerCase().includes('ta-in') || v.lang.toLowerCase().includes('ta_in') || v.lang.toLowerCase().startsWith('ta'))) ||
-        (v.name && (v.name.toLowerCase().includes('tamil') || v.name.toLowerCase().includes('தமிழ்') || v.name.toLowerCase().includes('valluvar')))
-      );
-
-      if (tamilVoice) {
-        utterance.voice = tamilVoice;
-      }
-    } else {
-      utterance.lang = 'en-IN';
-      utterance.pitch = 0.88; // Deep Strong Male Pitch for English
-      utterance.rate = 0.95;  // Confident Male Speed
-
-      const englishMaleVoice = availVoices.find(v => 
-        (v.lang.includes('en') || v.name.toLowerCase().includes('english')) &&
-        (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || 
-         v.name.toLowerCase().includes('ravi') || v.name.toLowerCase().includes('george') || 
-         v.name.toLowerCase().includes('mark') || v.name.toLowerCase().includes('guy') || 
-         v.name.toLowerCase().includes('james'))
-      ) || availVoices.find(v => v.lang.includes('en'));
-
-      if (englishMaleVoice) utterance.voice = englishMaleVoice;
-    }
-      utterance.lang = 'en-IN';
-      utterance.pitch = 0.88; // Deep Strong Male Pitch for English
-      utterance.rate = 0.95;  // Confident Male Speed
-
-      const englishMaleVoice = availVoices.find(v => 
-        (v.lang.includes('en') || v.name.toLowerCase().includes('english')) &&
-        (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || 
-         v.name.toLowerCase().includes('ravi') || v.name.toLowerCase().includes('george') || 
-         v.name.toLowerCase().includes('mark') || v.name.toLowerCase().includes('guy') || 
-         v.name.toLowerCase().includes('james'))
-      ) || availVoices.find(v => v.lang.includes('en'));
-
-      if (englishMaleVoice) utterance.voice = englishMaleVoice;
-    }
-
-    utterance.onend = () => setSpeakingMsgId(null);
-    utterance.onerror = () => setSpeakingMsgId(null);
-
-    window.speechSynthesis.speak(utterance);
-  };
+  const speakText = () => {};
 
   // Toggle voice recording (Microphone Speech Recognition)
   const toggleSpeechRecognition = () => {
@@ -423,10 +327,10 @@ export default function AIChatbotModal({
             <div>
               <div className="ai-bot-title">
                 <strong>{botLang === 'ta' ? 'பிரண்ட்ஸ் மொபைல் AI' : 'FRIENDS MOBILE AI'}</strong>
-                <span className="ai-badge">{botLang === 'ta' ? '24/7 குரல் சேவை' : '24/7 Care'}</span>
+                <span className="ai-badge">{botLang === 'ta' ? '24/7 உதவி மையம்' : '24/7 Care'}</span>
               </div>
               <div className="ai-bot-status">
-                {botLang === 'ta' ? 'குரல் & பிரதான வரைபட உதவி' : 'Voice Assistant & Support Chart'}
+                {botLang === 'ta' ? 'பிரதான சேவை வரைபட உதவி' : 'Support Chart & Order Help'}
               </div>
             </div>
           </div>
@@ -439,47 +343,26 @@ export default function AIChatbotModal({
                 const nextLang = botLang === 'ta' ? 'en' : 'ta';
                 setBotLang(nextLang);
                 const switchMsgId = `welcome-${Date.now()}`;
-                const announceText = nextLang === 'ta'
-                  ? "வணக்கம்! தமிழ் குரல் சேவை இயக்கப்பட்டது. பிரண்ட்ஸ் மொபைல் உதவி மையத்திற்கு வரவேற்கிறோம்."
-                  : "English male voice support activated. Welcome to FRIENDS MOBILE support.";
 
                 const switchMsg = {
                   id: switchMsgId,
                   sender: 'bot',
                   text: nextLang === 'ta'
-                    ? `வணக்கம்! 🖐️ தமிழ் குரல் சேவை இயக்கப்பட்டது.\n\nபிரண்ட்ஸ் மொபைல் 24/7 வாடிக்கையாளர் உதவி மையத்திற்கு வரவேற்கிறோம். கீழே உள்ள **பிரதான உதவி வரைபடத்தை (Fixed Support Chart)** பயன்படுத்தவும் அல்லது கேள்விகளை உள்ளிடவும்:`
-                    : `English voice support activated! 🚀\n\nWelcome to FRIENDS MOBILE 24/7 Support Center. Please select an option from our **Fixed Support Chart** below or enter your query:`,
+                    ? `வணக்கம்! 🖐️ பிரண்ட்ஸ் மொபைல் 24/7 வாடிக்கையாளர் உதவி மையத்திற்கு வரவேற்கிறோம். கீழே உள்ள **பிரதான உதவி வரைபடத்தை (Fixed Support Chart)** பயன்படுத்தவும் அல்லது கேள்விகளை உள்ளிடவும்:`
+                    : `Welcome to FRIENDS MOBILE 24/7 Support Center! 🚀\n\nPlease select an option from our **Fixed Support Chart** below or enter your query:`,
                   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                   isChartMenu: true,
                   quickReplies: nextLang === 'ta' 
-                    ? ['📦 ஆர்டர் டிராக்கிங்', '🔄 ரத்து & மாற்று பாலிசி', '💳 கட்டணம் & ரீஃபண்ட்', '🎨 கஸ்டமைஸ் கவர்', '⚠️ புகார்கள் & நேரடி உதவி']
+                    ? ['📦 ஆர்டர் கண்காணிப்பு', '🔄 ரத்து & மாற்று பாலிசி', '💳 கட்டணம் & ரீஃபண்ட்', '🎨 கஸ்டமைஸ் கவர்', '⚠️ புகார்கள் & நேரடி உதவி']
                     : ['📦 Track My Order', '🔄 Returns & Cancellation', '💳 Payments & Refund', '🎨 Custom Covers', '⚠️ Report Complaint']
                 };
 
                 setMessages(prev => [...prev, switchMsg]);
-                if (isVoiceEnabled) {
-                  speakText(announceText, switchMsgId, nextLang);
-                }
               }}
               title="Switch Language / மொழி மாற்றம்"
             >
               <Languages size={15} color="#ffffff" />
-              <span>{botLang === 'ta' ? 'தமிழ் (Female Voice)' : 'English (Male Voice)'}</span>
-            </button>
-
-
-            <button 
-              className="ai-reset-btn"
-              onClick={() => {
-                const nextState = !isVoiceEnabled;
-                setIsVoiceEnabled(nextState);
-                if (nextState) speakText(botLang === 'ta' ? "குரல் ஒலி இயக்கப்பட்டது" : "Voice speech enabled", null, botLang);
-                else stopAllAudio();
-              }}
-              title={isVoiceEnabled ? "Mute Voice Speech" : "Enable Voice Speech"}
-              style={{ color: isVoiceEnabled ? '#22c55e' : 'var(--text-muted)' }}
-            >
-              {isVoiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              <span>{botLang === 'ta' ? 'தமிழ் (Tamil)' : 'English (ஆங்கிலம்)'}</span>
             </button>
 
             <button 
@@ -601,17 +484,8 @@ export default function AIChatbotModal({
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: '6px' }}>
                     <span className="ai-msg-timestamp">{msg.timestamp}</span>
-                    {msg.sender === 'bot' && (
-                      <button 
-                        onClick={() => speakText(msg.text, msg.id, botLang)}
-                        style={{ background: 'none', border: 'none', color: speakingMsgId === msg.id ? '#22c55e' : 'var(--text-muted)', cursor: 'pointer', padding: '2px' }}
-                        title="Listen to Speech synthesis"
-                      >
-                        <Volume2 size={13} />
-                      </button>
-                    )}
                   </div>
                 </div>
 
