@@ -4,7 +4,6 @@ import Header from './components/Header';
 import MobileDrawer from './components/MobileDrawer';
 import Hero from './components/Hero';
 import CategoryGrid from './components/CategoryGrid';
-import TrustBadges from './components/TrustBadges';
 import PromoBanners from './components/PromoBanners';
 import TrendingProducts from './components/TrendingProducts';
 import ServicesSection from './components/ServicesSection';
@@ -802,7 +801,6 @@ export default function App() {
       <main>
         <Hero theme={theme} slides={heroSlides} t={t} language={language} />
         <CategoryGrid onOpenShop={handleOpenShop} t={t} />
-        <TrustBadges shippingSettings={shippingSettings} t={t} language={language} />
         <PromoBanners 
           onOpenCustomCover={() => setIsCustomCoverOpen(true)}
           onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
