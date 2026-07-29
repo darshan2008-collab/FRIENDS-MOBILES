@@ -19,21 +19,25 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
   // Cancel Order Modal State
   const [cancelTargetOrder, setCancelTargetOrder] = useState(null);
   const [cancelReasonText, setCancelReasonText] = useState('Ordered by mistake / wrong item selected');
+  const [customCancelReason, setCustomCancelReason] = useState('');
   const [isCancellingOrder, setIsCancellingOrder] = useState(false);
 
   const handleConfirmCancelOrder = async () => {
     if (!cancelTargetOrder) return;
+    const finalReason = cancelReasonText.startsWith('Other') 
+      ? (customCancelReason.trim() || 'Other reason') 
+      : cancelReasonText;
     setIsCancellingOrder(true);
     try {
       const res = await fetch(`${API_BASE}/orders/${cancelTargetOrder.orderId}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: cancelReasonText })
+        body: JSON.stringify({ reason: finalReason })
       });
       const data = await res.json();
       if (data.success) {
         if (addToast) addToast(`Order #${cancelTargetOrder.orderId} cancelled successfully!`, '🔴');
-        setUserOrders(prev => prev.map(o => o.orderId === cancelTargetOrder.orderId ? { ...o, status: 'Cancelled', cancellationReason: cancelReasonText } : o));
+        setUserOrders(prev => prev.map(o => o.orderId === cancelTargetOrder.orderId ? { ...o, status: 'Cancelled', cancellationReason: finalReason } : o));
         setCancelTargetOrder(null);
       } else {
         if (addToast) addToast(data.message || 'Failed to cancel order', '⚠️');
@@ -995,33 +999,63 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
               Are you sure you want to cancel this order? Please select a reason below to process your cancellation:
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
               {[
                 'Ordered by mistake / wrong item selected',
                 'Delivery taking too long',
                 'Found a better price elsewhere',
                 'Incorrect shipping address / phone number',
-                'Changed my mind / Other reason'
+                'Other (Write manual custom reason)'
               ].map(reason => (
-                <label 
-                  key={reason}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px',
-                    borderRadius: '10px', border: cancelReasonText === reason ? '2px solid #ef4444' : '1px solid var(--border-color)',
-                    background: cancelReasonText === reason ? 'rgba(239,68,68,0.08)' : 'var(--bg-input)',
-                    color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <input 
-                    type="radio" 
-                    name="cancelReason" 
-                    checked={cancelReasonText === reason} 
-                    onChange={() => setCancelReasonText(reason)}
-                    style={{ accentColor: '#ef4444' }}
-                  />
-                  {reason}
-                </label>
+                <div key={reason}>
+                  <label 
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px',
+                      borderRadius: '10px', border: cancelReasonText === reason ? '2px solid #ef4444' : '1px solid var(--border-color)',
+                      background: cancelReasonText === reason ? 'rgba(239,68,68,0.08)' : 'var(--bg-input)',
+                      color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <input 
+                      type="radio" 
+                      name="cancelReason" 
+                      checked={cancelReasonText === reason} 
+                      onChange={() => {
+                        setCancelReasonText(reason);
+                        if (!reason.startsWith('Other')) {
+                          setCustomCancelReason('');
+                        }
+                      }}
+                      style={{ accentColor: '#ef4444' }}
+                    />
+                    {reason}
+                  </label>
+
+                  {/* Manual Custom Reason Text Area */}
+                  {reason.startsWith('Other') && cancelReasonText === reason && (
+                    <div style={{ marginTop: '8px', paddingLeft: '8px' }}>
+                      <textarea
+                        value={customCancelReason}
+                        onChange={(e) => setCustomCancelReason(e.target.value)}
+                        placeholder="Write your custom cancellation reason here..."
+                        rows={3}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          borderRadius: '10px',
+                          border: '1.5px solid #ef4444',
+                          background: 'var(--bg-input)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.82rem',
+                          outline: 'none',
+                          resize: 'none',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
 
