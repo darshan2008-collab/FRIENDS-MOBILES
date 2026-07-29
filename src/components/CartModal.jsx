@@ -881,8 +881,8 @@ export default function CartModal({
 
                 {/* Dynamic QR Code Generator */}
                 {(() => {
-                  const storeUpi = shippingSettings?.storeUpiId || '7448578507@paytm';
-                  const payeeName = shippingSettings?.storePayeeName || 'FRIENDS MOBILE';
+                  const storeUpi = import.meta.env.VITE_STORE_UPI_ID || shippingSettings?.storeUpiId || '7448578507@paytm';
+                  const payeeName = import.meta.env.VITE_STORE_PAYEE_NAME || shippingSettings?.storePayeeName || 'FRIENDS MOBILE';
                   const upiUri = `upi://pay?pa=${encodeURIComponent(storeUpi)}&pn=${encodeURIComponent(payeeName)}&am=${pendingOrder.total}&cu=INR&tn=${encodeURIComponent(`Order ${pendingOrder.orderId}`)}`;
                   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiUri)}`;
 
