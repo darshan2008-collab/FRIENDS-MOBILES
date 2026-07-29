@@ -35,10 +35,15 @@ const brandMap = {
   'redmi': 'ரெட்மி',
   'infinix': 'இன்பினிக்ஸ்',
   'techno': 'டெக்னோ',
+  'tecno': 'டெக்னோ',
   'noise': 'நாய்ஸ்',
   'fire-boltt': 'பயர்-போல்ட்',
   'fireboltt': 'பயர்-போல்ட்',
-  'boult': 'போல்ட்'
+  'boult': 'போல்ட்',
+  'zebronics': 'ஜெப்ரானிக்ஸ்',
+  'amane': 'அமேன்',
+  'ptron': 'பிட்ரான்',
+  'pTron': 'பிட்ரான்'
 };
 
 const termMap = {
@@ -46,6 +51,9 @@ const termMap = {
   'earbuds': 'இயர்பட்ஸ்',
   'earphone': 'இயர்போன்',
   'earphones': 'இயர்போன்கள்',
+  'headphone': 'ஹெட்போன்',
+  'headphones': 'ஹெட்போன்கள்',
+  'tws': 'TWS',
   'bluetooth': 'புளூடூத்',
   'wireless': 'வயர்லெஸ்',
   'neckband': 'நெக்பேண்ட்',
@@ -53,8 +61,13 @@ const termMap = {
   'bank': 'பேங்க்',
   'powerbank': 'பவர் பேங்க்',
   'charger': 'சார்ஜர்',
+  'charging': 'சார்ஜிங்',
+  'battery': 'பேட்டரி',
   'fast': 'வேகமான',
   'quick': 'விரைவு',
+  'flash': 'பிளாஷ்',
+  'super': 'சூப்பர்',
+  'speed': 'ஸ்பீட்',
   'adapter': 'அடாப்டர்',
   'adaptor': 'அடாப்டர்',
   'cable': 'கேபிள்',
@@ -65,10 +78,12 @@ const termMap = {
   'bridge': 'பிரிட்ஜ்',
   'customized': 'கஸ்டமைஸ்',
   'custom': 'கஸ்டமைஸ்',
+  'personalized': 'கஸ்டமைஸ்',
   'back': 'பேக்',
   'cover': 'கவர்',
   'covers': 'கவர்கள்',
   'case': 'கேஸ்',
+  'cases': 'கேஸ்கள்',
   'pouch': 'பவுச்',
   'mobile': 'மொபைல்',
   'phone': 'போன்',
@@ -79,19 +94,42 @@ const termMap = {
   'frame': 'பிரேம்',
   'frames': 'பிரேம்கள்',
   'wooden': 'மர',
-  'glass': 'அக்ரிலிக் கிளாஸ்',
+  'glass': 'கிளாஸ்',
+  'acrylic': 'அக்ரிலிக்',
+  'premium': 'பிரீமியம்',
+  'original': 'அசல்',
+  'genuine': 'அசல்',
   'tempered': 'டெம்பர்டு',
   'screen': 'ஸ்கிரீன்',
   'guard': 'கார்டு',
   'protector': 'பாதுகாப்பு',
   'display': 'டிஸ்பிளே',
   'speaker': 'ஸ்பீக்கர்',
-  'smartwatch': 'ஸ்மார்ட்வாட்ச்',
+  'sound': 'சவுண்ட்',
+  'audio': 'ஆடியோ',
+  'bass': 'பேஸ்',
+  'stereo': 'ஸ்டீரியோ',
+  'smartwatch': 'ஸ்மார்ட் வாட்ச்',
   'watch': 'வாட்ச்',
   'stand': 'ஸ்டாண்ட்',
   'holder': 'ஹோல்டர்',
   'mount': 'மவுண்ட்',
-  'car': 'கார்'
+  'car': 'கார்',
+  'pro': 'புரோ',
+  'max': 'மேக்ஸ்',
+  'plus': 'பிளஸ்',
+  'mini': 'மினி',
+  'ultra': 'அல்ட்ரா',
+  'light': 'லைட்',
+  'clear': 'கிளியர்',
+  'transparent': 'வெளிப்படையான',
+  'black': 'கருப்பு',
+  'white': 'வெள்ளை',
+  'blue': 'நீலம்',
+  'red': 'சிவப்பு',
+  'green': 'பச்சை',
+  'gold': 'தங்கம்',
+  'silver': 'வெள்ளி'
 };
 
 export const autoTranslateToTamil = (text) => {
@@ -171,10 +209,23 @@ export const getProductTitle = (product, lang = 'en') => {
   if (!englishTitle) return '';
   if (lang !== 'ta') return englishTitle;
 
+  // Check explicit Tamil title override first
+  if (typeof product === 'object' && product.tamilTitle && typeof product.tamilTitle === 'string' && product.tamilTitle.trim()) {
+    if (/[\u0B80-\u0BFF]/.test(product.tamilTitle)) {
+      return product.tamilTitle;
+    }
+  }
+
+  // Generate full automatic Tamil translation for dynamic new products
+  const tamilTranslated = autoTranslateToTamil(englishTitle);
+  if (tamilTranslated && /[\u0B80-\u0BFF]/.test(tamilTranslated)) {
+    return tamilTranslated;
+  }
+
   const shortTamilName = getShortTamilName(englishTitle);
   if (!shortTamilName) return englishTitle;
 
-  return `${shortTamilName} (${englishTitle})`;
+  return shortTamilName;
 };
 
 export const getProductDesc = (product, lang = 'en') => {
