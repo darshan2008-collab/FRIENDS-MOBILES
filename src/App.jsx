@@ -863,106 +863,122 @@ export default function App() {
 
       <Footer language={language} toggleLanguage={toggleLanguage} t={t} />
 
-      <ProductDetailModal 
-        product={selectedProduct}
-        products={products}
-        wishlist={wishlist}
-        onClose={() => setSelectedProduct(null)}
-        onToggleWishlist={handleToggleWishlist}
-        onAddToCart={handleAddToCart}
-        onSelectProduct={handleSelectProduct}
-        language={language}
-        t={t}
-      />
+      {selectedProduct && (
+        <ProductDetailModal 
+          product={selectedProduct}
+          products={products}
+          wishlist={wishlist}
+          onClose={() => setSelectedProduct(null)}
+          onToggleWishlist={handleToggleWishlist}
+          onAddToCart={handleAddToCart}
+          onSelectProduct={handleSelectProduct}
+          language={language}
+          t={t}
+        />
+      )}
 
-      <ShoppingPortal 
-        isOpen={isShopOpen}
-        onClose={() => setIsShopOpen(false)}
-        products={products}
-        onAddToCart={handleAddToCart}
-        wishlist={wishlist}
-        onToggleWishlist={handleToggleWishlist}
-        onSelectProduct={handleSelectProduct}
-        initialCategory={shopCategory}
-        cartCount={cartCount}
-        onOpenCart={handleOpenCartClick}
-        language={language}
-        t={t}
-      />
+      {isShopOpen && (
+        <ShoppingPortal 
+          isOpen={isShopOpen}
+          onClose={() => setIsShopOpen(false)}
+          products={products}
+          onAddToCart={handleAddToCart}
+          wishlist={wishlist}
+          onToggleWishlist={handleToggleWishlist}
+          onSelectProduct={handleSelectProduct}
+          initialCategory={shopCategory}
+          cartCount={cartCount}
+          onOpenCart={handleOpenCartClick}
+          language={language}
+          t={t}
+        />
+      )}
       
-      <AdminModal 
-        isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
-        products={products}
-        onAddProduct={handleAddProduct}
-        onUpdateProduct={handleUpdateProduct}
-        onDeleteProduct={handleDeleteProduct}
-        shippingSettings={shippingSettings}
-        onUpdateShippingSettings={handleUpdateShippingSettings}
-        orders={orders}
-        onUpdateOrderStatus={handleUpdateOrderStatus}
-        onUpdateShippingCost={handleUpdateOrderShipping}
-        addToast={addToast}
-        slides={heroSlides}
-        onUpdateSlides={handleUpdateSlides}
-        onUpdateOrders={setOrders}
-      />
+      {isAdminOpen && (
+        <AdminModal 
+          isOpen={isAdminOpen}
+          onClose={() => setIsAdminOpen(false)}
+          products={products}
+          onAddProduct={handleAddProduct}
+          onUpdateProduct={handleUpdateProduct}
+          onDeleteProduct={handleDeleteProduct}
+          shippingSettings={shippingSettings}
+          onUpdateShippingSettings={handleUpdateShippingSettings}
+          orders={orders}
+          onUpdateOrderStatus={handleUpdateOrderStatus}
+          onUpdateShippingCost={handleUpdateOrderShipping}
+          addToast={addToast}
+          slides={heroSlides}
+          onUpdateSlides={handleUpdateSlides}
+          onUpdateOrders={setOrders}
+        />
+      )}
 
-      <UserAuthModal 
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
-        addToast={addToast}
-        redirectMessage={authRedirectMessage}
-        onOpenAdmin={() => setIsAdminOpen(true)}
-        t={t}
-      />
+      {isAuthOpen && (
+        <UserAuthModal 
+          isOpen={isAuthOpen}
+          onClose={() => setIsAuthOpen(false)}
+          onLoginSuccess={handleLoginSuccess}
+          addToast={addToast}
+          redirectMessage={authRedirectMessage}
+          onOpenAdmin={() => setIsAdminOpen(true)}
+          t={t}
+        />
+      )}
 
-      <UserAccountModal 
-        isOpen={isAccountOpen}
-        onClose={() => setIsAccountOpen(false)}
-        user={currentUser}
-        orders={orders}
-        onLogout={handleLogout}
-        addToast={addToast}
-        language={language}
-        t={t}
-      />
+      {isAccountOpen && (
+        <UserAccountModal 
+          isOpen={isAccountOpen}
+          onClose={() => setIsAccountOpen(false)}
+          user={currentUser}
+          orders={orders}
+          onLogout={handleLogout}
+          addToast={addToast}
+          language={language}
+          t={t}
+        />
+      )}
 
-      <CustomBackCoverModal 
-        isOpen={isCustomCoverOpen}
-        onClose={() => setIsCustomCoverOpen(false)}
-        onAddToCart={handleAddToCart}
-        addToast={addToast}
-        t={t}
-        language={language}
-      />
+      {isCustomCoverOpen && (
+        <CustomBackCoverModal 
+          isOpen={isCustomCoverOpen}
+          onClose={() => setIsCustomCoverOpen(false)}
+          onAddToCart={handleAddToCart}
+          addToast={addToast}
+          t={t}
+          language={language}
+        />
+      )}
 
-      <CustomPhotoFrameModal 
-        isOpen={isCustomFrameOpen}
-        onClose={() => setIsCustomFrameOpen(false)}
-        onAddToCart={handleAddToCart}
-        addToast={addToast}
-        t={t}
-        language={language}
-      />
+      {isCustomFrameOpen && (
+        <CustomPhotoFrameModal 
+          isOpen={isCustomFrameOpen}
+          onClose={() => setIsCustomFrameOpen(false)}
+          onAddToCart={handleAddToCart}
+          addToast={addToast}
+          t={t}
+          language={language}
+        />
+      )}
 
-      <CartModal 
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cart={cart}
-        onUpdateQuantity={handleUpdateCartQuantity}
-        onRemoveItem={handleRemoveFromCart}
-        onClearCart={handleClearCart}
-        shippingSettings={shippingSettings}
-        currentUser={currentUser}
-        onTriggerAuth={triggerCompulsoryAuth}
-        addToast={addToast}
-        onOrderPlaced={handleOrderPlaced}
-        onUpdateUserProfile={handleUpdateUserProfile}
-        language={language}
-        t={t}
-      />
+      {isCartOpen && (
+        <CartModal 
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          cart={cart}
+          onUpdateQuantity={handleUpdateCartQuantity}
+          onRemoveItem={handleRemoveFromCart}
+          onClearCart={handleClearCart}
+          shippingSettings={shippingSettings}
+          currentUser={currentUser}
+          onTriggerAuth={triggerCompulsoryAuth}
+          addToast={addToast}
+          onOrderPlaced={handleOrderPlaced}
+          onUpdateUserProfile={handleUpdateUserProfile}
+          language={language}
+          t={t}
+        />
+      )}
 
       <MobileBottomBar 
         cartCount={cartCount}
@@ -982,23 +998,25 @@ export default function App() {
           handleOpenShop('Wishlist');
         }}
         onOpenCart={handleOpenCartClick}
-        onOpenChatbot={() => setIsChatbotOpen(true)}
+        onOpenChatbot={() => setIsChatbotOpen(false)}
       />
 
-      <AIChatbotModal 
-        isOpen={isChatbotOpen}
-        onClose={() => setIsChatbotOpen(false)}
-        orders={orders}
-        products={products}
-        currentUser={currentUser}
-        language={language}
-        t={t}
-        onOpenCustomCover={() => setIsCustomCoverOpen(true)}
-        onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
-        onOpenShop={handleOpenShop}
-        onOpenUserAccount={() => setIsAccountOpen(true)}
-        addToast={addToast}
-      />
+      {isChatbotOpen && (
+        <AIChatbotModal 
+          isOpen={isChatbotOpen}
+          onClose={() => setIsChatbotOpen(false)}
+          orders={orders}
+          products={products}
+          currentUser={currentUser}
+          language={language}
+          t={t}
+          onOpenCustomCover={() => setIsCustomCoverOpen(true)}
+          onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+          onOpenShop={handleOpenShop}
+          onOpenUserAccount={() => setIsAccountOpen(true)}
+          addToast={addToast}
+        />
+      )}
 
 
       <ToastContainer toasts={toasts} onRemoveToast={handleRemoveToast} />
