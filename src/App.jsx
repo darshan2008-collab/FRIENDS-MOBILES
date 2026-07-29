@@ -690,17 +690,22 @@ export default function App() {
       });
   };
 
-  const handleUpdateOrderStatus = (orderId, newStatus) => {
+  const handleUpdateOrderStatus = (orderId, newStatus, cancellationReason) => {
+    const reqBody = { status: newStatus };
+    if (cancellationReason) {
+      reqBody.cancellationReason = cancellationReason;
+    }
+
     fetch(`${API_BASE}/admin/orders/${orderId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
+      body: JSON.stringify(reqBody)
     })
       .then(res => res.json())
       .then((data) => {
         if (data.success) {
-          setOrders(prev => prev.map(o => o.orderId === orderId ? { ...o, status: newStatus } : o));
-          addToast(`Order ${orderId} updated to "${newStatus}"`, '📍');
+          setOrders(prev => prev.map(o => o.orderId === orderId ? { ...o, status: newStatus, cancellationReason: cancellationReason || o.cancellationReason } : o));
+          addToast(`Order #${orderId} updated to "${newStatus}"`, '📍');
         } else {
           addToast(data.message || 'Failed to update order status.', 'error');
         }

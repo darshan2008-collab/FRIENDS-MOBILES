@@ -67,6 +67,26 @@ export default function AdminModal({
     return [];
   });
 
+  // Admin Order Cancellation State
+  const [adminCancelTargetOrder, setAdminCancelTargetOrder] = useState(null);
+  const [adminCancelReasonText, setAdminCancelReasonText] = useState('Item Out of Stock / Discontinued');
+
+  const handleAdminConfirmCancelOrder = () => {
+    if (!adminCancelTargetOrder) return;
+    const targetId = adminCancelTargetOrder.orderId;
+    const reason = adminCancelReasonText;
+
+    if (onUpdateOrderStatus) {
+      onUpdateOrderStatus(targetId, 'Cancelled', reason);
+    }
+    setAdminOrders(prev => prev.map(o => o.orderId === targetId ? { ...o, status: 'Cancelled', cancellationReason: reason } : o));
+
+    if (addToast) {
+      addToast(`Order #${targetId} has been cancelled by Admin.`, '🔴');
+    }
+    setAdminCancelTargetOrder(null);
+  };
+
   useEffect(() => {
     if (Array.isArray(orders) && orders.length > 0) {
       setAdminOrders(orders);
@@ -2570,17 +2590,25 @@ export default function AdminModal({
                           </span>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700' }}>Order Status:</span>
                           <select 
                             value={order.status || 'Order Placed'}
-                            onChange={(e) => onUpdateOrderStatus(order.orderId, e.target.value)}
+                            onChange={(e) => {
+                              const selectedVal = e.target.value;
+                              if (selectedVal === 'Cancelled') {
+                                setAdminCancelTargetOrder(order);
+                                setAdminCancelReasonText('Item Out of Stock / Discontinued');
+                              } else {
+                                onUpdateOrderStatus(order.orderId, selectedVal);
+                              }
+                            }}
                             style={{
                               padding: '6px 12px',
                               borderRadius: '8px',
-                              border: '1.5px solid #FF5500',
-                              background: 'var(--bg-input)',
-                              color: '#FF5500',
+                              border: (order.status || '').toLowerCase().includes('cancel') ? '1.5px solid #ef4444' : '1.5px solid #FF5500',
+                              background: (order.status || '').toLowerCase().includes('cancel') ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-input)',
+                              color: (order.status || '').toLowerCase().includes('cancel') ? '#ef4444' : '#FF5500',
                               fontWeight: '800',
                               fontSize: '0.8rem',
                               cursor: 'pointer'
@@ -2591,9 +2619,16 @@ export default function AdminModal({
                             <option value="Shipped">Shipped</option>
                             <option value="Out for Delivery">Out for Delivery</option>
                             <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">🔴 Cancelled</option>
                           </select>
                         </div>
                       </div>
+
+                      {order.cancellationReason && (
+                        <div style={{ fontSize: '0.76rem', color: '#ef4444', background: 'rgba(239, 68, 68, 0.08)', padding: '6px 12px', borderRadius: '8px', marginBottom: '10px', fontWeight: '700', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
+                          🚫 Cancellation Reason: {order.cancellationReason}
+                        </div>
+                      )}
 
                       {/* Customer Info & Payment Details Row */}
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', fontSize: '0.8rem', marginBottom: '12px' }}>
@@ -2758,6 +2793,35 @@ export default function AdminModal({
                         >
                           Save Fee
                         </button>
+
+                        {/* Admin Cancel Order Action Button */}
+                        {(order.status || '').toLowerCase() !== 'cancelled' && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAdminCancelTargetOrder(order);
+                              setAdminCancelReasonText('Item Out of Stock / Discontinued');
+                            }}
+                            style={{
+                              padding: '7px 14px',
+                              borderRadius: '8px',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              background: 'rgba(239, 68, 68, 0.08)',
+                              color: '#ef4444',
+                              fontWeight: '800',
+                              fontSize: '0.76rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              transition: 'all 0.2s ease',
+                              marginLeft: 'auto'
+                            }}
+                          >
+                            🚫 Cancel Order
+                          </button>
+                        )}
+
                         {order.shipping === 'Pending' && (
                           <span style={{ color: 'var(--primary-orange)', fontWeight: '700', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <AlertTriangle size={12} /> Pending
@@ -3547,6 +3611,82 @@ export default function AdminModal({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Admin Cancel Order Reason Selection Modal */}
+      {adminCancelTargetOrder && (
+        <div 
+          style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(0,0,0,0.82)', zIndex: 100050, display: 'flex',
+            alignItems: 'center', justifyContent: 'center', padding: '20px',
+            backdropFilter: 'blur(8px)', boxSizing: 'border-box'
+          }}
+          onClick={() => setAdminCancelTargetOrder(null)}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+              borderRadius: '20px', padding: '24px', maxWidth: '460px', width: '100%',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.6)'
+            }}
+          >
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', fontWeight: '800', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🚫 Admin Order Cancellation
+            </h3>
+            <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.5' }}>
+              Are you sure you want to cancel <strong>Order #{adminCancelTargetOrder.orderId}</strong>? Select the cancellation reason below:
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+              {[
+                'Item Out of Stock / Discontinued',
+                'Customer Requested Cancellation (Call/Chat)',
+                'Incorrect Shipping Address / Phone Unreachable',
+                'Payment Failed / Fraud Check',
+                'Damaged Item / Quality Inspection Failed',
+                'Other Administrative Reason'
+              ].map(reason => (
+                <label 
+                  key={reason}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px',
+                    borderRadius: '10px', border: adminCancelReasonText === reason ? '2px solid #ef4444' : '1px solid var(--border-color)',
+                    background: adminCancelReasonText === reason ? 'rgba(239,68,68,0.08)' : 'var(--bg-input)',
+                    color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <input 
+                    type="radio" 
+                    name="adminCancelReason" 
+                    checked={adminCancelReasonText === reason} 
+                    onChange={() => setAdminCancelReasonText(reason)}
+                    style={{ accentColor: '#ef4444' }}
+                  />
+                  {reason}
+                </label>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setAdminCancelTargetOrder(null)}
+                style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-muted)', fontWeight: '700', fontSize: '0.84rem', cursor: 'pointer' }}
+              >
+                Keep Order Active
+              </button>
+              <button
+                type="button"
+                onClick={handleAdminConfirmCancelOrder}
+                style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#ffffff', fontWeight: '800', fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(239,68,68,0.35)' }}
+              >
+                Confirm Admin Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

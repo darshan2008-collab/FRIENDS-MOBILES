@@ -400,7 +400,7 @@ router.get('/orders', async (req, res) => {
 // PUT /api/admin/orders/:orderId
 router.put('/orders/:orderId', async (req, res) => {
   try {
-    const { status, shipping } = req.body;
+    const { status, shipping, cancellationReason } = req.body;
     const orders = await getOrdersAsync();
     const orderIndex = orders.findIndex(o => o.orderId.toLowerCase() === req.params.orderId.toLowerCase());
 
@@ -410,6 +410,11 @@ router.put('/orders/:orderId', async (req, res) => {
 
     if (status !== undefined) {
       orders[orderIndex].status = sanitizeInput(status);
+    }
+
+    if (cancellationReason !== undefined) {
+      orders[orderIndex].cancellationReason = sanitizeInput(cancellationReason);
+      orders[orderIndex].cancelledAt = new Date().toISOString();
     }
 
     if (shipping !== undefined) {
