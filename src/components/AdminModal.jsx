@@ -2381,16 +2381,16 @@ export default function AdminModal({
             )}
 
               {/* Product Catalog Table */}
-              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '780px', tableLayout: 'fixed' }}>
                   <thead>
-                    <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
-                      <th style={{ padding: '10px' }}>PRODUCT</th>
-                      <th style={{ padding: '10px' }}>CATEGORY</th>
-                      <th style={{ padding: '10px' }}>MRP &amp; DISCOUNT</th>
-                      <th style={{ padding: '10px' }}>FINAL RATE</th>
-                      <th style={{ padding: '10px' }}>STOCK</th>
-                      <th style={{ padding: '10px', textAlign: 'right' }}>ACTIONS</th>
+                    <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.76rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      <th style={{ padding: '12px 10px', width: '250px' }}>PRODUCT</th>
+                      <th style={{ padding: '12px 10px', width: '140px' }}>CATEGORY</th>
+                      <th style={{ padding: '12px 10px', width: '120px' }}>MRP &amp; DISCOUNT</th>
+                      <th style={{ padding: '12px 10px', width: '110px' }}>FINAL RATE</th>
+                      <th style={{ padding: '12px 10px', width: '110px' }}>STOCK</th>
+                      <th style={{ padding: '12px 10px', width: '170px', textAlign: 'right' }}>ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2398,25 +2398,28 @@ export default function AdminModal({
                       const orig = prod.originalPrice || Math.round(prod.price * 1.25);
                       return (
                         <tr key={prod.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                          <td style={{ padding: '10px' }}>
+                          <td style={{ padding: '12px 10px', verticalAlign: 'middle' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <img src={prod.img} alt={prod.title} style={{ width: '42px', height: '42px', objectFit: 'contain', borderRadius: '6px', border: '1px solid var(--border-color)', background: '#ffffff', padding: '2px' }} />
-                              <strong style={{ fontSize: '0.86rem' }}>{prod.title}</strong>
+                              <img src={prod.img} alt={prod.title} style={{ width: '42px', height: '42px', objectFit: 'contain', borderRadius: '6px', border: '1px solid var(--border-color)', background: '#ffffff', padding: '2px', flexShrink: 0 }} />
+                              <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                                <strong style={{ fontSize: '0.84rem', display: 'block', color: 'var(--text-primary)', lineHeight: 1.3, wordBreak: 'break-word' }}>{prod.title}</strong>
+                                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>ID: #{prod.id}</span>
+                              </div>
                             </div>
                           </td>
-                          <td style={{ padding: '10px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                            {prod.category}
+                          <td style={{ padding: '12px 10px', verticalAlign: 'middle', fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                            {prod.category || 'Accessories'}
                           </td>
-                          <td style={{ padding: '10px' }}>
+                          <td style={{ padding: '12px 10px', verticalAlign: 'middle' }}>
                             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>₹{orig.toLocaleString('en-IN')}</div>
-                            <span style={{ background: '#FF5500', color: '#fff', fontSize: '0.68rem', fontWeight: '800', padding: '1px 6px', borderRadius: '8px' }}>
+                            <span style={{ background: '#FF5500', color: '#fff', fontSize: '0.68rem', fontWeight: '800', padding: '1px 6px', borderRadius: '8px', display: 'inline-block', marginTop: '2px' }}>
                               {prod.discount || '-15%'}
                             </span>
                           </td>
-                          <td style={{ padding: '10px', fontWeight: '900', color: '#FF5500', fontSize: '0.92rem' }}>
+                          <td style={{ padding: '12px 10px', verticalAlign: 'middle', fontWeight: '900', color: '#FF5500', fontSize: '0.92rem', whiteSpace: 'nowrap' }}>
                             ₹{prod.price.toLocaleString('en-IN')}
                           </td>
-                          <td style={{ padding: '10px' }}>
+                          <td style={{ padding: '12px 10px', verticalAlign: 'middle' }}>
                             <button
                               onClick={() => {
                                 const updated = { ...prod, inStock: prod.inStock === false ? true : false };
@@ -2431,7 +2434,8 @@ export default function AdminModal({
                                 borderRadius: '12px',
                                 fontSize: '0.72rem',
                                 fontWeight: '800',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap'
                               }}
                             >
                               {prod.inStock !== false ? '● In Stock' : '○ Out of Stock'}
