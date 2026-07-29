@@ -909,7 +909,7 @@ export default function CartModal({
                         </span>
                       </div>
 
-                      {/* Copyable UPI ID & Linked Mobile Number */}
+                      {/* Copyable UPI ID */}
                       <div style={{
                         marginTop: '14px',
                         background: 'var(--bg-input)',
@@ -920,7 +920,7 @@ export default function CartModal({
                         maxWidth: '320px',
                         textAlign: 'left'
                       }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <div>
                             <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block' }}>UPI VPA ID:</span>
                             <strong style={{ fontSize: '0.85rem', color: '#FF5500', wordBreak: 'break-all' }}>{storeUpi}</strong>
@@ -934,23 +934,6 @@ export default function CartModal({
                             style={{ padding: '4px 10px', fontSize: '0.72rem', borderRadius: '6px', background: '#FF5500', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
                           >
                             Copy
-                          </button>
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px dashed var(--border-color)', paddingTop: '8px' }}>
-                          <div>
-                            <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block' }}>GPay / PhonePe Mobile:</span>
-                            <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{import.meta.env.VITE_STORE_UPI_MOBILE || '7448578507'}</strong>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(import.meta.env.VITE_STORE_UPI_MOBILE || '7448578507');
-                              if (addToast) addToast('Copied Mobile Number!', '📋');
-                            }}
-                            style={{ padding: '4px 10px', fontSize: '0.72rem', borderRadius: '6px', background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: 'bold' }}
-                          >
-                            Copy Number
                           </button>
                         </div>
                       </div>
