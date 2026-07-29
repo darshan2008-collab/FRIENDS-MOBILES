@@ -388,12 +388,12 @@ export const translations = {
     navContact: 'தொடர்புகொள்ள',
     searchPlaceholder: 'மொபைல் பொருட்கள், பிராண்டுகளைத் தேடவும்...',
     cart: 'கார்ட்',
-    wishlist: 'விருப்பப் பட்டியல்',
+    wishlist: 'விருப்பங்கள்',
     myAccount: 'என் கணக்கு',
     adminPortal: 'அட்மின் போர்டல்',
     loginSignUp: 'லாகின் / பதிவு',
     logout: 'லாக்அவுட்',
-    care247: '24/7 சேவை',
+    care247: '24/7 உதவி',
     customize: 'கஸ்டமைஸ்',
 
     // Mobile Drawer & Bottom Navigation
