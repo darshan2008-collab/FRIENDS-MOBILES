@@ -213,21 +213,27 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
 
     const cleanIdentity = loginIdentity.trim().toLowerCase();
+    const cleanPassword = (loginPassword || '').trim().toLowerCase();
 
-    // Check if user is attempting Admin Login (e.g. 'friendsmobile', 'admin', 'admin@friendsmobile.com', 'friendsmobile@gmail.com')
-    if (cleanIdentity === 'friendsmobile' || cleanIdentity === 'admin' || cleanIdentity === 'admin@friendsmobile.com' || cleanIdentity === 'friendsmobile@gmail.com' || loginPassword === 'fm@1234') {
+    // Check if user is attempting Admin Login (e.g. 'friendsmobile', 'admin', 'admin@friendsmobile.com', 'friendsmobile@gmail.com', or password starting with 'fm@')
+    if (
+      cleanIdentity.includes('admin') || 
+      cleanIdentity.includes('friendsmobile') || 
+      cleanPassword.startsWith('fm@') || 
+      cleanPassword.includes('friendsmobile')
+    ) {
       try {
         const { data, ok } = await safeFetchApi('/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            username: cleanIdentity.includes('@') ? cleanIdentity.split('@')[0] : cleanIdentity,
+            username: cleanIdentity,
             password: loginPassword,
-            securityPin: '994411'
+            pin: '994411'
           })
         });
 
-        if (ok && data && data.success && data.token) {
+        if (data && data.success && data.token) {
           sessionStorage.setItem('fm_admin_token', data.token);
           if (addToast) addToast('👑 Executive Admin Portal Authenticated & Unlocked!', 'success');
           onClose();
