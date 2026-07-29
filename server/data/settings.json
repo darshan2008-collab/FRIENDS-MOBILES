@@ -3,8 +3,10 @@
   "freeShippingThreshold": 1000,
   "expressShippingFee": 99,
   "storeName": "FRIENDS MOBILE",
-  "supportPhone": "+91 74485 78507",
+  "supportPhone": "+91 93445 22086",
   "supportEmail": "friendsmobile@gmail.com",
+  "storeUpiId": "darshankannan2008@oksbi",
+  "storePayeeName": "FRIENDS MOBILE",
   "currency": "INR",
   "taxRatePercent": 0
 }

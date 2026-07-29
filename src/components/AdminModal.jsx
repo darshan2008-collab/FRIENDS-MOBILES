@@ -499,7 +499,7 @@ export default function AdminModal({
     expressShippingFee: 99,
     supportPhone: '+91 93445 22086',
     supportEmail: 'friendsmobile@gmail.com',
-    storeUpiId: '7448578507@paytm',
+    storeUpiId: 'darshankannan2008@oksbi',
     storePayeeName: 'FRIENDS MOBILE'
   });
 
@@ -515,7 +515,7 @@ export default function AdminModal({
         expressShippingFee: shippingSettings.expressShippingFee ?? 99,
         supportPhone: shippingSettings.supportPhone || '+91 93445 22086',
         supportEmail: shippingSettings.supportEmail || 'friendsmobile@gmail.com',
-        storeUpiId: shippingSettings.storeUpiId || '7448578507@paytm',
+        storeUpiId: shippingSettings.storeUpiId || 'darshankannan2008@oksbi',
         storePayeeName: shippingSettings.storePayeeName || 'FRIENDS MOBILE'
       });
     }
