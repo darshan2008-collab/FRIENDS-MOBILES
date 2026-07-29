@@ -38,8 +38,8 @@ export default function TrustBadges({ t = (k) => k, language = 'en' }) {
                 <Icon size={20} className="guarantee-svg" />
               </div>
               <div className="guarantee-text" style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-                <h4 style={{ margin: '0 0 2px 0', wordBreak: 'break-word', whiteSpace: 'normal', lineHeight: '1.25' }}>{b.title}</h4>
-                <p style={{ margin: 0, wordBreak: 'break-word', whiteSpace: 'normal', lineHeight: '1.15' }}>{b.desc}</p>
+                <h4 style={{ margin: '0 0 2px 0', wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'normal', lineHeight: '1.25' }}>{b.title}</h4>
+                <p style={{ margin: 0, wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'normal', lineHeight: '1.15' }}>{b.desc}</p>
               </div>
             </div>
           );
