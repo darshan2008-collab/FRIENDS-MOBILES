@@ -23,14 +23,13 @@ export default function ServicesSection({ t = (k) => k, language = 'en' }) {
   // Double array to create seamless infinite loop
   const displayServices = [...services, ...services];
 
-  // Continuous Smooth Auto-Scrolling Loop (Forward Left-to-Right)
+  // Continuous Non-Stop Smooth Auto-Scrolling Loop
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     let animationFrameId;
     let lastTime = performance.now();
-    let isHovered = false;
     let halfWidth = container.scrollWidth / 2;
     let accumulatedScroll = halfWidth;
 
@@ -39,46 +38,26 @@ export default function ServicesSection({ t = (k) => k, language = 'en' }) {
     const autoScroll = (timestamp) => {
       if (!container) return;
 
-      if (!isHovered) {
-        const elapsed = timestamp - lastTime;
-        if (elapsed > 0) {
-          const delta = (scrollSpeed * elapsed) / 1000;
-          halfWidth = container.scrollWidth / 2 || 1;
+      const elapsed = timestamp - lastTime;
+      if (elapsed > 0) {
+        const delta = (scrollSpeed * elapsed) / 1000;
+        halfWidth = container.scrollWidth / 2 || 1;
 
-          accumulatedScroll -= delta;
-          if (accumulatedScroll <= 0) {
-            accumulatedScroll = halfWidth;
-          }
-          container.scrollLeft = Math.round(accumulatedScroll);
+        accumulatedScroll -= delta;
+        if (accumulatedScroll <= 0) {
+          accumulatedScroll = halfWidth;
         }
-      } else {
-        accumulatedScroll = container.scrollLeft;
+        container.scrollLeft = Math.round(accumulatedScroll);
       }
 
       lastTime = timestamp;
       animationFrameId = requestAnimationFrame(autoScroll);
     };
 
-    const handleMouseEnter = () => { isHovered = true; };
-    const handleMouseLeave = () => { isHovered = false; accumulatedScroll = container.scrollLeft; };
-    const handleTouchStart = () => { isHovered = true; };
-    const handleTouchEnd = () => { isHovered = false; accumulatedScroll = container.scrollLeft; };
-
-    container.addEventListener('mouseenter', handleMouseEnter);
-    container.addEventListener('mouseleave', handleMouseLeave);
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
-    container.addEventListener('touchend', handleTouchEnd, { passive: true });
-
     animationFrameId = requestAnimationFrame(autoScroll);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      if (container) {
-        container.removeEventListener('mouseenter', handleMouseEnter);
-        container.removeEventListener('mouseleave', handleMouseLeave);
-        container.removeEventListener('touchstart', handleTouchStart);
-        container.removeEventListener('touchend', handleTouchEnd);
-      }
     };
   }, []);
 

@@ -133,8 +133,8 @@ router.post('/verify-pin', adminAuthLimiter, (req, res) => {
     }
 
     const cleanPin = String(pin).trim();
-    if (cleanPin !== DEFAULT_ADMIN_PIN && cleanPin !== '123456' && cleanPin !== '994411') {
-      return res.status(401).json({ success: false, message: 'Invalid 6-Digit Admin Security PIN.' });
+    if (cleanPin !== '994411' && cleanPin !== DEFAULT_ADMIN_PIN) {
+      return res.status(401).json({ success: false, message: 'Invalid 6-Digit Admin Security PIN. (Use PIN: 994411)' });
     }
 
     const cleanUser = username ? String(username).trim().toLowerCase() : DEFAULT_ADMIN_USER;
