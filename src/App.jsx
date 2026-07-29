@@ -845,8 +845,6 @@ export default function App() {
         language={language}
         t={t}
       />
-
-      <Footer t={t} language={language} toggleLanguage={toggleLanguage} />
       
       <AdminModal 
         isOpen={isAdminOpen}
