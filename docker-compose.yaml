@@ -1,0 +1,140 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: friends_mobile_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-friends_mobile}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-friends_mobile}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # 1. Core Store REST API & Auth Microservice
+  backend:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: friends_mobile_backend
+    restart: always
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      PORT: ${PORT:-5000}
+      MAIL_SERVICE_URL: "http://backend_mail:5001"
+      DATABASE_URL: ${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/friends_mobile}
+      NODE_ENV: ${NODE_ENV:-production}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-https://friendsmobiles.unitaryx.org}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-noreplyfriendsmobiles@gmail.com}
+      SMTP_PASS: ${SMTP_PASS:-fsthwswldbblrslw}
+      FROM_EMAIL: ${FROM_EMAIL:-noreplyfriendsmobiles@gmail.com}
+      GMAIL_USER: ${GMAIL_USER:-noreplyfriendsmobiles@gmail.com}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:-fsthwswldbblrslw}
+    volumes:
+      - backend_data:/app/data
+      - backend_images:/app/public/images
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 30s
+
+  # 2. Dedicated Mail Microservice (Gmail SMTP & OTP Dispatch)
+  backend_mail:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: friends_mobile_mail
+    command: ["node", "/app/mailServer.js"]
+    restart: always
+    ports:
+      - "127.0.0.1:5001:5001"
+    environment:
+      MAIL_PORT: 5001
+      NODE_ENV: ${NODE_ENV:-production}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-noreplyfriendsmobiles@gmail.com}
+      SMTP_PASS: ${SMTP_PASS:-fsthwswldbblrslw}
+      FROM_EMAIL: ${FROM_EMAIL:-noreplyfriendsmobiles@gmail.com}
+      GMAIL_USER: ${GMAIL_USER:-noreplyfriendsmobiles@gmail.com}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD:-fsthwswldbblrslw}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+
+  # 3. Dedicated Background Worker Process (Database Snapshots & Cloud Backup Sync)
+  backend_worker:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: friends_mobile_worker
+    command: ["node", "/app/worker.js"]
+    restart: always
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/friends_mobile}
+      NODE_ENV: ${NODE_ENV:-production}
+      GDRIVE_CLIENT_ID: ${GDRIVE_CLIENT_ID}
+      GDRIVE_CLIENT_SECRET: ${GDRIVE_CLIENT_SECRET}
+      GDRIVE_FOLDER_ID: ${GDRIVE_FOLDER_ID}
+      GDRIVE_REFRESH_TOKEN: ${GDRIVE_REFRESH_TOKEN}
+      GDRIVE_WEBHOOK_URL: ${GDRIVE_WEBHOOK_URL}
+      BACKUP_INTERVAL_HOURS: ${BACKUP_INTERVAL_HOURS:-1}
+    volumes:
+      - backend_data:/app/data
+      - backend_images:/app/public/images
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"process.exit(0)\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: friends_mobile_frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT:-10026}:3000"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      VITE_HOST: "0.0.0.0"
+      PORT: ${FRONTEND_PORT:-3000}
+      VITE_BACKEND_URL: "http://backend:5000"
+      VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  postgres_data:
+  backend_data:
+  backend_images:
