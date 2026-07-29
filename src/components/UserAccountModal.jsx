@@ -11,6 +11,7 @@ import { getProductTitle } from '../data/translations';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export default function UserAccountModal({ isOpen, onClose, user, orders: allOrders, onLogout, addToast, language = 'en', t = (k) => k }) {
+  const isTamil = language === 'ta';
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile' | 'addresses' | 'offers' | 'support'
   const [userOrders, setUserOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -327,9 +328,11 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
           <CompanyLogo size={32} />
           <div style={{ minWidth: 0, overflow: 'hidden' }}>
             <h2 style={{ margin: 0, fontSize: 'clamp(0.85rem, 3.2vw, 1.25rem)', fontWeight: '900', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              FRIENDS <span style={{ color: '#FF5500' }}>MOBILE</span> PORTAL
+              FRIENDS <span style={{ color: '#FF5500' }}>MOBILE</span> {isTamil ? 'போர்ட்டல்' : 'PORTAL'}
             </h2>
-            <span className="admin-subtitle-mobile-hide" style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '600', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Customer Executive Dashboard</span>
+            <span className="admin-subtitle-mobile-hide" style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '600', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {isTamil ? 'வாடிக்கையாளர் கணக்கு மையம்' : 'Customer Executive Dashboard'}
+            </span>
           </div>
         </div>
 
@@ -354,7 +357,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
             }}
             title="Log Out Account"
           >
-            <LogOut size={15} /> <span className="close-btn-label">Logout</span>
+            <LogOut size={15} /> <span className="close-btn-label">{isTamil ? 'லாக்அவுட்' : 'Logout'}</span>
           </button>
 
           <button 
@@ -374,7 +377,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
               flexShrink: 0
             }}
           >
-            <X size={16} /> <span className="close-btn-label">Store</span>
+            <X size={16} /> <span className="close-btn-label">{isTamil ? 'ஸ்டோர்' : 'Store'}</span>
           </button>
         </div>
       </header>
@@ -391,17 +394,17 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
               </div>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div className="dash-user-title-row">
-                  <h2 className="dash-user-name">Hi, {user.name}</h2>
+                  <h2 className="dash-user-name">{isTamil ? 'வணக்கம், ' : 'Hi, '}{user.name}</h2>
                 </div>
                 <div className="dash-user-info-list">
                   <span className="dash-user-info-item">
                     <Phone size={13} style={{ color: 'var(--primary-orange)' }} /> {user.phone}
                   </span>
                   <span className="dash-user-info-item">
-                    <Mail size={13} style={{ color: 'var(--primary-orange)' }} /> {user.email || 'Registered Customer'}
+                    <Mail size={13} style={{ color: 'var(--primary-orange)' }} /> {user.email || (isTamil ? 'பதிவுசெய்த வாடிக்கையாளர்' : 'Registered Customer')}
                   </span>
                   <span className="dash-user-info-item">
-                    <MapPin size={13} style={{ color: 'var(--primary-orange)' }} /> Madurai, Tamil Nadu
+                    <MapPin size={13} style={{ color: 'var(--primary-orange)' }} /> {isTamil ? 'கரூர் / மதுரை, தமிழ்நாடு' : 'Madurai, Tamil Nadu'}
                   </span>
                 </div>
               </div>
@@ -412,7 +415,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 onClick={() => setActiveTab('offers')}
                 className="btn-coupon-view"
               >
-                <Tag size={15} /> View My Coupons
+                <Tag size={15} /> {isTamil ? 'என் கூப்பன்கள்' : 'View My Coupons'}
               </button>
             </div>
           </div>
@@ -421,7 +424,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
           <div className="dash-stats-grid">
             <div className="dash-stat-card" onClick={() => setActiveTab('orders')}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <span className="dash-stat-label">Total Orders</span>
+                <span className="dash-stat-label">{isTamil ? 'மொத்த ஆர்டர்கள்' : 'Total Orders'}</span>
                 <h3 className="dash-stat-value">{userOrders.length}</h3>
               </div>
               <ShoppingBag size={18} className="dash-stat-icon-right" />
@@ -429,7 +432,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
 
             <div className="dash-stat-card" onClick={() => setActiveTab('orders')}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <span className="dash-stat-label">Active Deliveries</span>
+                <span className="dash-stat-label">{isTamil ? 'நடப்பு டெலிவரிகள்' : 'Active Deliveries'}</span>
                 <h3 className="dash-stat-value">{activeOrdersCount}</h3>
               </div>
               <Truck size={18} className="dash-stat-icon-right" />
@@ -437,7 +440,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
 
             <div className="dash-stat-card" onClick={() => setActiveTab('offers')}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <span className="dash-stat-label">Reward Points</span>
+                <span className="dash-stat-label">{isTamil ? 'ரிவார்டு புள்ளிகள்' : 'Reward Points'}</span>
                 <h3 className="dash-stat-value">₹450</h3>
               </div>
               <Star size={18} className="dash-stat-icon-right" />
@@ -445,8 +448,8 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
 
             <div className="dash-stat-card" onClick={() => setActiveTab('offers')}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <span className="dash-stat-label">Active Vouchers</span>
-                <h3 className="dash-stat-value">3 Available</h3>
+                <span className="dash-stat-label">{isTamil ? 'கூப்பன்கள்' : 'Active Vouchers'}</span>
+                <h3 className="dash-stat-value">{isTamil ? '3 உள்ளது' : '3 Available'}</h3>
               </div>
               <Tag size={18} className="dash-stat-icon-right" />
             </div>
@@ -461,21 +464,21 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 onClick={() => setActiveTab('orders')}
                 className={`dash-nav-item ${activeTab === 'orders' ? 'active' : ''}`}
               >
-                <ShoppingBag size={18} /> My Orders &amp; Tracking
+                <ShoppingBag size={18} /> {isTamil ? 'என் ஆர்டர்கள் & டிரேக்கிங்' : 'My Orders & Tracking'}
               </button>
 
               <button 
                 onClick={() => setActiveTab('profile')}
                 className={`dash-nav-item ${activeTab === 'profile' ? 'active' : ''}`}
               >
-                <User size={18} /> Profile &amp; Security
+                <User size={18} /> {isTamil ? 'சுயவிவரம் & பாதுகாப்பு' : 'Profile & Security'}
               </button>
 
               <button 
                 onClick={() => setActiveTab('addresses')}
                 className={`dash-nav-item ${activeTab === 'addresses' ? 'active' : ''}`}
               >
-                <MapPin size={18} /> Delivery Addresses
+                <MapPin size={18} /> {isTamil ? 'டெலிவரி முகவரிகள்' : 'Delivery Addresses'}
               </button>
 
               <button 
@@ -483,21 +486,21 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 className={`dash-nav-item ${activeTab === 'rewards' ? 'active' : ''}`}
                 style={{ color: '#FF5500', fontWeight: '800' }}
               >
-                <Sparkles size={18} color="#FF5500" /> 🎁 Friends Rewards &amp; Points ({user?.rewardPoints || 150} PTS)
+                <Sparkles size={18} color="#FF5500" /> {isTamil ? '🎁 பிரண்ட்ஸ் ரிவார்டுகள் (' : '🎁 Friends Rewards ('}{user?.rewardPoints || 150} {isTamil ? 'புள்ளிகள்)' : 'PTS)'}
               </button>
 
               <button 
                 onClick={() => setActiveTab('offers')}
                 className={`dash-nav-item ${activeTab === 'offers' ? 'active' : ''}`}
               >
-                <Tag size={18} /> Exclusive Coupons
+                <Tag size={18} /> {isTamil ? 'சிறப்பு கூப்பன்கள்' : 'Exclusive Coupons'}
               </button>
 
               <button 
                 onClick={() => setActiveTab('support')}
                 className={`dash-nav-item ${activeTab === 'support' ? 'active' : ''}`}
               >
-                <HelpCircle size={18} /> Help Desk &amp; Support
+                <HelpCircle size={18} /> {isTamil ? 'வாடிக்கையாளர் உதவி மையம்' : 'Help Desk & Support'}
               </button>
 
               <hr style={{ margin: '16px 0', borderColor: 'var(--border-color)' }} />
@@ -510,7 +513,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 className="dash-nav-item"
                 style={{ color: '#ef4444' }}
               >
-                <LogOut size={18} /> Log Out Account
+                <LogOut size={18} /> {isTamil ? 'கணக்கில் இருந்து வெளியேற' : 'Log Out Account'}
               </button>
             </div>
 
@@ -522,27 +525,27 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800' }}>Order History</h3>
-                      <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Review your past purchases</span>
+                      <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800' }}>{isTamil ? 'என் ஆர்டர்கள் & நேரலை டிரேக்கிங்' : 'Order History'}</h3>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{isTamil ? 'உங்கள் ஆர்டர்களின் விவரங்கள் மற்றும் டெலிவரி நிலை' : 'Review your past purchases'}</span>
                     </div>
                     <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#FF5500', background: 'var(--orange-light)', padding: '6px 14px', borderRadius: '20px' }}>
-                      {userOrders.length} Orders Placed
+                      {userOrders.length} {isTamil ? 'ஆர்டர்கள் செய்யப்பட்டுள்ளன' : 'Orders Placed'}
                     </span>
                   </div>
 
                   {isLoading ? (
-                    <p style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading your order history...</p>
+                    <p style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>{isTamil ? 'ஆர்டர் விவரங்கள் ஏற்றப்படுகின்றன...' : 'Loading your order history...'}</p>
                   ) : userOrders.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '50px 20px', background: 'var(--bg-input)', borderRadius: '20px', border: '1px solid var(--border-color)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+                      <div style={{ display: 'center', justifyContent: 'center', marginBottom: '14px' }}>
                         <ShoppingBag size={56} color="var(--text-muted)" />
                       </div>
-                      <h3 style={{ margin: '0 0 8px 0', fontWeight: '800' }}>No Orders Found Yet</h3>
+                      <h3 style={{ margin: '0 0 8px 0', fontWeight: '800' }}>{isTamil ? 'நீங்கள் இதுவரை ஆர்டர் செய்யவில்லை' : 'No Orders Found Yet'}</h3>
                       <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', maxWidth: '440px', margin: '0 auto 24px auto', lineHeight: '1.6' }}>
-                        You haven't placed any mobile or accessory orders with FRIENDS MOBILE yet. Explore our latest collection today!
+                        {isTamil ? 'பிரண்ட்ஸ் மொபைல் ஷோரூமில் நீங்கள் இதுவரை ஆர்டர் எதுவும் செய்யவில்லை. எங்கள் புதிய பொருட்களை இப்போதே பாருங்கள்!' : 'You haven\'t placed any mobile or accessory orders with FRIENDS MOBILE yet. Explore our latest collection today!'}
                       </p>
                       <button className="auth-submit-btn" onClick={onClose} style={{ width: 'auto', padding: '12px 30px', margin: '0 auto' }}>
-                        START SHOPPING NOW <ArrowRight size={18} />
+                        {isTamil ? 'இப்போதே வாங்குங்கள்' : 'START SHOPPING NOW'} <ArrowRight size={18} />
                       </button>
                     </div>
                   ) : (
@@ -651,7 +654,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                     transition: 'all 0.2s ease'
                                   }}
                                 >
-                                  🚫 Cancel Order
+                                  🚫 {isTamil ? 'ஆர்டரை ரத்து செய்க' : 'Cancel Order'}
                                 </button>
                               )}
 
@@ -674,13 +677,13 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                     transition: 'all 0.2s ease'
                                   }}
                                 >
-                                  🔄 Return / Exchange Product
+                                  🔄 {isTamil ? 'பொருளைத் திருப்புக / மாற்றுக' : 'Return / Exchange Product'}
                                 </button>
                               )}
 
                               {String(order.paymentMethod || '').toLowerCase().includes('cod') || String(order.paymentMethod || '').toLowerCase().includes('cash') ? (
                                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic', background: 'var(--bg-card)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                                  📦 Cash on Delivery (E-Bill unavailable for COD)
+                                  📦 {isTamil ? 'கேஷ் ஆன் டெலிவரி (COD ஆர்டர்களுக்கு E-Bill கிடைக்காது)' : 'Cash on Delivery (E-Bill unavailable for COD)'}
                                 </span>
                               ) : (
                                 <button
@@ -693,7 +696,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                     boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'
                                   }}
                                 >
-                                  📄 Download E-Bill (Tax Invoice)
+                                  📄 {isTamil ? 'பில் பதிவிறக்கம் (Tax Invoice)' : 'Download E-Bill (Tax Invoice)'}
                                 </button>
                               )}
                             </div>
@@ -993,20 +996,26 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
             }}
           >
             <h3 style={{ margin: '0 0 8px 0', fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🚫 Cancel Order #{cancelTargetOrder.orderId}
+              🚫 {isTamil ? 'ஆர்டர் ரத்து செய்தல் #' : 'Cancel Order #'}{cancelTargetOrder.orderId}
             </h3>
             <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.5' }}>
-              Are you sure you want to cancel this order? Please select a reason below to process your cancellation:
+              {isTamil ? 'இந்த ஆர்டரை நிச்சயமாக ரத்து செய்ய விரும்புகிறீர்களா? கீழே உள்ள காரணத்தைத் தேர்ந்தெடுக்கவும்:' : 'Are you sure you want to cancel this order? Please select a reason below to process your cancellation:'}
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-              {[
+              {(isTamil ? [
+                'தவறுதலாக ஆர்டர் செய்துவிட்டேன்',
+                'டெலிவரி தாமதமாகிறது',
+                'வேறு இடத்தில் குறைந்த விலையில் கிடைக்கிறது',
+                'முகவரி / போன் எண் தவறு',
+                'மற்ற காரணம் (கீழே எழுதவும்)'
+              ] : [
                 'Ordered by mistake / wrong item selected',
                 'Delivery taking too long',
                 'Found a better price elsewhere',
                 'Incorrect shipping address / phone number',
                 'Other (Write manual custom reason)'
-              ].map(reason => (
+              ]).map(reason => (
                 <div key={reason}>
                   <label 
                     style={{
@@ -1023,7 +1032,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                       checked={cancelReasonText === reason} 
                       onChange={() => {
                         setCancelReasonText(reason);
-                        if (!reason.startsWith('Other')) {
+                        if (!reason.includes('Other') && !reason.includes('மற்ற')) {
                           setCustomCancelReason('');
                         }
                       }}
@@ -1033,12 +1042,12 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                   </label>
 
                   {/* Manual Custom Reason Text Area */}
-                  {reason.startsWith('Other') && cancelReasonText === reason && (
+                  {(reason.includes('Other') || reason.includes('மற்ற')) && cancelReasonText === reason && (
                     <div style={{ marginTop: '8px', paddingLeft: '8px' }}>
                       <textarea
                         value={customCancelReason}
                         onChange={(e) => setCustomCancelReason(e.target.value)}
-                        placeholder="Write your custom cancellation reason here..."
+                        placeholder={isTamil ? 'உங்கள் ரத்து செய்தலுக்கான காரணத்தை எழுதவும்...' : 'Write your custom cancellation reason here...'}
                         rows={3}
                         style={{
                           width: '100%',
@@ -1065,7 +1074,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 onClick={() => setCancelTargetOrder(null)}
                 style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-muted)', fontWeight: '700', fontSize: '0.84rem', cursor: 'pointer' }}
               >
-                Keep Order
+                {isTamil ? 'ஆர்டரைத் தொடர்க' : 'Keep Order'}
               </button>
               <button
                 type="button"
@@ -1073,7 +1082,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 disabled={isCancellingOrder}
                 style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#ffffff', fontWeight: '800', fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(239,68,68,0.35)' }}
               >
-                {isCancellingOrder ? 'Cancelling...' : 'Confirm Cancellation'}
+                {isCancellingOrder ? (isTamil ? 'ரத்து செய்யப்படுகிறது...' : 'Cancelling...') : (isTamil ? 'ரத்து செய்வதை உறுதிசெய்' : 'Confirm Cancellation')}
               </button>
             </div>
           </div>
@@ -1099,16 +1108,16 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
             }}
           >
             <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', fontWeight: '800', color: '#a855f7', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🔄 Return / Exchange Order #{returnTargetOrder.orderId}
+              🔄 {isTamil ? 'பொருளைத் திருப்புதல் / மாற்றுதல் #' : 'Return / Exchange Order #'}{returnTargetOrder.orderId}
             </h3>
             <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.5' }}>
-              Submit a return or replacement request. Our FRIENDS MOBILE support team will process your request within 24 hours under our 7-Day Guarantee:
+              {isTamil ? 'பொருளைத் திரும்ப அனுப்ப அல்லது மாற்ற கோரிக்கை சமர்ப்பிக்கவும். எங்கள் 7 நாள் உத்தரவாதத்தின் கீழ் 24 மணி நேரத்திற்குள் செயல்படுத்தப்படும்:' : 'Submit a return or replacement request. Our FRIENDS MOBILE support team will process your request within 24 hours under our 7-Day Guarantee:'}
             </p>
 
             {/* Select Return Action Type */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
-                Select Requested Action:
+                {isTamil ? 'கோரப்படும் நடவடிக்கை:' : 'Select Requested Action:'}
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <button
@@ -1122,7 +1131,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                     fontWeight: '800', fontSize: '0.8rem', cursor: 'pointer'
                   }}
                 >
-                  🔄 Free Replacement
+                  🔄 {isTamil ? 'இலவசமாக மாற்றுக' : 'Free Replacement'}
                 </button>
                 <button
                   type="button"
@@ -1135,7 +1144,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                     fontWeight: '800', fontSize: '0.8rem', cursor: 'pointer'
                   }}
                 >
-                  💳 Full Refund
+                  💳 {isTamil ? 'பணத்தை திரும்பப் பெறுக' : 'Full Refund'}
                 </button>
               </div>
             </div>
@@ -1143,15 +1152,21 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
             {/* Select Return Reason */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
               <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-primary)' }}>
-                Reason for Return:
+                {isTamil ? 'காரணம்:' : 'Reason for Return:'}
               </label>
-              {[
+              {(isTamil ? [
+                'பொருள் சேதமடைந்துள்ளது',
+                'தவறான பொருள் வழங்கப்பட்டுள்ளது',
+                'தரம் எதிர்பார்த்தபடி இல்லை',
+                'அளவு / பொருத்தம் பிரச்சனை',
+                'யோசனை மாறியது / தேவையில்லை'
+              ] : [
                 'Damaged / Defective Item Received',
                 'Wrong Product / Model Delivered',
                 'Item Quality Not as Expected',
                 'Size / Fitting Issue',
                 'Changed Mind / Don\'t Need Anymore'
-              ].map(reason => (
+              ]).map(reason => (
                 <label 
                   key={reason}
                   style={{
@@ -1176,12 +1191,12 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
             {/* Additional Notes */}
             <div style={{ marginBottom: '20px' }}>
               <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
-                Additional Issue Description (Optional):
+                {isTamil ? 'கூடுதல் பிரச்சனை விவரங்கள் (விருப்பப்பட்டால்):' : 'Additional Issue Description (Optional):'}
               </label>
               <textarea
                 value={returnNotesText}
                 onChange={(e) => setReturnNotesText(e.target.value)}
-                placeholder="Describe any specific issue with the product..."
+                placeholder={isTamil ? 'பொருளின் பிரச்சனை குறித்து விவரிக்கவும்...' : 'Describe any specific issue with the product...'}
                 style={{
                   width: '100%', height: '70px', padding: '10px', borderRadius: '10px',
                   border: '1px solid var(--border-color)', background: 'var(--bg-input)',
@@ -1197,7 +1212,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 onClick={() => setReturnTargetOrder(null)}
                 style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-muted)', fontWeight: '700', fontSize: '0.84rem', cursor: 'pointer' }}
               >
-                Close
+                {isTamil ? 'மூடுக' : 'Close'}
               </button>
               <button
                 type="button"
@@ -1205,7 +1220,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 disabled={isSubmittingReturn}
                 style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #a855f7, #9333ea)', color: '#ffffff', fontWeight: '800', fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(168,85,247,0.35)' }}
               >
-                {isSubmittingReturn ? 'Submitting...' : 'Submit Return Request'}
+                {isSubmittingReturn ? (isTamil ? 'அனுப்பப்படுகிறது...' : 'Submitting...') : (isTamil ? 'ரிட்டர்ன் கோரிக்கையை அனுப்புக' : 'Submit Return Request')}
               </button>
             </div>
           </div>
