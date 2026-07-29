@@ -126,10 +126,15 @@ export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
 
           <div className="hero-buttons">
             <a href={activeSlide.btnLink} className="btn btn-primary btn-sm">
-              {language === 'ta' ? (activeSlide.btnText === 'CUSTOMIZE COVER' ? 'போட்டோ கவர் டிசைன் பண்ண' : activeSlide.btnText === 'CREATE FRAME' ? 'போட்டோ பிரேம் தயாரிக்க' : activeSlide.btnText === 'EXPLORE OFFERS' ? 'தள்ளுபடி சலுகைகள் பார்க்க' : 'இப்போதே வாங்க') : activeSlide.btnText} <ArrowRight size={16} />
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                {language === 'ta' ? (activeSlide.btnText === 'CUSTOMIZE COVER' ? 'போட்டோ கவர் டிசைன்' : activeSlide.btnText === 'CREATE FRAME' ? 'போட்டோ பிரேம்' : activeSlide.btnText === 'EXPLORE OFFERS' ? 'சலுகைகள் பார்க்க' : 'இப்போதே வாங்க') : activeSlide.btnText}
+                <ArrowRight size={16} style={{ flexShrink: 0 }} />
+              </span>
             </a>
             <a href="#products" className="btn btn-secondary btn-sm">
-              {language === 'ta' ? 'பொருட்களை பார்க்க' : 'EXPLORE STORE'}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                {language === 'ta' ? 'பொருட்களை பார்க்க' : 'EXPLORE STORE'}
+              </span>
             </a>
           </div>
 

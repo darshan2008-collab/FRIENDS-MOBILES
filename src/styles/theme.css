@@ -666,15 +666,19 @@ img {
   align-items: center;
   gap: 16px;
   margin-bottom: 36px;
+  flex-wrap: wrap;
 }
 
 .hero-buttons .btn {
-  width: 185px;
+  min-width: 150px;
+  width: auto;
+  max-width: 100%;
   height: 46px;
-  padding: 0 !important;
+  padding: 0 20px !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
 }
 
 .slider-dots {
@@ -1932,22 +1936,27 @@ img {
   .hero-buttons {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
     gap: 10px;
     width: 100%;
     margin-bottom: 20px;
   }
 
   .hero-buttons .btn {
-    flex: 0 0 145px;
-    width: 145px;
+    flex: 1 1 auto;
+    min-width: 120px;
+    max-width: 100%;
+    width: auto;
     height: 42px;
-    padding: 0 8px !important;
-    font-size: 0.72rem !important;
+    padding: 0 14px !important;
+    font-size: 0.76rem !important;
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
   }
 
   .glowing-ring {
@@ -2273,15 +2282,18 @@ img {
   }
 
   .hero-buttons .btn {
-    flex: 0 0 130px;
-    width: 130px;
+    flex: 1 1 auto;
+    min-width: 105px;
+    max-width: 100%;
+    width: auto;
     height: 38px;
-    padding: 0 4px !important;
-    font-size: 0.68rem !important;
+    padding: 0 10px !important;
+    font-size: 0.72rem !important;
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
   }
 
   .cat-card {
@@ -3222,19 +3234,23 @@ img {
     justify-content: center;
     gap: 10px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
   }
 
   .hero-buttons .btn {
-    flex: 0 0 145px;
-    width: 145px;
+    flex: 1 1 auto;
+    min-width: 120px;
+    max-width: 100%;
+    width: auto;
     height: 42px;
-    padding: 0 8px !important;
-    font-size: 0.72rem !important;
+    padding: 0 14px !important;
+    font-size: 0.76rem !important;
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 12px;
+    box-sizing: border-box;
   }
 
   .slider-dots {
