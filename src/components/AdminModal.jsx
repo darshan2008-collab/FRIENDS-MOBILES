@@ -2045,16 +2045,41 @@ export default function AdminModal({
                 </div>
               )}
 
-              {/* Edit Product Drawer Form (With Real-Time Auto Discount Rate Calculator) */}
+              {/* Edit Product Pop-up Modal Dialog (With Real-Time Auto Discount Rate Calculator) */}
               {editingProductId && (
-                <div style={{
-                  background: 'var(--bg-card)',
-                  border: '2px solid #3b82f6',
-                  borderRadius: '18px',
-                  padding: '24px',
-                  boxShadow: '0 10px 30px rgba(59, 130, 246, 0.15)',
-                  animation: 'modalPop 0.3s ease-out'
-                }}>
+                <div 
+                  style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    zIndex: 99999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '16px'
+                  }} 
+                  onClick={() => setEditingProductId(null)}
+                >
+                  <div 
+                    style={{
+                      background: 'var(--bg-card)',
+                      border: '2px solid #3b82f6',
+                      borderRadius: '20px',
+                      padding: '24px',
+                      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
+                      maxWidth: '680px',
+                      width: '100%',
+                      maxHeight: '90vh',
+                      overflowY: 'auto',
+                      animation: 'modalPop 0.3s ease-out'
+                    }} 
+                    onClick={(e) => e.stopPropagation()}
+                  >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '8px' }}>
                     <div>
                       <h4 style={{ margin: 0, fontSize: '0.92rem', color: '#3b82f6', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -2352,7 +2377,8 @@ export default function AdminModal({
                     </div>
                   </form>
                 </div>
-              )}
+              </div>
+            )}
 
               {/* Product Catalog Table */}
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', overflowX: 'auto' }}>
