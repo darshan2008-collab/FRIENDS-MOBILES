@@ -57,40 +57,26 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
   const [returnNotesText, setReturnNotesText] = useState('');
   const [isSubmittingReturn, setIsSubmittingReturn] = useState(false);
 
-  // Client-side Pure CSV Exporter with UTF-8 BOM for Customer Order History
+  // Client-side Styled Excel (.xls) Exporter for Customer Order History
   const handleExportUserOrdersExcel = () => {
     if (!userOrders || userOrders.length === 0) {
       if (addToast) addToast(isTamil ? 'பதிவிறக்கம் செய்ய ஆர்டர்கள் எதுவும் இல்லை!' : 'No order history available to export!', '⚠️');
       return;
     }
 
-    const escapeCSV = (val) => {
-      if (val === undefined || val === null) return '""';
-      const str = String(val).replace(/"/g, '""');
-      return `"${str}"`;
+    const escapeXml = (str) => {
+      if (str === undefined || str === null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
     };
 
-    const headers = [
-      'Order ID',
-      'Order Date & Time',
-      'Customer Name',
-      'Phone Number',
-      'Delivery Address',
-      'Purchased Items',
-      'Subtotal (INR)',
-      'Shipping Fee (INR)',
-      'Grand Total (INR)',
-      'Payment Method',
-      'Payment Status',
-      'Order Status',
-      'Notes / Reason'
-    ];
-
-    const csvRows = [headers.map(escapeCSV).join(',')];
-
-    userOrders.forEach((o) => {
+    const rowsXml = userOrders.map((o, idx) => {
       const custName = o.customer?.name || user?.name || 'Customer';
-      const custPhone = o.customer?.phone || user?.phone || '';
+      const custPhone = (o.customer?.phone || user?.phone) ? String(o.customer?.phone || user?.phone) : '';
       const custAddr = o.customer?.address || '';
       const itemsFormatted = (o.items || []).map(i => `${i.title || 'Product'} (x${i.quantity || 1}) - Rs.${i.price || 0}`).join('; ');
       const subtotal = parseFloat(o.subtotal || o.total || 0);
@@ -101,37 +87,98 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
       const orderStatus = o.status || 'Order Placed';
       const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
       const reasonNote = o.cancellationReason || (o.returnDetails ? `${o.returnDetails.reason} (${o.returnDetails.returnType})` : '');
+      const bg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
 
-      const row = [
-        o.orderId || '',
-        dateStr,
-        custName,
-        custPhone,
-        custAddr,
-        itemsFormatted,
-        subtotal,
-        shipping === 0 ? 'FREE' : shipping,
-        total,
-        payMethod,
-        payStatus,
-        orderStatus,
-        reasonNote
-      ];
+      let statusBg = '#e2e8f0';
+      let statusColor = '#334155';
+      const statusLower = orderStatus.toLowerCase();
+      if (statusLower.includes('delivered')) {
+        statusBg = '#dcfce7'; statusColor = '#15803d';
+      } else if (statusLower.includes('cancell')) {
+        statusBg = '#fee2e2'; statusColor = '#b91c1c';
+      } else if (statusLower.includes('return')) {
+        statusBg = '#f3e8ff'; statusColor = '#6b21a8';
+      } else if (statusLower.includes('process') || statusLower.includes('ship')) {
+        statusBg = '#dbeafe'; statusColor = '#1e40af';
+      }
 
-      csvRows.push(row.map(escapeCSV).join(','));
-    });
+      return `
+        <tr style="background-color: ${bg}; height: 30px;">
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: bold; color: #ff5500; mso-number-format:'\\@';">${escapeXml(o.orderId)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;">${escapeXml(dateStr)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; font-weight: 600;">${escapeXml(custName)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; mso-number-format:'\\@';">${escapeXml(custPhone)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px;">${escapeXml(custAddr)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px;">${escapeXml(itemsFormatted)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: right; font-weight: 600;">Rs. ${subtotal.toLocaleString('en-IN')}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: 600; color: ${shipping === 0 ? '#16a34a' : '#1e293b'};">${shipping === 0 ? 'FREE' : `Rs. ${shipping}`}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: right; font-weight: bold; color: #ff5500;">Rs. ${total.toLocaleString('en-IN')}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: 600;">${escapeXml(payMethod)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: 600; color: ${payStatus === 'Paid' ? '#16a34a' : '#ea580c'};">${escapeXml(payStatus)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: bold; background-color: ${statusBg}; color: ${statusColor};">${escapeXml(orderStatus)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #64748b;">${escapeXml(reasonNote)}</td>
+        </tr>
+      `;
+    }).join('');
 
-    const csvContent = '\uFEFF' + csvRows.join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    const excelTemplate = `\uFEFF<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!--[if gte mso 9]>
+<xml>
+  <x:ExcelWorkbook>
+    <x:ExcelWorksheets>
+      <x:ExcelWorksheet>
+        <x:Name>My Order History</x:Name>
+        <x:WorksheetOptions>
+          <x:DisplayGridlines/>
+        </x:WorksheetOptions>
+      </x:ExcelWorksheet>
+    </x:ExcelWorksheets>
+  </x:ExcelWorkbook>
+</xml>
+<![endif]-->
+<style>
+  table { border-collapse: collapse; width: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; }
+  th { background-color: #FF5500; color: #ffffff; font-weight: bold; padding: 12px 10px; border: 1px solid #ea580c; text-align: center; font-size: 13px; vertical-align: middle; }
+  td { vertical-align: middle; }
+</style>
+</head>
+<body>
+<table>
+  <thead>
+    <tr style="height: 38px;">
+      <th style="width: 150px; background-color: #FF5500; color: #ffffff;">Order ID</th>
+      <th style="width: 170px; background-color: #FF5500; color: #ffffff;">Order Date &amp; Time</th>
+      <th style="width: 180px; background-color: #FF5500; color: #ffffff;">Customer Name</th>
+      <th style="width: 150px; background-color: #FF5500; color: #ffffff;">Phone Number</th>
+      <th style="width: 320px; background-color: #FF5500; color: #ffffff;">Delivery Address</th>
+      <th style="width: 380px; background-color: #FF5500; color: #ffffff;">Purchased Products</th>
+      <th style="width: 130px; background-color: #FF5500; color: #ffffff;">Subtotal (INR)</th>
+      <th style="width: 120px; background-color: #FF5500; color: #ffffff;">Shipping Fee</th>
+      <th style="width: 140px; background-color: #FF5500; color: #ffffff;">Grand Total (INR)</th>
+      <th style="width: 130px; background-color: #FF5500; color: #ffffff;">Payment Method</th>
+      <th style="width: 130px; background-color: #FF5500; color: #ffffff;">Payment Status</th>
+      <th style="width: 150px; background-color: #FF5500; color: #ffffff;">Order Status</th>
+      <th style="width: 250px; background-color: #FF5500; color: #ffffff;">Cancellation / Return Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${rowsXml}
+  </tbody>
+</table>
+</body>
+</html>`;
+
+    const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `FRIENDS_MOBILE_My_Orders_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.href = URL.createObjectURL(blob);
+    a.download = `FRIENDS_MOBILE_My_Orders_${new Date().toISOString().slice(0, 10)}.xls`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    if (addToast) addToast(isTamil ? 'எக்செல் CSV ஆர்டர் ரிப்போர்ட் பதிவிறக்கம் செய்யப்பட்டது!' : 'Excel CSV Order Report downloaded successfully!', '📊');
+    if (addToast) addToast(isTamil ? 'எக்செல் ஆர்டர் ரிப்போர்ட் பதிவிறக்கம் செய்யப்பட்டது!' : 'Excel Order Report downloaded successfully!', '📊');
   };
 
   const handleConfirmReturnOrder = async () => {
