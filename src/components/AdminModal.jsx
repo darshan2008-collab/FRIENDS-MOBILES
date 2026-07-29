@@ -614,18 +614,32 @@ export default function AdminModal({
       }
     } catch (_) {}
 
-    // Client-side Formatted Excel (.xls) Export with Auto Column Alignment & Styling
-    const escapeXml = (str) => {
-      if (str === undefined || str === null) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
+    // Client-side Pure CSV Exporter with UTF-8 BOM for Microsoft Excel Compatibility
+    const escapeCSV = (val) => {
+      if (val === undefined || val === null) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
     };
 
-    const rowsXml = targetOrdersList.map((o, idx) => {
+    const headers = [
+      'Order ID',
+      'Order Date & Time',
+      'Customer Name',
+      'Phone Number',
+      'Delivery Address',
+      'Products Added & Quantity',
+      'Subtotal (INR)',
+      'Shipping Fee (INR)',
+      'Grand Total (INR)',
+      'Payment Method',
+      'Payment Status',
+      'Order Status',
+      'Cancellation / Return Reason'
+    ];
+
+    const csvRows = [headers.map(escapeCSV).join(',')];
+
+    targetOrdersList.forEach((o) => {
       const custName = o.customer?.name || 'Walk-in Customer';
       const custPhone = o.customer?.phone || '';
       const custAddr = o.customer?.address || '';
@@ -637,87 +651,39 @@ export default function AdminModal({
       const payStatus = o.paymentStatus || (payMethod === 'COD' ? 'Pending' : 'Paid');
       const orderStatus = o.status || 'Order Placed';
       const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
-      const bg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+      const reasonNote = o.cancellationReason || (o.returnDetails ? `${o.returnDetails.reason} (${o.returnDetails.returnType})` : '');
 
-      return `
-        <tr style="background-color: ${bg};">
-          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: bold; color: #ff5500;">${escapeXml(o.orderId)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(dateStr)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px; font-weight: 600;">${escapeXml(custName)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(custPhone)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px;">${escapeXml(custAddr)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px;">${escapeXml(itemsFormatted)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: right;">Rs. ${subtotal.toLocaleString('en-IN')}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: right; color: ${shipping === 0 ? '#16a34a' : '#1e293b'};">${shipping === 0 ? 'FREE' : `Rs. ${shipping}`}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: right; font-weight: bold; color: #ff5500;">Rs. ${total.toLocaleString('en-IN')}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(payMethod)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(payStatus)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: 600;">${escapeXml(orderStatus)}</td>
-        </tr>
-      `;
-    }).join('');
+      const row = [
+        o.orderId || '',
+        dateStr,
+        custName,
+        custPhone,
+        custAddr,
+        itemsFormatted,
+        subtotal,
+        shipping === 0 ? 'FREE' : shipping,
+        total,
+        payMethod,
+        payStatus,
+        orderStatus,
+        reasonNote
+      ];
 
-    const excelHtml = `\uFEFF` + `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-      <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <!--[if gte mso 9]>
-        <xml>
-          <x:ExcelWorkbook>
-            <x:ExcelWorksheets>
-              <x:ExcelWorksheet>
-                <x:Name>Master Order History</x:Name>
-                <x:WorksheetOptions>
-                  <x:DisplayGridlines/>
-                </x:WorksheetOptions>
-              </x:ExcelWorksheet>
-            </x:ExcelWorksheets>
-          </x:ExcelWorkbook>
-        </xml>
-        <![endif]-->
-        <style>
-          table { border-collapse: collapse; width: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; }
-          th { background-color: #FF5500; color: #ffffff; font-weight: bold; padding: 10px; border: 1px solid #ea580c; text-align: center; font-size: 13px; }
-          td { padding: 8px; border: 1px solid #cbd5e1; vertical-align: middle; }
-        </style>
-      </head>
-      <body>
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 150px;">Order ID</th>
-              <th style="width: 180px;">Order Date &amp; Time</th>
-              <th style="width: 180px;">Customer Name</th>
-              <th style="width: 140px;">Phone Number</th>
-              <th style="width: 320px;">Delivery Address</th>
-              <th style="width: 380px;">Products Added &amp; Quantity</th>
-              <th style="width: 130px;">Subtotal (INR)</th>
-              <th style="width: 140px;">Shipping Fee (INR)</th>
-              <th style="width: 140px;">Grand Total (INR)</th>
-              <th style="width: 130px;">Payment Method</th>
-              <th style="width: 130px;">Payment Status</th>
-              <th style="width: 140px;">Order Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsXml}
-          </tbody>
-        </table>
-      </body>
-      </html>
-    `;
+      csvRows.push(row.map(escapeCSV).join(','));
+    });
 
-    const blob = new Blob([excelHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const csvContent = '\uFEFF' + csvRows.join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `FRIENDS_MOBILE_Orders_Master_${new Date().toISOString().slice(0, 10)}.xls`);
+    link.href = url;
+    link.download = `FRIENDS_MOBILE_Orders_Master_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    if (addToast) addToast('Master Excel Order History downloaded successfully!', '📊');
+    if (addToast) addToast('Master Excel CSV Order History downloaded successfully!', '📊');
   };
 
   // --- Printable Official Tax Invoice ---
