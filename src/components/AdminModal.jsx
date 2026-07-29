@@ -1106,9 +1106,10 @@ export default function AdminModal({
         gap: '10px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, overflow: 'hidden' }}>
-          {isSidebarOpen === false && (
+          {isAuthenticated && (
             <button
-              onClick={() => setIsSidebarOpen(true)}
+              className="admin-hamburger-btn"
+              onClick={() => setIsAdminSidebarOpen(!isAdminSidebarOpen)}
               style={{
                 background: 'var(--bg-input)',
                 border: '1px solid var(--border-color)',
