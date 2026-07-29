@@ -421,15 +421,15 @@ img {
 
 .badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: -3px;
+  right: -2px;
   background: linear-gradient(135deg, #FF5500 0%, #E03E00 100%);
   color: #ffffff;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 800;
-  min-width: 17px;
-  height: 17px;
-  padding: 0 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
   border-radius: 10px;
   border: 1.5px solid var(--bg-card);
   display: flex;
@@ -437,6 +437,7 @@ img {
   justify-content: center;
   box-shadow: 0 2px 6px rgba(255, 85, 0, 0.4);
   z-index: 2;
+  pointer-events: none;
 }
 
 .account-btn {
@@ -1816,8 +1817,9 @@ img {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 4px !important;
+    gap: 6px !important;
     margin-left: auto !important;
+    padding-right: 6px !important;
     flex-shrink: 0 !important;
   }
 
