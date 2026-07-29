@@ -2619,6 +2619,10 @@ export default function AdminModal({
                             <option value="Shipped">Shipped</option>
                             <option value="Out for Delivery">Out for Delivery</option>
                             <option value="Delivered">Delivered</option>
+                            <option value="Return Requested">🔄 Return Requested</option>
+                            <option value="Return Approved">✅ Return Approved</option>
+                            <option value="Return Refunded">💳 Return Refunded</option>
+                            <option value="Return Rejected">❌ Return Rejected</option>
                             <option value="Cancelled">🔴 Cancelled</option>
                           </select>
                         </div>
@@ -2627,6 +2631,12 @@ export default function AdminModal({
                       {order.cancellationReason && (
                         <div style={{ fontSize: '0.76rem', color: '#ef4444', background: 'rgba(239, 68, 68, 0.08)', padding: '6px 12px', borderRadius: '8px', marginBottom: '10px', fontWeight: '700', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
                           🚫 Cancellation Reason: {order.cancellationReason}
+                        </div>
+                      )}
+
+                      {order.returnDetails && (
+                        <div style={{ fontSize: '0.76rem', color: '#a855f7', background: 'rgba(168, 85, 247, 0.08)', padding: '6px 12px', borderRadius: '8px', marginBottom: '10px', fontWeight: '700', border: '1px solid rgba(168, 85, 247, 0.25)' }}>
+                          🔄 Return Requested: {order.returnDetails.reason} ({order.returnDetails.returnType}) {order.returnDetails.notes ? `- "${order.returnDetails.notes}"` : ''}
                         </div>
                       )}
 

@@ -45,6 +45,50 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
     }
   };
 
+  // Return Product Modal State
+  const [returnTargetOrder, setReturnTargetOrder] = useState(null);
+  const [returnReasonText, setReturnReasonText] = useState('Damaged / Defective Item Received');
+  const [returnActionType, setReturnType] = useState('Replacement');
+  const [returnNotesText, setReturnNotesText] = useState('');
+  const [isSubmittingReturn, setIsSubmittingReturn] = useState(false);
+
+  const handleConfirmReturnOrder = async () => {
+    if (!returnTargetOrder) return;
+    setIsSubmittingReturn(true);
+    try {
+      const res = await fetch(`${API_BASE}/orders/${returnTargetOrder.orderId}/return`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          reason: returnReasonText,
+          returnType: returnActionType,
+          notes: returnNotesText 
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (addToast) addToast(`Return request for Order #${returnTargetOrder.orderId} submitted!`, '🔄');
+        setUserOrders(prev => prev.map(o => o.orderId === returnTargetOrder.orderId ? {
+          ...o,
+          status: 'Return Requested',
+          returnDetails: {
+            reason: returnReasonText,
+            returnType: returnActionType,
+            notes: returnNotesText,
+            requestedAt: new Date().toISOString()
+          }
+        } : o));
+        setReturnTargetOrder(null);
+      } else {
+        if (addToast) addToast(data.message || 'Failed to submit return request', '⚠️');
+      }
+    } catch (err) {
+      if (addToast) addToast('Network error while requesting return', '⚠️');
+    } finally {
+      setIsSubmittingReturn(false);
+    }
+  };
+
   // Address management state
   const [addresses, setAddresses] = useState(() => {
     if (user?.address && !user.address.includes('Double Tank')) {
@@ -513,18 +557,23 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                   </strong>
                                   <span style={{
                                     fontSize: '0.75rem',
-                                    background: (order.status || '').toLowerCase().includes('cancel') ? 'rgba(239, 68, 68, 0.15)' : 'var(--orange-light)',
-                                    color: (order.status || '').toLowerCase().includes('cancel') ? '#ef4444' : '#FF5500',
+                                    background: (order.status || '').toLowerCase().includes('cancel') ? 'rgba(239, 68, 68, 0.15)' : (order.status || '').toLowerCase().includes('return') ? 'rgba(168, 85, 247, 0.15)' : 'var(--orange-light)',
+                                    color: (order.status || '').toLowerCase().includes('cancel') ? '#ef4444' : (order.status || '').toLowerCase().includes('return') ? '#a855f7' : '#FF5500',
                                     padding: '3px 10px',
                                     borderRadius: '12px',
                                     fontWeight: '800'
                                   }}>
-                                    {(order.status || '').toLowerCase().includes('cancel') ? '🔴 Cancelled' : (order.status || 'Order Placed')}
+                                    {(order.status || '').toLowerCase().includes('cancel') ? '🔴 Cancelled' : (order.status || '').toLowerCase().includes('return') ? '🔄 ' + order.status : (order.status || 'Order Placed')}
                                   </span>
                                 </div>
                                 {order.cancellationReason && (
                                   <div style={{ fontSize: '0.74rem', color: '#ef4444', marginTop: '4px', fontStyle: 'italic', fontWeight: '600' }}>
-                                    Reason: {order.cancellationReason}
+                                    Cancellation Reason: {order.cancellationReason}
+                                  </div>
+                                )}
+                                {order.returnDetails && (
+                                  <div style={{ fontSize: '0.74rem', color: '#a855f7', marginTop: '4px', fontStyle: 'italic', fontWeight: '600' }}>
+                                    Return Reason: {order.returnDetails.reason} ({order.returnDetails.returnType})
                                   </div>
                                 )}
                               </div>
@@ -582,7 +631,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                             {/* Action Row: Cancel Order + Download E-Bill */}
                             <div style={{ marginTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                               {/* Cancel Order Action Button */}
-                              {(!order.status || !['shipped', 'out for delivery', 'delivered', 'cancelled'].some(s => (order.status || '').toLowerCase().includes(s))) ? (
+                              {(!order.status || !['shipped', 'out for delivery', 'delivered', 'cancelled', 'return requested'].some(s => (order.status || '').toLowerCase().includes(s))) && (
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -600,7 +649,30 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                 >
                                   🚫 Cancel Order
                                 </button>
-                              ) : <div />}
+                              )}
+
+                              {/* Return / Exchange Product Action Button */}
+                              {(!order.status || !['cancelled', 'return requested', 'return approved', 'return refunded'].some(s => (order.status || '').toLowerCase().includes(s))) && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setReturnTargetOrder(order);
+                                    setReturnReasonText('Damaged / Defective Item Received');
+                                    setReturnType('Replacement');
+                                    setReturnNotesText('');
+                                  }}
+                                  style={{
+                                    padding: '8px 16px', borderRadius: '10px',
+                                    border: '1px solid rgba(168, 85, 247, 0.4)',
+                                    background: 'rgba(168, 85, 247, 0.1)',
+                                    color: '#a855f7', fontWeight: '800', fontSize: '0.8rem',
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                >
+                                  🔄 Return / Exchange Product
+                                </button>
+                              )}
 
                               {String(order.paymentMethod || '').toLowerCase().includes('cod') || String(order.paymentMethod || '').toLowerCase().includes('cash') ? (
                                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic', background: 'var(--bg-card)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
@@ -968,6 +1040,138 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#ffffff', fontWeight: '800', fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(239,68,68,0.35)' }}
               >
                 {isCancellingOrder ? 'Cancelling...' : 'Confirm Cancellation'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Return Product Request Choice Modal */}
+      {returnTargetOrder && (
+        <div 
+          style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            background: 'rgba(0,0,0,0.8)', zIndex: 100036, display: 'flex',
+            alignItems: 'center', justifyContent: 'center', padding: '20px',
+            backdropFilter: 'blur(8px)', boxSizing: 'border-box'
+          }}
+          onClick={() => setReturnTargetOrder(null)}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+              borderRadius: '20px', padding: '24px', maxWidth: '480px', width: '100%',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.6)', maxHeight: '90vh', overflowY: 'auto'
+            }}
+          >
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', fontWeight: '800', color: '#a855f7', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🔄 Return / Exchange Order #{returnTargetOrder.orderId}
+            </h3>
+            <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.5' }}>
+              Submit a return or replacement request. Our FRIENDS MOBILE support team will process your request within 24 hours under our 7-Day Guarantee:
+            </p>
+
+            {/* Select Return Action Type */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
+                Select Requested Action:
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setReturnType('Replacement')}
+                  style={{
+                    padding: '10px', borderRadius: '10px',
+                    border: returnActionType === 'Replacement' ? '2px solid #a855f7' : '1px solid var(--border-color)',
+                    background: returnActionType === 'Replacement' ? 'rgba(168,85,247,0.1)' : 'var(--bg-input)',
+                    color: returnActionType === 'Replacement' ? '#a855f7' : 'var(--text-primary)',
+                    fontWeight: '800', fontSize: '0.8rem', cursor: 'pointer'
+                  }}
+                >
+                  🔄 Free Replacement
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReturnType('Refund')}
+                  style={{
+                    padding: '10px', borderRadius: '10px',
+                    border: returnActionType === 'Refund' ? '2px solid #a855f7' : '1px solid var(--border-color)',
+                    background: returnActionType === 'Refund' ? 'rgba(168,85,247,0.1)' : 'var(--bg-input)',
+                    color: returnActionType === 'Refund' ? '#a855f7' : 'var(--text-primary)',
+                    fontWeight: '800', fontSize: '0.8rem', cursor: 'pointer'
+                  }}
+                >
+                  💳 Full Refund
+                </button>
+              </div>
+            </div>
+
+            {/* Select Return Reason */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+                Reason for Return:
+              </label>
+              {[
+                'Damaged / Defective Item Received',
+                'Wrong Product / Model Delivered',
+                'Item Quality Not as Expected',
+                'Size / Fitting Issue',
+                'Changed Mind / Don\'t Need Anymore'
+              ].map(reason => (
+                <label 
+                  key={reason}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px',
+                    borderRadius: '10px', border: returnReasonText === reason ? '2px solid #a855f7' : '1px solid var(--border-color)',
+                    background: returnReasonText === reason ? 'rgba(168,85,247,0.08)' : 'var(--bg-input)',
+                    color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer'
+                  }}
+                >
+                  <input 
+                    type="radio" 
+                    name="returnReason" 
+                    checked={returnReasonText === reason} 
+                    onChange={() => setReturnReasonText(reason)}
+                    style={{ accentColor: '#a855f7' }}
+                  />
+                  {reason}
+                </label>
+              ))}
+            </div>
+
+            {/* Additional Notes */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
+                Additional Issue Description (Optional):
+              </label>
+              <textarea
+                value={returnNotesText}
+                onChange={(e) => setReturnNotesText(e.target.value)}
+                placeholder="Describe any specific issue with the product..."
+                style={{
+                  width: '100%', height: '70px', padding: '10px', borderRadius: '10px',
+                  border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                  color: 'var(--text-primary)', outline: 'none', fontSize: '0.8rem',
+                  resize: 'none', boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setReturnTargetOrder(null)}
+                style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-muted)', fontWeight: '700', fontSize: '0.84rem', cursor: 'pointer' }}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmReturnOrder}
+                disabled={isSubmittingReturn}
+                style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #a855f7, #9333ea)', color: '#ffffff', fontWeight: '800', fontSize: '0.84rem', cursor: 'pointer', boxShadow: '0 4px 14px rgba(168,85,247,0.35)' }}
+              >
+                {isSubmittingReturn ? 'Submitting...' : 'Submit Return Request'}
               </button>
             </div>
           </div>

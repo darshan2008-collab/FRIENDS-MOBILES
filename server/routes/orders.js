@@ -273,4 +273,42 @@ router.post('/:orderId/cancel', async (req, res) => {
   }
 });
 
+// POST /api/orders/:orderId/return (Request Order Product Return / Exchange)
+router.post('/:orderId/return', async (req, res) => {
+  try {
+    const { reason, returnType, notes } = req.body;
+    const orderIdParam = req.params.orderId.toLowerCase().trim();
+    const orders = await getOrdersAsync();
+
+    const orderIndex = orders.findIndex(o => o.orderId && o.orderId.toLowerCase().trim() === orderIdParam);
+    if (orderIndex === -1) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const targetOrder = { ...orders[orderIndex] };
+
+    targetOrder.status = 'Return Requested';
+    targetOrder.returnDetails = {
+      reason: reason ? sanitizeInput(reason) : 'Quality / Fitting issue',
+      returnType: returnType ? sanitizeInput(returnType) : 'Replacement',
+      notes: notes ? sanitizeInput(notes) : '',
+      requestedAt: new Date().toISOString()
+    };
+    targetOrder.updatedAt = new Date().toISOString();
+
+    await saveOrderAsync(targetOrder);
+
+    // Trigger instant backup sync
+    BackupService.triggerRealTimeBackup(`return_order_${targetOrder.orderId}`);
+
+    res.json({
+      success: true,
+      message: `Return request for Order #${targetOrder.orderId} submitted successfully!`,
+      order: targetOrder
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to process return request', error: err.message });
+  }
+});
+
 module.exports = router;
