@@ -205,17 +205,11 @@ export default function CategoryGrid({ onOpenShop, t = (k) => k }) {
                   fontWeight: '700',
                   color: 'var(--text-primary)',
                   textAlign: 'center',
-                  marginBottom: '3px',
-                  lineHeight: '1.2'
+                  lineHeight: '1.2',
+                  whiteSpace: 'normal',
+                  wordBreak: 'break-word'
                 }}>
                   {cat.name}
-                </span>
-                <span style={{
-                  fontSize: '0.68rem',
-                  color: 'var(--text-muted)',
-                  fontWeight: '600'
-                }}>
-                  {cat.count}
                 </span>
               </div>
             );
