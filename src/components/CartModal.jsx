@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, CheckCircle2, CreditCard } from 'lucide-react';
+import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, CheckCircle2, CreditCard, Sparkles, Copy, Check, Lock, Phone } from 'lucide-react';
 import { getProductTitle } from '../data/translations';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
