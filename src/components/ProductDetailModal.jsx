@@ -15,6 +15,38 @@ export default function ProductDetailModal({
   language = 'en',
   t = (k) => k
 }) {
+  const [reviewsList, setReviewsList] = useState([]);
+  const [newReview, setNewReview] = useState({ name: '', comment: '', rating: 5 });
+  const [hoverRating, setHoverRating] = useState(0);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [zoomPhoto, setZoomPhoto] = useState(null);
+
+  const [selectedImage, setSelectedImage] = useState('');
+  const [isHoveringZoom, setIsHoveringZoom] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const [selectedSize, setSelectedSize] = useState('Standard');
+
+  const horizontalScrollRef = useRef(null);
+
+  useEffect(() => {
+    if (!product) return;
+    setReviewsList(product.reviewsList || []);
+    setSelectedPhoto(null);
+    setSelectedImage(product.img || '');
+    const titleLower = String(product.title || '').toLowerCase();
+    const catLower = String(product.category || '').toLowerCase();
+    const sizes = product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0
+      ? product.sizes
+      : (catLower === 'covers' || titleLower.includes('cover') || titleLower.includes('pouch')
+          ? ['Universal (Up to 6.8")', 'Standard (5.5" - 6.1")', 'Pro / Max (6.7" - 6.9")']
+          : ['Standard Pack (1 Metre)', 'Pro Pack (2 Metres)', 'Extended Pack (3 Metres)']);
+    setSelectedSize(sizes[0] || 'Standard');
+  }, [product]);
+
   if (!product) return null;
 
   const productTitleLower = product && product.title ? String(product.title).toLowerCase() : '';
@@ -24,28 +56,8 @@ export default function ProductDetailModal({
     ? product.sizes
     : (productCategoryLower === 'covers' || productTitleLower.includes('cover') || productTitleLower.includes('pouch') || productTitleLower.includes('water proof') || productTitleLower.includes('waterproof')
         ? ['Universal (Up to 6.8")', 'Standard (5.5" - 6.1")', 'Pro / Max (6.7" - 6.9")']
-        : (productCategoryLower === 'tshirts' || productTitleLower.includes('shirt')
-            ? ['S (36")', 'M (38")', 'L (40")', 'XL (42")', 'XXL (44")']
-            : ['Standard Pack (1 Metre)', 'Pro Pack (2 Metres)', 'Extended Pack (3 Metres)']
-          )
+        : ['Standard Pack (1 Metre)', 'Pro Pack (2 Metres)', 'Extended Pack (3 Metres)']
       );
-
-  const [reviewsList, setReviewsList] = useState(product.reviewsList || []);
-  const [newReview, setNewReview] = useState({ name: '', comment: '', rating: 5 });
-  const [hoverRating, setHoverRating] = useState(0);
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
-  const [zoomPhoto, setZoomPhoto] = useState(null);
-
-  const [selectedImage, setSelectedImage] = useState(product.img || '');
-  const [isHoveringZoom, setIsHoveringZoom] = useState(false);
-  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
-
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
-
-  const [selectedSize, setSelectedSize] = useState(defaultSizesList[0] || 'Standard');
-
-  const horizontalScrollRef = useRef(null);
 
   const galleryImages = (product.images && Array.isArray(product.images) && product.images.length > 0)
     ? product.images
@@ -62,14 +74,6 @@ export default function ProductDetailModal({
       horizontalScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
-
-  useEffect(() => {
-    if (!product) return;
-    setReviewsList(product.reviewsList || []);
-    setSelectedPhoto(null);
-    setSelectedImage(product.img || '');
-    setSelectedSize(defaultSizesList[0] || 'Standard');
-  }, [product]);
 
   const isLiked = wishlist && Array.isArray(wishlist) ? wishlist.includes(product.id) : false;
   const exploreProducts = (products || []).filter(p => p && p.id !== product.id);
