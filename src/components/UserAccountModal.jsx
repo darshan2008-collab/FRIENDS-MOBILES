@@ -1114,7 +1114,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                       </div>
                       <h4 style={{ margin: '0 0 6px 0' }}>Phone Helpline</h4>
                       <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Mon - Sat: 9:30 AM to 9:00 PM</p>
-                      <strong style={{ fontSize: '1.1rem', color: '#FF5500', display: 'block' }}>+91 74485 78507</strong>
+                      <strong style={{ fontSize: '1.1rem', color: '#FF5500', display: 'block' }}>+91 93445 22086</strong>
                     </div>
                   </div>
                 </div>
