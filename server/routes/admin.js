@@ -377,8 +377,8 @@ router.get('/orders/export-excel', async (req, res) => {
       return res.status(500).json({ success: false, message: 'Failed to generate Excel report' });
     }
 
-    const filename = `FRIENDS_MOBILE_Orders_Master_${new Date().toISOString().slice(0, 10)}.csv`;
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    const filename = `FRIENDS_MOBILE_Orders_Master_${new Date().toISOString().slice(0, 10)}.xls`;
+    res.setHeader('Content-Type', 'application/vnd.ms-excel; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.sendFile(path.resolve(filePath));
   } catch (err) {

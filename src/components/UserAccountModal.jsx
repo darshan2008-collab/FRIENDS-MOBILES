@@ -57,6 +57,117 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
   const [returnNotesText, setReturnNotesText] = useState('');
   const [isSubmittingReturn, setIsSubmittingReturn] = useState(false);
 
+  // Client-side Formatted Excel (.xls) Export for Customer Order History
+  const handleExportUserOrdersExcel = () => {
+    if (!userOrders || userOrders.length === 0) {
+      if (addToast) addToast(isTamil ? 'பதிவிறக்கம் செய்ய ஆர்டர்கள் எதுவும் இல்லை!' : 'No order history available to export!', '⚠️');
+      return;
+    }
+
+    const escapeXml = (str) => {
+      if (str === undefined || str === null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    };
+
+    const rowsXml = userOrders.map((o, idx) => {
+      const custName = o.customer?.name || user?.name || 'Customer';
+      const custPhone = o.customer?.phone || user?.phone || '';
+      const custAddr = o.customer?.address || '';
+      const itemsFormatted = (o.items || []).map(i => `${i.title || 'Product'} (x${i.quantity || 1}) - Rs.${i.price || 0}`).join('; ');
+      const subtotal = parseFloat(o.subtotal || o.total || 0);
+      const shipping = (o.shipping === 0 || o.shipping === '0' || o.shipping === 'FREE' || subtotal >= 1000) ? 0 : (typeof o.shipping === 'number' ? o.shipping : 60);
+      const total = parseFloat(o.total || (subtotal + shipping));
+      const payMethod = o.paymentMethod || 'COD';
+      const payStatus = o.paymentStatus || (payMethod === 'COD' ? 'Pending' : 'Paid');
+      const orderStatus = o.status || 'Order Placed';
+      const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
+      const bg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+
+      return `
+        <tr style="background-color: ${bg};">
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: bold; color: #ff5500;">${escapeXml(o.orderId)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(dateStr)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; font-weight: 600;">${escapeXml(custName)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(custPhone)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px;">${escapeXml(custAddr)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px;">${escapeXml(itemsFormatted)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: right;">Rs. ${subtotal.toLocaleString('en-IN')}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: right; color: ${shipping === 0 ? '#16a34a' : '#1e293b'};">${shipping === 0 ? 'FREE' : `Rs. ${shipping}`}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: right; font-weight: bold; color: #ff5500;">Rs. ${total.toLocaleString('en-IN')}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(payMethod)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">${escapeXml(payStatus)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: 600;">${escapeXml(orderStatus)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    const excelXml = `\uFEFF` + `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <!--[if gte mso 9]>
+        <xml>
+          <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+              <x:ExcelWorksheet>
+                <x:Name>My Order History</x:Name>
+                <x:WorksheetOptions>
+                  <x:DisplayGridlines/>
+                </x:WorksheetOptions>
+              </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+          </x:ExcelWorkbook>
+        </xml>
+        <![endif]-->
+        <style>
+          table { border-collapse: collapse; width: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; }
+          th { background-color: #FF5500; color: #ffffff; font-weight: bold; padding: 10px; border: 1px solid #ea580c; text-align: center; font-size: 13px; }
+          td { padding: 8px; border: 1px solid #cbd5e1; vertical-align: middle; }
+        </style>
+      </head>
+      <body>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 150px;">Order ID</th>
+              <th style="width: 180px;">Order Date &amp; Time</th>
+              <th style="width: 180px;">Customer Name</th>
+              <th style="width: 130px;">Phone Number</th>
+              <th style="width: 250px;">Delivery Address</th>
+              <th style="width: 320px;">Purchased Items</th>
+              <th style="width: 110px;">Subtotal</th>
+              <th style="width: 100px;">Shipping</th>
+              <th style="width: 120px;">Total Amount</th>
+              <th style="width: 110px;">Payment Method</th>
+              <th style="width: 110px;">Payment Status</th>
+              <th style="width: 130px;">Order Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsXml}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([excelXml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `FRIENDS_MOBILE_My_Orders_${new Date().toISOString().slice(0, 10)}.xls`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    if (addToast) addToast(isTamil ? 'எக்செல் ஆர்டர் ரிப்போர்ட் பதிவிறக்கம் செய்யப்பட்டது!' : 'Excel Order Report downloaded successfully!', '📊');
+  };
+
   const handleConfirmReturnOrder = async () => {
     if (!returnTargetOrder) return;
     setIsSubmittingReturn(true);
@@ -523,14 +634,40 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
               {/* TAB 1: ORDERS & TRACKING */}
               {activeTab === 'orders' && (
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
                     <div>
                       <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800' }}>{isTamil ? 'என் ஆர்டர்கள் & நேரலை டிரேக்கிங்' : 'Order History'}</h3>
                       <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{isTamil ? 'உங்கள் ஆர்டர்களின் விவரங்கள் மற்றும் டெலிவரி நிலை' : 'Review your past purchases'}</span>
                     </div>
-                    <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#FF5500', background: 'var(--orange-light)', padding: '6px 14px', borderRadius: '20px' }}>
-                      {userOrders.length} {isTamil ? 'ஆர்டர்கள் செய்யப்பட்டுள்ளன' : 'Orders Placed'}
-                    </span>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {userOrders.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleExportUserOrdersExcel}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '10px',
+                            border: '1px solid rgba(16, 185, 129, 0.4)',
+                            background: 'rgba(16, 185, 129, 0.1)',
+                            color: '#10b981',
+                            fontWeight: '800',
+                            fontSize: '0.82rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.15)'
+                          }}
+                        >
+                          📊 {isTamil ? 'எக்செல் பதிவிறக்கம்' : 'Download Excel Sheet'}
+                        </button>
+                      )}
+
+                      <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#FF5500', background: 'var(--orange-light)', padding: '6px 14px', borderRadius: '20px' }}>
+                        {userOrders.length} {isTamil ? 'ஆர்டர்கள் செய்யப்பட்டுள்ளன' : 'Orders Placed'}
+                      </span>
+                    </div>
                   </div>
 
                   {isLoading ? (
