@@ -654,20 +654,20 @@ export default function AdminModal({
       }
 
       return `
-        <tr style="background-color: ${bg}; height: 30px;">
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: bold; color: #ff5500; mso-number-format:'\\@';">${escapeXml(o.orderId)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center;">${escapeXml(dateStr)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; font-weight: 600;">${escapeXml(custName)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; mso-number-format:'\\@';">${escapeXml(custPhone)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px;">${escapeXml(custAddr)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px;">${escapeXml(itemsFormatted)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: right; font-weight: 600;">Rs. ${subtotal.toLocaleString('en-IN')}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: 600; color: ${shipping === 0 ? '#16a34a' : '#1e293b'};">${shipping === 0 ? 'FREE' : `Rs. ${shipping}`}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: right; font-weight: bold; color: #ff5500;">Rs. ${total.toLocaleString('en-IN')}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: 600;">${escapeXml(payMethod)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: 600; color: ${payStatus === 'Paid' ? '#16a34a' : '#ea580c'};">${escapeXml(payStatus)}</td>
+        <tr style="height: 32px;">
+          <td style="border: 1px solid #fed7aa; padding: 8px 12px; text-align: center; font-weight: bold; background-color: #fff3ed; color: #ea580c; mso-number-format:'\\@';">${escapeXml(o.orderId)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; background-color: #f8fafc; color: #334155;">${escapeXml(dateStr)}</td>
+          <td style="border: 1px solid #e9d5ff; padding: 8px 12px; font-weight: bold; background-color: #f3e8ff; color: #7e22ce;">${escapeXml(custName)}</td>
+          <td style="border: 1px solid #a5f3fc; padding: 8px 12px; text-align: center; font-weight: 600; background-color: #ecfeff; color: #0e7490; mso-number-format:'\\@';">${escapeXml(custPhone)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; background-color: #ffffff; color: #1e293b;">${escapeXml(custAddr)}</td>
+          <td style="border: 1px solid #fef08a; padding: 8px 12px; background-color: #fefce8; color: #854d0e; font-weight: 500;">${escapeXml(itemsFormatted)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: right; font-weight: 600; background-color: #f1f5f9; color: #0f172a;">Rs. ${subtotal.toLocaleString('en-IN')}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: bold; background-color: ${shipping === 0 ? '#dcfce7' : '#fee2e2'}; color: ${shipping === 0 ? '#15803d' : '#991b1b'};">${shipping === 0 ? 'FREE' : `Rs. ${shipping}`}</td>
+          <td style="border: 1px solid #fdba74; padding: 8px 12px; text-align: right; font-weight: bold; font-size: 13px; background-color: #ffedd5; color: #c2410c;">Rs. ${total.toLocaleString('en-IN')}</td>
+          <td style="border: 1px solid #bae6fd; padding: 8px 12px; text-align: center; font-weight: bold; background-color: #e0f2fe; color: #0369a1;">${escapeXml(payMethod)}</td>
+          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: bold; background-color: ${payStatus === 'Paid' ? '#d1fae5' : '#fef3c7'}; color: ${payStatus === 'Paid' ? '#047857' : '#b45309'};">${escapeXml(payStatus)}</td>
           <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: bold; background-color: ${statusBg}; color: ${statusColor};">${escapeXml(orderStatus)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; color: #64748b;">${escapeXml(reasonNote)}</td>
+          <td style="border: 1px solid #fecdd3; padding: 8px 12px; background-color: #fff1f2; color: #be123c;">${escapeXml(reasonNote)}</td>
         </tr>
       `;
     }).join('');
