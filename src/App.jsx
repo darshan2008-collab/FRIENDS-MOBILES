@@ -472,6 +472,7 @@ export default function App() {
     });
 
     addToast(`Added "${String(safeTitle).slice(0, 18)}..." to Cart!`, '🛍️');
+    setIsCartOpen(true);
   };
 
   const handleUpdateCartQuantity = (productId, newQty) => {
@@ -576,13 +577,7 @@ export default function App() {
   };
 
   const handleOpenCartClick = () => {
-    if (!currentUser) {
-      setAuthRedirectMessage('Login Required: Please sign in or create an account to access your shopping cart.');
-      setOpenCartAfterLogin(true);
-      setIsAuthOpen(true);
-    } else {
-      setIsCartOpen(true);
-    }
+    setIsCartOpen(true);
   };
 
   // Enforce mandatory login before checkout / placing orders

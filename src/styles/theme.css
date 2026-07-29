@@ -1417,6 +1417,7 @@ img {
   justify-content: space-around;
   padding: 0 4px;
   gap: 2px;
+  overflow: visible !important;
 }
 
 [data-theme="dark"] .mobile-bottom-bar {
@@ -1441,7 +1442,7 @@ img {
   padding: 2px 0;
   flex: 1;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible !important;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   -webkit-tap-highlight-color: transparent;
@@ -1474,6 +1475,7 @@ img {
 
 .bottom-nav-item.custom-highlight {
   color: #ff5500;
+  overflow: visible !important;
 }
 
 .custom-icon-ring {
@@ -1485,11 +1487,14 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 3px rgba(255, 85, 0, 0.18), 0 8px 24px rgba(255, 85, 0, 0.45);
-  margin-top: -16px;
+  box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px rgba(255, 85, 0, 0.35), 0 8px 24px rgba(255, 85, 0, 0.45);
+  margin-top: -18px;
   border: 2px solid #ffffff;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: customGlow 3s ease-in-out infinite alternate;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
 }
 
 .custom-icon-ring svg {
@@ -1498,8 +1503,8 @@ img {
 }
 
 [data-theme="dark"] .custom-icon-ring {
-  border-color: #16181d;
-  box-shadow: 0 0 0 3px rgba(255, 85, 0, 0.25), 0 8px 24px rgba(255, 85, 0, 0.55);
+  border-color: #0b0c0e;
+  box-shadow: 0 0 0 3px #0b0c0e, 0 0 0 5px rgba(255, 85, 0, 0.4), 0 8px 24px rgba(255, 85, 0, 0.55);
 }
 
 .bottom-nav-item.custom-highlight:active .custom-icon-ring {
@@ -3511,17 +3516,27 @@ img {
 }
 
 .brands-marquee-container {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  gap: 40px;
-  padding: 8px 0;
-  animation: marqueeBrands 18s linear infinite;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 16px !important;
+  padding: 8px 0 !important;
+  width: max-content !important;
+  will-change: transform !important;
+  animation: marqueeBrands 30s linear infinite !important;
+}
+
+.brands-marquee-container:hover {
+  animation-play-state: paused;
 }
 
 @keyframes marqueeBrands {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
 
 /* Customizer Studio Zero-Shift Layout Lock & Smooth Vertical Scroll */
