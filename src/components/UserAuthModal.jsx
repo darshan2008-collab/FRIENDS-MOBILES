@@ -677,7 +677,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                     <User size={16} className="auth-input-icon" />
                     <input 
                       type="text" 
-                      placeholder="e.g. Friendsmobile or user@gmail.com"
+                      placeholder="Enter username or email address"
                       value={loginIdentity}
                       onChange={(e) => setLoginIdentity(e.target.value)}
                       required
