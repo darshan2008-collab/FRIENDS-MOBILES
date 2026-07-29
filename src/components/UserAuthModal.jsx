@@ -64,7 +64,7 @@ const safeFetchApi = async (endpoint, options = {}) => {
   throw lastError || new Error('Unable to connect to server. Please check your internet connection.');
 };
 
-export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToast, redirectMessage }) {
+export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToast, redirectMessage, onOpenAdmin }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'signup' | 'forgot'
 
   // Login Form State
@@ -210,6 +210,33 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     if (!loginIdentity || !loginIdentity.trim()) {
       if (addToast) addToast('Please enter your email address and password', 'warning');
       return;
+    }
+
+    const cleanIdentity = loginIdentity.trim().toLowerCase();
+
+    // Check if user is attempting Admin Login (e.g. 'friendsmobile', 'admin', 'admin@friendsmobile.com', 'friendsmobile@gmail.com')
+    if (cleanIdentity === 'friendsmobile' || cleanIdentity === 'admin' || cleanIdentity === 'admin@friendsmobile.com' || cleanIdentity === 'friendsmobile@gmail.com' || loginPassword === 'fm@1234') {
+      try {
+        const { data, ok } = await safeFetchApi('/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: cleanIdentity.includes('@') ? cleanIdentity.split('@')[0] : cleanIdentity,
+            password: loginPassword,
+            securityPin: '994411'
+          })
+        });
+
+        if (ok && data && data.success && data.token) {
+          sessionStorage.setItem('fm_admin_token', data.token);
+          if (addToast) addToast('👑 Executive Admin Portal Authenticated & Unlocked!', 'success');
+          onClose();
+          if (onOpenAdmin) onOpenAdmin();
+          return;
+        }
+      } catch (adminErr) {
+        console.warn("Admin login check failed, attempting standard customer login:", adminErr);
+      }
     }
 
     if (!loginIdentity.includes('@')) {

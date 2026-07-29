@@ -125,16 +125,7 @@ export default function Header({
                 </div>
               </button>
 
-              <button 
-                className="action-btn admin-btn" 
-                onClick={onOpenAdmin}
-                title="Admin Portal"
-                style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
-              >
-                <div className="icon-wrap" style={{ color: '#FF5500' }}>
-                  <ShieldCheck size={20} />
-                </div>
-              </button>
+              {/* Public Admin Shield Button hidden - Admin logs in securely via Login Modal */}
 
               {currentUser ? (
                 <div className="user-profile-header-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

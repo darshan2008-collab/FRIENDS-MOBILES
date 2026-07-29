@@ -885,6 +885,7 @@ export default function App() {
         onLoginSuccess={handleLoginSuccess}
         addToast={addToast}
         redirectMessage={authRedirectMessage}
+        onOpenAdmin={() => setIsAdminOpen(true)}
         t={t}
       />
 
