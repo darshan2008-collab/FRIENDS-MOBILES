@@ -114,10 +114,14 @@ export default function Header({
               </button>
 
               <button 
+                type="button"
                 className="action-btn header-cart-btn" 
-                onClick={onOpenCart}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onOpenCart) onOpenCart();
+                }}
                 title="Cart"
-                style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}
               >
                 <div className="icon-wrap">
                   <ShoppingBag size={20} />

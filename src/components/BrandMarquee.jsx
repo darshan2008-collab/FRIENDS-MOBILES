@@ -184,6 +184,21 @@ export default function BrandMarquee() {
       </div>
 
       {/* Continuous Smooth Fast Scrolling Marquee Row */}
+      <style>{`
+        @keyframes marqueeBrands {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
+        }
+        .brands-marquee-container {
+          display: flex !important;
+          flex-direction: row !important;
+          flex-wrap: nowrap !important;
+          gap: 16px !important;
+          width: max-content !important;
+          will-change: transform !important;
+          animation: marqueeBrands 25s linear infinite !important;
+        }
+      `}</style>
       <div style={{
         display: 'block',
         width: '100%',
@@ -192,7 +207,7 @@ export default function BrandMarquee() {
         maskImage: 'linear-gradient(to right, transparent, white 15%, white 85%, transparent)',
         WebkitMaskImage: 'linear-gradient(to right, transparent, white 15%, white 85%, transparent)'
       }}>
-        <div className="brands-marquee-container" style={{ width: 'max-content' }}>
+        <div className="brands-marquee-container">
           {marqueeItems.map((item, index) => (
             <div 
               key={`${item.id}-${index}`} 

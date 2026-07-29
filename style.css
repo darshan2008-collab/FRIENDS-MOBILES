@@ -328,26 +328,30 @@ img {
 }
 
 .account-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
 }
 
 .account-text {
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  line-height: 1.2 !important;
 }
 
 .acc-title {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-white);
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  white-space: nowrap !important;
 }
 
 .acc-sub {
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  font-size: 0.72rem !important;
+  color: var(--text-muted) !important;
+  white-space: nowrap !important;
 }
 
 /* ==========================================================================
@@ -372,25 +376,45 @@ img {
   white-space: nowrap;
 }
 
-.nav-link {
-  display: inline-block;
-  padding: 8px 16px;
-  font-size: 0.86rem;
+.nav-link,
+button.nav-link,
+a.nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   border-radius: var(--radius-sm);
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  font-family: var(--font-body);
   transition: all var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
-.nav-link:hover {
-  color: var(--text-white);
-  background-color: rgba(255, 255, 255, 0.04);
+.nav-link:hover,
+button.nav-link:hover,
+a.nav-link:hover {
+  color: var(--primary-orange) !important;
+  background-color: rgba(255, 85, 0, 0.08) !important;
+  border-color: rgba(255, 85, 0, 0.15) !important;
 }
 
-.nav-link.active {
-  color: var(--text-white);
-  background-color: rgba(255, 85, 0, 0.2);
-  border: 1px solid var(--primary-orange);
+.nav-link.active,
+button.nav-link.active,
+a.nav-link.active {
+  color: var(--primary-orange) !important;
+  background-color: rgba(255, 85, 0, 0.12) !important;
+  border: 1px solid rgba(255, 85, 0, 0.35) !important;
+  font-weight: 700 !important;
 }
 
 .arrow {
