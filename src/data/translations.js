@@ -121,19 +121,60 @@ export const autoTranslateToTamil = (text) => {
   return translated.join(' ');
 };
 
-export const getProductTitle = (product, lang = 'en') => {
-  if (!product) return '';
-  const title = typeof product === 'string' ? product : (product.title || product.name || '');
-  if (!title) return '';
-  if (lang !== 'ta') return title;
+export const getShortTamilName = (englishTitle) => {
+  if (!englishTitle || typeof englishTitle !== 'string') return '';
+  const lower = englishTitle.toLowerCase().trim();
 
-  if (typeof product === 'object' && product.tamilTitle && typeof product.tamilTitle === 'string' && product.tamilTitle.trim()) {
-    if (/[\u0B80-\u0BFF]/.test(product.tamilTitle)) {
-      return product.tamilTitle;
-    }
+  if (lower.includes('airdopes') || lower.includes('airpods')) {
+    if (lower.includes('boat')) return 'போட் ஏர்டோப்ஸ்';
+    return 'இயர்பட்ஸ்';
+  }
+  if (lower.includes('power bank') || lower.includes('powerbank')) {
+    if (lower.includes('mi')) return 'மி பவர் பேங்க்';
+    return 'பவர் பேங்க்';
+  }
+  if (lower.includes('neckband')) {
+    if (lower.includes('realme')) return 'ரியல்மி நெக்பேண்ட்';
+    if (lower.includes('boat')) return 'போட் நெக்பேண்ட்';
+    return 'நெக்பேண்ட்';
+  }
+  if (lower.includes('charger')) {
+    if (lower.includes('portronics')) return 'போர்ட்ரானிக்ஸ் சார்ஜர்';
+    return 'சார்ஜர்';
+  }
+  if (lower.includes('customized back cover') || lower.includes('custom cover') || lower.includes('custom case') || (lower.includes('cover') && lower.includes('custom'))) {
+    return '3D போட்டோ கவர்';
+  }
+  if (lower.includes('waterproof') || lower.includes('water proof')) {
+    return 'வாட்டர்ப்ரூப் கவர்';
+  }
+  if (lower.includes('otg') || lower.includes('adaptor') || lower.includes('adapter')) {
+    if (lower.includes('portronics')) return 'போர்ட்ரானிக்ஸ் OTG';
+    return 'OTG அடாப்டர்';
+  }
+  if (lower.includes('photo frame') || lower.includes('frame')) {
+    if (lower.includes('wooden')) return 'மர போட்டோ பிரேம்';
+    if (lower.includes('glass') || lower.includes('acrylic')) return 'கிளாஸ் போட்டோ பிரேம்';
+    return 'போட்டோ பிரேம்';
+  }
+  if (lower.includes('speaker')) {
+    return 'ஸ்பீக்கர்';
   }
 
-  return autoTranslateToTamil(title);
+  const words = englishTitle.split(/\s+/).slice(0, 2).join(' ');
+  return autoTranslateToTamil(words);
+};
+
+export const getProductTitle = (product, lang = 'en') => {
+  if (!product) return '';
+  const englishTitle = typeof product === 'string' ? product : (product.title || product.name || '');
+  if (!englishTitle) return '';
+  if (lang !== 'ta') return englishTitle;
+
+  const shortTamilName = getShortTamilName(englishTitle);
+  if (!shortTamilName) return englishTitle;
+
+  return `${shortTamilName} (${englishTitle})`;
 };
 
 export const getProductDesc = (product, lang = 'en') => {
