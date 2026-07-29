@@ -695,9 +695,14 @@ export default function App() {
       reqBody.cancellationReason = cancellationReason;
     }
 
+    const token = sessionStorage.getItem('fm_admin_token') || localStorage.getItem('fm_admin_token') || '';
+
     fetch(`${API_BASE}/admin/orders/${orderId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(reqBody)
     })
       .then(res => res.json())
@@ -717,9 +722,14 @@ export default function App() {
 
   const handleUpdateOrderShipping = (orderId, shippingCost) => {
     const cost = parseFloat(shippingCost) || 0;
+    const token = sessionStorage.getItem('fm_admin_token') || localStorage.getItem('fm_admin_token') || '';
+
     fetch(`${API_BASE}/admin/orders/${orderId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({ shipping: cost })
     })
       .then(res => res.json())
