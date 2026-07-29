@@ -817,6 +817,8 @@ export default function App() {
         <ServicesSection t={t} language={language} />
       </main>
 
+      <Footer language={language} toggleLanguage={toggleLanguage} t={t} />
+
       <ProductDetailModal 
         product={selectedProduct}
         products={products}
