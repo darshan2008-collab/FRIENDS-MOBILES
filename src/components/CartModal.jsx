@@ -34,23 +34,34 @@ export default function CartModal({
 
   const handleDownloadInvoice = (order) => {
     if (!order) return;
-    const isCOD = String(order.paymentMethod || '').toLowerCase().includes('cod') || String(order.paymentMethod || '').toLowerCase().includes('cash');
-    if (isCOD) {
-      if (addToast) addToast('E-Bills are not generated for Cash on Delivery orders.', 'ℹ️');
-      return;
-    }
+    const isUPI = String(order.paymentMethod || '').toLowerCase().includes('upi') || 
+                  String(order.paymentMethod || '').toLowerCase().includes('qr') || 
+                  String(order.paymentMethod || '').toLowerCase().includes('online');
+    
+    const isCOD = String(order.paymentMethod || '').toLowerCase().includes('cod') || 
+                  String(order.paymentMethod || '').toLowerCase().includes('cash');
 
-    const printWindow = window.open('', '_blank', 'width=850,height=900');
+    const printWindow = window.open('', '_blank', 'width=850,height=920');
     if (!printWindow) return;
 
     const itemsRows = (order.items || []).map((item, idx) => `
       <tr style="border-bottom: 1px solid #e2e8f0;">
-        <td style="padding: 12px; font-size: 14px; font-weight: 600;">${idx + 1}. ${item.title}</td>
+        <td style="padding: 12px; font-size: 14px; font-weight: 600;">${idx + 1}. ${item.title || item.name}</td>
         <td style="padding: 12px; font-size: 14px; text-align: center;">${item.quantity || 1}</td>
         <td style="padding: 12px; font-size: 14px; text-align: right;">₹${item.price}</td>
         <td style="padding: 12px; font-size: 14px; text-align: right; font-weight: 700;">₹${(item.price * (item.quantity || 1)).toLocaleString('en-IN')}</td>
       </tr>
     `).join('');
+
+    const statusBadge = isUPI ? `
+      <div style="display: inline-block; border: 2px solid #166534; background: #dcfce7; color: #166534; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">
+        ✓ PAID (ONLINE UPI VERIFIED)
+      </div>
+    ` : `
+      <div style="display: inline-block; border: 2px solid #ea580c; background: #fff7ed; color: #ea580c; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">
+        📦 CASH ON DELIVERY ORDER
+      </div>
+    `;
 
     const invoiceHTML = `
       <!DOCTYPE html>
@@ -58,55 +69,59 @@ export default function CartModal({
       <head>
         <title>FRIENDS MOBILE Tax Invoice #${order.orderId || order.id}</title>
         <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b; padding: 40px; background: #fff; }
-          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ea580c; padding-bottom: 20px; }
-          .logo-title { font-size: 28px; font-weight: 900; color: #ea580c; text-transform: uppercase; margin: 0; }
-          .sub-title { font-size: 12px; color: #64748b; margin-top: 4px; }
-          .invoice-tag { font-size: 18px; font-weight: 800; color: #0f172a; text-align: right; }
-          .badge-paid { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 800; display: inline-block; margin-top: 6px; }
-          .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0; }
-          .meta-box { background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; }
-          .meta-label { font-size: 11px; text-transform: uppercase; font-weight: 800; color: #64748b; }
-          .meta-val { font-size: 14px; font-weight: 700; margin-top: 4px; }
-          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-          th { background: #f1f5f9; padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; color: #475569; border-bottom: 2px solid #cbd5e1; }
-          .total-box { margin-left: auto; width: 300px; background: #fff7ed; padding: 16px; border-radius: 12px; border: 1.5px solid #ffedd5; margin-top: 20px; }
-          .total-row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
-          .grand-total { font-size: 18px; font-weight: 900; color: #ea580c; border-top: 2px solid #fdba74; padding-top: 8px; margin-top: 6px; }
-          .footer { text-align: center; margin-top: 50px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b; padding: 40px; background: #fff; line-height: 1.5; }
+          .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #ff5500; padding-bottom: 20px; }
+          .logo-title { font-size: 32px; font-weight: 900; color: #ff5500; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+          .sub-title { font-size: 12px; color: #64748b; margin-top: 4px; font-weight: 600; }
+          .invoice-tag { font-size: 18px; font-weight: 800; color: #0f172a; text-align: right; margin-bottom: 8px; }
+          .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 28px 0; }
+          .meta-box { background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; }
+          .meta-label { font-size: 11px; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 0.5px; }
+          .meta-val { font-size: 15px; font-weight: 700; margin-top: 4px; color: #0f172a; }
+          table { width: 100%; border-collapse: collapse; margin: 24px 0; }
+          th { background: #f1f5f9; padding: 14px 12px; text-align: left; font-size: 12px; text-transform: uppercase; color: #475569; border-bottom: 2px solid #cbd5e1; font-weight: 800; }
+          .total-box { margin-left: auto; width: 320px; background: #fff7ed; padding: 18px; border-radius: 12px; border: 1.5px solid #ffedd5; margin-top: 24px; }
+          .total-row { display: flex; justify-content: space-between; font-size: 14px; padding: 5px 0; }
+          .grand-total { font-size: 20px; font-weight: 900; color: #ff5500; border-top: 2px solid #fdba74; padding-top: 10px; margin-top: 8px; }
+          .paid-stamp { position: absolute; top: 120px; right: 60px; font-size: 42px; font-weight: 900; color: rgba(22, 101, 52, 0.15); border: 4px solid rgba(22, 101, 52, 0.2); padding: 8px 24px; border-radius: 12px; transform: rotate(-12deg); pointer-events: none; letter-spacing: 4px; }
+          .footer { text-align: center; margin-top: 48px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
         </style>
       </head>
       <body>
+        ${isUPI ? '<div class="paid-stamp">PAID</div>' : ''}
+        
         <div class="header">
           <div>
             <h1 class="logo-title">FRIENDS MOBILE</h1>
-            <div class="sub-title">Madurai Road, Near Double Tank, Karur / Madurai, Tamil Nadu | Ph: +91 74485 78507</div>
+            <div class="sub-title">South Gandhigramam, Near Double Tank, Karur / Madurai, Tamil Nadu - 639004</div>
+            <div class="sub-title">Customer Care: +91 74485 78507 | Support Email: noreplyfriendsmobiles@gmail.com</div>
           </div>
-          <div>
+          <div style="text-align: right;">
             <div class="invoice-tag">OFFICIAL E-BILL / TAX INVOICE</div>
-            <div style="text-align: right;"><span class="badge-paid">ONLINE PAYMENT VERIFIED ✅</span></div>
+            ${statusBadge}
           </div>
         </div>
 
         <div class="meta-grid">
           <div class="meta-box">
-            <div class="meta-label">Billed To (Customer Details)</div>
+            <div class="meta-label">Customer Billed Details</div>
             <div class="meta-val">${order.customer?.name || 'Valued Customer'}</div>
-            <div style="font-size: 13px; color: #475569; margin-top: 2px;">📞 ${order.customer?.phone || ''}</div>
-            <div style="font-size: 13px; color: #475569;">📍 ${order.customer?.address || 'Tamil Nadu, India'}</div>
+            <div style="font-size: 13px; color: #475569; margin-top: 4px;">📞 Phone: ${order.customer?.phone || ''}</div>
+            <div style="font-size: 13px; color: #475569; margin-top: 2px;">📍 Address: ${order.customer?.address || 'Tamil Nadu, India'}</div>
           </div>
           <div class="meta-box">
-            <div class="meta-label">Invoice Details</div>
-            <div class="meta-val">Invoice #: ${order.orderId || order.id}</div>
-            <div style="font-size: 13px; color: #475569; margin-top: 2px;">Date: ${new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-            <div style="font-size: 13px; color: #475569;">Payment Method: <strong>${order.paymentMethod || 'Online Payment'}</strong></div>
+            <div class="meta-label">Payment & Order Info</div>
+            <div class="meta-val">Order ID: #${order.orderId || order.id}</div>
+            <div style="font-size: 13px; color: #475569; margin-top: 4px;">📅 Order Date: ${new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+            <div style="font-size: 13px; color: #475569; margin-top: 2px;">💳 Payment Mode: <strong>${order.paymentMethod || 'UPI QR Code Scan'}</strong></div>
+            <div style="font-size: 13px; color: #166534; margin-top: 2px; font-weight: 700;">Status: ${isUPI ? '✓ PAID & CONFIRMED' : 'ORDER PLACED (COD)'}</div>
           </div>
         </div>
 
         <table>
           <thead>
             <tr>
-              <th>Item Description</th>
+              <th>Item Description & Specification</th>
               <th style="text-align: center;">Qty</th>
               <th style="text-align: right;">Unit Price</th>
               <th style="text-align: right;">Total Amount</th>
@@ -118,13 +133,14 @@ export default function CartModal({
         </table>
 
         <div class="total-box">
-          <div class="total-row"><span>Subtotal:</span><strong>₹${order.subtotal || order.total}</strong></div>
-          <div class="total-row"><span>Shipping Fee:</span><strong>${order.shipping === 0 ? 'FREE' : '₹' + (order.shipping || 0)}</strong></div>
-          <div class="total-row grand-total"><span>Total Paid:</span><span>₹${order.total}</span></div>
+          <div class="total-row"><span>Subtotal:</span><strong>₹${(order.subtotal || order.total).toLocaleString('en-IN')}</strong></div>
+          <div class="total-row"><span>Shipping & Delivery:</span><strong>${order.shipping === 0 ? 'FREE' : '₹' + (order.shipping || 0)}</strong></div>
+          <div class="total-row grand-total"><span>Total Amount Paid:</span><span>₹${order.total.toLocaleString('en-IN')}</span></div>
         </div>
 
         <div class="footer">
-          This is an official computer-generated E-Bill tax invoice for Online Payment Order #${order.orderId || order.id}.<br/>
+          This is an official computer-generated E-Bill Tax Invoice for Order #${order.orderId || order.id}.<br/>
+          <strong>Store UPI Payee:</strong> FRIENDS MOBILE (darshankannan2008@oksbi)<br/>
           Thank you for shopping with <strong>FRIENDS MOBILE</strong>!
         </div>
 
