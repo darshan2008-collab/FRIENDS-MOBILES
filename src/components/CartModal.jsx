@@ -909,14 +909,60 @@ export default function CartModal({
                         </span>
                       </div>
 
+                      {/* Copyable UPI ID & Linked Mobile Number */}
+                      <div style={{
+                        marginTop: '14px',
+                        background: 'var(--bg-input)',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: '1px solid var(--border-color)',
+                        width: '100%',
+                        maxWidth: '320px',
+                        textAlign: 'left'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <div>
+                            <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block' }}>UPI VPA ID:</span>
+                            <strong style={{ fontSize: '0.85rem', color: '#FF5500', wordBreak: 'break-all' }}>{storeUpi}</strong>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(storeUpi);
+                              if (addToast) addToast('Copied UPI ID!', '📋');
+                            }}
+                            style={{ padding: '4px 10px', fontSize: '0.72rem', borderRadius: '6px', background: '#FF5500', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                          >
+                            Copy
+                          </button>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px dashed var(--border-color)', paddingTop: '8px' }}>
+                          <div>
+                            <span style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block' }}>GPay / PhonePe Mobile:</span>
+                            <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{import.meta.env.VITE_STORE_UPI_MOBILE || '7448578507'}</strong>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(import.meta.env.VITE_STORE_UPI_MOBILE || '7448578507');
+                              if (addToast) addToast('Copied Mobile Number!', '📋');
+                            }}
+                            style={{ padding: '4px 10px', fontSize: '0.72rem', borderRadius: '6px', background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', cursor: 'pointer', fontWeight: 'bold' }}
+                          >
+                            Copy Number
+                          </button>
+                        </div>
+                      </div>
+
                       {/* Mobile Deep Link Instant App Launchers */}
-                      <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
                         <a 
                           href={upiUri} 
                           className="btn btn-sm"
                           style={{ background: '#4285F4', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '0.78rem', padding: '8px 12px', textDecoration: 'none', fontWeight: 'bold' }}
                         >
-                          📲 Open UPI App
+                          📲 Open UPI App Directly
                         </a>
                       </div>
                     </div>
