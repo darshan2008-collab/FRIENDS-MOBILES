@@ -985,6 +985,9 @@ export default function AdminModal({
       discountPct: pct > 0 ? pct : 10,
       images: prod.images && prod.images.length > 0 ? [...prod.images] : [prod.img || '']
     });
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (_) {}
   };
 
   const saveEditProduct = (e) => {
@@ -2045,340 +2048,361 @@ export default function AdminModal({
                 </div>
               )}
 
-              {/* Edit Product Pop-up Modal Dialog (With Real-Time Auto Discount Rate Calculator) */}
+              {/* Full-Page Product Editor Section (Shown when editing a product) */}
               {editingProductId && (
-                <div 
-                  style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    zIndex: 99999,
+                <div id="edit-product-section" style={{ display: 'flex', flexDirection: 'column', gap: '20px', animation: 'modalPop 0.3s ease-out', marginBottom: '24px' }}>
+                  
+                  {/* Editor Header Bar */}
+                  <div style={{
+                    background: 'var(--bg-card)',
+                    border: '1.5px solid #3b82f6',
+                    borderRadius: '16px',
+                    padding: '16px 20px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '16px'
-                  }} 
-                  onClick={() => setEditingProductId(null)}
-                >
-                  <div 
-                    style={{
-                      background: 'var(--bg-card)',
-                      border: '2px solid #3b82f6',
-                      borderRadius: '20px',
-                      padding: '24px',
-                      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
-                      maxWidth: '680px',
-                      width: '100%',
-                      maxHeight: '90vh',
-                      overflowY: 'auto',
-                      animation: 'modalPop 0.3s ease-out'
-                    }} 
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px', gap: '8px' }}>
-                    <div>
-                      <h4 style={{ margin: 0, fontSize: '0.92rem', color: '#3b82f6', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Edit3 size={15} /> Edit Product #{editingProductId}
-                      </h4>
-                      <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: '600' }}>Auto Discount Rate Calculator</span>
-                    </div>
-                    <button 
-                      onClick={() => setEditingProductId(null)}
-                      style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', flexShrink: 0 }}
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-
-                  <form onSubmit={saveEditProduct} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {/* Title & Tamil Title */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Product Title (English)</label>
-                        <input 
-                          type="text" 
-                          value={editProductForm.title || ''}
-                          onChange={e => {
-                            const val = e.target.value;
-                            const autoTa = autoTranslateToTamil(val);
-                            setEditProductForm({
-                              ...editProductForm, 
-                              title: val,
-                              tamilTitle: autoTa
-                            });
-                          }}
-                          required 
-                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', boxSizing: 'border-box' }} 
-                        />
-                      </div>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                          <label style={{ fontSize: '0.74rem', fontWeight: '700', color: '#3b82f6' }}>Tamil Title / தமிழ் பெயர் 🇮🇳</label>
-                          <span style={{ fontSize: '0.62rem', background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', padding: '1px 5px', borderRadius: '5px', fontWeight: '800' }}>
-                            ✨ Auto-Translated
-                          </span>
-                        </div>
-                        <input 
-                          type="text" 
-                          placeholder="தானாக தமிழில் மொழிபெயர்க்கப்படும்..."
-                          value={editProductForm.tamilTitle || ''}
-                          onChange={e => setEditProductForm({...editProductForm, tamilTitle: e.target.value})}
-                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #3b82f6', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 'bold', boxSizing: 'border-box' }} 
-                        />
-                      </div>
-                    </div>
-
-                    {/* Product Description */}
-                    <div>
-                      <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Product Description</label>
-                      <textarea 
-                        placeholder="Enter detailed product specifications, features, and description..."
-                        value={editProductForm.description || ''}
-                        onChange={e => {
-                          const val = e.target.value;
-                          const autoTaDesc = autoTranslateToTamil(val);
-                          setEditProductForm({
-                            ...editProductForm, 
-                            description: val,
-                            tamilDesc: autoTaDesc
-                          });
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '12px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <button 
+                        type="button"
+                        onClick={() => setEditingProductId(null)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '8px 14px',
+                          borderRadius: '10px',
+                          border: '1px solid var(--border-color)',
+                          background: 'var(--bg-input)',
+                          color: 'var(--text-primary)',
+                          fontWeight: '800',
+                          fontSize: '0.82rem',
+                          cursor: 'pointer'
                         }}
-                        rows={2}
-                        style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }} 
-                      />
-                    </div>
-
-                    {/* Category + MRP */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      >
+                        <ArrowLeft size={16} /> ← Back to Catalog
+                      </button>
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                          <label style={{ fontSize: '0.74rem', fontWeight: '700' }}>Category</label>
-                          <button
-                            type="button"
-                            onClick={() => setIsEditManualCategory(!isEditManualCategory)}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: '#3b82f6',
-                              fontSize: '0.68rem',
-                              fontWeight: 'bold',
-                              cursor: 'pointer',
-                              padding: 0
-                            }}
-                          >
-                            {isEditManualCategory ? '📋 Select List' : '✏️ Manual Entry'}
-                          </button>
-                        </div>
-
-                        {isEditManualCategory ? (
-                          <input 
-                            type="text" 
-                            placeholder="Type custom category..."
-                            value={editProductForm.category || ''}
-                            onChange={e => setEditProductForm({...editProductForm, category: e.target.value})}
-                            required
-                            style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #3b82f6', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 'bold', boxSizing: 'border-box' }} 
-                          />
-                        ) : (
-                          <select 
-                            value={editProductForm.category || 'Accessories'} 
-                            onChange={e => {
-                              if (e.target.value === 'CUSTOM_MANUAL_ENTRY') {
-                                setIsEditManualCategory(true);
-                                setEditProductForm({...editProductForm, category: ''});
-                              } else {
-                                setEditProductForm({...editProductForm, category: e.target.value});
-                              }
-                            }}
-                            style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.8rem' }}
-                          >
-                            <option value="Mobile Phones">Mobile Phones</option>
-                            <option value="Chargers & Cables">Chargers &amp; Cables</option>
-                            <option value="Power Banks">Power Banks</option>
-                            <option value="Earphones">Earphones &amp; Audio</option>
-                            <option value="Smartwatches">Smartwatches &amp; Bands</option>
-                            <option value="OTG & Adapters">OTG &amp; Adapters</option>
-                            <option value="Back Covers">Back Covers &amp; Cases</option>
-                            <option value="Photo Frames">Photo Frames</option>
-                            <option value="Screen Protectors">Screen Protectors &amp; Glass</option>
-                            <option value="Accessories">General Accessories</option>
-                            <option value="CUSTOM_MANUAL_ENTRY">✏️ Custom / Manual Entry...</option>
-                          </select>
-                        )}
-                      </div>
-                      <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Original MRP (₹)</label>
-                        <input 
-                          type="number" 
-                          value={editProductForm.originalPrice || ''} 
-                          onChange={e => handleEditMrpDiscountCalc(e.target.value, editProductForm.discountPct)} 
-                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', boxSizing: 'border-box' }} 
-                        />
-                      </div>
-                    </div>
-
-                    {/* Discount + Final Price */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px', color: '#3b82f6' }}>Discount (%)</label>
-                        <input 
-                          type="number" 
-                          value={editProductForm.discountPct || 10} 
-                          onChange={e => handleEditMrpDiscountCalc(editProductForm.originalPrice, e.target.value)} 
-                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #3b82f6', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 'bold', boxSizing: 'border-box' }} 
-                        />
-                      </div>
-                      <div>
-                        <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Final Price (₹)</label>
-                        <input 
-                          type="number" 
-                          value={editProductForm.price || ''} 
-                          onChange={e => setEditProductForm({...editProductForm, price: parseFloat(e.target.value) || 0})} 
-                          required 
-                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: '#FF5500', fontWeight: '900', fontSize: '0.88rem', boxSizing: 'border-box' }} 
-                        />
-                      </div>
-                    </div>
-
-                    {/* Multiple Product Images for Editing - Upload Only */}
-                    <div>
-                      <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '6px' }}>Product Photos</label>
-                      
-                      <label style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '2px dashed var(--border-color)',
-                        borderRadius: '12px',
-                        padding: '20px 16px',
-                        background: 'var(--bg-input)',
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                        transition: 'border-color 0.2s ease',
-                        marginBottom: '12px'
-                      }}>
-                        <Upload size={24} style={{ color: '#3b82f6', marginBottom: '6px' }} />
-                        <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-primary)' }}>
-                          Click to Upload Product Photos
+                        <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '900', color: '#3b82f6', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Edit3 size={18} /> FULL PAGE PRODUCT EDITOR
+                        </h3>
+                        <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                          Editing Item #{editingProductId}: {editProductForm.title || ''}
                         </span>
-                        <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                          Select one or multiple files (PNG, JPG, WEBP)
-                        </span>
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          multiple 
-                          onChange={handleEditProductImageUpload} 
-                          style={{ display: 'none' }} 
-                        />
-                      </label>
-
-                      {/* Preview Gallery of Uploaded Photos */}
-                      {editProductForm.images && editProductForm.images.length > 0 && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
-                          {editProductForm.images.map((imgUrl, idx) => (
-                            <div 
-                              key={idx} 
-                              style={{ 
-                                position: 'relative', 
-                                width: '60px', 
-                                height: '60px', 
-                                borderRadius: '10px', 
-                                border: '1.5px solid var(--border-color)', 
-                                padding: '4px',
-                                background: '#fff',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                            >
-                              <img 
-                                src={imgUrl} 
-                                alt={`uploaded-preview-${idx}`} 
-                                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '6px' }} 
-                              />
-                              {/* Main image indicator */}
-                              {idx === 0 && (
-                                <span style={{
-                                  position: 'absolute',
-                                  bottom: '-5px',
-                                  left: '50%',
-                                  transform: 'translateX(-50%)',
-                                  background: '#3b82f6',
-                                  color: '#fff',
-                                  fontSize: '0.55rem',
-                                  padding: '1px 5px',
-                                  borderRadius: '6px',
-                                  fontWeight: '800',
-                                  whiteSpace: 'nowrap',
-                                  boxShadow: '0 2px 4px rgba(59,130,246,0.2)'
-                                }}>
-                                  Main
-                                </span>
-                              )}
-                              {/* Delete button overlay */}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updatedImages = editProductForm.images.filter((_, i) => i !== idx);
-                                  setEditProductForm({
-                                    ...editProductForm,
-                                    images: updatedImages,
-                                    img: updatedImages[0] || ''
-                                  });
-                                }}
-                                style={{
-                                  position: 'absolute',
-                                  top: '-6px',
-                                  right: '-6px',
-                                  background: '#ef4444',
-                                  color: '#fff',
-                                  border: 'none',
-                                  borderRadius: '50%',
-                                  width: '18px',
-                                  height: '18px',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  cursor: 'pointer',
-                                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                }}
-                                title="Remove photo"
-                              >
-                                <X size={10} strokeWidth={3} />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      </div>
                     </div>
 
-                    {/* Buttons */}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
+                    <div style={{ display: 'flex', gap: '10px' }}>
                       <button 
                         type="button" 
                         onClick={() => setEditingProductId(null)}
-                        style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.78rem' }}
+                        style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.82rem' }}
                       >
                         Cancel
                       </button>
                       <button 
-                        type="submit" 
-                        style={{ padding: '7px 16px', borderRadius: '8px', border: 'none', background: '#3b82f6', color: '#fff', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem' }}
+                        type="button"
+                        onClick={saveEditProduct}
+                        style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', background: '#3b82f6', color: '#fff', fontWeight: 'bold', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.84rem' }}
                       >
-                        <Check size={14} /> Save Changes
+                        <Check size={16} /> Save Product Changes
                       </button>
                     </div>
-                  </form>
+                  </div>
+
+                  {/* Form Container */}
+                  <div style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '18px',
+                    padding: '24px'
+                  }}>
+                    <form onSubmit={saveEditProduct} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      {/* Title & Tamil Title */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
+                        <div>
+                          <label style={{ fontSize: '0.78rem', fontWeight: '800', display: 'block', marginBottom: '6px' }}>Product Title (English)</label>
+                          <input 
+                            type="text" 
+                            value={editProductForm.title || ''}
+                            onChange={e => {
+                              const val = e.target.value;
+                              const autoTa = autoTranslateToTamil(val);
+                              setEditProductForm({
+                                ...editProductForm, 
+                                title: val,
+                                tamilTitle: autoTa
+                              });
+                            }}
+                            required 
+                            style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.88rem', boxSizing: 'border-box' }} 
+                          />
+                        </div>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                            <label style={{ fontSize: '0.78rem', fontWeight: '800', color: '#3b82f6' }}>Tamil Title / தமிழ் பெயர் 🇮🇳</label>
+                            <span style={{ fontSize: '0.64rem', background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', padding: '2px 6px', borderRadius: '6px', fontWeight: '800' }}>
+                              ✨ Auto-Translated
+                            </span>
+                          </div>
+                          <input 
+                            type="text" 
+                            placeholder="தானாக தமிழில் மொழிபெயர்க்கப்படும்..."
+                            value={editProductForm.tamilTitle || ''}
+                            onChange={e => setEditProductForm({...editProductForm, tamilTitle: e.target.value})}
+                            style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #3b82f6', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.88rem', fontWeight: 'bold', boxSizing: 'border-box' }} 
+                          />
+                        </div>
+                      </div>
+
+                      {/* Product Description */}
+                      <div>
+                        <label style={{ fontSize: '0.78rem', fontWeight: '800', display: 'block', marginBottom: '6px' }}>Product Description</label>
+                        <textarea 
+                          placeholder="Enter detailed product specifications, features, and description..."
+                          value={editProductForm.description || ''}
+                          onChange={e => {
+                            const val = e.target.value;
+                            const autoTaDesc = autoTranslateToTamil(val);
+                            setEditProductForm({
+                              ...editProductForm, 
+                              description: val,
+                              tamilDesc: autoTaDesc
+                            });
+                          }}
+                          rows={3}
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.88rem', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' }} 
+                        />
+                      </div>
+
+                      {/* Category + MRP */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                            <label style={{ fontSize: '0.78rem', fontWeight: '800' }}>Category</label>
+                            <button
+                              type="button"
+                              onClick={() => setIsEditManualCategory(!isEditManualCategory)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#3b82f6',
+                                fontSize: '0.72rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                padding: 0
+                              }}
+                            >
+                              {isEditManualCategory ? '📋 Select List' : '✏️ Manual Entry'}
+                            </button>
+                          </div>
+
+                          {isEditManualCategory ? (
+                            <input 
+                              type="text" 
+                              placeholder="Type custom category..."
+                              value={editProductForm.category || ''}
+                              onChange={e => setEditProductForm({...editProductForm, category: e.target.value})}
+                              required
+                              style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #3b82f6', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.88rem', fontWeight: 'bold', boxSizing: 'border-box' }} 
+                            />
+                          ) : (
+                            <select 
+                              value={editProductForm.category || 'Accessories'} 
+                              onChange={e => {
+                                if (e.target.value === 'CUSTOM_MANUAL_ENTRY') {
+                                  setIsEditManualCategory(true);
+                                  setEditProductForm({...editProductForm, category: ''});
+                                } else {
+                                  setEditProductForm({...editProductForm, category: e.target.value});
+                                }
+                              }}
+                              style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.88rem' }}
+                            >
+                              <option value="Mobile Phones">Mobile Phones</option>
+                              <option value="Chargers & Cables">Chargers &amp; Cables</option>
+                              <option value="Power Banks">Power Banks</option>
+                              <option value="Earphones">Earphones &amp; Audio</option>
+                              <option value="Smartwatches">Smartwatches &amp; Bands</option>
+                              <option value="OTG & Adapters">OTG &amp; Adapters</option>
+                              <option value="Back Covers">Back Covers &amp; Cases</option>
+                              <option value="Photo Frames">Photo Frames</option>
+                              <option value="Screen Protectors">Screen Protectors &amp; Glass</option>
+                              <option value="Accessories">General Accessories</option>
+                              <option value="CUSTOM_MANUAL_ENTRY">✏️ Custom / Manual Entry...</option>
+                            </select>
+                          )}
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.78rem', fontWeight: '800', display: 'block', marginBottom: '6px' }}>Original MRP (₹)</label>
+                          <input 
+                            type="number" 
+                            value={editProductForm.originalPrice || ''} 
+                            onChange={e => handleEditMrpDiscountCalc(e.target.value, editProductForm.discountPct)} 
+                            style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.88rem', boxSizing: 'border-box' }} 
+                          />
+                        </div>
+                      </div>
+
+                      {/* Discount + Final Price */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                        <div>
+                          <label style={{ fontSize: '0.78rem', fontWeight: '800', display: 'block', marginBottom: '6px', color: '#3b82f6' }}>Discount (%)</label>
+                          <input 
+                            type="number" 
+                            value={editProductForm.discountPct || 10} 
+                            onChange={e => handleEditMrpDiscountCalc(editProductForm.originalPrice, e.target.value)} 
+                            style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #3b82f6', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.88rem', fontWeight: 'bold', boxSizing: 'border-box' }} 
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.78rem', fontWeight: '800', display: 'block', marginBottom: '6px' }}>Final Price (₹)</label>
+                          <input 
+                            type="number" 
+                            value={editProductForm.price || ''} 
+                            onChange={e => setEditProductForm({...editProductForm, price: parseFloat(e.target.value) || 0})} 
+                            required 
+                            style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: '#FF5500', fontWeight: '900', fontSize: '0.96rem', boxSizing: 'border-box' }} 
+                          />
+                        </div>
+                      </div>
+
+                      {/* Photos Upload & Preview Gallery */}
+                      <div>
+                        <label style={{ fontSize: '0.78rem', fontWeight: '800', display: 'block', marginBottom: '8px' }}>Product Photos</label>
+                        
+                        <label style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '2px dashed var(--border-color)',
+                          borderRadius: '14px',
+                          padding: '24px 16px',
+                          background: 'var(--bg-input)',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          transition: 'border-color 0.2s ease',
+                          marginBottom: '14px'
+                        }}>
+                          <Upload size={28} style={{ color: '#3b82f6', marginBottom: '8px' }} />
+                          <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                            Click to Upload Product Photos
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            Select one or multiple files (PNG, JPG, WEBP)
+                          </span>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            multiple 
+                            onChange={handleEditProductImageUpload} 
+                            style={{ display: 'none' }} 
+                          />
+                        </label>
+
+                        {/* Preview Gallery */}
+                        {editProductForm.images && editProductForm.images.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '10px' }}>
+                            {editProductForm.images.map((imgUrl, idx) => (
+                              <div 
+                                key={idx} 
+                                style={{ 
+                                  position: 'relative', 
+                                  width: '70px', 
+                                  height: '70px', 
+                                  borderRadius: '12px', 
+                                  border: '1.5px solid var(--border-color)', 
+                                  padding: '4px',
+                                  background: '#fff',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <img 
+                                  src={imgUrl} 
+                                  alt={`uploaded-preview-${idx}`} 
+                                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px' }} 
+                                />
+                                {idx === 0 && (
+                                  <span style={{
+                                    position: 'absolute',
+                                    bottom: '-5px',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    background: '#3b82f6',
+                                    color: '#fff',
+                                    fontSize: '0.58rem',
+                                    padding: '1px 6px',
+                                    borderRadius: '6px',
+                                    fontWeight: '800',
+                                    whiteSpace: 'nowrap',
+                                    boxShadow: '0 2px 4px rgba(59,130,246,0.2)'
+                                  }}>
+                                    Main
+                                  </span>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updatedImages = editProductForm.images.filter((_, i) => i !== idx);
+                                    setEditProductForm({
+                                      ...editProductForm,
+                                      images: updatedImages,
+                                      img: updatedImages[0] || ''
+                                    });
+                                  }}
+                                  style={{
+                                    position: 'absolute',
+                                    top: '-6px',
+                                    right: '-6px',
+                                    background: '#ef4444',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: '20px',
+                                    height: '20px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
+                                  }}
+                                  title="Remove photo"
+                                >
+                                  <X size={12} strokeWidth={3} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
+                        <button 
+                          type="button" 
+                          onClick={() => setEditingProductId(null)}
+                          className="btn btn-secondary"
+                          style={{ padding: '10px 20px', fontWeight: 'bold' }}
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          type="submit" 
+                          className="btn btn-primary"
+                          style={{ padding: '10px 24px', background: '#3b82f6', borderColor: '#3b82f6', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          <Check size={16} /> Save Product Changes
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
               {/* Product Catalog Table */}
               <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
