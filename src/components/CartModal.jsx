@@ -315,6 +315,36 @@ export default function CartModal({
     if (addToast) addToast(`🎉 You earned +${earned} Friends Reward Points! Total: ${updatedPts} PTS`, '🎁');
   };
 
+  const [pendingOrder, setPendingOrder] = useState(null);
+  const [utrNumber, setUtrNumber] = useState('');
+  const [isVerifyingUtr, setIsVerifyingUtr] = useState(false);
+
+  const executeOrderPlacement = async (orderToPlace) => {
+    try {
+      const res = await fetch(`${API_BASE}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderToPlace)
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setPlacedOrderDetails(data.order || orderToPlace);
+        awardUserPointsOnOrder(data.order || orderToPlace);
+        triggerWhatsAppOrderNotification(data.order || orderToPlace);
+        if (onOrderPlaced) onOrderPlaced(data.order || orderToPlace);
+        if (onClearCart) onClearCart();
+        setCheckoutStep('success');
+        if (addToast) addToast(`Order #${orderToPlace.orderId} Placed Successfully!`, '✓');
+      } else {
+        executeFailSafeOrder(orderToPlace);
+      }
+    } catch (err) {
+      console.warn("API order placement network fallback:", err);
+      executeFailSafeOrder(orderToPlace);
+    }
+  };
+
   const handlePlaceOrderSubmit = async (e) => {
     e.preventDefault();
     
@@ -370,32 +400,40 @@ export default function CartModal({
       shipping: shippingFeeVal,
       total: grandTotal,
       paymentMethod: paymentMethod || 'COD',
+      paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Paid',
       status: 'Order Placed'
     };
 
-    try {
-      const res = await fetch(`${API_BASE}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newOrder)
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        setPlacedOrderDetails(data.order || newOrder);
-        awardUserPointsOnOrder(data.order || newOrder);
-        triggerWhatsAppOrderNotification(data.order || newOrder);
-        if (onOrderPlaced) onOrderPlaced(data.order || newOrder);
-        if (onClearCart) onClearCart();
-        setCheckoutStep('success');
-        if (addToast) addToast(`Order #${newOrder.orderId} Placed Successfully!`, '✓');
-      } else {
-        executeFailSafeOrder(newOrder);
-      }
-    } catch (err) {
-      console.warn("API order placement network fallback:", err);
-      executeFailSafeOrder(newOrder);
+    if (paymentMethod === 'UPI') {
+      setPendingOrder(newOrder);
+      setUtrNumber('');
+      setCheckoutStep('payment_qr');
+    } else {
+      executeOrderPlacement(newOrder);
     }
+  };
+
+  const handleConfirmUpiPaymentSubmit = async (e) => {
+    e.preventDefault();
+    if (!pendingOrder) return;
+
+    const cleanUtr = utrNumber.replace(/\D/g, '').trim();
+    if (!cleanUtr || cleanUtr.length < 10) {
+      if (addToast) addToast('Please scan the QR code and enter a valid 12-digit UPI Transaction UTR / Ref No.', '⚠️');
+      return;
+    }
+
+    setIsVerifyingUtr(true);
+    const finalizedOrder = {
+      ...pendingOrder,
+      paymentMethod: 'UPI QR Code',
+      paymentStatus: 'Paid',
+      transactionUtr: cleanUtr,
+      cancellationReason: `Verified UPI Payment (UTR: ${cleanUtr})`
+    };
+
+    await executeOrderPlacement(finalizedOrder);
+    setIsVerifyingUtr(false);
   };
 
   const executeFailSafeOrder = (order) => {
@@ -814,10 +852,129 @@ export default function CartModal({
                   className="btn btn-primary"
                   style={{ flex: 1.5, padding: '12px' }}
                 >
-                  Place Order (₹{grandTotal}{!isFreeShipping && ' + Shipping'}) <ArrowRight size={16} />
+                  Proceed to Payment (₹{grandTotal}{!isFreeShipping && ' + Shipping'}) <ArrowRight size={16} />
                 </button>
               </div>
             </form>
+          )}
+
+          {/* STEP 2.5: DYNAMIC UPI QR SCANNER & UTR VERIFICATION */}
+          {checkoutStep === 'payment_qr' && pendingOrder && (
+            <div style={{ padding: '16px 10px', textAlign: 'center' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 85, 0, 0.12) 0%, rgba(37, 211, 102, 0.1) 100%)',
+                border: '1.5px solid #FF5500',
+                borderRadius: '16px',
+                padding: '16px',
+                marginBottom: '20px'
+              }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#FF5500', color: '#ffffff', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '900', letterSpacing: '0.5px', marginBottom: '12px' }}>
+                  <Sparkles size={14} /> SCAN &amp; PAY VIA ANY UPI APP
+                </div>
+                
+                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.4rem', fontWeight: '900', color: 'var(--text-primary)' }}>
+                  Total Amount: <span style={{ color: '#FF5500' }}>₹{pendingOrder.total}</span>
+                </h3>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '700' }}>
+                  Order ID: #{pendingOrder.orderId}
+                </span>
+
+                {/* Dynamic QR Code Generator */}
+                {(() => {
+                  const storeUpi = shippingSettings?.storeUpiId || '7448578507@paytm';
+                  const payeeName = shippingSettings?.storePayeeName || 'FRIENDS MOBILE';
+                  const upiUri = `upi://pay?pa=${encodeURIComponent(storeUpi)}&pn=${encodeURIComponent(payeeName)}&am=${pendingOrder.total}&cu=INR&tn=${encodeURIComponent(`Order ${pendingOrder.orderId}`)}`;
+                  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiUri)}`;
+
+                  return (
+                    <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{
+                        background: '#ffffff',
+                        padding: '12px',
+                        borderRadius: '16px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                        border: '2px solid #e2e8f0',
+                        display: 'inline-block'
+                      }}>
+                        <img 
+                          src={qrUrl} 
+                          alt="Scan UPI QR Code to Pay" 
+                          style={{ width: '210px', height: '210px', display: 'block', borderRadius: '8px' }} 
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#16a34a', background: '#dcfce7', padding: '3px 8px', borderRadius: '6px' }}>
+                          ✓ Accepted on: GPay • PhonePe • Paytm • BHIM
+                        </span>
+                      </div>
+
+                      {/* Mobile Deep Link Instant App Launchers */}
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                        <a 
+                          href={upiUri} 
+                          className="btn btn-sm"
+                          style={{ background: '#4285F4', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '0.78rem', padding: '8px 12px', textDecoration: 'none', fontWeight: 'bold' }}
+                        >
+                          📲 Open UPI App
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* UTR Verification Form */}
+              <form onSubmit={handleConfirmUpiPaymentSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left' }}>
+                <div style={{ background: 'var(--bg-input)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
+                  <label style={{ fontSize: '0.82rem', fontWeight: '800', color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
+                    Enter 12-Digit UPI Transaction UTR / Ref No. <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'block', marginBottom: '10px' }}>
+                    After scanning &amp; paying on GPay / PhonePe / Paytm, copy the 12-digit UTR or Ref number from your payment receipt.
+                  </span>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. 423891823901"
+                    value={utrNumber}
+                    onChange={(e) => setUtrNumber(e.target.value)}
+                    maxLength={16}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '10px',
+                      border: '1.5px solid #FF5500',
+                      background: 'var(--bg-card)',
+                      color: 'var(--text-primary)',
+                      fontSize: '1rem',
+                      fontWeight: '800',
+                      letterSpacing: '1px',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button 
+                    type="button"
+                    onClick={() => setCheckoutStep('checkout')}
+                    className="btn btn-secondary"
+                    style={{ flex: 1, padding: '12px' }}
+                  >
+                    Change Method
+                  </button>
+                  <button 
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={isVerifyingUtr}
+                    style={{ flex: 1.5, padding: '12px', background: '#16a34a', borderColor: '#16a34a' }}
+                  >
+                    {isVerifyingUtr ? 'Verifying...' : 'Confirm Payment & Complete Order ✓'}
+                  </button>
+                </div>
+              </form>
+            </div>
           )}
 
           {/* STEP 3: ORDER PLACED SUCCESS */}

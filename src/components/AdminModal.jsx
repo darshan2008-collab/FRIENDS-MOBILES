@@ -497,8 +497,10 @@ export default function AdminModal({
     standardShippingFee: 70,
     freeShippingThreshold: 1000,
     expressShippingFee: 99,
-    supportPhone: '+91 74485 78507',
-    supportEmail: 'friendsmobile@gmail.com'
+    supportPhone: '+91 93445 22086',
+    supportEmail: 'friendsmobile@gmail.com',
+    storeUpiId: '7448578507@paytm',
+    storePayeeName: 'FRIENDS MOBILE'
   });
 
   const [editingProductId, setEditingProductId] = useState(null);
@@ -511,8 +513,10 @@ export default function AdminModal({
         standardShippingFee: shippingSettings.standardShippingFee ?? 70,
         freeShippingThreshold: shippingSettings.freeShippingThreshold ?? 1000,
         expressShippingFee: shippingSettings.expressShippingFee ?? 99,
-        supportPhone: shippingSettings.supportPhone || '+91 74485 78507',
-        supportEmail: shippingSettings.supportEmail || 'friendsmobile@gmail.com'
+        supportPhone: shippingSettings.supportPhone || '+91 93445 22086',
+        supportEmail: shippingSettings.supportEmail || 'friendsmobile@gmail.com',
+        storeUpiId: shippingSettings.storeUpiId || '7448578507@paytm',
+        storePayeeName: shippingSettings.storePayeeName || 'FRIENDS MOBILE'
       });
     }
   }, [shippingSettings]);
@@ -693,8 +697,7 @@ export default function AdminModal({
       `;
     }).join('');
 
-    const excelTemplate = `\uFEFF<!DOCTYPE html>
-<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    const excelTemplate = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!--[if gte mso 9]>
