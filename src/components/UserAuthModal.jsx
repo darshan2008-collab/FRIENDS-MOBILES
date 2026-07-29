@@ -208,15 +208,21 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     if (!loginIdentity || !loginIdentity.trim()) {
-      if (addToast) addToast('Please enter your email address and password', 'warning');
+      if (addToast) addToast('Please enter your username, email address, or phone number', 'warning');
+      return;
+    }
+    if (!loginPassword || !loginPassword.trim()) {
+      if (addToast) addToast('Please enter your password', 'warning');
       return;
     }
 
     const cleanIdentity = loginIdentity.trim().toLowerCase();
     const cleanPassword = (loginPassword || '').trim().toLowerCase();
 
-    // Check if user is attempting Admin Login (e.g. 'friendsmobile', 'admin', 'admin@friendsmobile.com', 'friendsmobile@gmail.com', or password starting with 'fm@')
+    // Admin Login Check (matches username 'Friendsmobile', 'admin', 'admin@friendsmobile.com', or passwords starting with 'fm@')
     if (
+      cleanIdentity === 'friendsmobile' || 
+      cleanIdentity === 'admin' || 
       cleanIdentity.includes('admin') || 
       cleanIdentity.includes('friendsmobile') || 
       cleanPassword.startsWith('fm@') || 
@@ -227,7 +233,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            username: cleanIdentity,
+            username: loginIdentity.trim(),
             password: loginPassword,
             pin: '994411'
           })
@@ -245,11 +251,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       }
     }
 
-    if (!loginIdentity.includes('@')) {
-      if (addToast) addToast('Please enter a valid email address (e.g. user@gmail.com)', 'warning');
-      return;
-    }
-
+    // Standard Customer Login
     try {
       const { data, ok } = await safeFetchApi('/auth/login', {
         method: 'POST',
@@ -262,7 +264,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         if (addToast) addToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
         onClose();
       } else {
-        if (addToast) addToast((data && data.message) || 'Invalid email or password', 'error');
+        if (addToast) addToast((data && data.message) || 'Invalid username/email or password', 'error');
       }
     } catch (err) {
       console.warn("Login connection error:", err);
@@ -670,12 +672,12 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
             {activeTab === 'login' ? (
               <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Email Address</label>
+                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Username / Email Address</label>
                   <div className="auth-input-group">
-                    <Mail size={16} className="auth-input-icon" />
+                    <User size={16} className="auth-input-icon" />
                     <input 
-                      type="email" 
-                      placeholder="e.g. user@gmail.com"
+                      type="text" 
+                      placeholder="e.g. Friendsmobile or user@gmail.com"
                       value={loginIdentity}
                       onChange={(e) => setLoginIdentity(e.target.value)}
                       required
