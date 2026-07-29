@@ -93,6 +93,26 @@ export default function AdminModal({
     }
   }, [orders]);
 
+  useEffect(() => {
+    if (isOpen) {
+      try {
+        const storedToken = sessionStorage.getItem('fm_admin_token');
+        if (storedToken) {
+          setAdminToken(storedToken);
+          setIsAuthenticated(true);
+        } else {
+          const isPending2FA = sessionStorage.getItem('fm_admin_pending_2fa') === 'true';
+          if (isPending2FA) {
+            setIsAuthenticated(false);
+            setAuthStep(2);
+            const savedUsername = sessionStorage.getItem('fm_admin_username') || 'friendsmobile';
+            setAdminUsername(savedUsername);
+          }
+        }
+      } catch (_) {}
+    }
+  }, [isOpen]);
+
   // Handle Admin Logout & Session Revocation
   const handleAdminLogout = (reason = 'Admin session locked.') => {
     try {
@@ -570,6 +590,7 @@ export default function AdminModal({
         try {
           sessionStorage.setItem('fm_admin_token', data.token);
           sessionStorage.setItem('fm_admin_auth', 'true');
+          sessionStorage.removeItem('fm_admin_pending_2fa');
         } catch (_) {}
         if (addToast) addToast('2FA Security Passed! Welcome, Super Admin.', '🔐');
       } else {
