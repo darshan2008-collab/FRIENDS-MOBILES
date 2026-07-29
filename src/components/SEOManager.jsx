@@ -6,10 +6,11 @@ import { useEffect } from 'react';
  * Dynamic Features:
  * 1. Bilingual Dynamic Document Title & Meta Description for High Search Engine Ranking.
  * 2. High-Intent Tamil & English Keyword Injection (Google & Bing SEO).
- * 3. Amazon/Flipkart Grade Schema.org Rich Snippets (Product, Offer, AggregateRating, BreadcrumbList).
- * 4. WhatsApp / Facebook / Twitter Rich Social Cards (OpenGraph & Twitter Card).
- * 5. Multi-Region Hreflang Tags & Canonical URL Management.
- * 6. Automatic HTML Language Code Switching (`ta-IN` vs `en-IN`).
+ * 3. Amazon/Flipkart Grade Schema.org Rich Snippets (Product, Offer, AggregateRating, BreadcrumbList, ItemList).
+ * 4. Automatic SEO Enhancement for Newly Added Products (Auto-indexes all products in dynamic JSON-LD).
+ * 5. WhatsApp / Facebook / Twitter Rich Social Cards (OpenGraph & Twitter Card).
+ * 6. Multi-Region Hreflang Tags & Canonical URL Management.
+ * 7. Automatic HTML Language Code Switching (`ta-IN` vs `en-IN`).
  */
 export default function SEOManager({ 
   selectedProduct, 
@@ -17,7 +18,8 @@ export default function SEOManager({
   isCustomCoverOpen, 
   isCustomFrameOpen,
   isShopOpen,
-  language = 'en'
+  language = 'en',
+  products = []
 }) {
   useEffect(() => {
     const isTamil = language === 'ta';
@@ -242,11 +244,11 @@ export default function SEOManager({
     if (hrefTa) hrefTa.setAttribute('href', `${canonical}?lang=ta`);
 
     // -------------------------------------------------------------
-    // 3. SCHEMA.ORG JSON-LD INJECTION (BREADCRUMB & PRODUCT SCHEMAS)
+    // 3. SCHEMA.ORG JSON-LD INJECTION (BREADCRUMB, ITEMLIST & PRODUCT SCHEMAS)
     // -------------------------------------------------------------
 
     // Clean Existing Dynamic Schemas
-    ['dynamic-breadcrumb-jsonld', 'dynamic-product-jsonld'].forEach(id => {
+    ['dynamic-breadcrumb-jsonld', 'dynamic-product-jsonld', 'dynamic-itemlist-jsonld'].forEach(id => {
       const oldScript = document.getElementById(id);
       if (oldScript) oldScript.remove();
     });
@@ -277,7 +279,48 @@ export default function SEOManager({
     bScript.text = JSON.stringify(breadcrumbSchema);
     document.head.appendChild(bScript);
 
-    // Inject Product JSON-LD (If viewing a product)
+    // Inject Dynamic ItemList JSON-LD for All Active Store Products (Including Newly Added Products)
+    if (Array.isArray(products) && products.length > 0) {
+      const itemListSchema = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "FRIENDS MOBILE Products",
+        "numberOfItems": products.length,
+        "itemListElement": products.map((prod, idx) => {
+          let pImg = prod.img || prod.fallback || 'images/prod_custom_cover.png';
+          let fullImg = pImg.startsWith('http') ? pImg : `${baseUrl}/${pImg.replace(/^\//, '')}`;
+          return {
+            "@type": "ListItem",
+            "position": idx + 1,
+            "item": {
+              "@type": "Product",
+              "name": prod.title || prod.name || 'Mobile Accessory',
+              "alternateName": prod.tamilTitle || '',
+              "image": fullImg,
+              "description": prod.description || prod.tamilDesc || '',
+              "offers": {
+                "@type": "Offer",
+                "priceCurrency": "INR",
+                "price": String(prod.price || "399.00"),
+                "availability": prod.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                "seller": {
+                  "@type": "Organization",
+                  "name": "FRIENDS MOBILE"
+                }
+              }
+            }
+          };
+        })
+      };
+
+      const itemListScript = document.createElement('script');
+      itemListScript.id = 'dynamic-itemlist-jsonld';
+      itemListScript.type = 'application/ld+json';
+      itemListScript.text = JSON.stringify(itemListSchema);
+      document.head.appendChild(itemListScript);
+    }
+
+    // Inject Specific Product JSON-LD (If viewing a product detail)
     if (productSchemaData) {
       const pScript = document.createElement('script');
       pScript.id = 'dynamic-product-jsonld';
@@ -286,7 +329,7 @@ export default function SEOManager({
       document.head.appendChild(pScript);
     }
 
-  }, [selectedProduct, shopCategory, isCustomCoverOpen, isCustomFrameOpen, isShopOpen, language]);
+  }, [selectedProduct, shopCategory, isCustomCoverOpen, isCustomFrameOpen, isShopOpen, language, products]);
 
   return null;
 }

@@ -753,6 +753,7 @@ export default function App() {
         isCustomFrameOpen={isCustomFrameOpen}
         isShopOpen={isShopOpen}
         language={language}
+        products={products}
       />
       <Header 
         theme={theme}
