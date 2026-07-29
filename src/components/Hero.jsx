@@ -86,17 +86,18 @@ export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
             <span className="hero-tag" style={{ 
               display: 'inline-flex', 
               alignItems: 'center', 
-              gap: '6px', 
+              gap: '8px', 
               background: 'rgba(255, 85, 0, 0.12)', 
               color: 'var(--text-primary)', 
-              padding: '5px 12px', 
-              borderRadius: '20px', 
-              fontSize: '0.72rem', 
+              padding: '7px 16px', 
+              borderRadius: '24px', 
+              fontSize: 'clamp(0.78rem, 2.5vw, 0.86rem)', 
               fontWeight: '800', 
-              letterSpacing: '0.5px',
-              border: '1px solid rgba(255, 85, 0, 0.25)'
+              letterSpacing: '0.6px',
+              border: '1px solid rgba(255, 85, 0, 0.3)',
+              boxShadow: '0 2px 8px rgba(255, 85, 0, 0.12)'
             }}>
-              <Sparkles size={13} style={{ color: '#FF5500' }} /> {language === 'ta' ? 'பிரண்ட்ஸ் மொபைல் ஷோரூம் 🖐️' : (activeSlide.tag || "WELCOME TO FRIENDS MOBILE")}
+              <Sparkles size={15} style={{ color: '#FF5500' }} /> {language === 'ta' ? 'பிரண்ட்ஸ் மொபைல் ஷோரூம் 🖐️' : (activeSlide.tag || "WELCOME TO FRIENDS MOBILE")}
             </span>
           </div>
 
