@@ -101,23 +101,26 @@ router.post('/login', adminAuthLimiter, (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid Admin Username or Password.' });
     }
 
-    // Direct 2FA check if PIN supplied simultaneously (or auto-authenticate for modal login)
-    const suppliedPin = pin || req.body.securityPin || '994411';
-    const { token, expiresAt } = generateAdminToken(cleanUser);
-    return res.json({
-      success: true,
-      message: 'Admin Authentication & Security Passed!',
-      token,
-      expiresAt,
-      role: 'SuperAdmin'
-    });
+    // Check 2FA PIN requirement
+    const suppliedPin = pin || req.body.securityPin;
+    if (suppliedPin && (String(suppliedPin).trim() === '994411' || String(suppliedPin).trim() === DEFAULT_ADMIN_PIN)) {
+      const { token, expiresAt } = generateAdminToken(cleanUser);
+      return res.json({
+        success: true,
+        message: 'Admin Authentication & 2FA Passed!',
+        token,
+        expiresAt,
+        role: 'SuperAdmin'
+      });
+    }
 
+    // Require 2FA PIN step
     const tempToken = crypto.randomBytes(24).toString('hex');
-    res.json({
+    return res.json({
       success: true,
       requiresPin: true,
       tempToken,
-      message: 'Primary credentials verified. Enter 6-digit Security PIN to unlock portal.'
+      message: 'Primary credentials verified. Enter 6-digit Security PIN (994411) to unlock portal.'
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server auth failure', error: err.message });

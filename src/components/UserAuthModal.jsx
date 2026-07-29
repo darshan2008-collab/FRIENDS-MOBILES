@@ -234,20 +234,19 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             username: loginIdentity.trim(),
-            password: loginPassword,
-            pin: '994411'
+            password: loginPassword
           })
         });
 
         if (data && data.success) {
+          sessionStorage.setItem('fm_admin_pending_2fa', 'true');
+          sessionStorage.setItem('fm_admin_username', loginIdentity.trim());
           if (data.token) {
             sessionStorage.setItem('fm_admin_token', data.token);
             sessionStorage.removeItem('fm_admin_pending_2fa');
             if (addToast) addToast('👑 Executive Admin Portal Authenticated & Unlocked!', 'success');
-          } else if (data.requiresPin) {
-            sessionStorage.setItem('fm_admin_pending_2fa', 'true');
-            sessionStorage.setItem('fm_admin_username', loginIdentity.trim());
-            if (addToast) addToast('Primary credentials verified! Enter your 6-digit Security PIN.', '🔐');
+          } else {
+            if (addToast) addToast('Primary credentials verified! Enter your 6-digit Security PIN (994411).', '🔐');
           }
           onClose();
           if (onOpenAdmin) onOpenAdmin();
