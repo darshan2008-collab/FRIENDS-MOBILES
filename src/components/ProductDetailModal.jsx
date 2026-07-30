@@ -34,6 +34,19 @@ export default function ProductDetailModal({
   const horizontalScrollRef = useRef(null);
 
   useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    }
+    return () => {
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!product) return;
     setReviewsList(product.reviewsList || []);
     setSelectedPhoto(null);

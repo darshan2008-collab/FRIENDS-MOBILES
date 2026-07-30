@@ -227,7 +227,14 @@ export default function ShoppingPortal({
 
       {/* Category Pills Navigation Bar */}
       <div className="shop-category-pills-bar">
-        <div className="shop-pills-scroll">
+        <div 
+          className="shop-pills-scroll"
+          onWheel={(e) => {
+            if (e.deltaY) {
+              e.currentTarget.scrollLeft += e.deltaY;
+            }
+          }}
+        >
           {categoryList.map(cat => (
             <button
               key={cat}

@@ -574,20 +574,28 @@ img {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   padding: 6px 0;
   overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   white-space: nowrap;
+}
+
+.nav-links::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-link {
   display: inline-block;
-  padding: 8px 16px;
-  font-size: 0.86rem;
-  font-weight: 600;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: var(--text-secondary);
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .nav-link:hover {
@@ -3850,16 +3858,85 @@ img {
   cursor: pointer;
 }
 
-/* Products Grid System */
+/* Shopping Portal Layout & Category Pills Bar */
+.shop-category-pills-bar {
+  background: var(--bg-card) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 10px 20px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.shop-pills-scroll {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  overflow-x: auto !important;
+  scroll-behavior: smooth !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  white-space: nowrap !important;
+  padding: 4px 0 !important;
+}
+
+.shop-pills-scroll::-webkit-scrollbar {
+  display: none !important;
+}
+
+.shop-pill-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 16px !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+.shop-pill-btn:hover,
+.shop-pill-btn.active {
+  background: #FF5500 !important;
+  color: #ffffff !important;
+  border-color: #FF5500 !important;
+  box-shadow: 0 4px 14px rgba(255, 85, 0, 0.25) !important;
+}
+
+.shop-main-layout {
+  display: flex !important;
+  gap: 24px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 24px 20px !important;
+  box-sizing: border-box !important;
+}
+
+.shop-catalog-content {
+  flex: 1 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
 .shop-catalog-area {
-  padding: 0 0 60px 0;
-  flex: 1;
+  flex: 1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 0 60px 0 !important;
 }
 
 .products-grid-portal {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 300px));
-  gap: 24px;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+  gap: 24px !important;
+  width: 100% !important;
 }
 
 /* Product Card Aesthetics */
@@ -4621,12 +4698,18 @@ img {
   .nav-links {
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
-    padding: 8px 0 !important;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    padding: 6px 0 !important;
     margin: 0 !important;
     list-style: none !important;
-    overflow: visible !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    white-space: nowrap !important;
+  }
+  .nav-links::-webkit-scrollbar {
+    display: none !important;
   }
 
   .nav-link,

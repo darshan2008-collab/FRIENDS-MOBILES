@@ -21,17 +21,17 @@ export default function ServicesSection({ t = (k) => k, language = 'en' }) {
     { title: 'Visit Our Store', desc: 'Find Nearest Store', icon: MapPin },
   ];
 
-  // Repeat items 3 times for continuous seamless marquee loop
-  const displayServices = [...services, ...services, ...services];
+  // Repeat items 4 times for continuous seamless forward marquee loop
+  const displayServices = [...services, ...services, ...services, ...services];
 
-  // Continuous Smooth Auto-Scrolling Loop with Hover Pause
+  // Continuous Fast & Smooth Forward Auto-Scrolling Loop
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     let animationFrameId;
     let lastTime = performance.now();
-    const scrollSpeed = 35; // Pixels per second
+    const scrollSpeed = 65; // Pixels per second (Fast & Forward)
 
     const autoScroll = (timestamp) => {
       if (!container) return;
@@ -40,13 +40,16 @@ export default function ServicesSection({ t = (k) => k, language = 'en' }) {
       lastTime = timestamp;
 
       if (!isPaused && elapsed > 0) {
+        // Disable smooth CSS physics during continuous frame updates
+        container.style.scrollBehavior = 'auto';
+
         const delta = (scrollSpeed * elapsed) / 1000;
         container.scrollLeft += delta;
 
         // Reset scroll position seamlessly when reaching end of loop
-        const maxScroll = container.scrollWidth / 3;
-        if (container.scrollLeft >= maxScroll * 2) {
-          container.scrollLeft -= maxScroll;
+        const singleSetWidth = container.scrollWidth / 4;
+        if (container.scrollLeft >= singleSetWidth * 2) {
+          container.scrollLeft -= singleSetWidth;
         }
       }
 
@@ -62,13 +65,15 @@ export default function ServicesSection({ t = (k) => k, language = 'en' }) {
 
   const handleScrollLeft = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -260, behavior: 'smooth' });
+      scrollContainerRef.current.style.scrollBehavior = 'smooth';
+      scrollContainerRef.current.scrollBy({ left: -260 });
     }
   };
 
   const handleScrollRight = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 260, behavior: 'smooth' });
+      scrollContainerRef.current.style.scrollBehavior = 'smooth';
+      scrollContainerRef.current.scrollBy({ left: 260 });
     }
   };
 
@@ -134,7 +139,6 @@ export default function ServicesSection({ t = (k) => k, language = 'en' }) {
             display: 'flex',
             gap: '16px',
             overflowX: 'auto',
-            scrollBehavior: 'smooth',
             padding: '12px 4px 18px 4px',
             msOverflowStyle: 'none',
             scrollbarWidth: 'none',

@@ -370,10 +370,16 @@ img {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   padding: 6px 0;
   overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   white-space: nowrap;
+}
+
+.nav-links::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-link,
@@ -382,9 +388,9 @@ a.nav-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 14px;
+  padding: 6px 10px;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-secondary);
   border-radius: var(--radius-sm);
   background: transparent !important;
@@ -393,9 +399,10 @@ a.nav-link {
   box-shadow: none !important;
   cursor: pointer;
   font-family: var(--font-body);
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all var(--transition-fast);
   text-decoration: none;
-  white-space: nowrap;
   appearance: none;
   -webkit-appearance: none;
 }
