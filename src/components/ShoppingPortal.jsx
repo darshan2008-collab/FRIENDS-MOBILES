@@ -227,29 +227,6 @@ export default function ShoppingPortal({
         </div>
       </header>
 
-      {/* Category Pills Navigation Bar */}
-      <div className="shop-category-pills-bar">
-        <div 
-          className="shop-pills-scroll"
-          onWheel={(e) => {
-            if (e.deltaY) {
-              e.currentTarget.scrollLeft += e.deltaY;
-            }
-          }}
-        >
-          {categoryList.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`shop-pill-btn ${selectedCategory === cat ? 'active' : ''}`}
-            >
-              {getCategoryIcon(cat)}
-              <span>{cat}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Main Layout: Collapsible Sidebar + Full-Width Product Catalog */}
       <div className={`shop-main-layout container ${isFilterOpen ? 'filter-open' : 'filter-closed'}`}>
 
