@@ -1,8 +1,9 @@
-import React, { useRef, useEffect } from 'react';
-import { Wrench, Smartphone, RefreshCw, Image, Printer, MapPin } from 'lucide-react';
+import React, { useRef, useEffect, useState } from 'react';
+import { Wrench, Smartphone, RefreshCw, Image, Printer, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function ServicesSection({ t = (k) => k, language = 'en' }) {
   const scrollContainerRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const services = language === 'ta' ? [
     { title: '30-நிமிட மொபைல் சர்வீஸ்', desc: 'விரைவு & நம்பகமான சேவை', icon: Wrench },
@@ -20,37 +21,35 @@ export default function ServicesSection({ t = (k) => k, language = 'en' }) {
     { title: 'Visit Our Store', desc: 'Find Nearest Store', icon: MapPin },
   ];
 
-  // Double array to create seamless infinite loop
-  const displayServices = [...services, ...services];
+  // Repeat items 3 times for continuous seamless marquee loop
+  const displayServices = [...services, ...services, ...services];
 
-  // Continuous Non-Stop Smooth Auto-Scrolling Loop
+  // Continuous Smooth Auto-Scrolling Loop with Hover Pause
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     let animationFrameId;
     let lastTime = performance.now();
-    let halfWidth = container.scrollWidth / 2;
-    let accumulatedScroll = halfWidth;
-
-    const scrollSpeed = 40; // Pixels per second (matched to company brand marquee speed)
+    const scrollSpeed = 35; // Pixels per second
 
     const autoScroll = (timestamp) => {
       if (!container) return;
 
       const elapsed = timestamp - lastTime;
-      if (elapsed > 0) {
-        const delta = (scrollSpeed * elapsed) / 1000;
-        halfWidth = container.scrollWidth / 2 || 1;
+      lastTime = timestamp;
 
-        accumulatedScroll -= delta;
-        if (accumulatedScroll <= 0) {
-          accumulatedScroll = halfWidth;
+      if (!isPaused && elapsed > 0) {
+        const delta = (scrollSpeed * elapsed) / 1000;
+        container.scrollLeft += delta;
+
+        // Reset scroll position seamlessly when reaching end of loop
+        const maxScroll = container.scrollWidth / 3;
+        if (container.scrollLeft >= maxScroll * 2) {
+          container.scrollLeft -= maxScroll;
         }
-        container.scrollLeft = Math.round(accumulatedScroll);
       }
 
-      lastTime = timestamp;
       animationFrameId = requestAnimationFrame(autoScroll);
     };
 
@@ -59,37 +58,108 @@ export default function ServicesSection({ t = (k) => k, language = 'en' }) {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [isPaused]);
+
+  const handleScrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -260, behavior: 'smooth' });
+    }
+  };
+
+  const handleScrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 260, behavior: 'smooth' });
+    }
+  };
 
   return (
-    <section className="services-section" id="services" style={{ overflow: 'hidden' }}>
-      <div className="container">
+    <section className="services-section" id="services" style={{ overflow: 'hidden', padding: '36px 0' }}>
+      <div className="container" style={{ position: 'relative' }}>
         
-        <div className="section-header">
-          <h2 className="section-title">{t('servicesTitle') || 'OUR SERVICES'}</h2>
+        <div className="section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+          <h2 className="section-title" style={{ margin: 0 }}>{t('servicesTitle') || 'OUR STORE EXECUTIVE SERVICES'}</h2>
+          
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button 
+              onClick={handleScrollLeft}
+              aria-label="Scroll Left"
+              style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-primary)',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                boxShadow: 'var(--shadow-sm)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button 
+              onClick={handleScrollRight}
+              aria-label="Scroll Right"
+              style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-primary)',
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                boxShadow: 'var(--shadow-sm)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
 
         <div 
           ref={scrollContainerRef}
           className="services-grid"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
           style={{
             display: 'flex',
+            gap: '16px',
             overflowX: 'auto',
-            whiteSpace: 'nowrap',
+            scrollBehavior: 'smooth',
+            padding: '12px 4px 18px 4px',
             msOverflowStyle: 'none',
-            scrollbarWidth: 'none'
+            scrollbarWidth: 'none',
+            WebkitOverflowScrolling: 'touch'
           }}
         >
           {displayServices.map((s, i) => {
             const Icon = s.icon;
             return (
-              <div key={i} className="service-card">
+              <div 
+                key={i} 
+                className="service-card"
+                style={{
+                  flex: '0 0 210px',
+                  minWidth: '210px',
+                  maxWidth: '210px',
+                  boxSizing: 'border-box'
+                }}
+              >
                 <div className="service-icon">
                   <Icon size={22} className="service-svg" />
                 </div>
                 <div className="service-content">
-                  <h3>{s.title}</h3>
-                  <p>{s.desc}</p>
+                  <h3 style={{ whiteSpace: 'normal', wordBreak: 'break-word', margin: '0 0 4px 0' }}>{s.title}</h3>
+                  <p style={{ whiteSpace: 'normal', wordBreak: 'break-word', margin: 0 }}>{s.desc}</p>
                 </div>
               </div>
             );

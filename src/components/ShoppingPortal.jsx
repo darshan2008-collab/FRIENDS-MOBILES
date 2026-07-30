@@ -548,8 +548,6 @@ function ProductCard({ product, onAddToCart, isLiked, onToggleWishlist, onSelect
           </button>
         </div>
       </div>
-
-    </div>,
-    document.body
+    </div>
   );
 }
