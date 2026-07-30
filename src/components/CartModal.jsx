@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, CheckCircle2, CreditCard, Sparkles, Copy, Check, Lock, Phone } from 'lucide-react';
 import { getProductTitle } from '../data/translations';
 
@@ -1057,18 +1058,18 @@ export default function CartModal({
                 borderRadius: '12px', 
                 padding: '10px 16px', 
                 display: 'inline-flex', 
-                alignItems: 'center', 
-                gap: '10px', 
-                marginBottom: '18px' 
-              }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)' }}>ORDER NUMBER:</span>
-                <strong style={{ fontSize: '1.1rem', fontWeight: '900', color: '#FF5500', letterSpacing: '0.5px' }}>
-                  {placedOrderDetails.orderId || 'FM-ORD-PENDING'}
-                </strong>
-                <button
-                  type="button"
+            <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center', padding: '20px 0' }}>
+              <div style={{ width: '72px', height: '72px', background: '#dcfce7', color: '#166534', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                <CheckCircle2 size={40} />
+              </div>
+              <h3 style={{ margin: '0 0 6px', fontSize: '1.35rem', fontWeight: '900', color: 'var(--text-primary)' }}>Order Placed Successfully!</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>Your order has been recorded and sent to Friends Mobile fulfillment team.</p>
+
+              <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '14px', marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: '700' }}>Order ID: #{placedOrderDetails.orderId}</span>
+                <button 
                   onClick={() => {
-                    if (placedOrderDetails.orderId) {
+                    if (navigator.clipboard) {
                       navigator.clipboard.writeText(placedOrderDetails.orderId);
                       if (addToast) addToast(`Copied Order Number: ${placedOrderDetails.orderId}`, '📋');
                     }
@@ -1099,32 +1100,28 @@ export default function CartModal({
               </div>
 
               {/* Online Payment E-Bill Download Option */}
-              {!String(placedOrderDetails.paymentMethod || '').toLowerCase().includes('cod') && 
-               !String(placedOrderDetails.paymentMethod || '').toLowerCase().includes('cash') && (
-                <button
-                  onClick={() => handleDownloadInvoice(placedOrderDetails)}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    borderRadius: '10px',
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #10b981, #059669)',
-                    color: '#ffffff',
-                    fontWeight: '800',
-                    fontSize: '0.88rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    marginBottom: '10px',
-                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
-                  }}
-                >
-                  📄 Download E-Bill (Tax Invoice)
-                </button>
-              )}
-
+              <button
+                onClick={() => handleDownloadInvoice(placedOrderDetails)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  color: '#ffffff',
+                  fontWeight: '800',
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  marginBottom: '10px',
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
+                }}
+              >
+                📄 Download Official E-Bill / Tax Invoice
+              </button>
 
               <a 
                 href={getWhatsAppUrl(placedOrderDetails)}
@@ -1160,10 +1157,9 @@ export default function CartModal({
               </button>
             </div>
           )}
-
         </div>
 
-        {/* Modal Footer (Only shown in Step 1 when cart has items) */}
+        {/* Modal Sticky Footer */}
         {checkoutStep === 'cart' && cart.length > 0 && (
           <footer style={{
             background: 'var(--bg-card)',
@@ -1189,6 +1185,6 @@ export default function CartModal({
           </footer>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
-}
