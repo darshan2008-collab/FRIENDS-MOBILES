@@ -705,7 +705,8 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
           </form>
         </div>
       </div>
-    </div>,
-    document.body
-  );
+    </div>
+  </div>,
+  document.body
+);
 }
