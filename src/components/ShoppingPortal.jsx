@@ -371,7 +371,7 @@ export default function ShoppingPortal({
 
               <h2 className="section-heading" style={{ margin: 0 }}>
                 {selectedCategory === 'All' ? 'All Showroom Products' : selectedCategory}
-                <span className="count-tag">({sortedProducts.length} items found)</span>
+                <span className="count-tag" style={{ marginLeft: '8px' }}>({sortedProducts.length} {sortedProducts.length === 1 ? 'item' : 'items'} found)</span>
               </h2>
             </div>
 
