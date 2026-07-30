@@ -4658,7 +4658,10 @@ img {
 
   .nav-link,
   button.nav-link,
-  a.nav-link {
+  a.nav-link,
+  .main-nav a,
+  .main-nav button {
+    all: unset !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -4668,14 +4671,17 @@ img {
     letter-spacing: 0.25px !important;
     color: var(--text-secondary) !important;
     border-radius: 6px !important;
-    border: 1px solid transparent !important;
+    border: none !important;
     background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
     cursor: pointer !important;
     font-family: var(--font-body) !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     line-height: 1.4 !important;
     text-decoration: none !important;
     white-space: nowrap !important;
+    box-sizing: border-box !important;
   }
 
   .nav-link:hover,

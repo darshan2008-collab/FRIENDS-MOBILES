@@ -202,33 +202,33 @@ export default function Header({
           <ul className="nav-links">
             <li><a href="#" className="nav-link active">{t('navHome')}</a></li>
             <li>
-              <button 
-                type="button"
-                onClick={() => onOpenShop && onOpenShop('Mobile Phones')}
+              <a 
+                href="#shop"
+                onClick={(e) => { e.preventDefault(); if (onOpenShop) onOpenShop('Mobile Phones'); }}
                 className="nav-link"
               >
                 {t('navPhones')}
-              </button>
+              </a>
             </li>
             <li>
-              <button 
-                type="button"
-                onClick={() => onOpenShop && onOpenShop('Chargers & Cables')}
+              <a 
+                href="#shop"
+                onClick={(e) => { e.preventDefault(); if (onOpenShop) onOpenShop('Chargers & Cables'); }}
                 className="nav-link"
               >
                 {t('navChargers')}
-              </button>
+              </a>
             </li>
             <li><a href="#photo-frames" className="nav-link">{t('navPhotoFrames')}</a></li>
             <li><a href="#customized-covers" className="nav-link">{t('navCustomCovers')}</a></li>
             <li>
-              <button 
-                type="button"
-                onClick={() => onOpenShop && onOpenShop('All')}
+              <a 
+                href="#shop"
+                onClick={(e) => { e.preventDefault(); if (onOpenShop) onOpenShop('All'); }}
                 className="nav-link"
               >
                 {t('navShopAll')}
-              </button>
+              </a>
             </li>
             <li><a href="#offers" className="nav-link">{t('navOffers')}</a></li>
             <li><a href="#contact" className="nav-link">{t('navContact')}</a></li>
