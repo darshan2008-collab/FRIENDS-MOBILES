@@ -1085,6 +1085,10 @@ export default function AdminModal({
     return matchesSearch && matchesStatus;
   });
 
+  if (!isOpen || typeof document === 'undefined') return null;
+  const portalContainer = document.body || document.getElementById('root') || document.documentElement;
+  if (!portalContainer) return null;
+
   return createPortal(
     <div 
       className="full-page-admin-portal"
@@ -3809,6 +3813,6 @@ export default function AdminModal({
         </div>
       )}
     </div>,
-    document.body
+    portalContainer
   );
 }

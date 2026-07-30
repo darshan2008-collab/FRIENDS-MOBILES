@@ -322,6 +322,10 @@ export default function AIChatbotModal({
     }, 450);
   };
 
+  if (!isOpen || typeof document === 'undefined') return null;
+  const portalContainer = document.body || document.getElementById('root') || document.documentElement;
+  if (!portalContainer) return null;
+
   return createPortal(
     <div className="ai-chatbot-modal-overlay full-view-overlay" onClick={onClose}>
       <div className="ai-chatbot-container full-view-container" onClick={(e) => e.stopPropagation()}>
@@ -616,6 +620,6 @@ export default function AIChatbotModal({
 
       </div>
     </div>,
-    document.body
+    portalContainer
   );
 }

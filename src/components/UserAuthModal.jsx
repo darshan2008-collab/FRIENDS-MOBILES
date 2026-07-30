@@ -593,6 +593,8 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   }, [isOpen]);
 
   if (!isOpen || typeof document === 'undefined') return null;
+  const portalContainer = document.body || document.getElementById('root') || document.documentElement;
+  if (!portalContainer) return null;
 
   return createPortal(
     <div className="full-page-user-auth-portal">
@@ -1219,6 +1221,6 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         </div>
       </div>
     </div>,
-    document.body
+    portalContainer
   );
 }

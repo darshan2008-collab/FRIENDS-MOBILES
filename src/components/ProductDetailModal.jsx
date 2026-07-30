@@ -148,7 +148,7 @@ export default function ProductDetailModal({
   };
 
   if (!product || typeof document === 'undefined') return null;
-  const portalContainer = document.body || document.getElementById('root');
+  const portalContainer = document.body || document.getElementById('root') || document.documentElement;
   if (!portalContainer) return null;
 
   return createPortal(

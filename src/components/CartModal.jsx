@@ -470,6 +470,8 @@ export default function CartModal({
   };
 
   if (!isOpen || typeof document === 'undefined') return null;
+  const portalContainer = document.body || document.getElementById('root') || document.documentElement;
+  if (!portalContainer) return null;
 
   return createPortal(
     <div className="cart-drawer-overlay" style={{ padding: 0 }} onClick={onClose}>
@@ -1161,6 +1163,6 @@ export default function CartModal({
         )}
       </div>
     </div>,
-    document.body
+    portalContainer
   );
 }

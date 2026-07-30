@@ -167,6 +167,10 @@ export default function ShoppingPortal({
     setInStockOnly(false);
   };
 
+  if (!isOpen || typeof document === 'undefined') return null;
+  const targetContainer = document.body || document.getElementById('root') || document.documentElement;
+  if (!targetContainer) return null;
+
   return createPortal(
     <div className="full-page-shopping-portal">
       
@@ -463,7 +467,8 @@ export default function ShoppingPortal({
 
       </div>
 
-    </div>
+    </div>,
+    targetContainer
   );
 }
 

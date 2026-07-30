@@ -466,6 +466,10 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
 
   const activeOrdersCount = userOrders.filter(o => !o.status?.toLowerCase().includes('delivered')).length;
 
+  if (!isOpen || typeof document === 'undefined') return null;
+  const portalContainer = document.body || document.getElementById('root') || document.documentElement;
+  if (!portalContainer) return null;
+
   return createPortal(
     <div className="full-page-user-dashboard">
       {/* Top Sticky Header */}
@@ -1399,6 +1403,6 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
         </div>
       )}
     </div>,
-    document.body
+    portalContainer
   );
 }

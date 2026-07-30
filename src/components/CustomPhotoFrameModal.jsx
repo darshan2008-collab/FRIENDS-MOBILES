@@ -131,6 +131,10 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
     return '#5C3A21'; // Walnut Wood
   };
 
+  if (!isOpen || typeof document === 'undefined') return null;
+  const portalContainer = document.body || document.getElementById('root') || document.documentElement;
+  if (!portalContainer) return null;
+
   return createPortal(
     <div 
       className="cart-drawer-overlay" 
@@ -707,6 +711,6 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
       </div>
     </div>
   </div>,
-  document.body
+  portalContainer
 );
 }

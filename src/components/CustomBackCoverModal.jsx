@@ -955,6 +955,10 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
     }
   };
 
+  if (!isOpen || typeof document === 'undefined') return null;
+  const portalContainer = document.body || document.getElementById('root') || document.documentElement;
+  if (!portalContainer) return null;
+
   return createPortal(
     <div 
       className="cart-drawer-overlay" 
@@ -1445,6 +1449,6 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
       </div>
     </div>
     </div>,
-    document.body
+    portalContainer
   );
 }
