@@ -291,9 +291,13 @@ export default function CartModal({
   }
 
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
+  // Detect First Order for the User (0 previous orders = FREE Delivery!)
+  const userOrdersCount = (currentUser?.orders || []).length;
+  const isFirstOrder = currentUser ? userOrdersCount === 0 : true;
+
   const freeThreshold = shippingSettings?.freeShippingThreshold || 1000;
   const standardFee = shippingSettings?.standardShippingFee || 60;
-  const isFreeShipping = (appliedCoupon && appliedCoupon.isFreeShip) || discountedSubtotal >= freeThreshold;
+  const isFreeShipping = isFirstOrder || (appliedCoupon && appliedCoupon.isFreeShip) || discountedSubtotal >= freeThreshold;
   const shippingFeeVal = isFreeShipping ? 0 : standardFee;
   const grandTotal = discountedSubtotal + shippingFeeVal;
   const amountToFreeShipping = Math.max(0, freeThreshold - discountedSubtotal);
@@ -795,7 +799,7 @@ export default function CartModal({
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
                       <span>Delivery Charge:</span>
                       <strong style={{ color: isFreeShipping ? '#22c55e' : 'var(--text-primary)' }}>
-                        {isFreeShipping ? 'FREE' : `₹${shippingFeeVal}`}
+                        {isFreeShipping ? (isFirstOrder ? '🎉 FREE (1st Order Offer!)' : 'FREE') : `₹${shippingFeeVal}`}
                       </strong>
                     </div>
 
