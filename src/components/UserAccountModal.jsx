@@ -215,6 +215,8 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
     } finally {
       setIsSubmittingReturn(false);
     }
+  };
+
   const [addresses, setAddresses] = useState(() => {
     if (user?.address && !user.address.includes('Double Tank')) {
       return [{ id: 1, title: 'Primary Delivery Address (Default)', address: user.address, isDefault: true }];
