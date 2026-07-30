@@ -369,43 +369,6 @@ export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }
                 </span>
               </div>
 
-              {/* VISA Official Logo */}
-              <div style={{
-                height: '21px',
-                padding: '0 6px',
-                borderRadius: '4px',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                display: 'inline-flex',
-                alignItems: 'center'
-              }}>
-                <svg width="32" height="11" viewBox="0 0 100 32" fill="none">
-                  <path d="M38.8 2.5L25.6 30H17.2L10.5 6.6C10.1 5.1 9.7 4.5 8.4 3.8C6.4 2.7 3.1 1.7 0 1L0.4 0H14.1C15.9 0 17.4 1.2 17.8 3.2L21.2 21L29.6 0H38.8V2.5ZM72.6 20.8C72.7 12.9 61.4 12.4 61.6 8.9C61.7 7.8 62.8 6.6 65.3 6.3C66.5 6.1 69.9 6 73.5 7.6L74.8 1.6C73.1 1 70.8 0.4 67.9 0.4C59.6 0.4 53.7 4.8 53.6 11C53.4 15.6 57.6 18.2 60.8 19.8C64 21.4 65.1 22.4 65.1 23.8C65 25.9 62.4 26.8 60 26.8C55.8 26.8 53.4 25.6 51.5 24.7L50.1 31C52 31.8 55.4 32.5 59 32.5C67.8 32.5 73.6 28.2 73.6 21.4M94.6 30H102L95.5 0H88.7C87.2 0 86 0.9 85.4 2.2L73 30H81.4L83.1 25.4H93.3L94.6 30ZM85.5 19L89.6 7.8L92 19H85.5ZM51 0L44.3 30H36.3L43 0H51Z" fill="#1A1F71"/>
-                  <path d="M14.1 0L8.4 3.8L10.5 6.6L17.8 3.2L14.1 0Z" fill="#F7B600"/>
-                </svg>
-              </div>
-
-              {/* Mastercard Official Logo */}
-              <div style={{
-                height: '21px',
-                padding: '0 6px',
-                borderRadius: '4px',
-                background: '#ffffff',
-                border: '1px solid #cbd5e1',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                <svg width="18" height="11" viewBox="0 0 38 24" fill="none">
-                  <circle cx="12" cy="12" r="12" fill="#EB001B"/>
-                  <circle cx="26" cy="12" r="12" fill="#F79E1B"/>
-                  <path d="M19 3.5C21.6 5.7 23.3 8.7 23.3 12C23.3 15.3 21.6 18.3 19 20.5C16.4 18.3 14.7 15.3 14.7 12C14.7 8.7 16.4 5.7 19 3.5Z" fill="#FF5F00"/>
-                </svg>
-                <span style={{ fontSize: '0.6rem', fontWeight: '900', color: '#111827', letterSpacing: '-0.3px' }}>mastercard</span>
-              </div>
-
               {/* Cash On Delivery Official Badge */}
               <div style={{
                 height: '21px',
