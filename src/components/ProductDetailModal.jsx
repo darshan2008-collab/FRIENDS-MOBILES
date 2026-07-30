@@ -403,6 +403,7 @@ export default function ProductDetailModal({
                 </button>
               </div>
             </div>
+          </div>
 
           {/* Product Overview & Specifications Section */}
           <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
