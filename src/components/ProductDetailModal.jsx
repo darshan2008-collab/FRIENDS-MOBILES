@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight, ZoomIn, Check } from 'lucide-react';
+import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight, ZoomIn, Check, Zap, ShieldCheck } from 'lucide-react';
 import { getProductTitle, getProductDesc } from '../data/translations';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
