@@ -10,6 +10,7 @@ COPY package.json ./
 RUN npm install --include=dev --legacy-peer-deps
 
 COPY . .
+RUN rm -f package-lock.json
 
 # Build React production bundle into /app/dist
 RUN npm run build
