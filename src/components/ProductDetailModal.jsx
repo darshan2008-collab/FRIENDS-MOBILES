@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import { createPortal } from 'react-dom';
 import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight, ZoomIn, Check } from 'lucide-react';
 import { getProductTitle, getProductDesc } from '../data/translations';
 
@@ -147,7 +147,9 @@ export default function ProductDetailModal({
     }
   };
 
-  return (
+  if (!product || typeof document === 'undefined') return null;
+
+  return createPortal(
     <div className="product-detail-overlay" onClick={onClose}>
       <div 
         className="product-detail-content" 

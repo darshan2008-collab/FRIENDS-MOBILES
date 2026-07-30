@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createPortal } from 'react-dom';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, CheckCircle2, CreditCard, Sparkles, Copy, Check, Lock, Phone } from 'lucide-react';
 import { getProductTitle } from '../data/translations';
 
@@ -469,7 +469,9 @@ export default function CartModal({
     if (addToast) addToast(`Order #${order.orderId} Placed Successfully!`, '✓');
   };
 
-  return (
+  if (!isOpen || typeof document === 'undefined') return null;
+
+  return createPortal(
     <div className="cart-drawer-overlay" style={{ padding: 0 }} onClick={onClose}>
       <div 
         className="cart-drawer-content" 
