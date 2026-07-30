@@ -148,6 +148,8 @@ export default function ProductDetailModal({
   };
 
   if (!product || typeof document === 'undefined') return null;
+  const portalContainer = document.body || document.getElementById('root');
+  if (!portalContainer) return null;
 
   return createPortal(
     <div className="product-detail-overlay" onClick={onClose}>
@@ -818,6 +820,6 @@ export default function ProductDetailModal({
         </div>
       )}
     </div>,
-    document.body
+    portalContainer
   );
 }
