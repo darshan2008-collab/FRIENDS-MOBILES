@@ -1404,7 +1404,6 @@ a.nav-link.active {
 }
 
 .cart-modal-content,
-.cart-drawer-content,
 .cart-modal {
   background: var(--bg-card) !important;
   color: var(--text-primary) !important;

@@ -5,7 +5,17 @@ import ErrorBoundary from './components/ErrorBoundary';
 import '../style.css';
 import './styles/theme.css';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const mountRoot = () => {
+  let rootElement = document.getElementById('root');
+  if (!rootElement) {
+    rootElement = document.createElement('div');
+    rootElement.id = 'root';
+    document.body.appendChild(rootElement);
+  }
+  return rootElement;
+};
+
+ReactDOM.createRoot(mountRoot()).render(
   <React.StrictMode>
     <ErrorBoundary>
       <App />
