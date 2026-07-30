@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, ShieldCheck, Package, Truck, ShoppingBag, BarChart3, Plus, Trash2, Edit3, 
   Check, RefreshCw, Lock, User, Key, ArrowRight, LogOut, CheckCircle2, Clock, 
@@ -522,7 +523,16 @@ export default function AdminModal({
   }, [shippingSettings]);
 
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen && typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isOpen]);
+
+  if (!isOpen || typeof document === 'undefined') return null;
 
   // --- High Security Server-Side Authentication Handlers ---
   const handleStep1LoginSubmit = async (e) => {
@@ -1075,7 +1085,7 @@ export default function AdminModal({
     return matchesSearch && matchesStatus;
   });
 
-  return (
+  return createPortal(
     <div 
       className="full-page-admin-portal"
       style={{
@@ -3798,6 +3808,7 @@ export default function AdminModal({
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }

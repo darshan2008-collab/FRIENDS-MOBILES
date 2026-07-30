@@ -1,8 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Smartphone, Upload, Plus, AlertCircle, ShoppingCart, Camera, Image, Search, Shield, Sparkles, Type, MessageSquare, ShoppingBag, RefreshCw, CheckCircle2, Crown, Zap, Edit3, ChevronDown, ChevronUp, Move, ZoomIn, RotateCw, Sliders } from 'lucide-react';
 import { PHONE_BRANDS, PHONE_MODELS_REGISTRY, findModelSpecs } from '../data/phoneCameraRegistry';
 
 export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, addToast, t = (k) => k, language = 'en' }) {
+  useEffect(() => {
+    if (isOpen && typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isOpen]);
+
   const fileInputRef = useRef(null);
   const [selectedBrand, setSelectedBrand] = useState('Apple');
   const [isBrandListOpen, setIsBrandListOpen] = useState(false);
@@ -20,7 +30,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
     setPhoneModel('');
   }, [selectedBrand]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const brandModels = PHONE_MODELS_REGISTRY[selectedBrand] || [];
   const filteredModels = searchTerm.trim() === '' 
@@ -945,7 +955,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
     }
   };
 
-  return (
+  return createPortal(
     <div 
       className="cart-drawer-overlay" 
       style={{
@@ -1433,7 +1443,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
           </form>
         </div>
       </div>
-    </div>
-  </div>
-);
+    </div>,
+    document.body
+  );
 }

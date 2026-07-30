@@ -1348,7 +1348,8 @@ a.nav-link.active {
   .newsletter-left { flex-direction: column; }
 }
 
-/* Fullscreen User Auth, Dashboard & Admin Portals */
+/* Fullscreen Shopping Catalog, User Auth, Dashboard & Admin Portals */
+.full-page-shopping-portal,
 .full-page-user-auth-portal,
 .full-page-user-dashboard,
 .full-page-admin-portal {
@@ -1403,6 +1404,7 @@ a.nav-link.active {
 }
 
 .cart-modal-content,
+.cart-drawer-content,
 .cart-modal {
   background: var(--bg-card) !important;
   color: var(--text-primary) !important;

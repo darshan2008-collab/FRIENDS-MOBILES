@@ -1,7 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield, Ruler, Maximize2, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
 
 export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, addToast, t = (k) => k, language = 'en' }) {
+  useEffect(() => {
+    if (isOpen && typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isOpen]);
+
   const fileInputRef = useRef(null);
   const [frameSize, setFrameSize] = useState('6 x 8 inches (Standard Desk / Wall)'); // 4x6 | 6x8 | 8x10 | 12x18 | 18x24 | Custom / Manual
   const [isSizeMenuOpen, setIsSizeMenuOpen] = useState(false); // Open/Close toggle for frame sizes guide
@@ -14,7 +24,7 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
   const [uploadedPhoto, setUploadedPhoto] = useState(null);
   const [uploadedFileInfo, setUploadedFileInfo] = useState(null);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const frameSizes = [
     { label: '4 x 6 inches (Table Desk Frame)', price: 299 },
@@ -121,7 +131,7 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
     return '#5C3A21'; // Walnut Wood
   };
 
-  return (
+  return createPortal(
     <div 
       className="cart-drawer-overlay" 
       style={{
@@ -695,7 +705,7 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
           </form>
         </div>
       </div>
-    </div>
-  </div>
-);
+    </div>,
+    document.body
+  );
 }

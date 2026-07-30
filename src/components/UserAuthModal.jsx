@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, Eye, EyeOff, AlertCircle, Clock, RefreshCw } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
@@ -582,7 +583,18 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
 
 
-  return (
+  useEffect(() => {
+    if (isOpen && typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isOpen]);
+
+  if (!isOpen || typeof document === 'undefined') return null;
+
+  return createPortal(
     <div className="full-page-user-auth-portal">
       {/* Top Sticky Header */}
       <header className="auth-header-bar">
@@ -1206,6 +1218,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

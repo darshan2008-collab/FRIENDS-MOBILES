@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, Send, Bot, User, Mic, MicOff, Phone, MessageSquare, 
   RefreshCw, Volume2, VolumeX, Languages, ShieldCheck, CheckCircle2, 
@@ -19,6 +20,16 @@ export default function AIChatbotModal({
   onOpenUserAccount,
   addToast
 }) {
+  useEffect(() => {
+    if (isOpen && typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isOpen]);
+
+  if (!isOpen || typeof document === 'undefined') return null;
   const [botLang, setBotLang] = useState(language);
   const [messages, setMessages] = useState([]);
   const [inputQuery, setInputQuery] = useState('');
@@ -311,9 +322,7 @@ export default function AIChatbotModal({
     }, 450);
   };
 
-  if (!isOpen) return null;
-
-  return (
+  return createPortal(
     <div className="ai-chatbot-modal-overlay full-view-overlay" onClick={onClose}>
       <div className="ai-chatbot-container full-view-container" onClick={(e) => e.stopPropagation()}>
         
@@ -606,6 +615,7 @@ export default function AIChatbotModal({
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, ArrowLeft, Search, Filter, ShoppingBag, Heart, Star, Smartphone, 
   Zap, Headphones, Watch, Frame, Palette, CheckCircle2, SlidersHorizontal, 
@@ -35,7 +36,16 @@ export default function ShoppingPortal({
     }
   }, [isOpen, initialCategory]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen && typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isOpen]);
+
+  if (!isOpen || typeof document === 'undefined') return null;
 
   // Extract all unique categories dynamically from products array
   const dynamicCategories = Array.from(
@@ -157,7 +167,7 @@ export default function ShoppingPortal({
     setInStockOnly(false);
   };
 
-  return (
+  return createPortal(
     <div className="full-page-shopping-portal">
       
       {/* Sticky Shopping Portal Top Header */}
@@ -539,6 +549,7 @@ function ProductCard({ product, onAddToCart, isLiked, onToggleWishlist, onSelect
         </div>
       </div>
 
-    </div>
+    </div>,
+    document.body
   );
 }

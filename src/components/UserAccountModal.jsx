@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, ShoppingBag, User, LogOut, PackageCheck, Clock, MapPin, Phone, Mail, 
   CheckCircle2, ShieldCheck, Tag, CreditCard, Star, ArrowRight, Heart, 
@@ -11,6 +12,16 @@ import { getProductTitle } from '../data/translations';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export default function UserAccountModal({ isOpen, onClose, user, orders: allOrders, onLogout, addToast, language = 'en', t = (k) => k }) {
+  useEffect(() => {
+    if (isOpen && typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isOpen]);
+
+  if (!isOpen || typeof document === 'undefined') return null;
   const isTamil = language === 'ta';
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile' | 'addresses' | 'offers' | 'support'
   const [userOrders, setUserOrders] = useState([]);
@@ -455,7 +466,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
 
   const activeOrdersCount = userOrders.filter(o => !o.status?.toLowerCase().includes('delivered')).length;
 
-  return (
+  return createPortal(
     <div className="full-page-user-dashboard">
       {/* Top Sticky Header */}
       <header className="dash-header-bar">
@@ -1387,6 +1398,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }
