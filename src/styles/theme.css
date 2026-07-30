@@ -5675,6 +5675,12 @@ img {
   padding: 0 !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.product-detail-overlay::-webkit-scrollbar {
+  display: none !important;
 }
 
 .product-detail-content {

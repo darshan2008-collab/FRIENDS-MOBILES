@@ -404,12 +404,87 @@ export default function ProductDetailModal({
               </div>
             </div>
 
+          {/* Product Overview & Specifications Section */}
+          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+              <Sparkles size={18} color="#FF5500" /> Product Overview &amp; Specifications
+            </h3>
+
+            {/* Feature Highlights Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+              <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                <span style={{ background: '#FF5500', color: '#fff', padding: '6px', borderRadius: '8px', display: 'flex', flexShrink: 0 }}><Check size={14} /></span>
+                <div>
+                  <strong style={{ fontSize: '0.84rem', display: 'block', color: 'var(--text-primary)' }}>100% Genuine Quality</strong>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Tested &amp; certified with Friends Mobile guarantee</span>
+                </div>
+              </div>
+              <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                <span style={{ background: '#3b82f6', color: '#fff', padding: '6px', borderRadius: '8px', display: 'flex', flexShrink: 0 }}><Zap size={14} /></span>
+                <div>
+                  <strong style={{ fontSize: '0.84rem', display: 'block', color: 'var(--text-primary)' }}>High Efficiency &amp; Speed</strong>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Optimized power output &amp; high durability</span>
+                </div>
+              </div>
+              <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', padding: '14px', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                <span style={{ background: '#22c55e', color: '#fff', padding: '6px', borderRadius: '8px', display: 'flex', flexShrink: 0 }}><ShieldCheck size={14} /></span>
+                <div>
+                  <strong style={{ fontSize: '0.84rem', display: 'block', color: 'var(--text-primary)' }}>Showroom Warranty</strong>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>6 Months official showroom support &amp; service</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Specifications Specs Table */}
+            <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '14px', overflow: 'hidden' }}>
+              <div style={{ padding: '12px 16px', background: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)', fontWeight: '800', fontSize: '0.84rem' }}>
+                Technical Details &amp; Specifications
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', padding: '14px 16px', gap: '12px', fontSize: '0.8rem' }}>
+                <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>Category:</span><strong style={{ color: 'var(--text-primary)' }}>{product.category}</strong></div>
+                <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>Brand:</span><strong style={{ color: 'var(--text-primary)' }}>FRIENDS MOBILE Original</strong></div>
+                <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>Warranty:</span><strong style={{ color: 'var(--text-primary)' }}>6 Months Showroom Warranty</strong></div>
+                <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>Compatibility:</span><strong style={{ color: 'var(--text-primary)' }}>Universal Android &amp; iOS</strong></div>
+                <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>In The Box:</span><strong style={{ color: 'var(--text-primary)' }}>1x {product.title}, Tax Invoice</strong></div>
+                <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>Stock Status:</span><strong style={{ color: product.inStock ? '#22c55e' : '#ef4444' }}>{product.inStock ? 'In Stock (Ready to Dispatch)' : 'Out of Stock'}</strong></div>
+              </div>
+            </div>
           </div>
 
+          {/* Similar Products You May Also Like Section */}
+          {products && products.filter(p => p.category === product.category && p.id !== product.id).length > 0 && (
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                <ShoppingBag size={18} color="#FF5500" /> Similar Products You May Also Like
+              </h3>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+                {products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4).map(sim => (
+                  <div key={sim.id} style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'space-between' }}>
+                    <div style={{ width: '100%', height: '120px', borderRadius: '10px', overflow: 'hidden', background: 'var(--bg-card)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={sim.img} alt={sim.title} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                    </div>
+                    <div>
+                      <strong style={{ fontSize: '0.82rem', color: 'var(--text-primary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{sim.title}</strong>
+                      <span style={{ fontSize: '0.9rem', fontWeight: '900', color: '#FF5500', display: 'block', marginTop: '4px' }}>₹{sim.price}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onSelectProduct && onSelectProduct(sim)}
+                      style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: '#FF5500', color: '#ffffff', fontSize: '0.75rem', fontWeight: '800', cursor: 'pointer' }}
+                    >
+                      View Details
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Customer Reviews Section */}
-          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px' }}>
+          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '28px' }}>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 650, letterSpacing: '-0.025em', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <MessageSquare size={18} /> Customer Feedback & Reviews
+              <MessageSquare size={18} /> Customer Feedback &amp; Reviews
             </h3>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
