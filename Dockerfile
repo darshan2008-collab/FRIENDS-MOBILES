@@ -6,7 +6,7 @@ WORKDIR /app
 ENV NODE_ENV=development
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-COPY package*.json ./
+COPY package.json ./
 RUN npm install --include=dev --legacy-peer-deps
 
 COPY . .
