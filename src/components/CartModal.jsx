@@ -1188,3 +1188,4 @@ export default function CartModal({
     </div>,
     document.body
   );
+}

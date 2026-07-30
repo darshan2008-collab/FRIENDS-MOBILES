@@ -856,3 +856,4 @@ export default function ProductDetailModal({
     </div>,
     document.body
   );
+}
