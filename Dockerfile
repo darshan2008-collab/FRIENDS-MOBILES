@@ -1,5 +1,5 @@
 # Stage 1: High-Performance Frontend Build Stage (Node 18)
-FROM node:18 AS build
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
@@ -10,8 +10,8 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-# Build React production bundle into /app/dist (with automatic fallback copy)
-RUN npm run build || (mkdir -p /app/dist && cp index.html /app/dist/index.html && cp -r public/* /app/dist/ 2>/dev/null || true)
+# Build React production bundle into /app/dist
+RUN npm run build
 
 # Stage 2: Production High-Performance NGINX Web Server
 FROM nginx:alpine
@@ -27,3 +27,4 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 3000
 
 CMD ["nginx", "-g", "daemon off;"]
+
