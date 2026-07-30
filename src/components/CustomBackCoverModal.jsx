@@ -1447,7 +1447,6 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
           </form>
         </div>
       </div>
-    </div>
     </div>,
     portalContainer
   );
