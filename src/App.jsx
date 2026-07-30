@@ -210,16 +210,6 @@ export default function App() {
     }
   });
 
-  const handleUpdateUserProfile = (updatedUser) => {
-    if (!updatedUser) return;
-    setCurrentUser(updatedUser);
-    try {
-      localStorage.setItem('fm_user', JSON.stringify(updatedUser));
-    } catch (e) {
-      console.error("Failed to save updated user profile to localStorage", e);
-    }
-  };
-
   const [toasts, setToasts] = useState([]);
 
   const handleRemoveToast = (id) => {
