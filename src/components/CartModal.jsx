@@ -24,12 +24,18 @@ export default function CartModal({
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [placedOrderDetails, setPlacedOrderDetails] = useState(null);
 
-  // ✅ BUG FIX: Reset to cart view every time the modal is closed
+  // Lock body scroll and reset step when open/closed
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
       setCheckoutStep('cart');
       setPlacedOrderDetails(null);
     }
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen]);
 
   const handleDownloadInvoice = (order) => {

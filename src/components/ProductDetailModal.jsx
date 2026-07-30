@@ -59,6 +59,14 @@ export default function ProductDetailModal({
         : ['Standard Pack (1 Metre)', 'Pro Pack (2 Metres)', 'Extended Pack (3 Metres)']
       );
 
+  // Lock body scroll when ProductDetailModal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   const galleryImages = (product.images && Array.isArray(product.images) && product.images.length > 0)
     ? product.images
     : [
