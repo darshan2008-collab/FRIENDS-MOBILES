@@ -1,5 +1,5 @@
-# Stage 1: High-Performance Frontend Build Stage (Node 18)
-FROM node:18-alpine AS build
+# Stage 1: High-Performance Frontend Build Stage (Node 20)
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ ENV NODE_ENV=development
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 COPY package.json ./
-RUN npm install --include=dev --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 COPY . .
 RUN rm -f package-lock.json
