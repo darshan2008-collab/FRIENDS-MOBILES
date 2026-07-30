@@ -1033,33 +1033,6 @@ export default function CartModal({
 
           {/* STEP 3: ORDER PLACED SUCCESS */}
           {checkoutStep === 'success' && placedOrderDetails && (
-            <div style={{ textAlign: 'center', padding: '24px 10px' }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '50%',
-                background: '#22c55e',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px auto',
-                boxShadow: '0 8px 24px rgba(34, 197, 94, 0.4)'
-              }}>
-                <CheckCircle2 size={36} />
-              </div>
-
-              <h4 style={{ margin: '0 0 10px 0', fontSize: '1.2rem', fontWeight: '900', color: '#22c55e' }}>
-                Order Successfully Placed!
-              </h4>
-
-              {/* Prominent Order Number Display */}
-              <div style={{ 
-                background: 'var(--orange-light)', 
-                border: '1.5px dashed #FF5500', 
-                borderRadius: '12px', 
-                padding: '10px 16px', 
-                display: 'inline-flex', 
             <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center', padding: '20px 0' }}>
               <div style={{ width: '72px', height: '72px', background: '#dcfce7', color: '#166534', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                 <CheckCircle2 size={40} />

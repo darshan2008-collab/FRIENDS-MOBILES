@@ -162,30 +162,39 @@
         }
       ]
     }
+    <!-- Global White Screen Shield & Unhandled Error Recovery -->
+    <script>
+      (function() {
+        function showFallbackUI(msg) {
+          const rootEl = document.getElementById('root');
+          if (rootEl && rootEl.children.length === 0) {
+            rootEl.innerHTML = `
+              <div style="min-height:100vh;background:#090d16;color:#ffffff;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;padding:20px;text-align:center;">
+                <div style="background:rgba(255,85,0,0.1);border:1.5px solid #FF5500;border-radius:16px;padding:32px;max-width:480px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+                  <h2 style="color:#FF5500;margin:0 0 12px 0;">FRIENDS MOBILE</h2>
+                  <p style="color:#94a3b8;font-size:0.9rem;margin-bottom:20px;">The application encountered a loading error. Click below to refresh.</p>
+                  <button onclick="window.location.reload()" style="background:linear-gradient(135deg, #FF5500, #E03E00);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:bold;cursor:pointer;box-shadow:0 4px 14px rgba(255,85,0,0.35);">
+                    🔄 Reload Page
+                  </button>
+                  ${msg ? `<div style="margin-top:16px;font-size:0.75rem;color:#ef4444;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:6px;text-align:left;">${msg}</div>` : ''}
+                </div>
+              </div>
+            `;
+          }
+        }
+        window.addEventListener('error', function(event) {
+          console.error('Unhandled script error captured:', event.error || event.message);
+          showFallbackUI(event.message || 'Script execution failed');
+        }, true);
+        window.addEventListener('unhandledrejection', function(event) {
+          console.error('Unhandled promise rejection captured:', event.reason);
+          showFallbackUI(event.reason ? (event.reason.message || String(event.reason)) : 'Promise rejected');
+        });
+      })();
     </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    <script>
-      // Global White Screen Shield & Unhandled Error Recovery
-      window.addEventListener('error', function(event) {
-        console.error('Unhandled script error captured:', event.error || event.message);
-        const rootEl = document.getElementById('root');
-        if (rootEl && rootEl.children.length === 0) {
-          rootEl.innerHTML = `
-            <div style="min-height:100vh;background:#090d16;color:#ffffff;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;padding:20px;text-align:center;">
-              <div style="background:rgba(255,85,0,0.1);border:1.5px solid #FF5500;border-radius:16px;padding:32px;max-width:480px;width:100%;">
-                <h2 style="color:#FF5500;margin:0 0 12px 0;">FRIENDS MOBILE</h2>
-                <p style="color:#94a3b8;font-size:0.9rem;margin-bottom:20px;">The application encountered a loading error. Click below to refresh.</p>
-                <button onclick="window.location.reload()" style="background:linear-gradient(135deg, #FF5500, #E03E00);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:bold;cursor:pointer;">
-                  🔄 Reload Page
-                </button>
-              </div>
-            </div>
-          `;
-        }
-      });
-    </script>
   </body>
 </html>

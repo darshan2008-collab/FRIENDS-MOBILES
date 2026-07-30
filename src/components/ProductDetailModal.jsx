@@ -786,48 +786,10 @@ export default function ProductDetailModal({
           <div onClick={(e) => e.stopPropagation()} style={{ maxWidth: '85vw', maxHeight: '72vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <img 
               src={galleryImages[lightboxIndex] || selectedImage || product.img} 
-              alt={product.title} 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'rgba(0,0,0,0.92)',
-            zIndex: 10020,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '24px'
-          }}
-        >
-          <button
-            onClick={() => setIsLightboxOpen(false)}
-            style={{
-              position: 'absolute',
-              top: '20px',
-              right: '24px',
-              background: 'rgba(255,255,255,0.15)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '40px',
-              height: '40px',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer'
-            }}
-          >
-            <X size={22} />
-          </button>
-
-          <img
-            src={galleryImages[lightboxIndex] || selectedImage || product.img}
-            alt="Enlarged Product View"
-            style={{ maxWidth: '90%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '12px' }}
-          />
+              alt={product.title || "Enlarged Product View"} 
+              style={{ maxWidth: '90%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '12px' }}
+            />
+          </div>
 
           <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
             {galleryImages.map((img, idx) => (
