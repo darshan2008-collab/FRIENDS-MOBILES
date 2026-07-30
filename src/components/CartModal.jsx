@@ -206,39 +206,65 @@ export default function CartModal({
     const code = (codeToApply || couponInput).trim().toUpperCase();
     if (!code) return;
 
-    if (code === 'FRIENDS10') {
+    // 1. Check if user claimed this exact unique random code
+    const userClaimed = (currentUser?.claimedCoupons || []).find(c => c.code && c.code.toUpperCase() === code);
+    if (userClaimed) {
+      const minVal = userClaimed.minOrderValue || 299;
+      if (subtotal < minVal) {
+        if (addToast) addToast(`Redeem Code "${code}" requires a minimum order of ₹${minVal}.`, '⚠️');
+        return;
+      }
+      setAppliedCoupon({
+        code,
+        discountPct: userClaimed.discountPct || 0,
+        flatDiscount: userClaimed.flatDiscount || 0,
+        title: userClaimed.title || `${code} Offer Coupon`
+      });
+      if (addToast) addToast(`Applied Unique Redeem Code ${code}!`, '🎉');
+      return;
+    }
+
+    // 2. Pattern Match for dynamic generated prefixes (e.g. FM-10OFF-XXXX, FM-50OFF-XXXX)
+    if (code.includes('10OFF') || code === 'FRIENDS10') {
       if (subtotal < 299) {
-        if (addToast) addToast('FRIENDS10 requires a minimum order of ₹299.', '⚠️');
+        if (addToast) addToast('10% OFF Redeem Code requires a minimum order of ₹299.', '⚠️');
         return;
       }
-      setAppliedCoupon({ code, discountPct: 10, flatDiscount: 0, title: '10% OFF Rewards Coupon' });
-      if (addToast) addToast('Applied 10% OFF Rewards Coupon!', '🎉');
-    } else if (code === 'FRIENDS15') {
+      setAppliedCoupon({ code, discountPct: 10, flatDiscount: 0, title: '10% OFF Redeem Coupon' });
+      if (addToast) addToast(`Applied 10% OFF Redeem Code ${code}!`, '🎉');
+    } else if (code.includes('15OFF') || code === 'FRIENDS15') {
       if (subtotal < 499) {
-        if (addToast) addToast('FRIENDS15 requires a minimum order of ₹499.', '⚠️');
+        if (addToast) addToast('15% OFF Redeem Code requires a minimum order of ₹499.', '⚠️');
         return;
       }
-      setAppliedCoupon({ code, discountPct: 15, flatDiscount: 0, title: '15% OFF Rewards Coupon' });
-      if (addToast) addToast('Applied 15% OFF Rewards Coupon!', '🎉');
-    } else if (code === 'FRIENDS20') {
+      setAppliedCoupon({ code, discountPct: 15, flatDiscount: 0, title: '15% OFF Redeem Coupon' });
+      if (addToast) addToast(`Applied 15% OFF Redeem Code ${code}!`, '🎉');
+    } else if (code.includes('20OFF') || code === 'FRIENDS20') {
       if (subtotal < 799) {
-        if (addToast) addToast('FRIENDS20 requires a minimum order of ₹799.', '⚠️');
+        if (addToast) addToast('20% OFF Redeem Code requires a minimum order of ₹799.', '⚠️');
         return;
       }
-      setAppliedCoupon({ code, discountPct: 20, flatDiscount: 0, title: '20% OFF Rewards Coupon' });
-      if (addToast) addToast('Applied 20% OFF Gold Rewards Coupon!', '🎉');
-    } else if (code === 'SUPER200') {
+      setAppliedCoupon({ code, discountPct: 20, flatDiscount: 0, title: '20% OFF Redeem Coupon' });
+      if (addToast) addToast(`Applied 20% OFF Redeem Code ${code}!`, '🎉');
+    } else if (code.includes('SAVE200') || code.includes('200OFF') || code === 'SUPER200') {
       if (subtotal < 999) {
-        if (addToast) addToast('SUPER200 requires a minimum order of ₹999.', '⚠️');
+        if (addToast) addToast('Flat ₹200 OFF Redeem Code requires a minimum order of ₹999.', '⚠️');
         return;
       }
-      setAppliedCoupon({ code, discountPct: 0, flatDiscount: 200, title: 'Flat ₹200 OFF VIP Coupon' });
-      if (addToast) addToast('Applied Flat ₹200 OFF VIP Coupon!', '🎉');
+      setAppliedCoupon({ code, discountPct: 0, flatDiscount: 200, title: 'Flat ₹200 OFF Redeem Coupon' });
+      if (addToast) addToast(`Applied Flat ₹200 OFF Redeem Code ${code}!`, '🎉');
+    } else if (code.includes('50OFF') || code === 'MEGA50') {
+      if (subtotal < 1499) {
+        if (addToast) addToast('50% OFF Mega Redeem Code requires a minimum order of ₹1,499.', '⚠️');
+        return;
+      }
+      setAppliedCoupon({ code, discountPct: 50, flatDiscount: 0, title: '50% OFF Mega Redeem Coupon' });
+      if (addToast) addToast(`Applied 50% OFF Mega Redeem Code ${code}!`, '🎉');
     } else if (code === 'FREESHIP') {
       setAppliedCoupon({ code, discountPct: 0, flatDiscount: 0, isFreeShip: true, title: 'Free Express Shipping' });
       if (addToast) addToast('Applied Free Express Shipping Coupon!', '🎉');
     } else {
-      if (addToast) addToast('Invalid or expired coupon code.', '❌');
+      if (addToast) addToast('Invalid or expired redeem code.', '❌');
     }
   };
 
@@ -697,6 +723,31 @@ export default function CartModal({
                           </span>
                         )}
                       </div>
+
+                      {currentUser?.claimedCoupons && currentUser.claimedCoupons.length > 0 && !appliedCoupon && (
+                        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '6px', marginBottom: '8px' }}>
+                          {currentUser.claimedCoupons.map((c, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => handleApplyCoupon(c.code)}
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                border: '1px solid #FF5500',
+                                background: 'rgba(255,85,0,0.1)',
+                                color: '#FF5500',
+                                fontSize: '0.72rem',
+                                fontWeight: '800',
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              ⚡ Apply {c.code} ({c.discountPct ? `${c.discountPct}% OFF` : `₹${c.flatDiscount} OFF`})
+                            </button>
+                          ))}
+                        </div>
+                      )}
 
                       {appliedCoupon ? (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid #22c55e', padding: '6px 10px', borderRadius: '8px' }}>

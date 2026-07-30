@@ -5,7 +5,7 @@ export const REWARD_COUPONS = [
   {
     id: 'c1',
     code: 'FRIENDS10',
-    title: 'Bronze Reward - 10% OFF',
+    title: '10% OFF Reward',
     discountPct: 10,
     flatDiscount: 0,
     pointsRequired: 100,
@@ -17,19 +17,19 @@ export const REWARD_COUPONS = [
   {
     id: 'c2',
     code: 'FRIENDS15',
-    title: 'Silver Reward - 15% OFF',
+    title: '15% OFF Reward',
     discountPct: 15,
     flatDiscount: 0,
     pointsRequired: 200,
     minOrderValue: 499,
     desc: 'Get 15% OFF on orders above ₹499.',
-    badgeColor: '#64748b',
-    bgGradient: 'linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(100, 116, 139, 0.05))'
+    badgeColor: '#3b82f6',
+    bgGradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05))'
   },
   {
     id: 'c3',
     code: 'FRIENDS20',
-    title: 'Gold Reward - 20% OFF',
+    title: '20% OFF Reward',
     discountPct: 20,
     flatDiscount: 0,
     pointsRequired: 300,
@@ -41,7 +41,7 @@ export const REWARD_COUPONS = [
   {
     id: 'c4',
     code: 'SUPER200',
-    title: 'VIP Reward - FLAT ₹200 OFF',
+    title: 'FLAT ₹200 OFF',
     discountPct: 0,
     flatDiscount: 200,
     pointsRequired: 500,
@@ -49,10 +49,32 @@ export const REWARD_COUPONS = [
     desc: 'Get Flat ₹200 OFF on orders above ₹999.',
     badgeColor: '#FF5500',
     bgGradient: 'linear-gradient(135deg, rgba(255, 85, 0, 0.18), rgba(255, 85, 0, 0.05))'
+  },
+  {
+    id: 'c5',
+    code: 'MEGA50',
+    title: '50% OFF Mega Discount',
+    discountPct: 50,
+    flatDiscount: 0,
+    pointsRequired: 750,
+    minOrderValue: 1499,
+    desc: 'Get 50% OFF on all orders above ₹1,499.',
+    badgeColor: '#a855f7',
+    bgGradient: 'linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(168, 85, 247, 0.05))'
   }
 ];
 
-export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast, onOpenCheckout }) {
+const generateRandomRedeemCode = (coupon) => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let randomTag = '';
+  for (let i = 0; i < 4; i++) {
+    randomTag += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  const tagPrefix = coupon.discountPct > 0 ? `${coupon.discountPct}OFF` : `SAVE${coupon.flatDiscount}`;
+  return `FM-${tagPrefix}-${randomTag}`;
+};
+
+export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast }) {
   const [copiedCode, setCopiedCode] = useState('');
 
   const currentPoints = currentUser?.rewardPoints || 150; // Welcome points default
@@ -68,15 +90,19 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast,
       return;
     }
 
-    if (claimedCoupons.some(c => c.code === coupon.code)) {
-      if (addToast) addToast(`You have already claimed coupon "${coupon.code}"!`, 'ℹ️');
-      return;
-    }
+    const uniqueRedeemCode = generateRandomRedeemCode(coupon);
+
+    const claimedObj = {
+      ...coupon,
+      code: uniqueRedeemCode,
+      templateCode: coupon.code,
+      claimedAt: new Date().toISOString()
+    };
 
     const updatedPoints = currentPoints - coupon.pointsRequired;
-    const updatedClaimed = [...claimedCoupons, { ...coupon, claimedAt: new Date().toISOString() }];
+    const updatedClaimed = [claimedObj, ...claimedCoupons];
     const updatedHistory = [
-      { id: Date.now(), type: 'debit', points: coupon.pointsRequired, title: `Claimed ${coupon.title} (${coupon.code})`, date: 'Just Now' },
+      { id: Date.now(), type: 'debit', points: coupon.pointsRequired, title: `Claimed ${coupon.title} (${uniqueRedeemCode})`, date: 'Just Now' },
       ...pointHistory
     ];
 
@@ -91,13 +117,13 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast,
       onUpdateUserProfile(updatedUser);
     }
 
-    if (addToast) addToast(`Successfully claimed coupon "${coupon.code}"! Used ${coupon.pointsRequired} Points.`, '🎉');
+    if (addToast) addToast(`🎉 Unlocked Unique Redeem Code: ${uniqueRedeemCode}`, '✨');
   };
 
   const handleCopyCode = (code) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
-    if (addToast) addToast(`Copied Coupon Code: ${code}`, '📋');
+    if (addToast) addToast(`Copied Unique Redeem Code: ${code}`, '📋');
     setTimeout(() => setCopiedCode(''), 3000);
   };
 
@@ -118,7 +144,7 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast,
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <span style={{ fontSize: '0.78rem', opacity: 0.9, fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Award size={16} /> FRIENDS LOYALTY REWARDS BALANCE
+              <Award size={16} /> LOYALTY REWARDS BALANCE
             </span>
             <h2 style={{ fontSize: '2.4rem', fontWeight: '900', margin: '4px 0 0 0', lineHeight: 1 }}>
               {currentPoints} <span style={{ fontSize: '1.2rem', fontWeight: '700', opacity: 0.9 }}>PTS</span>
@@ -132,19 +158,20 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast,
         </div>
 
         <div style={{ fontSize: '0.82rem', opacity: 0.95, lineHeight: 1.5, background: 'rgba(0, 0, 0, 0.15)', padding: '10px 14px', borderRadius: '10px' }}>
-          ✨ Continuously order at Friends Mobile to earn points! Redeem points for <strong>10%, 15%, 20% OFF and Flat ₹200 OFF Coupons</strong>.
+          ✨ Buy products at Friends Mobile to earn points! Redeem points to generate **unique random discount codes** (10%, 15%, 20%, Flat ₹200, 50% OFF).
         </div>
       </div>
 
       {/* Claimable Reward Coupons Section */}
       <div>
         <h4 style={{ fontSize: '1.05rem', fontWeight: '800', margin: '0 0 14px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Gift size={18} color="#FF5500" /> Available Points Redemption Coupons
+          <Gift size={18} color="#FF5500" /> Generate &amp; Redeem Unique Offer Codes
         </h4>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
           {REWARD_COUPONS.map(coupon => {
-            const isClaimed = claimedCoupons.some(c => c.code === coupon.code);
+            const userClaimedItems = claimedCoupons.filter(c => c.templateCode === coupon.code || c.id === coupon.id || (c.code && c.code.includes(coupon.discountPct ? `${coupon.discountPct}OFF` : `SAVE${coupon.flatDiscount}`)));
+            const latestClaimed = userClaimedItems.length > 0 ? userClaimedItems[0] : null;
             const canAfford = currentPoints >= coupon.pointsRequired;
 
             return (
@@ -172,24 +199,24 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast,
                 </div>
 
                 <div style={{ margin: '6px 0 14px 0' }}>
-                  <strong style={{ fontSize: '1.2rem', display: 'block', color: 'var(--text-primary)', letterSpacing: '0.5px' }}>
-                    {coupon.code}
+                  <strong style={{ fontSize: '1.15rem', display: 'block', color: 'var(--text-primary)', letterSpacing: '0.5px' }}>
+                    {latestClaimed ? latestClaimed.code : `${coupon.code} (Unique Code on Claim)`}
                   </strong>
                   <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '4px 0 0 0', lineHeight: 1.4 }}>
                     {coupon.desc} (Min. Order ₹{coupon.minOrderValue})
                   </p>
                 </div>
 
-                {isClaimed ? (
+                {latestClaimed ? (
                   <button
                     type="button"
-                    onClick={() => handleCopyCode(coupon.code)}
+                    onClick={() => handleCopyCode(latestClaimed.code)}
                     style={{
                       width: '100%',
-                      padding: '8px',
+                      padding: '9px',
                       borderRadius: '8px',
                       border: '1px solid #22c55e',
-                      background: 'rgba(34,197,94,0.1)',
+                      background: 'rgba(34,197,94,0.12)',
                       color: '#22c55e',
                       fontWeight: '800',
                       fontSize: '0.78rem',
@@ -200,7 +227,7 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast,
                       gap: '6px'
                     }}
                   >
-                    <CheckCircle2 size={14} /> {copiedCode === coupon.code ? 'Copied!' : 'Claimed - Copy Code'}
+                    <CheckCircle2 size={14} /> {copiedCode === latestClaimed.code ? 'Copied!' : `Copy Redeem Code: ${latestClaimed.code}`}
                   </button>
                 ) : (
                   <button
@@ -209,7 +236,7 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast,
                     disabled={!canAfford}
                     style={{
                       width: '100%',
-                      padding: '8px',
+                      padding: '9px',
                       borderRadius: '8px',
                       border: 'none',
                       background: canAfford ? '#FF5500' : 'var(--border-color)',
@@ -223,7 +250,7 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast,
                       gap: '6px'
                     }}
                   >
-                    <Sparkles size={14} /> {canAfford ? `Claim for ${coupon.pointsRequired} PTS` : `Need ${coupon.pointsRequired - currentPoints} More PTS`}
+                    <Sparkles size={14} /> {canAfford ? `Generate Code (${coupon.pointsRequired} PTS)` : `Need ${coupon.pointsRequired - currentPoints} More PTS`}
                   </button>
                 )}
               </div>
@@ -235,11 +262,11 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast,
       {/* Points History Log */}
       <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '16px' }}>
         <h4 style={{ fontSize: '0.9rem', fontWeight: '800', margin: '0 0 12px 0', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Zap size={16} color="#FF5500" /> Reward Points History Log
+          <Zap size={16} color="#FF5500" /> Reward Points &amp; Code Claim History
         </h4>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {pointHistory.slice(0, 5).map(item => (
+          {pointHistory.slice(0, 6).map(item => (
             <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card)', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
               <div>
                 <strong style={{ fontSize: '0.8rem', display: 'block', color: 'var(--text-primary)' }}>{item.title}</strong>
