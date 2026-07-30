@@ -139,21 +139,10 @@ export default function ProductDetailModal({
   };
 
   return (
-    <div className="cart-drawer-overlay" style={{ zIndex: 10008, padding: 0 }} onClick={onClose}>
+    <div className="product-detail-overlay" onClick={onClose}>
       <div 
-        className="cart-drawer-content" 
+        className="product-detail-content" 
         onClick={(e) => e.stopPropagation()}
-        style={{
-          maxWidth: '100vw',
-          width: '100vw',
-          height: '100vh',
-          maxHeight: '100vh',
-          borderRadius: 0,
-          border: 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden'
-        }}
       >
         {/* Modal Sticky Header */}
         <header style={{
