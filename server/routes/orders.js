@@ -73,9 +73,22 @@ const placeOrderHandler = async (req, res) => {
       address: sanitizeInput(customer.address)
     };
 
-    const settings = await getSettingsAsync();
-    const subtotal = clientSubtotal || items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-    const shipping = clientShipping !== undefined ? clientShipping : (subtotal >= (settings.freeShippingThreshold || 499) ? 0 : (settings.standardShippingFee || 49));
+    const customerPhone = normalizePhone(customer.phone);
+    const allOrders = await getOrdersAsync();
+    const customerPriorOrders = allOrders.filter(o => o.customer && normalizePhone(o.customer.phone) === customerPhone);
+    const isFirstOrder = customerPriorOrders.length === 0;
+
+    const subtotal = clientSubtotal || items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+    
+    let shipping = 0;
+    if (clientShipping !== undefined) {
+      shipping = clientShipping;
+    } else if (isFirstOrder || subtotal >= 1000) {
+      shipping = 0;
+    } else {
+      shipping = 70; // Fixed ₹70 shipping charge below ₹1,000 for returning accounts
+    }
+
     const total = clientTotal || (subtotal + (typeof shipping === 'number' ? shipping : 0));
 
     const orderId = clientOrderId || `FM-ORD-${Math.floor(100000 + Math.random() * 900000)}`;

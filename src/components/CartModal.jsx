@@ -359,12 +359,12 @@ export default function CartModal({
   }
 
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
-  // Detect First Order for the User (0 previous orders = FREE Delivery!)
-  const userOrdersCount = (currentUser?.orders || []).length;
-  const isFirstOrder = currentUser ? userOrdersCount === 0 : true;
+  // Detect First Order for the User (0 previous orders = 1-TIME FREE Delivery for new account!)
+  const userOrdersCount = Array.isArray(currentUser?.orders) ? currentUser.orders.length : 0;
+  const isFirstOrder = currentUser ? userOrdersCount === 0 : false;
 
-  const freeThreshold = shippingSettings?.freeShippingThreshold || 1000;
-  const standardFee = shippingSettings?.standardShippingFee || 60;
+  const freeThreshold = 1000;
+  const standardFee = 70; // Fixed ₹70 charge below ₹1,000 for returning accounts
   const isFreeShipping = isFirstOrder || (appliedCoupon && appliedCoupon.isFreeShip) || discountedSubtotal >= freeThreshold;
   const shippingFeeVal = isFreeShipping ? 0 : standardFee;
   const grandTotal = discountedSubtotal + shippingFeeVal;

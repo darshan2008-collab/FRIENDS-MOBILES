@@ -490,10 +490,18 @@ export default function App() {
 
   const handleClearCart = () => {
     setCart([]);
+    try {
+      localStorage.removeItem('fm_cart');
+    } catch (_) {}
   };
 
   const handleOrderPlaced = (newOrder) => {
     if (!newOrder) return;
+    setCart([]);
+    try {
+      localStorage.removeItem('fm_cart');
+    } catch (_) {}
+
     setOrders(prev => {
       const safePrev = Array.isArray(prev) ? prev : [];
       const updated = [newOrder, ...safePrev.filter(o => o.orderId !== newOrder.orderId)];
@@ -501,6 +509,20 @@ export default function App() {
         localStorage.setItem('fm_user_orders', JSON.stringify(updated));
       } catch (_) {}
       return updated;
+    });
+
+    setCurrentUser(prevUser => {
+      if (!prevUser) return prevUser;
+      const existingUserOrders = Array.isArray(prevUser.orders) ? prevUser.orders : [];
+      const updatedUserOrders = [newOrder, ...existingUserOrders.filter(o => o.orderId !== newOrder.orderId)];
+      const updatedUser = {
+        ...prevUser,
+        orders: updatedUserOrders
+      };
+      try {
+        localStorage.setItem('fm_user', JSON.stringify(updatedUser));
+      } catch (_) {}
+      return updatedUser;
     });
   };
 
