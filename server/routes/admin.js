@@ -580,17 +580,37 @@ router.post('/backups/create', async (req, res) => {
   }
 });
 
-// POST /api/admin/backups/restore — Restore database state from selected backup file
-router.post('/backups/restore', async (req, res) => {
+// POST /api/admin/backups/restore-file — Restore database state directly from uploaded backup JSON file
+router.post('/backups/restore-file', async (req, res) => {
   try {
-    const { filename } = req.body;
-    if (!filename) {
-      return res.status(400).json({ success: false, message: 'Backup filename is required' });
+    const { backupData, filename } = req.body;
+    if (!backupData) {
+      return res.status(400).json({ success: false, message: 'Backup JSON data is required.' });
     }
-    const result = await BackupService.restoreBackup(filename);
+    const result = await BackupService.restoreFromUploadedJson(backupData, filename || 'Uploaded_Backup.json');
     res.json(result);
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to restore database from backup file', error: err.message });
+    res.status(500).json({ success: false, message: 'Failed to restore database from uploaded backup file', error: err.message });
+  }
+});
+
+// POST /api/admin/backups/sync-gdrive — Fetch & restore latest backup snapshot directly from Google Drive
+router.post('/backups/sync-gdrive', async (req, res) => {
+  try {
+    const GoogleDriveService = require('../services/googleDriveService');
+    const driveResult = await GoogleDriveService.fetchLatestDriveBackup();
+
+    if (!driveResult || !driveResult.success || !driveResult.payload) {
+      return res.status(400).json({
+        success: false,
+        message: driveResult?.message || 'Could not download backup from Google Drive. Try uploading your backup file manually.'
+      });
+    }
+
+    const restoreResult = await BackupService.restoreFromPayload(driveResult.payload, driveResult.filename || 'GoogleDrive_Backup.json');
+    res.json(restoreResult);
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to sync and restore backup from Google Drive', error: err.message });
   }
 });
 

@@ -197,9 +197,69 @@ export default function CartModal({
       (order.items || []).map(item => `• ${item.title} (x${item.quantity}) - ₹${item.price * item.quantity}`).join('\n') +
       `\n\n*Subtotal:* ₹${order.subtotal}\n` +
       `*Shipping:* ${order.shipping === 'Pending' ? 'Pending verify (Admin will update)' : `₹${order.shipping}`}\n` +
-      `*Total Amount:* ₹${order.total}\n` +
-      `*Payment Method:* ${order.paymentMethod || 'COD'}`;
-    return `https://wa.me/917448578507?text=${encodeURIComponent(whatsappMsg)}`;
+  const handleDownloadInvoice = (order) => {
+    if (!order || !order.orderId) return;
+    const invoiceUrl = `${API_BASE}/payments/invoice/${encodeURIComponent(order.orderId)}`;
+    window.open(invoiceUrl, '_blank');
+  };
+
+  const [isAutoVerifying, setIsAutoVerifying] = useState(false);
+
+  useEffect(() => {
+    let intervalId = null;
+
+    if (checkoutStep === 'payment_qr' && pendingOrder && pendingOrder.orderId) {
+      setIsAutoVerifying(true);
+      intervalId = setInterval(async () => {
+        try {
+          const res = await fetch(`${API_BASE}/payments/status/${pendingOrder.orderId}`);
+          const data = await res.json();
+          if (data && data.success && data.paymentStatus === 'Paid') {
+            clearInterval(intervalId);
+            setIsAutoVerifying(false);
+            if (addToast) addToast('⚡ Payment Confirmed via Webhook Auto-Verification!', '🎉');
+            const verifiedOrder = {
+              ...pendingOrder,
+              paymentMethod: 'UPI QR Code (Webhook Auto-Verified)',
+              paymentStatus: 'Paid',
+              transactionUtr: data.transactionUtr || `AUTO-UPI-${Date.now()}`
+            };
+            executeOrderPlacement(verifiedOrder);
+          }
+        } catch (_) {}
+      }, 2000); // Poll every 2 seconds
+    } else {
+      setIsAutoVerifying(false);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [checkoutStep, pendingOrder]);
+
+  const handleSimulatePaymentSuccess = async () => {
+    if (!pendingOrder) return;
+    try {
+      if (addToast) addToast('Simulating Instant Webhook Auto-Verification...', '⚡');
+      const res = await fetch(`${API_BASE}/payments/simulate-qr-success`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: pendingOrder.orderId })
+      });
+      const data = await res.json();
+      if (data && data.success) {
+        if (addToast) addToast(`✅ Auto-Verified Payment for Order #${pendingOrder.orderId}!`, '🎉');
+        const verifiedOrder = {
+          ...pendingOrder,
+          paymentMethod: 'UPI QR Code (Auto-Verified)',
+          paymentStatus: 'Paid',
+          transactionUtr: data.transactionUtr || `AUTO-${Date.now()}`
+        };
+        executeOrderPlacement(verifiedOrder);
+      }
+    } catch (err) {
+      if (addToast) addToast(`Simulation status: ${err.message}`, 'ℹ️');
+    }
   };
 
   const [couponInput, setCouponInput] = useState('');
@@ -988,11 +1048,42 @@ export default function CartModal({
                         />
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: '800', color: '#16a34a', background: '#dcfce7', padding: '3px 8px', borderRadius: '6px' }}>
-                          ✓ Accepted on: GPay • PhonePe • Paytm • BHIM
+                      {/* Zero-Touch Webhook Auto-Detection Banner */}
+                      <div style={{
+                        marginTop: '16px', width: '100%', maxWidth: '360px',
+                        background: 'rgba(34, 197, 94, 0.12)', border: '1.5px solid #22c55e',
+                        borderRadius: '12px', padding: '12px', textAlign: 'center'
+                      }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: '800', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 1.5s infinite' }}></span>
+                          ⚡ Auto-Detecting Payment via Gateway Webhook...
+                        </div>
+                        <span style={{ fontSize: '0.72rem', color: '#166534', display: 'block', marginTop: '2px' }}>
+                          No transaction ID entry needed! Your order completes automatically upon bank confirmation.
                         </span>
                       </div>
+
+                      {/* Sandbox Simulator Test Button */}
+                      <button
+                        type="button"
+                        onClick={handleSimulatePaymentSuccess}
+                        style={{
+                          marginTop: '10px',
+                          padding: '8px 14px',
+                          borderRadius: '8px',
+                          border: '1px dashed #3b82f6',
+                          background: 'rgba(59, 130, 246, 0.1)',
+                          color: '#3b82f6',
+                          fontWeight: '800',
+                          fontSize: '0.75rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        ⚡ Simulate Instant Webhook Verification (Sandbox Test)
+                      </button>
 
                       {/* Copyable UPI ID */}
                       <div style={{
@@ -1038,14 +1129,14 @@ export default function CartModal({
                 })()}
               </div>
 
-              {/* UTR Verification Form */}
+              {/* UTR Verification Form (Fallback) */}
               <form onSubmit={handleConfirmUpiPaymentSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left' }}>
                 <div style={{ background: 'var(--bg-input)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
                   <label style={{ fontSize: '0.82rem', fontWeight: '800', color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
-                    Enter 12-Digit UPI Transaction UTR / Ref No. <span style={{ color: '#ef4444' }}>*</span>
+                    Optional Manual Fallback: Enter 12-Digit UTR / Ref No.
                   </label>
                   <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'block', marginBottom: '10px' }}>
-                    After scanning &amp; paying on GPay / PhonePe / Paytm, copy the 12-digit UTR or Ref number from your payment receipt.
+                    Auto-verification is active above. Use manual entry below only if webhooks are delayed.
                   </span>
                   <input 
                     type="text" 

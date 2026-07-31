@@ -234,6 +234,78 @@ export default function AdminModal({
     setIsBackingUp(false);
   };
 
+  const [isRestoringUpload, setIsRestoringUpload] = useState(false);
+  const [isSyncingGDrive, setIsSyncingGDrive] = useState(false);
+
+  const handleFileUploadRestore = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!window.confirm(`Are you sure you want to upload & restore database backup from "${file.name}"? This will update your database, customer accounts, orders, products, images, and local code files.`)) {
+      e.target.value = '';
+      return;
+    }
+
+    setIsRestoringUpload(true);
+    if (addToast) addToast(`Reading backup file "${file.name}"...`, '⏳');
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const textContent = evt.target.result;
+        const parsedData = JSON.parse(textContent);
+        const apiHost = getApiHost();
+
+        const { ok, data } = await safeJsonFetch(`${apiHost}/api/admin/backups/restore-file`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ backupData: parsedData, filename: file.name })
+        });
+
+        if (ok && data && data.success) {
+          const counts = data.restoredCounts || {};
+          const msg = `Restored successfully! (${counts.users || 0} users, ${counts.orders || 0} orders, ${counts.products || 0} products)`;
+          if (addToast) addToast(`✅ ${msg}`, '🎉');
+          setTimeout(() => window.location.reload(), 1200);
+        } else {
+          if (addToast) addToast(`Restore error: ${data?.message || data?.error || 'Failed to restore file'}`, '⚠️');
+        }
+      } catch (err) {
+        if (addToast) addToast(`Invalid JSON file: ${err.message}`, '❌');
+      } finally {
+        setIsRestoringUpload(false);
+        if (e.target) e.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleGDriveSyncRestore = async () => {
+    if (!window.confirm('Fetch and restore the latest database backup directly from Google Drive?')) {
+      return;
+    }
+    setIsSyncingGDrive(true);
+    if (addToast) addToast('Connecting to Google Drive to download latest backup...', '☁️');
+
+    try {
+      const apiHost = getApiHost();
+      const { ok, data } = await safeJsonFetch(`${apiHost}/api/admin/backups/sync-gdrive`, {
+        method: 'POST'
+      });
+
+      if (ok && data && data.success) {
+        if (addToast) addToast(`✅ Restored from Google Drive snapshot "${data.source || 'Latest'}"!`, '🎉');
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        if (addToast) addToast(`Google Drive sync notice: ${data?.message || 'Drive file synced'}`, 'ℹ️');
+      }
+    } catch (err) {
+      if (addToast) addToast(`Drive restore status: ${err.message}`, 'ℹ️');
+    } finally {
+      setIsSyncingGDrive(false);
+    }
+  };
+
   const handleRestoreBackup = async (filename) => {
     if (!window.confirm(`Are you sure you want to restore database snapshot "${filename}"? Current data will be merged/updated.`)) {
       return;
@@ -3467,6 +3539,58 @@ export default function AdminModal({
                       {backupStatus?.lastBackupAt ? new Date(backupStatus.lastBackupAt).toLocaleString('en-IN') : 'None'}
                     </h4>
                   </div>
+                </div>
+              </div>
+
+              {/* Google Drive & Local File Disaster Recovery Restore Card */}
+              <div style={{ background: 'var(--bg-card)', border: '1.5px solid #3b82f6', padding: '24px', borderRadius: '18px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 8px 24px rgba(59, 130, 246, 0.12)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '900', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <RefreshCw size={20} color="#3b82f6" /> ⚡ Disaster Recovery &amp; Database Restoration
+                    </h4>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      Restore your complete store (Users, Orders, Products, Base64 Images &amp; Settings) after a server crash using your Google Drive backup JSON file.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={handleGDriveSyncRestore}
+                    disabled={isSyncingGDrive}
+                    style={{
+                      padding: '10px 18px', borderRadius: '10px', border: 'none',
+                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      color: '#ffffff', fontWeight: '800', fontSize: '0.82rem',
+                      cursor: isSyncingGDrive ? 'not-allowed' : 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '8px',
+                      boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)'
+                    }}
+                  >
+                    <Cloud size={16} /> {isSyncingGDrive ? 'Downloading from Drive...' : '☁️ 1-Click Sync & Restore from Google Drive'}
+                  </button>
+                </div>
+
+                {/* Upload JSON File Dropzone */}
+                <div style={{
+                  background: 'var(--bg-input)', border: '2px dashed #3b82f6', borderRadius: '14px',
+                  padding: '20px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s ease'
+                }}>
+                  <label style={{ cursor: 'pointer', display: 'block', width: '100%' }}>
+                    <input
+                      type="file"
+                      accept=".json,application/json"
+                      onChange={handleFileUploadRestore}
+                      disabled={isRestoringUpload}
+                      style={{ display: 'none' }}
+                    />
+                    <Upload size={32} color="#3b82f6" style={{ margin: '0 auto 8px auto', display: 'block' }} />
+                    <strong style={{ fontSize: '0.92rem', color: 'var(--text-primary)', display: 'block' }}>
+                      {isRestoringUpload ? 'Restoring Database & Images from File...' : '📁 Click to Upload & Restore Google Drive Backup JSON File'}
+                    </strong>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                      Select any <code style={{ background: 'var(--bg-card)', padding: '2px 6px', borderRadius: '4px', color: '#FF5500' }}>friends_mobile_master_backup.json</code> file downloaded from your Google Drive folder.
+                    </span>
+                  </label>
                 </div>
               </div>
 

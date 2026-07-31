@@ -265,27 +265,21 @@ const BackupService = {
     }
   },
 
-  // Restore database state from selected snapshot filename
-  restoreBackup: async (filename) => {
+  // Process & restore database state directly from a JSON backup payload object
+  restoreFromPayload: async (payload, sourceLabel = 'Snapshot') => {
     try {
-      const filePath = path.join(backupsDir, filename);
-      if (!fs.existsSync(filePath)) {
-        return { success: false, message: `Backup file "${filename}" not found.` };
-      }
-
-      const content = fs.readFileSync(filePath, 'utf8');
-      const payload = JSON.parse(content);
-
-      if (!payload) {
-        return { success: false, message: 'Invalid backup file structure.' };
+      if (!payload || typeof payload !== 'object') {
+        return { success: false, message: 'Invalid or empty backup payload data.' };
       }
 
       const users = payload.users || payload.data?.users || [];
       const products = payload.products || payload.data?.products || [];
       const orders = payload.orders || payload.data?.orders || [];
       const complaints = payload.complaints || payload.data?.complaints || [];
+      const banners = payload.banners || payload.data?.banners || [];
+      const settings = payload.settings || payload.data?.settings || null;
 
-      // Write to local JSON storage files as well as PostgreSQL DB
+      // 1. Write to local JSON storage files
       if (users.length > 0) {
         const { writeData } = require('../utils/db');
         const existingUsers = readData(usersFilePath, []);
@@ -313,7 +307,16 @@ const BackupService = {
         writeData(productsFilePath, Array.from(prodMap.values()));
       }
 
-      // Restore Users to PostgreSQL
+      if (settings) {
+        const { writeData } = require('../utils/db');
+        const settingsFilePath = path.join(__dirname, '../data/settings.json');
+        writeData(settingsFilePath, settings);
+        try {
+          await Setting.updateOne({}, { $set: settings }, { upsert: true });
+        } catch (_) {}
+      }
+
+      // 2. Restore Users to PostgreSQL
       for (const u of users) {
         try {
           const query = u.email ? { email: u.email } : (u.phone ? { phone: u.phone } : { id: u.id });
@@ -321,37 +324,94 @@ const BackupService = {
         } catch (_) {}
       }
 
-      // Restore Products to PostgreSQL
+      // 3. Restore Products to PostgreSQL
       for (const p of products) {
         try {
           await Product.updateOne({ id: p.id }, { $set: p }, { upsert: true });
         } catch (_) {}
       }
 
-      // Restore Orders to PostgreSQL
+      // 4. Restore Orders to PostgreSQL
       for (const o of orders) {
         try {
           await Order.updateOne({ orderId: o.orderId }, { $set: o }, { upsert: true });
         } catch (_) {}
       }
 
-      // Restore Complaints to PostgreSQL
+      // 5. Restore Complaints to PostgreSQL
       for (const c of complaints) {
         try {
           await Complaint.updateOne({ ticketId: c.ticketId }, { $set: c }, { upsert: true });
         } catch (_) {}
       }
 
-      console.log(`[Restore Success] Restored snapshot "${filename}" (${users.length} users, ${orders.length} orders, ${products.length} prods)`);
+      // 6. Restore Banners if present
+      if (banners && banners.length > 0) {
+        for (const b of banners) {
+          try {
+            if (b.id) await Banner.updateOne({ id: b.id }, { $set: b }, { upsert: true });
+          } catch (_) {}
+        }
+      }
+
+      const totalCounts = {
+        users: users.length,
+        orders: orders.length,
+        products: products.length,
+        complaints: complaints.length,
+        banners: banners.length
+      };
+
+      console.log(`[Restore Success] Restored data from "${sourceLabel}" (${users.length} users, ${orders.length} orders, ${products.length} prods)`);
 
       return {
         success: true,
-        message: `Database successfully restored from backup snapshot "${filename}"!`,
-        restoredCounts: payload.meta?.totalRecords || {}
+        message: `Database & local files successfully restored from "${sourceLabel}"!`,
+        source: sourceLabel,
+        restoredCounts: payload.meta?.totalRecords || totalCounts
       };
+    } catch (err) {
+      console.error('[Restore Payload Exception]', err);
+      return { success: false, error: err.message };
+    }
+  },
+
+  // Restore database state from selected snapshot filename
+  restoreBackup: async (filename) => {
+    try {
+      const filePath = path.join(backupsDir, filename);
+      if (!fs.existsSync(filePath)) {
+        return { success: false, message: `Backup file "${filename}" not found.` };
+      }
+
+      const content = fs.readFileSync(filePath, 'utf8');
+      const payload = JSON.parse(content);
+      return await BackupService.restoreFromPayload(payload, filename);
     } catch (err) {
       console.error('[Restore Exception]', err);
       return { success: false, error: err.message };
+    }
+  },
+
+  // Restore database state directly from uploaded JSON content or file payload
+  restoreFromUploadedJson: async (jsonInput, filename = 'Uploaded_Backup.json') => {
+    try {
+      let payload = jsonInput;
+      if (typeof jsonInput === 'string') {
+        payload = JSON.parse(jsonInput);
+      }
+      
+      // Also save the uploaded backup file to server/data/backups/ for future reference
+      try {
+        if (!fs.existsSync(backupsDir)) fs.mkdirSync(backupsDir, { recursive: true });
+        const savePath = path.join(backupsDir, filename.endsWith('.json') ? filename : `${filename}.json`);
+        fs.writeFileSync(savePath, JSON.stringify(payload, null, 2), 'utf8');
+      } catch (_) {}
+
+      return await BackupService.restoreFromPayload(payload, filename);
+    } catch (err) {
+      console.error('[Restore Upload Exception]', err);
+      return { success: false, error: `Failed to parse backup JSON: ${err.message}` };
     }
   },
 

@@ -190,6 +190,63 @@ const GoogleDriveService = {
       console.error('[Google Drive Backup Error]', err.message);
       return { success: false, error: err.message };
     }
+  },
+
+  // Download latest backup JSON snapshot directly from Google Drive
+  fetchLatestDriveBackup: async () => {
+    try {
+      const accessToken = await GoogleDriveService.getAccessToken();
+      const folderId = process.env.GDRIVE_FOLDER_ID || '1d-ca4wnFG0cwyy_b0Ry-cKnhr9b_G3Yl';
+
+      if (!accessToken) {
+        return { success: false, reason: 'NO_ACCESS_TOKEN', message: 'Google Drive OAuth access token not configured. Please use JSON File Upload or Webhook.' };
+      }
+
+      // Query files in folder
+      const queryUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&orderBy=createdTime+desc&pageSize=10`;
+
+      return new Promise((resolve) => {
+        https.get(queryUrl, {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        }, (res) => {
+          let body = '';
+          res.on('data', c => body += c);
+          res.on('end', () => {
+            try {
+              const data = JSON.parse(body);
+              const files = data.files || [];
+              const masterFile = files.find(f => f.name && f.name.includes('master_backup')) || files[0];
+
+              if (!masterFile) {
+                return resolve({ success: false, message: 'No backup files found in Google Drive folder.' });
+              }
+
+              // Download file content
+              const downloadUrl = `https://www.googleapis.com/drive/v3/files/${masterFile.id}?alt=media`;
+              https.get(downloadUrl, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+              }, (dlRes) => {
+                let fileBody = '';
+                dlRes.on('data', chunk => fileBody += chunk);
+                dlRes.on('end', () => {
+                  try {
+                    const parsedPayload = JSON.parse(fileBody);
+                    resolve({ success: true, filename: masterFile.name, payload: parsedPayload });
+                  } catch (e) {
+                    resolve({ success: false, message: `Downloaded Drive file is not valid JSON: ${e.message}` });
+                  }
+                });
+              }).on('error', err => resolve({ success: false, message: err.message }));
+
+            } catch (err) {
+              resolve({ success: false, message: err.message });
+            }
+          });
+        }).on('error', err => resolve({ success: false, message: err.message }));
+      });
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   }
 };
 
