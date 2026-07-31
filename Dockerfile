@@ -6,11 +6,10 @@ WORKDIR /app
 ENV NODE_ENV=development
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-COPY package.json ./
+COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
 COPY . .
-RUN rm -f package-lock.json
 
 # Build React production bundle into /app/dist
 RUN npm run build
@@ -29,4 +28,3 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 3000
 
 CMD ["nginx", "-g", "daemon off;"]
-
