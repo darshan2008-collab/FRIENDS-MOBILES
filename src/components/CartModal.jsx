@@ -248,7 +248,7 @@ export default function CartModal({
     };
   }, [checkoutStep, pendingOrder]);
 
-  const handleSimulatePaymentSuccess = async () => {
+  async function handleSimulatePaymentSuccess() {
     if (!pendingOrder) return;
     try {
       if (addToast) addToast('Simulating Instant Webhook Auto-Verification...', '⚡');
@@ -271,20 +271,21 @@ export default function CartModal({
     } catch (err) {
       if (addToast) addToast(`Simulation status: ${err.message}`, 'ℹ️');
     }
-  };
+  }
 
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
 
-  const handleApplyCoupon = (codeToApply) => {
+  function handleApplyCoupon(codeToApply) {
     const code = (codeToApply || couponInput).trim().toUpperCase();
     if (!code) return;
+    const currentSubtotal = (cart || []).reduce((acc, item) => acc + ((item.price || 0) * (item.quantity || 1)), 0);
 
     // 1. Check if user claimed this exact unique random code
     const userClaimed = (currentUser?.claimedCoupons || []).find(c => c.code && c.code.toUpperCase() === code);
     if (userClaimed) {
       const minVal = userClaimed.minOrderValue || 299;
-      if (subtotal < minVal) {
+      if (currentSubtotal < minVal) {
         if (addToast) addToast(`Redeem Code "${code}" requires a minimum order of ₹${minVal}.`, '⚠️');
         return;
       }
@@ -300,35 +301,35 @@ export default function CartModal({
 
     // 2. Pattern Match for dynamic generated prefixes (e.g. FM-10OFF-XXXX, FM-50OFF-XXXX)
     if (code.includes('10OFF') || code === 'FRIENDS10') {
-      if (subtotal < 299) {
+      if (currentSubtotal < 299) {
         if (addToast) addToast('10% OFF Redeem Code requires a minimum order of ₹299.', '⚠️');
         return;
       }
       setAppliedCoupon({ code, discountPct: 10, flatDiscount: 0, title: '10% OFF Redeem Coupon' });
       if (addToast) addToast(`Applied 10% OFF Redeem Code ${code}!`, '🎉');
     } else if (code.includes('15OFF') || code === 'FRIENDS15') {
-      if (subtotal < 499) {
+      if (currentSubtotal < 499) {
         if (addToast) addToast('15% OFF Redeem Code requires a minimum order of ₹499.', '⚠️');
         return;
       }
       setAppliedCoupon({ code, discountPct: 15, flatDiscount: 0, title: '15% OFF Redeem Coupon' });
       if (addToast) addToast(`Applied 15% OFF Redeem Code ${code}!`, '🎉');
     } else if (code.includes('20OFF') || code === 'FRIENDS20') {
-      if (subtotal < 799) {
+      if (currentSubtotal < 799) {
         if (addToast) addToast('20% OFF Redeem Code requires a minimum order of ₹799.', '⚠️');
         return;
       }
       setAppliedCoupon({ code, discountPct: 20, flatDiscount: 0, title: '20% OFF Redeem Coupon' });
       if (addToast) addToast(`Applied 20% OFF Redeem Code ${code}!`, '🎉');
     } else if (code.includes('SAVE200') || code.includes('200OFF') || code === 'SUPER200') {
-      if (subtotal < 999) {
+      if (currentSubtotal < 999) {
         if (addToast) addToast('Flat ₹200 OFF Redeem Code requires a minimum order of ₹999.', '⚠️');
         return;
       }
       setAppliedCoupon({ code, discountPct: 0, flatDiscount: 200, title: 'Flat ₹200 OFF Redeem Coupon' });
       if (addToast) addToast(`Applied Flat ₹200 OFF Redeem Code ${code}!`, '🎉');
     } else if (code.includes('50OFF') || code === 'MEGA50') {
-      if (subtotal < 1499) {
+      if (currentSubtotal < 1499) {
         if (addToast) addToast('50% OFF Mega Redeem Code requires a minimum order of ₹1,499.', '⚠️');
         return;
       }
@@ -340,17 +341,15 @@ export default function CartModal({
     } else {
       if (addToast) addToast('Invalid or expired redeem code.', '❌');
     }
-  };
+  }
 
-  const handleRemoveCoupon = () => {
+  function handleRemoveCoupon() {
     setAppliedCoupon(null);
     setCouponInput('');
     if (addToast) addToast('Coupon removed.', 'ℹ️');
-  };
+  }
 
-  if (!isOpen) return null;
-
-  const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const subtotal = (cart || []).reduce((acc, item) => acc + ((item.price || 0) * (item.quantity || 1)), 0);
 
   let couponDiscount = 0;
   if (appliedCoupon) {
@@ -374,7 +373,7 @@ export default function CartModal({
   const amountToFreeShipping = Math.max(0, freeThreshold - discountedSubtotal);
   const progressPercent = Math.min(100, Math.round((discountedSubtotal / freeThreshold) * 100));
 
-  const handleStartCheckout = () => {
+  function handleStartCheckout() {
     if (!currentUser) {
       if (onTriggerAuth) {
         onTriggerAuth('Please log in or create an account to complete your checkout.');
@@ -382,7 +381,7 @@ export default function CartModal({
       return;
     }
     setCheckoutStep('checkout');
-  };
+  }
 
   function triggerWhatsAppOrderNotification(order) {
     try {
@@ -470,7 +469,7 @@ export default function CartModal({
     })();
   }
 
-  const handlePlaceOrderSubmit = async (e) => {
+  async function handlePlaceOrderSubmit(e) {
     e.preventDefault();
     
     // Strict input security validation
@@ -536,9 +535,9 @@ export default function CartModal({
     } else {
       executeOrderPlacement(newOrder);
     }
-  };
+  }
 
-  const handleConfirmUpiPaymentSubmit = async (e) => {
+  async function handleConfirmUpiPaymentSubmit(e) {
     e.preventDefault();
     if (!pendingOrder) return;
 
@@ -559,7 +558,7 @@ export default function CartModal({
 
     await executeOrderPlacement(finalizedOrder);
     setIsVerifyingUtr(false);
-  };
+  }
 
   function executeFailSafeOrder(order) {
     setPlacedOrderDetails(order);
