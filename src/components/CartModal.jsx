@@ -194,9 +194,14 @@ export default function CartModal({
       `*Phone Number:* ${order.customer?.phone || ''}\n` +
       `*Address:* ${order.customer?.address || ''}\n\n` +
       `*Ordered Items:*\n` +
-      (order.items || []).map(item => `• ${item.title} (x${item.quantity}) - ₹${item.price * item.quantity}`).join('\n') +
+      (order.items || []).map(item => `• ${item.title || item.name} (x${item.quantity || 1}) - ₹${(item.price || 0) * (item.quantity || 1)}`).join('\n') +
       `\n\n*Subtotal:* ₹${order.subtotal}\n` +
       `*Shipping:* ${order.shipping === 'Pending' ? 'Pending verify (Admin will update)' : `₹${order.shipping}`}\n` +
+      `*Total Amount:* ₹${order.total}\n` +
+      `*Payment Method:* ${order.paymentMethod || 'COD'}`;
+    return `https://wa.me/917448578507?text=${encodeURIComponent(whatsappMsg)}`;
+  };
+
   const handleDownloadInvoice = (order) => {
     if (!order || !order.orderId) return;
     const invoiceUrl = `${API_BASE}/payments/invoice/${encodeURIComponent(order.orderId)}`;
