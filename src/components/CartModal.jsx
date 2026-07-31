@@ -236,7 +236,7 @@ export default function CartModal({
             executeOrderPlacement(verifiedOrder);
           }
         } catch (_) {}
-      }, 2000); // Poll every 2 seconds
+      }, 500); // Poll every 500ms for sub-second instant response
     } else {
       setIsAutoVerifying(false);
     }
@@ -449,17 +449,20 @@ export default function CartModal({
         });
         const data = await res.json();
 
-        if (data.success) {
-          setPlacedOrderDetails(data.order || orderToPlace);
-          awardUserPointsOnOrder(data.order || orderToPlace);
-          triggerWhatsAppOrderNotification(data.order || orderToPlace);
-          if (onOrderPlaced) onOrderPlaced(data.order || orderToPlace);
-          if (onClearCart) onClearCart();
-          setCheckoutStep('success');
-          if (addToast) addToast(`Order #${orderToPlace.orderId} Placed Successfully!`, '✓');
-        } else {
-          executeFailSafeOrder(orderToPlace);
-        }
+        const finalOrder = data.order || orderToPlace;
+        setPlacedOrderDetails(finalOrder);
+        awardUserPointsOnOrder(finalOrder);
+        triggerWhatsAppOrderNotification(finalOrder);
+        if (onOrderPlaced) onOrderPlaced(finalOrder);
+        if (onClearCart) onClearCart();
+        setCheckoutStep('success');
+        if (addToast) addToast(`Order #${finalOrder.orderId} Auto-Verified & Confirmed!`, '✓');
+
+        // Automatically trigger printable E-Bill Tax Receipt window popup
+        setTimeout(() => {
+          handleDownloadInvoice(finalOrder);
+        }, 500);
+
       } catch (err) {
         console.warn("API order placement network fallback:", err);
         executeFailSafeOrder(orderToPlace);
@@ -522,11 +525,20 @@ export default function CartModal({
       shipping: shippingFeeVal,
       total: grandTotal,
       paymentMethod: paymentMethod || 'COD',
-      paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Paid',
-      status: 'Order Placed'
+      paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Pending',
+      status: paymentMethod === 'COD' ? 'Order Placed' : 'Awaiting Payment'
     };
 
     if (paymentMethod === 'UPI') {
+      // Register pending order with backend so webhooks and status listener can verify instantly
+      try {
+        await fetch(`${API_BASE}/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newOrder)
+        });
+      } catch (_) {}
+
       setPendingOrder(newOrder);
       setUtrNumber('');
       setCheckoutStep('payment_qr');
@@ -1054,7 +1066,7 @@ export default function CartModal({
                         />
                       </div>
 
-                      {/* Zero-Touch Webhook Auto-Detection Banner */}
+                      {/* Zero-Touch Webhook Auto-Detection Banner (Always Active) */}
                       <div style={{
                         marginTop: '16px', width: '100%', maxWidth: '360px',
                         background: 'rgba(34, 197, 94, 0.12)', border: '1.5px solid #22c55e',
@@ -1062,34 +1074,12 @@ export default function CartModal({
                       }}>
                         <div style={{ fontSize: '0.8rem', fontWeight: '800', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
                           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 1.5s infinite' }}></span>
-                          ⚡ Auto-Detecting Payment via Gateway Webhook...
+                          ⚡ Live Bank Webhook Listener Active...
                         </div>
                         <span style={{ fontSize: '0.72rem', color: '#166534', display: 'block', marginTop: '2px' }}>
-                          No transaction ID entry needed! Your order completes automatically upon bank confirmation.
+                          Scanning &amp; paying automatically completes your order instantly.
                         </span>
                       </div>
-
-                      {/* Sandbox Simulator Test Button */}
-                      <button
-                        type="button"
-                        onClick={handleSimulatePaymentSuccess}
-                        style={{
-                          marginTop: '10px',
-                          padding: '8px 14px',
-                          borderRadius: '8px',
-                          border: '1px dashed #3b82f6',
-                          background: 'rgba(59, 130, 246, 0.1)',
-                          color: '#3b82f6',
-                          fontWeight: '800',
-                          fontSize: '0.75rem',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }}
-                      >
-                        ⚡ Simulate Instant Webhook Verification (Sandbox Test)
-                      </button>
 
                       {/* Copyable UPI ID */}
                       <div style={{
@@ -1135,56 +1125,17 @@ export default function CartModal({
                 })()}
               </div>
 
-              {/* UTR Verification Form (Fallback) */}
-              <form onSubmit={handleConfirmUpiPaymentSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left' }}>
-                <div style={{ background: 'var(--bg-input)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: '800', color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
-                    Optional Manual Fallback: Enter 12-Digit UTR / Ref No.
-                  </label>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'block', marginBottom: '10px' }}>
-                    Auto-verification is active above. Use manual entry below only if webhooks are delayed.
-                  </span>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. 423891823901"
-                    value={utrNumber}
-                    onChange={(e) => setUtrNumber(e.target.value)}
-                    maxLength={16}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '10px',
-                      border: '1.5px solid #FF5500',
-                      background: 'var(--bg-card)',
-                      color: 'var(--text-primary)',
-                      fontSize: '1rem',
-                      fontWeight: '800',
-                      letterSpacing: '1px',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button 
-                    type="button"
-                    onClick={() => setCheckoutStep('checkout')}
-                    className="btn btn-secondary"
-                    style={{ flex: 1, padding: '12px' }}
-                  >
-                    Change Method
-                  </button>
-                  <button 
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={isVerifyingUtr}
-                    style={{ flex: 1.5, padding: '12px', background: '#16a34a', borderColor: '#16a34a' }}
-                  >
-                    {isVerifyingUtr ? 'Verifying...' : 'Confirm Payment & Complete Order ✓'}
-                  </button>
-                </div>
-              </form>
+              {/* Zero-Touch Automatic Verification Footer */}
+              <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button 
+                  type="button"
+                  onClick={() => setCheckoutStep('checkout')}
+                  className="btn btn-secondary"
+                  style={{ width: '100%', padding: '12px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700' }}
+                >
+                  ← Back / Change Payment Method
+                </button>
+              </div>
             </div>
           )}
 

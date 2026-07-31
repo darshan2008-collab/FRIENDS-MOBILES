@@ -4281,7 +4281,24 @@ img {
 .shop-sidebar-panel {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+  position: sticky;
+  top: 90px;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  padding-right: 4px;
+  scroll-behavior: smooth;
+}
+
+.shop-sidebar-panel::-webkit-scrollbar {
+  width: 5px;
+}
+.shop-sidebar-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.shop-sidebar-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 85, 0, 0.3);
+  border-radius: 4px;
 }
 
 .sidebar-header {
@@ -4290,6 +4307,10 @@ img {
   justify-content: space-between;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  background: var(--bg-card);
+  z-index: 2;
 }
 
 .reset-filter-link {
@@ -4338,6 +4359,22 @@ img {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scroll-behavior: smooth;
+}
+
+.category-filter-list::-webkit-scrollbar {
+  width: 5px;
+}
+.category-filter-list::-webkit-scrollbar-track {
+  background: var(--bg-input);
+  border-radius: 4px;
+}
+.category-filter-list::-webkit-scrollbar-thumb {
+  background: #FF5500;
+  border-radius: 4px;
 }
 
 .category-item-btn {
@@ -4358,6 +4395,13 @@ img {
   text-align: left;
 }
 
+.cat-item-name {
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.3;
+  padding-right: 6px;
+}
+
 .category-item-btn:hover {
   background: var(--bg-input);
   color: #FF5500;
@@ -4376,6 +4420,7 @@ img {
   padding: 2px 7px;
   border-radius: 10px;
   font-weight: 700;
+  flex-shrink: 0;
 }
 
 .category-item-btn.active .cat-item-count {
