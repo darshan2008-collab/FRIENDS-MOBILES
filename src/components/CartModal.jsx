@@ -44,6 +44,14 @@ export default function CartModal({
 
   const handleDownloadInvoice = (order) => {
     if (!order) return;
+    if (order.orderId && typeof window !== 'undefined') {
+      try {
+        const invoiceUrl = `${API_BASE}/payments/invoice/${encodeURIComponent(order.orderId)}`;
+        window.open(invoiceUrl, '_blank');
+        return;
+      } catch (_) {}
+    }
+
     const isUPI = String(order.paymentMethod || '').toLowerCase().includes('upi') || 
                   String(order.paymentMethod || '').toLowerCase().includes('qr') || 
                   String(order.paymentMethod || '').toLowerCase().includes('online');
@@ -200,12 +208,6 @@ export default function CartModal({
       `*Total Amount:* ₹${order.total}\n` +
       `*Payment Method:* ${order.paymentMethod || 'COD'}`;
     return `https://wa.me/917448578507?text=${encodeURIComponent(whatsappMsg)}`;
-  };
-
-  const handleDownloadInvoice = (order) => {
-    if (!order || !order.orderId) return;
-    const invoiceUrl = `${API_BASE}/payments/invoice/${encodeURIComponent(order.orderId)}`;
-    window.open(invoiceUrl, '_blank');
   };
 
   const [isAutoVerifying, setIsAutoVerifying] = useState(false);

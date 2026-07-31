@@ -239,6 +239,15 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
 
   const handleDownloadInvoice = (order) => {
     if (!order) return;
+    if (order.orderId && typeof window !== 'undefined') {
+      try {
+        const apiHost = getApiHost();
+        const invoiceUrl = `${apiHost}/api/payments/invoice/${encodeURIComponent(order.orderId)}`;
+        window.open(invoiceUrl, '_blank');
+        return;
+      } catch (_) {}
+    }
+
     const isUPI = String(order.paymentMethod || '').toLowerCase().includes('upi') || 
                   String(order.paymentMethod || '').toLowerCase().includes('qr') || 
                   String(order.paymentMethod || '').toLowerCase().includes('online');
