@@ -198,7 +198,7 @@ export default function CartModal({
     }
   }, [currentUser]);
 
-  const getWhatsAppUrl = (order) => {
+  function getWhatsAppUrl(order) {
     if (!order) return '#';
     const whatsappMsg = `*New Order Placed - Friends Mobile Portal*\n\n` +
       `*Order ID:* ${order.orderId}\n` +
@@ -212,9 +212,7 @@ export default function CartModal({
       `*Total Amount:* ₹${order.total}\n` +
       `*Payment Method:* ${order.paymentMethod || 'COD'}`;
     return `https://wa.me/917448578507?text=${encodeURIComponent(whatsappMsg)}`;
-  };
-
-  const [isAutoVerifying, setIsAutoVerifying] = useState(false);
+  }
 
   useEffect(() => {
     let intervalId = null;
