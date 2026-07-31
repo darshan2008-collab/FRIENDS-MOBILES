@@ -24,6 +24,10 @@ export default function CartModal({
   const [checkoutStep, setCheckoutStep] = useState('cart'); // 'cart' | 'checkout' | 'success'
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [placedOrderDetails, setPlacedOrderDetails] = useState(null);
+  const [pendingOrder, setPendingOrder] = useState(null);
+  const [utrNumber, setUtrNumber] = useState('');
+  const [isVerifyingUtr, setIsVerifyingUtr] = useState(false);
+  const [isAutoVerifying, setIsAutoVerifying] = useState(false);
 
   // Lock body scroll and reset step when open/closed
   useEffect(() => {
@@ -42,7 +46,7 @@ export default function CartModal({
     };
   }, [isOpen]);
 
-  const handleDownloadInvoice = (order) => {
+  function handleDownloadInvoice(order) {
     if (!order) return;
     if (order.orderId && typeof window !== 'undefined') {
       try {
@@ -380,7 +384,7 @@ export default function CartModal({
     setCheckoutStep('checkout');
   };
 
-  const triggerWhatsAppOrderNotification = (order) => {
+  function triggerWhatsAppOrderNotification(order) {
     try {
       if (!order) return;
       const orderIdStr = order.orderId || '';
@@ -411,9 +415,9 @@ export default function CartModal({
     } catch (err) {
       console.error("WhatsApp redirect error", err);
     }
-  };
+  }
 
-  const awardUserPointsOnOrder = (order) => {
+  function awardUserPointsOnOrder(order) {
     if (!currentUser || !order) return;
     const earned = Math.floor((order.total || 0) / 10);
     if (earned <= 0) return;
@@ -436,37 +440,35 @@ export default function CartModal({
       onUpdateUserProfile(updatedUser);
     }
     if (addToast) addToast(`🎉 You earned +${earned} Friends Reward Points! Total: ${updatedPts} PTS`, '🎁');
-  };
+  }
 
-  const [pendingOrder, setPendingOrder] = useState(null);
-  const [utrNumber, setUtrNumber] = useState('');
-  const [isVerifyingUtr, setIsVerifyingUtr] = useState(false);
+  function executeOrderPlacement(orderToPlace) {
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderToPlace)
+        });
+        const data = await res.json();
 
-  const executeOrderPlacement = async (orderToPlace) => {
-    try {
-      const res = await fetch(`${API_BASE}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderToPlace)
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        setPlacedOrderDetails(data.order || orderToPlace);
-        awardUserPointsOnOrder(data.order || orderToPlace);
-        triggerWhatsAppOrderNotification(data.order || orderToPlace);
-        if (onOrderPlaced) onOrderPlaced(data.order || orderToPlace);
-        if (onClearCart) onClearCart();
-        setCheckoutStep('success');
-        if (addToast) addToast(`Order #${orderToPlace.orderId} Placed Successfully!`, '✓');
-      } else {
+        if (data.success) {
+          setPlacedOrderDetails(data.order || orderToPlace);
+          awardUserPointsOnOrder(data.order || orderToPlace);
+          triggerWhatsAppOrderNotification(data.order || orderToPlace);
+          if (onOrderPlaced) onOrderPlaced(data.order || orderToPlace);
+          if (onClearCart) onClearCart();
+          setCheckoutStep('success');
+          if (addToast) addToast(`Order #${orderToPlace.orderId} Placed Successfully!`, '✓');
+        } else {
+          executeFailSafeOrder(orderToPlace);
+        }
+      } catch (err) {
+        console.warn("API order placement network fallback:", err);
         executeFailSafeOrder(orderToPlace);
       }
-    } catch (err) {
-      console.warn("API order placement network fallback:", err);
-      executeFailSafeOrder(orderToPlace);
-    }
-  };
+    })();
+  }
 
   const handlePlaceOrderSubmit = async (e) => {
     e.preventDefault();
@@ -559,7 +561,7 @@ export default function CartModal({
     setIsVerifyingUtr(false);
   };
 
-  const executeFailSafeOrder = (order) => {
+  function executeFailSafeOrder(order) {
     setPlacedOrderDetails(order);
     awardUserPointsOnOrder(order);
     triggerWhatsAppOrderNotification(order);
@@ -567,7 +569,7 @@ export default function CartModal({
     if (onClearCart) onClearCart();
     setCheckoutStep('success');
     if (addToast) addToast(`Order #${order.orderId} Placed Successfully!`, '✓');
-  };
+  }
 
   if (!isOpen || typeof document === 'undefined') return null;
   const portalContainer = document.body || document.getElementById('root') || document.documentElement;

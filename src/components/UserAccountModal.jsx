@@ -237,7 +237,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
   const [newAddressText, setNewAddressText] = useState('');
   const [isAddingAddress, setIsAddingAddress] = useState(false);
 
-  const handleDownloadInvoice = (order) => {
+  function handleDownloadInvoice(order) {
     if (!order) return;
     if (order.orderId && typeof window !== 'undefined') {
       try {
