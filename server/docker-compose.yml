@@ -21,8 +21,8 @@ services:
   # 1. Core Store REST API & Auth Microservice
   backend:
     build:
-      context: ..
-      dockerfile: server/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     container_name: friends_mobile_backend
     restart: always
     ports:
@@ -58,8 +58,8 @@ services:
   # 2. Dedicated Mail Microservice (Gmail SMTP & OTP Dispatch)
   backend_mail:
     build:
-      context: ..
-      dockerfile: server/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     container_name: friends_mobile_mail
     command: ["node", "/app/mailServer.js"]
     restart: always
@@ -85,8 +85,8 @@ services:
   # 3. Dedicated Background Worker Process (Database Snapshots & Cloud Backup Sync)
   backend_worker:
     build:
-      context: ..
-      dockerfile: server/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     container_name: friends_mobile_worker
     command: ["node", "/app/worker.js"]
     restart: always
