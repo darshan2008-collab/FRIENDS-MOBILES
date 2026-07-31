@@ -93,6 +93,8 @@ const placeOrderHandler = async (req, res) => {
 
     const orderId = clientOrderId || `FM-ORD-${Math.floor(100000 + Math.random() * 900000)}`;
 
+    const isUpiPayment = String(paymentMethod || '').toUpperCase().includes('UPI') || String(paymentMethod || '').toUpperCase().includes('QR');
+
     const newOrder = {
       orderId,
       createdAt: new Date().toISOString(),
@@ -102,7 +104,8 @@ const placeOrderHandler = async (req, res) => {
       shipping,
       total,
       paymentMethod: paymentMethod || 'Cash on Delivery',
-      status: 'Order Placed',
+      paymentStatus: req.body.paymentStatus || (isUpiPayment ? 'Pending' : 'Pending'),
+      status: req.body.status || (isUpiPayment ? 'Awaiting Payment' : 'Order Placed'),
       estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     };
 

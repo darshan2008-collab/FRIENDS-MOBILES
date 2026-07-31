@@ -64,15 +64,14 @@ router.get('/status/:orderId', async (req, res) => {
     }
 
     const isPaid = (foundOrder.paymentStatus || '').toLowerCase() === 'paid' || 
-                   (foundOrder.status || '').toLowerCase().includes('confirm') ||
-                   (foundOrder.status || '').toLowerCase().includes('placed');
+                   (foundOrder.paymentStatus || '').toLowerCase() === 'captured';
 
     const result = {
       orderId: foundOrder.orderId,
       paymentStatus: isPaid ? 'Paid' : 'Pending',
-      status: foundOrder.status || (isPaid ? 'Order Placed' : 'Awaiting Payment'),
+      status: isPaid ? 'Order Placed' : 'Awaiting Payment',
       transactionUtr: foundOrder.transactionUtr || foundOrder.razorpayPaymentId || null,
-      paidAt: foundOrder.paymentVerifiedAt || foundOrder.updatedAt || null
+      paidAt: foundOrder.paymentVerifiedAt || null
     };
 
     if (isPaid) {
