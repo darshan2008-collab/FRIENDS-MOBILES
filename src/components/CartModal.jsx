@@ -14,6 +14,7 @@ export default function CartModal({
   onClearCart,
   shippingSettings,
   currentUser,
+  userOrders = [],
   onTriggerAuth,
   addToast,
   onOrderPlaced,
