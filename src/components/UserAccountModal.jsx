@@ -12,6 +12,7 @@ import { getProductTitle } from '../data/translations';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export default function UserAccountModal({ isOpen, onClose, user, orders: allOrders, onLogout, addToast, t = (k) => k }) {
+  const isTamil = false;
 
   useEffect(() => {
     if (isOpen && typeof document !== 'undefined') {

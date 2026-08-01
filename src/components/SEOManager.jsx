@@ -21,6 +21,7 @@ export default function SEOManager({
   products = []
 }) {
   useEffect(() => {
+    const isTamil = false;
     const baseUrl = 'https://friendsmobile.in';
 
     // Default Fallback Metadata
