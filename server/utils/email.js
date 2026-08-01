@@ -33,7 +33,6 @@ const createTransporterForCreds = (user, pass, port = 465) => {
   if (!nodemailer) return null;
   const host = getSmtpHost();
 
-  // Create explicit transport with custom TLS options for container compatibility
   return nodemailer.createTransport({
     host: host.includes('gmail') ? 'smtp.gmail.com' : host,
     port: port,
@@ -42,8 +41,8 @@ const createTransporterForCreds = (user, pass, port = 465) => {
     tls: {
       rejectUnauthorized: false
     },
-    connectionTimeout: 3000,
-    socketTimeout: 4000
+    connectionTimeout: 2500,
+    socketTimeout: 3500
   });
 };
 

@@ -352,15 +352,38 @@ router.post('/verify', async (req, res) => {
       }
     }
 
-    // Mark the order as paid in PostgreSQL
+    // Update payment status across memory cache, JSON file storage, and PostgreSQL DB
     if (orderId) {
+      const cleanId = String(orderId).toLowerCase();
+
+      // 1. Update Memory Cache
+      paymentStatusCache.set(cleanId, {
+        orderId,
+        paymentStatus: 'Paid',
+        status: 'Order Placed (Razorpay Paid)',
+        transactionUtr: razorpay_payment_id,
+        paidAt: new Date().toISOString()
+      });
+
+      // 2. Update Local JSON storage
+      const fileOrders = readData(ordersFilePath, []);
+      const idx = fileOrders.findIndex(o => o && o.orderId && o.orderId.toLowerCase() === cleanId);
+      if (idx !== -1) {
+        fileOrders[idx].paymentStatus = 'Paid';
+        fileOrders[idx].status = 'Order Placed';
+        fileOrders[idx].razorpayPaymentId = razorpay_payment_id;
+        fileOrders[idx].paymentVerifiedAt = new Date().toISOString();
+        writeData(ordersFilePath, fileOrders);
+      }
+
+      // 3. Update PostgreSQL DB
       try {
         const Order = require('../models/Order');
         await Order.updateOne(
-          { orderId: orderId },
+          { orderId: { $regex: new RegExp(`^${orderId}$`, 'i') } },
           { 
             $set: { 
-              status: 'Payment Confirmed',
+              status: 'Order Placed',
               paymentStatus: 'Paid',
               razorpayPaymentId: razorpay_payment_id || '',
               paymentVerifiedAt: new Date().toISOString()
@@ -370,6 +393,12 @@ router.post('/verify', async (req, res) => {
       } catch (e) {
         console.error('[Payment Verification DB Error]', e.message);
       }
+
+      // 4. Trigger Real-Time Backup
+      try {
+        const BackupService = require('../services/backupService');
+        BackupService.triggerRealTimeBackup(`razorpay_verified_${orderId}`);
+      } catch (_) {}
     }
 
     res.json({

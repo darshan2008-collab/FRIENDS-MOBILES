@@ -267,21 +267,19 @@ exports.verifyOtp = async (req, res) => {
 };
 
 /**
- * API 3: POST /api/otp/reset-password
+ * API 3: POST /api/otp/reset-password & POST /api/auth/reset-password
  * Password Reset after successful OTP verification
  */
 exports.resetPassword = async (req, res) => {
   try {
-    const { email, otp, resetToken, newPassword } = req.body || {};
+    const { email, otp, resetToken, newPassword, identity, phone } = req.body || {};
 
-    if (!email || !newPassword) {
+    if (!newPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Email address and new password are required.'
+        message: 'New password is required.'
       });
     }
-
-    const cleanEmail = email.toLowerCase().trim();
 
     if (typeof newPassword !== 'string' || newPassword.length < 4) {
       return res.status(400).json({
@@ -290,28 +288,44 @@ exports.resetPassword = async (req, res) => {
       });
     }
 
+    let targetEmail = (email || identity || '').toLowerCase().trim();
+
     // Verify Authorization: Check reset token or OTP match
     let isAuthorized = false;
-    if (resetToken && verifiedTokens.has(cleanEmail)) {
-      const stored = verifiedTokens.get(cleanEmail);
-      if (stored.resetToken === resetToken && stored.expiresAt > Date.now()) {
-        isAuthorized = true;
-        verifiedTokens.delete(cleanEmail);
+
+    if (resetToken) {
+      if (targetEmail && verifiedTokens.has(targetEmail)) {
+        const stored = verifiedTokens.get(targetEmail);
+        if (stored.resetToken === resetToken && stored.expiresAt > Date.now()) {
+          isAuthorized = true;
+          verifiedTokens.delete(targetEmail);
+        }
+      }
+
+      if (!isAuthorized) {
+        for (const [em, stored] of verifiedTokens.entries()) {
+          if (stored.resetToken === resetToken && stored.expiresAt > Date.now()) {
+            isAuthorized = true;
+            targetEmail = em;
+            verifiedTokens.delete(em);
+            break;
+          }
+        }
       }
     }
 
-    if (!isAuthorized && otp && /^\d{6}$/.test(otp.toString().trim())) {
+    if (!isAuthorized && targetEmail && otp && /^\d{6}$/.test(otp.toString().trim())) {
       let record = null;
       try {
-        record = await OtpVerification.findOne({ email: cleanEmail });
+        record = await OtpVerification.findOne({ email: targetEmail });
       } catch (_) {}
-      let memData = inMemoryOtpStore.get(cleanEmail);
+      let memData = inMemoryOtpStore.get(targetEmail);
       const hashToTest = record ? record.otpHash : (memData ? memData.otpHash : null);
 
       if (hashToTest && await bcrypt.compare(otp.toString().trim(), hashToTest)) {
         isAuthorized = true;
         if (record) try { await OtpVerification.deleteOne({ _id: record._id }); } catch (_) {}
-        inMemoryOtpStore.delete(cleanEmail);
+        inMemoryOtpStore.delete(targetEmail);
       }
     }
 
@@ -322,18 +336,30 @@ exports.resetPassword = async (req, res) => {
       });
     }
 
-    // Update Password in User storage
+    // Update Password in User storage (both PostgreSQL database & JSON file fallback)
     const hashedPassword = hashPassword(newPassword);
+
     try {
       await User.updateOne(
-        { email: cleanEmail },
-        { $set: { password: hashedPassword, updatedAt: new Date() } },
-        { upsert: true }
+        { email: targetEmail },
+        { $set: { password: hashedPassword, updatedAt: new Date() } }
       );
     } catch (_) {}
 
+    try {
+      const path = require('path');
+      const { readData, writeData } = require('../utils/db');
+      const usersFilePath = path.join(__dirname, '../data/users.json');
+      const fileUsers = readData(usersFilePath, []);
+      const userIdx = fileUsers.findIndex(u => u && u.email && u.email.toLowerCase().trim() === targetEmail);
+      if (userIdx !== -1) {
+        fileUsers[userIdx].password = hashedPassword;
+        fileUsers[userIdx].updatedAt = new Date().toISOString();
+        writeData(usersFilePath, fileUsers);
+      }
+    } catch (_) {}
 
-    console.log(`[OTP Info] Password Reset completed for ${cleanEmail}`);
+    console.log(`[OTP Info] Password Reset completed for ${targetEmail}`);
 
     return res.status(200).json({
       success: true,
@@ -349,3 +375,6 @@ exports.resetPassword = async (req, res) => {
     });
   }
 };
+
+exports.verifiedTokens = verifiedTokens;
+

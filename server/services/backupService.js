@@ -33,12 +33,12 @@ async function getMergedStoreData() {
   const userMap = new Map();
   (dbUsers || []).forEach(u => {
     if (!u) return;
-    const key = (u.email || u.phone || u.id || '').toString().toLowerCase();
+    const key = (u.email || u.phone || u.id || u._id || '').toString().toLowerCase();
     if (key) userMap.set(key, u.toObject ? u.toObject() : u);
   });
   (fileUsers || []).forEach(u => {
     if (!u) return;
-    const key = (u.email || u.phone || u.id || '').toString().toLowerCase();
+    const key = (u.email || u.phone || u.id || u._id || '').toString().toLowerCase();
     if (key && !userMap.has(key)) userMap.set(key, u);
   });
   const users = Array.from(userMap.values());
@@ -61,12 +61,12 @@ async function getMergedStoreData() {
   const orderMap = new Map();
   (dbOrders || []).forEach(o => {
     if (!o) return;
-    const key = (o.orderId || o.id || '').toString().toLowerCase();
+    const key = (o.orderId || o.id || o._id || '').toString().toLowerCase();
     if (key) orderMap.set(key, o.toObject ? o.toObject() : o);
   });
   (fileOrders || []).forEach(o => {
     if (!o) return;
-    const key = (o.orderId || o.id || '').toString().toLowerCase();
+    const key = (o.orderId || o.id || o._id || '').toString().toLowerCase();
     if (key && !orderMap.has(key)) orderMap.set(key, o);
   });
   const orders = Array.from(orderMap.values());
@@ -75,12 +75,12 @@ async function getMergedStoreData() {
   const complaintMap = new Map();
   (dbComplaints || []).forEach(c => {
     if (!c) return;
-    const key = (c.ticketId || c.id || '').toString();
+    const key = (c.ticketId || c.id || c._id || '').toString();
     if (key) complaintMap.set(key, c.toObject ? c.toObject() : c);
   });
   (fileComplaints || []).forEach(c => {
     if (!c) return;
-    const key = (c.ticketId || c.id || '').toString();
+    const key = (c.ticketId || c.id || c._id || '').toString();
     if (key && !complaintMap.has(key)) complaintMap.set(key, c);
   });
   const complaints = Array.from(complaintMap.values());

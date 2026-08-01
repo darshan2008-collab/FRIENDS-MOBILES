@@ -563,7 +563,7 @@ export default function CartModal({
       paymentMethod: 'UPI QR Code',
       paymentStatus: 'Paid',
       transactionUtr: cleanUtr,
-      cancellationReason: `Verified UPI Payment (UTR: ${cleanUtr})`
+      paymentNotes: `Verified UPI Payment (UTR: ${cleanUtr})`
     };
 
     await executeOrderPlacement(finalizedOrder);

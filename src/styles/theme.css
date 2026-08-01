@@ -1419,7 +1419,7 @@ img {
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(24px) saturate(190%);
   -webkit-backdrop-filter: blur(24px) saturate(190%);
-  z-index: 990;
+  z-index: 899;
   box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.08);
   align-items: center;
   justify-content: space-around;

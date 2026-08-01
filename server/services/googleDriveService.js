@@ -102,7 +102,7 @@ const GoogleDriveService = {
 
               req.on('error', (err) => {
                 console.error('[Google Drive Webhook Error]', err.message);
-                resolve({ success: true, localOnly: true, filename });
+                resolve(null);
               });
 
               req.write(postData);
@@ -110,7 +110,10 @@ const GoogleDriveService = {
             });
           };
 
-          return await sendWebhookRequest(webhookUrl);
+          const webhookRes = await sendWebhookRequest(webhookUrl);
+          if (webhookRes && webhookRes.success) {
+            return webhookRes;
+          }
         } catch (e) {
           console.error('[Google Drive Webhook Parsing Error]', e.message);
         }

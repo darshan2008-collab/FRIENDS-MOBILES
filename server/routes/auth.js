@@ -323,66 +323,6 @@ router.post('/verify-phone', resetLimiter, async (req, res) => {
   }
 });
 
-// POST /api/auth/reset-password
-router.post('/reset-password', resetLimiter, async (req, res) => {
-  try {
-    const { phone, email, identity, newPassword, resetToken } = req.body;
-
-    if (!newPassword || newPassword.length < 4) {
-      return res.status(400).json({ success: false, message: 'New password must be at least 4 characters long' });
-    }
-
-    // Check reset token if provided
-    let verifiedSession = null;
-    if (resetToken) {
-      verifiedSession = resetTokenCache.get(resetToken);
-      if (!verifiedSession || Date.now() > verifiedSession.expiresAt) {
-        return res.status(403).json({ success: false, message: 'Password reset session has expired or is invalid. Please request a new OTP.' });
-      }
-    }
-
-    const targetIdentity = identity || email || phone || (verifiedSession ? (verifiedSession.phone || verifiedSession.email) : null);
-    if (!targetIdentity) {
-      return res.status(400).json({ success: false, message: 'Phone number or email is required to identify account' });
-    }
-
-    const cleanPhone = normalizePhone(targetIdentity);
-    const cleanEmail = targetIdentity.includes('@') ? targetIdentity.toLowerCase().trim() : null;
-
-    const users = await getUsersAsync();
-    const user = users.find(u =>
-      (verifiedSession && verifiedSession.userId && u.id === verifiedSession.userId) ||
-      (cleanPhone && normalizePhone(u.phone) === cleanPhone) ||
-      (cleanEmail && u.email && u.email.toLowerCase().trim() === cleanEmail)
-    );
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'No account found with this registered phone or email' });
-    }
-
-    const updatedUser = { 
-      ...user, 
-      password: hashPassword(newPassword), 
-      otpCode: null, 
-      otpExpires: null,
-      updatedAt: new Date().toISOString() 
-    };
-    await saveUserAsync(updatedUser);
-
-    // Consume reset token
-    if (resetToken) {
-      resetTokenCache.delete(resetToken);
-    }
-
-    res.json({
-      success: true,
-      message: 'Password reset successfully! Please log in with your new password.'
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Password reset failed', error: err.message });
-  }
-});
-
 // PUT /api/auth/update-profile
 router.put('/update-profile', async (req, res) => {
   try {
