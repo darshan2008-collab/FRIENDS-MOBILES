@@ -1,18 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Wrench, Smartphone, RefreshCw, Image, Printer, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function ServicesSection({ t = (k) => k, language = 'en' }) {
+export default function ServicesSection({ t = (k) => k }) {
   const scrollContainerRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
 
-  const services = language === 'ta' ? [
-    { title: '30-நிமிட மொபைல் சர்வீஸ்', desc: 'விரைவு & நம்பகமான சேவை', icon: Wrench },
-    { title: 'ஒரிஜினல் டிஸ்பிளே மாற்றுதல்', desc: 'உயர்தர டிஸ்பிளே', icon: Smartphone },
-    { title: 'மென்பொருள் அப்டேட்', desc: 'அனைத்து போன்களுக்கும்', icon: RefreshCw },
-    { title: 'போட்டோ பிரேம் தயாரிப்பு', desc: 'கஸ்டம் பிரேம்கள்', icon: Image },
-    { title: '3D போட்டோ கவர் பிரிண்டிங்', desc: 'உங்கள் விருப்ப டிசைன்', icon: Printer },
-    { title: 'மதுரை & கரூர் ஷோரூம்', desc: 'நேரில் வருகை தாருங்கள்', icon: MapPin },
-  ] : [
+  const services = [
     { title: 'Mobile Repair', desc: 'Quick & Reliable', icon: Wrench },
     { title: 'Screen Replacement', desc: 'Best Quality', icon: Smartphone },
     { title: 'Software Update', desc: 'All Brands', icon: RefreshCw },

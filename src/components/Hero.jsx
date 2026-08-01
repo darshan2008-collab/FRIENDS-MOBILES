@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
+export default function Hero({ theme, slides, t = (k) => k }) {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const isDark = theme === 'dark';
 
@@ -97,7 +97,7 @@ export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
               border: '1px solid rgba(255, 85, 0, 0.3)',
               boxShadow: '0 2px 8px rgba(255, 85, 0, 0.12)'
             }}>
-              <Sparkles size={15} style={{ color: '#FF5500' }} /> {language === 'ta' ? 'பிரண்ட்ஸ் மொபைல் ஷோரூம் 🖐️' : (activeSlide.tag || "WELCOME TO FRIENDS MOBILE")}
+              <Sparkles size={15} style={{ color: '#FF5500' }} /> {activeSlide.tag || "WELCOME TO FRIENDS MOBILE"}
             </span>
           </div>
 
@@ -107,11 +107,11 @@ export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
             lineHeight: '1.2'
           }}>
             <span className="hero-heading-white" style={{ fontWeight: '900', fontSize: 'inherit' }}>
-              {language === 'ta' ? 'மொபைல் போன் அக்சஸரீஸ் &' : (activeSlide.titleWhite || "Your One Stop")}
+              {activeSlide.titleWhite || "Your One Stop"}
             </span>
             <br />
             <span className="hero-heading-gradient" style={{ fontWeight: '900', fontSize: 'inherit' }}>
-              {language === 'ta' ? '3D போட்டோ கவர் ஷாப் 🚀' : (activeSlide.titleGradient || "Mobile Destination")}
+              {activeSlide.titleGradient || "Mobile Destination"}
             </span>
           </h1>
 
@@ -122,19 +122,19 @@ export default function Hero({ theme, slides, t = (k) => k, language = 'en' }) {
             marginBottom: '20px',
             color: 'var(--text-secondary)'
           }}>
-            {language === 'ta' ? 'போட், மி, ரியல்மி, போர்ட்ரானிக்ஸ் ஒரிஜினல் பொருட்கள், 3D போட்டோ கவர்கள் & போட்டோ பிரேம்கள்.' : (activeSlide.desc || "Premium Accessories, Custom Covers & Wall Photo Frames Crafted for Your Style.")}
+            {activeSlide.desc || "Premium Accessories, Custom Covers & Wall Photo Frames Crafted for Your Style."}
           </p>
 
           <div className="hero-buttons">
             <a href={activeSlide.btnLink} className="btn btn-primary btn-sm">
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                {language === 'ta' ? (activeSlide.btnText === 'CUSTOMIZE COVER' ? 'போட்டோ கவர் டிசைன்' : activeSlide.btnText === 'CREATE FRAME' ? 'போட்டோ பிரேம்' : activeSlide.btnText === 'EXPLORE OFFERS' ? 'சலுகைகள் பார்க்க' : 'இப்போதே வாங்க') : activeSlide.btnText}
+                {activeSlide.btnText}
                 <ArrowRight size={16} style={{ flexShrink: 0 }} />
               </span>
             </a>
             <a href="#products" className="btn btn-secondary btn-sm">
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                {language === 'ta' ? 'பொருட்களை பார்க்க' : 'EXPLORE STORE'}
+                EXPLORE STORE
               </span>
             </a>
           </div>

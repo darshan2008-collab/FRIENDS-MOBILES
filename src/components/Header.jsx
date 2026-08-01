@@ -1,12 +1,10 @@
 import React from 'react';
-import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones, Languages } from 'lucide-react';
+import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
 export default function Header({ 
   theme, 
   toggleTheme, 
-  language = 'en',
-  toggleLanguage,
   t = (k) => k,
   cartCount, 
   wishlistCount, 
@@ -61,31 +59,8 @@ export default function Header({
               </button>
             </div>
 
-            {/* Actions, Language Switcher & Theme Toggle */}
+            {/* Actions & Theme Toggle */}
             <div className="header-actions">
-              {/* Language Switcher Button (Visible in Mobile & Desktop View) */}
-              <button 
-                className="lang-toggle-btn"
-                onClick={() => toggleLanguage && toggleLanguage()}
-                title={language === 'en' ? "Switch to Tamil / தமிழ்" : "Switch to English"}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '5px 9px',
-                  borderRadius: '20px',
-                  border: '1px solid #FF5500',
-                  background: 'rgba(255, 85, 0, 0.1)',
-                  color: '#FF5500',
-                  fontWeight: 'bold',
-                  fontSize: '0.74rem',
-                  cursor: 'pointer'
-                }}
-              >
-                <Languages size={17} />
-                <span>{language === 'en' ? 'தமிழ்' : 'EN'}</span>
-              </button>
-
               <button className="theme-toggle-btn" onClick={toggleTheme} title="Switch Light/Dark Theme">
                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
               </button>

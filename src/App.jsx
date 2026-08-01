@@ -112,52 +112,20 @@ const initialProducts = [
 
 export default function App() {
   const [theme, setTheme] = useState('light');
-  const [language, setLanguage] = useState(() => {
-    try {
-      return localStorage.getItem('fm_language') || 'en';
-    } catch {
-      return 'en';
-    }
-  });
 
-  // GOD MODE LEVEL SEO OPTIMIZATION FOR ENGLISH & TAMIL
+  // SEO Document Title & Description Setup
   useEffect(() => {
-    if (language === 'ta') {
-      document.title = 'பிரண்ட்ஸ் மொபைல் | மொபைல் அசெஸரீஸ், சார்ஜர்கள், 3D கஸ்டம் கவர் & பிரேம்கள் ஆன்லைன் ஷாப்பிங்';
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute('content', 'பிரண்ட்ஸ் மொபைல் ஆன்லைன் கடையில் 100% ஒரிஜினல் மொபைல் அசெஸரீஸ், அதிவேக சார்ஜர்கள், புளூடூத் இயர்பட்ஸ், பவர் பேங்க் மற்றும் 3D போட்டோ கஸ்டமைஸ் பேக் கவர்களை வாங்கவும். 24/7 குரல் உதவி மையம் & எக்ஸ்பிரஸ் டெலிவரி.');
-      }
-      const ogTitle = document.querySelector('meta[property="og:title"]');
-      if (ogTitle) ogTitle.setAttribute('content', 'பிரண்ட்ஸ் மொபைல் | மொபைல் அசெஸரீஸ் & 3D போட்டோ கவர் ஆன்லைன் ஷாப்பிங்');
-      document.documentElement.lang = 'ta-IN';
-    } else {
-      document.title = 'FRIENDS MOBILE - Customized Back Covers, Phone Cases & Mobile Accessories Store India';
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute('content', 'Shop 3D Customized Phone Back Covers, iPhone Cases, boAt Bluetooth Earbuds, Fast Chargers, Power Banks & Custom Photo Frames at FRIENDS MOBILE. Best Prices, Premium Quality & Express Cash on Delivery Across India.');
-      }
-      const ogTitle = document.querySelector('meta[property="og:title"]');
-      if (ogTitle) ogTitle.setAttribute('content', 'FRIENDS MOBILE - Custom Phone Cases & Accessories Store India');
-      document.documentElement.lang = 'en-IN';
+    document.title = 'FRIENDS MOBILE - Customized Back Covers, Phone Cases & Mobile Accessories Store India';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', 'Shop 3D Customized Phone Back Covers, iPhone Cases, boAt Bluetooth Earbuds, Fast Chargers, Power Banks & Custom Photo Frames at FRIENDS MOBILE. Best Prices, Premium Quality & Express Cash on Delivery Across India.');
     }
-  }, [language]);
-
-  const toggleLanguage = (lang) => {
-    const targetLang = lang || (language === 'en' ? 'ta' : 'en');
-    setLanguage(targetLang);
-    try {
-      localStorage.setItem('fm_language', targetLang);
-    } catch (_) {}
-    if (addToast) {
-      addToast(targetLang === 'ta' ? 'தமிழ் மொழி தேர்வு செய்யப்பட்டது 🌐' : 'English language selected 🌐', '🌐');
-    }
-  };
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', 'FRIENDS MOBILE - Custom Phone Cases & Accessories Store India');
+    document.documentElement.lang = 'en-IN';
+  }, []);
 
   const t = (key) => {
-    if (translations[language] && translations[language][key]) {
-      return translations[language][key];
-    }
     return (translations.en && translations.en[key]) || key;
   };
 
@@ -817,14 +785,11 @@ export default function App() {
         isCustomCoverOpen={isCustomCoverOpen}
         isCustomFrameOpen={isCustomFrameOpen}
         isShopOpen={isShopOpen}
-        language={language}
         products={products}
       />
       <Header 
         theme={theme}
         toggleTheme={toggleTheme}
-        language={language}
-        toggleLanguage={toggleLanguage}
         t={t}
         cartCount={cartCount}
         wishlistCount={wishlist.length}
@@ -847,8 +812,6 @@ export default function App() {
       <MobileDrawer 
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        language={language}
-        toggleLanguage={toggleLanguage}
         t={t}
         currentUser={currentUser}
         onOpenAuth={() => {
@@ -860,13 +823,12 @@ export default function App() {
       />
 
       <main>
-        <Hero theme={theme} slides={heroSlides} t={t} language={language} />
+        <Hero theme={theme} slides={heroSlides} t={t} />
         <CategoryGrid onOpenShop={handleOpenShop} t={t} />
         <PromoBanners 
           onOpenCustomCover={() => setIsCustomCoverOpen(true)}
           onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
           t={t}
-          language={language}
         />
         <BrandMarquee />
         <TrendingProducts 
@@ -878,12 +840,11 @@ export default function App() {
           onSelectProduct={handleSelectProduct}
           onOpenShop={handleOpenShop}
           t={t}
-          language={language}
         />
-        <ServicesSection t={t} language={language} />
+        <ServicesSection t={t} />
       </main>
 
-      <Footer language={language} toggleLanguage={toggleLanguage} t={t} />
+      <Footer t={t} />
 
       {selectedProduct && (
         <ProductDetailModal 
@@ -894,7 +855,6 @@ export default function App() {
           onToggleWishlist={handleToggleWishlist}
           onAddToCart={handleAddToCart}
           onSelectProduct={handleSelectProduct}
-          language={language}
           t={t}
         />
       )}
@@ -911,7 +871,6 @@ export default function App() {
           initialCategory={shopCategory}
           cartCount={cartCount}
           onOpenCart={handleOpenCartClick}
-          language={language}
           t={t}
         />
       )}
@@ -957,7 +916,6 @@ export default function App() {
           onLogout={handleLogout}
           onUpdateUserProfile={handleUpdateUserProfile}
           addToast={addToast}
-          language={language}
           t={t}
         />
       )}
@@ -969,7 +927,6 @@ export default function App() {
           onAddToCart={handleAddToCart}
           addToast={addToast}
           t={t}
-          language={language}
         />
       )}
 
@@ -980,7 +937,6 @@ export default function App() {
           onAddToCart={handleAddToCart}
           addToast={addToast}
           t={t}
-          language={language}
         />
       )}
 
@@ -994,11 +950,11 @@ export default function App() {
           onClearCart={handleClearCart}
           shippingSettings={shippingSettings}
           currentUser={currentUser}
+          userOrders={orders}
           onTriggerAuth={triggerCompulsoryAuth}
           addToast={addToast}
           onOrderPlaced={handleOrderPlaced}
           onUpdateUserProfile={handleUpdateUserProfile}
-          language={language}
           t={t}
         />
       )}
@@ -1007,8 +963,6 @@ export default function App() {
         cartCount={cartCount}
         wishlistCount={wishlist.length}
         currentUser={currentUser}
-        language={language}
-        toggleLanguage={toggleLanguage}
         t={t}
         onOpenAuth={() => {
           setAuthRedirectMessage('');
@@ -1031,7 +985,6 @@ export default function App() {
           orders={orders}
           products={products}
           currentUser={currentUser}
-          language={language}
           t={t}
           onOpenCustomCover={() => setIsCustomCoverOpen(true)}
           onOpenCustomFrame={() => setIsCustomFrameOpen(true)}

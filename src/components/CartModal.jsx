@@ -18,7 +18,6 @@ export default function CartModal({
   addToast,
   onOrderPlaced,
   onUpdateUserProfile,
-  language = 'en',
   t = (k) => k
 }) {
   const [checkoutStep, setCheckoutStep] = useState('cart'); // 'cart' | 'checkout' | 'success'
@@ -298,46 +297,60 @@ export default function CartModal({
     }
 
     // 2. Pattern Match for dynamic generated prefixes (e.g. FM-10OFF-XXXX, FM-50OFF-XXXX)
-    if (code.includes('10OFF') || code === 'FRIENDS10') {
+    if (code.startsWith('FM-10OFF-')) {
       if (currentSubtotal < 299) {
-        if (addToast) addToast('10% OFF Redeem Code requires a minimum order of ₹299.', '⚠️');
+        if (addToast) addToast('Coupon FM-10OFF requires minimum order of ₹299.', '⚠️');
         return;
       }
-      setAppliedCoupon({ code, discountPct: 10, flatDiscount: 0, title: '10% OFF Redeem Coupon' });
-      if (addToast) addToast(`Applied 10% OFF Redeem Code ${code}!`, '🎉');
-    } else if (code.includes('15OFF') || code === 'FRIENDS15') {
+      setAppliedCoupon({ code, discountPct: 10, title: '10% OFF Welcome Coupon' });
+      if (addToast) addToast('Applied 10% OFF Welcome Coupon!', '🎉');
+      return;
+    }
+    if (code.startsWith('FM-50OFF-')) {
       if (currentSubtotal < 499) {
-        if (addToast) addToast('15% OFF Redeem Code requires a minimum order of ₹499.', '⚠️');
+        if (addToast) addToast('Coupon FM-50OFF requires minimum order of ₹499.', '⚠️');
         return;
       }
-      setAppliedCoupon({ code, discountPct: 15, flatDiscount: 0, title: '15% OFF Redeem Coupon' });
-      if (addToast) addToast(`Applied 15% OFF Redeem Code ${code}!`, '🎉');
-    } else if (code.includes('20OFF') || code === 'FRIENDS20') {
+      setAppliedCoupon({ code, flatDiscount: 50, title: '₹50 OFF Flat Discount' });
+      if (addToast) addToast('Applied ₹50 Flat Discount Coupon!', '🎉');
+      return;
+    }
+    if (code.startsWith('FM-100OFF-')) {
       if (currentSubtotal < 799) {
-        if (addToast) addToast('20% OFF Redeem Code requires a minimum order of ₹799.', '⚠️');
+        if (addToast) addToast('Coupon FM-100OFF requires minimum order of ₹799.', '⚠️');
         return;
       }
-      setAppliedCoupon({ code, discountPct: 20, flatDiscount: 0, title: '20% OFF Redeem Coupon' });
-      if (addToast) addToast(`Applied 20% OFF Redeem Code ${code}!`, '🎉');
-    } else if (code.includes('SAVE200') || code.includes('200OFF') || code === 'SUPER200') {
+      setAppliedCoupon({ code, flatDiscount: 100, title: '₹100 OFF Special Coupon' });
+      if (addToast) addToast('Applied ₹100 Flat Discount Coupon!', '🎉');
+      return;
+    }
+    if (code.startsWith('FM-200OFF-')) {
       if (currentSubtotal < 999) {
-        if (addToast) addToast('Flat ₹200 OFF Redeem Code requires a minimum order of ₹999.', '⚠️');
+        if (addToast) addToast('Coupon FM-200OFF requires minimum order of ₹999.', '⚠️');
         return;
       }
-      setAppliedCoupon({ code, discountPct: 0, flatDiscount: 200, title: 'Flat ₹200 OFF Redeem Coupon' });
-      if (addToast) addToast(`Applied Flat ₹200 OFF Redeem Code ${code}!`, '🎉');
-    } else if (code.includes('50OFF') || code === 'MEGA50') {
+      setAppliedCoupon({ code, flatDiscount: 200, title: '₹200 OFF Mega Coupon' });
+      if (addToast) addToast('Applied ₹200 Flat Discount Coupon!', '🎉');
+      return;
+    }
+    if (code.startsWith('FM-300OFF-')) {
       if (currentSubtotal < 1499) {
-        if (addToast) addToast('50% OFF Mega Redeem Code requires a minimum order of ₹1,499.', '⚠️');
+        if (addToast) addToast('Coupon FM-300OFF requires minimum order of ₹1499.', '⚠️');
         return;
       }
-      setAppliedCoupon({ code, discountPct: 50, flatDiscount: 0, title: '50% OFF Mega Redeem Coupon' });
-      if (addToast) addToast(`Applied 50% OFF Mega Redeem Code ${code}!`, '🎉');
+      setAppliedCoupon({ code, flatDiscount: 300, title: '₹300 OFF Festival Coupon' });
+      if (addToast) addToast('Applied ₹300 Flat Discount Coupon!', '🎉');
+      return;
+    }
+
+    if (code === 'FRIENDS10') {
+      setAppliedCoupon({ code: 'FRIENDS10', discountPct: 10, title: '10% OFF First Purchase' });
+      if (addToast) addToast('Applied FRIENDS10 - 10% OFF!', '🎉');
     } else if (code === 'FREESHIP') {
-      setAppliedCoupon({ code, discountPct: 0, flatDiscount: 0, isFreeShip: true, title: 'Free Express Shipping' });
-      if (addToast) addToast('Applied Free Express Shipping Coupon!', '🎉');
+      setAppliedCoupon({ code: 'FREESHIP', isFreeShip: true, title: 'FREE Express Delivery' });
+      if (addToast) addToast('Applied FREESHIP - FREE Shipping Unlocked!', '🎉');
     } else {
-      if (addToast) addToast('Invalid or expired redeem code.', '❌');
+      if (addToast) addToast(`Invalid Coupon Code "${code}". Please check your code.`, '❌');
     }
   }
 
@@ -359,17 +372,33 @@ export default function CartModal({
   }
 
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
-  // Detect First Order for the User (0 previous orders = 1-TIME FREE Delivery for new account!)
-  const userOrdersCount = Array.isArray(currentUser?.orders) ? currentUser.orders.length : 0;
-  const isFirstOrder = currentUser ? userOrdersCount === 0 : false;
 
-  const freeThreshold = 1000;
-  const standardFee = 70; // Fixed ₹70 charge below ₹1,000 for returning accounts
+  // Detect First Order for User by checking order history by phone/email/userOrders list
+  const userPhone = currentUser?.phone ? String(currentUser.phone).replace(/\D/g, '') : '';
+  const userEmail = currentUser?.email ? String(currentUser.email).toLowerCase().trim() : '';
+
+  const matchedPreviousOrders = (Array.isArray(userOrders) ? userOrders : []).filter(o => {
+    if (!o) return false;
+    const oPhone = o.customer?.phone ? String(o.customer.phone).replace(/\D/g, '') : '';
+    const oEmail = o.customer?.email ? String(o.customer.email).toLowerCase().trim() : '';
+    const isPhoneMatch = userPhone && oPhone && (userPhone === oPhone || oPhone.endsWith(userPhone) || userPhone.endsWith(userPhone));
+    const isEmailMatch = userEmail && oEmail && (userEmail === oEmail);
+    return isPhoneMatch || isEmailMatch;
+  });
+
+  const profileOrdersCount = Array.isArray(currentUser?.orders) ? currentUser.orders.length : 0;
+  const previousOrdersCount = Math.max(matchedPreviousOrders.length, profileOrdersCount);
+
+  // 1st Order offer applies ONLY when previous order count is 0
+  const isFirstOrder = currentUser ? (previousOrdersCount === 0) : false;
+
+  const freeThreshold = shippingSettings?.freeShippingThreshold || 1000;
+  const standardFee = shippingSettings?.standardShippingFee || 49;
   const isFreeShipping = isFirstOrder || (appliedCoupon && appliedCoupon.isFreeShip) || discountedSubtotal >= freeThreshold;
   const shippingFeeVal = isFreeShipping ? 0 : standardFee;
   const grandTotal = discountedSubtotal + shippingFeeVal;
   const amountToFreeShipping = Math.max(0, freeThreshold - discountedSubtotal);
-  const progressPercent = Math.min(100, Math.round((discountedSubtotal / freeThreshold) * 100));
+  const progressPercent = isFirstOrder ? 100 : Math.min(100, Math.round((discountedSubtotal / freeThreshold) * 100));
 
   function handleStartCheckout() {
     if (!currentUser) {
@@ -690,7 +719,11 @@ export default function CartModal({
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '6px' }}>
                       <span style={{ fontWeight: '700' }}>
-                        {isFreeShipping ? '🎉 Congratulations! You unlocked FREE Shipping' : `Add ₹${amountToFreeShipping} more for FREE Express Delivery`}
+                        {isFirstOrder 
+                          ? '🎉 1st Order Special Offer: FREE Shipping Unlocked!' 
+                          : (isFreeShipping 
+                              ? '🎉 Congratulations! You unlocked FREE Shipping' 
+                              : `Add ₹${amountToFreeShipping} more for FREE Express Delivery (Free Shipping Above ₹${freeThreshold})`)}
                       </span>
                       <span style={{ color: '#FF5500', fontWeight: '800' }}>{progressPercent}%</span>
                     </div>
@@ -736,7 +769,7 @@ export default function CartModal({
 
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <h4 style={{ margin: '0 0 4px 0', fontSize: '0.84rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {getProductTitle(item, language)}
+                            {item.title || item.name || 'Product'}
                           </h4>
                           <div style={{ fontSize: '0.82rem', fontWeight: '800', color: '#FF5500' }}>
                             ₹{item.price.toLocaleString('en-IN')}
@@ -877,7 +910,9 @@ export default function CartModal({
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
                       <span>Delivery Charge:</span>
                       <strong style={{ color: isFreeShipping ? '#22c55e' : 'var(--text-primary)' }}>
-                        {isFreeShipping ? (isFirstOrder ? '🎉 FREE (1st Order Offer!)' : 'FREE') : `₹${shippingFeeVal}`}
+                        {isFreeShipping 
+                          ? (isFirstOrder ? '🎉 FREE (1st Order Offer!)' : 'FREE (Above ₹1,000)') 
+                          : `₹${shippingFeeVal}`}
                       </strong>
                     </div>
 

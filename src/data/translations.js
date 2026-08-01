@@ -1,256 +1,31 @@
-// FRIENDS MOBILE - English ↔ Tamil Comprehensive Translation Dictionary
-// தமிழ் மற்றும் ஆங்கில மொழிபெயர்ப்பு தரவுத்தளம்
+// FRIENDS MOBILE - English Standard Translation Dictionary
 
-export const productTranslations = {
-  'boAt Airdopes 141 Bluetooth Earbuds': 'போட் ஏர்டோப்ஸ் 141 புளூடூத் இயர்பட்ஸ்',
-  'Mi 20000mAh Power Bank 3i': 'மி 20000mAh பாஸ்ட் பவர் பேங்க் 3i',
-  'Portronics 20W Fast Charger': 'போர்ட்ரானிக்ஸ் 20W வேகமான சார்ஜர்',
-  'Realme Wireless 2S Neckband': 'ரியல்மி வயர்லெஸ் 2S நெக்பேண்ட்',
-  'Customized Back Cover': '3D கஸ்டமைஸ் பேக் கவர்',
-  'Personalized Wooden Frame': 'கஸ்டமைஸ் மர போட்டோ பிரேம்',
-  'Premium Glass Frame': 'பிரீமியம் அக்ரிலிக் கிளாஸ் பிரேம்',
-  'Portronics Bridge Y USB 3.0 to Type C OTG Adaptor': 'போர்ட்ரானிக்ஸ் பாஸ்ட் USB 3.0 டைப்-சி OTG அடாப்டர்',
-  'mobile water proof cover': 'மொபைல் வாட்டர்ப்ரூப் நீர்ப்புகா கவர்',
-  'Mobile Waterproof Cover': 'மொபைல் வாட்டர்ப்ரூப் நீர்ப்புகா கவர்',
-  'boAt Airdopes 141': 'போட் ஏர்டோப்ஸ் 141 புளூடூத் இயர்பட்ஸ்',
-  'Portronics OTG Adapter': 'போர்ட்ரானிக்ஸ் OTG அடாப்டர்'
-};
-
-const brandMap = {
-  'boat': 'போட்',
-  'mi': 'மி',
-  'xiaomi': 'சியோமி',
-  'realme': 'ரியல்மி',
-  'portronics': 'போர்ட்ரானிக்ஸ்',
-  'apple': 'ஆப்பிள்',
-  'iphone': 'ஐபோன்',
-  'samsung': 'சாம்சங்',
-  'oneplus': 'ஒன்பிளஸ்',
-  'vivo': 'விவோ',
-  'oppo': 'ஓப்போ',
-  'poco': 'போகோ',
-  'nokia': 'நோக்கியா',
-  'motorola': 'மோட்டோரோலா',
-  'moto': 'மோட்டோ',
-  'redmi': 'ரெட்மி',
-  'infinix': 'இன்பினிக்ஸ்',
-  'techno': 'டெக்னோ',
-  'tecno': 'டெக்னோ',
-  'noise': 'நாய்ஸ்',
-  'fire-boltt': 'பயர்-போல்ட்',
-  'fireboltt': 'பயர்-போல்ட்',
-  'boult': 'போல்ட்',
-  'zebronics': 'ஜெப்ரானிக்ஸ்',
-  'amane': 'அமேன்',
-  'ptron': 'பிட்ரான்',
-  'pTron': 'பிட்ரான்'
-};
-
-const termMap = {
-  'airdopes': 'ஏர்டோப்ஸ்',
-  'earbuds': 'இயர்பட்ஸ்',
-  'earphone': 'இயர்போன்',
-  'earphones': 'இயர்போன்கள்',
-  'headphone': 'ஹெட்போன்',
-  'headphones': 'ஹெட்போன்கள்',
-  'tws': 'TWS',
-  'bluetooth': 'புளூடூத்',
-  'wireless': 'வயர்லெஸ்',
-  'neckband': 'நெக்பேண்ட்',
-  'power': 'பவர்',
-  'bank': 'பேங்க்',
-  'powerbank': 'பவர் பேங்க்',
-  'charger': 'சார்ஜர்',
-  'charging': 'சார்ஜிங்',
-  'battery': 'பேட்டரி',
-  'fast': 'வேகமான',
-  'quick': 'விரைவு',
-  'flash': 'பிளாஷ்',
-  'super': 'சூப்பர்',
-  'speed': 'ஸ்பீட்',
-  'adapter': 'அடாப்டர்',
-  'adaptor': 'அடாப்டர்',
-  'cable': 'கேபிள்',
-  'otg': 'OTG',
-  'type-c': 'டைப்-சி',
-  'type': 'டைப்',
-  'usb': 'USB',
-  'bridge': 'பிரிட்ஜ்',
-  'customized': 'கஸ்டமைஸ்',
-  'custom': 'கஸ்டமைஸ்',
-  'personalized': 'கஸ்டமைஸ்',
-  'back': 'பேக்',
-  'cover': 'கவர்',
-  'covers': 'கவர்கள்',
-  'case': 'கேஸ்',
-  'cases': 'கேஸ்கள்',
-  'pouch': 'பவுச்',
-  'mobile': 'மொபைல்',
-  'phone': 'போன்',
-  'waterproof': 'வாட்டர்ப்ரூப் நீர்ப்புகா',
-  'water': 'நீர்ப்புகா',
-  'proof': 'கவர்',
-  'photo': 'போட்டோ',
-  'frame': 'பிரேம்',
-  'frames': 'பிரேம்கள்',
-  'wooden': 'மர',
-  'glass': 'கிளாஸ்',
-  'acrylic': 'அக்ரிலிக்',
-  'premium': 'பிரீமியம்',
-  'original': 'அசல்',
-  'genuine': 'அசல்',
-  'tempered': 'டெம்பர்டு',
-  'screen': 'ஸ்கிரீன்',
-  'guard': 'கார்டு',
-  'protector': 'பாதுகாப்பு',
-  'display': 'டிஸ்பிளே',
-  'speaker': 'ஸ்பீக்கர்',
-  'sound': 'சவுண்ட்',
-  'audio': 'ஆடியோ',
-  'bass': 'பேஸ்',
-  'stereo': 'ஸ்டீரியோ',
-  'smartwatch': 'ஸ்மார்ட் வாட்ச்',
-  'watch': 'வாட்ச்',
-  'stand': 'ஸ்டாண்ட்',
-  'holder': 'ஹோல்டர்',
-  'mount': 'மவுண்ட்',
-  'car': 'கார்',
-  'pro': 'புரோ',
-  'max': 'மேக்ஸ்',
-  'plus': 'பிளஸ்',
-  'mini': 'மினி',
-  'ultra': 'அல்ட்ரா',
-  'light': 'லைட்',
-  'clear': 'கிளியர்',
-  'transparent': 'வெளிப்படையான',
-  'black': 'கருப்பு',
-  'white': 'வெள்ளை',
-  'blue': 'நீலம்',
-  'red': 'சிவப்பு',
-  'green': 'பச்சை',
-  'gold': 'தங்கம்',
-  'silver': 'வெள்ளி'
-};
+export const productTranslations = {};
 
 export const autoTranslateToTamil = (text) => {
-  if (!text || typeof text !== 'string') return '';
-  const trimmed = text.trim();
-  if (!trimmed) return '';
-
-  if (productTranslations[trimmed]) {
-    return productTranslations[trimmed];
-  }
-
-  // Case insensitive dictionary check
-  const matchKey = Object.keys(productTranslations).find(
-    k => k.toLowerCase() === trimmed.toLowerCase()
-  );
-  if (matchKey) return productTranslations[matchKey];
-
-  // Tokenize and translate dynamic words
-  const words = trimmed.split(/\s+/);
-  const translated = words.map(word => {
-    const cleanWord = word.toLowerCase().replace(/[^a-z0-9\-]/g, '');
-    if (brandMap[cleanWord]) return brandMap[cleanWord];
-    if (termMap[cleanWord]) return termMap[cleanWord];
-    return word;
-  });
-
-  return translated.join(' ');
+  return text || '';
 };
 
 export const getShortTamilName = (englishTitle) => {
-  if (!englishTitle || typeof englishTitle !== 'string') return '';
-  const lower = englishTitle.toLowerCase().trim();
-
-  if (lower.includes('airdopes') || lower.includes('airpods')) {
-    if (lower.includes('boat')) return 'போட் ஏர்டோப்ஸ்';
-    return 'இயர்பட்ஸ்';
-  }
-  if (lower.includes('power bank') || lower.includes('powerbank')) {
-    if (lower.includes('mi')) return 'மி பவர் பேங்க்';
-    return 'பவர் பேங்க்';
-  }
-  if (lower.includes('neckband')) {
-    if (lower.includes('realme')) return 'ரியல்மி நெக்பேண்ட்';
-    if (lower.includes('boat')) return 'போட் நெக்பேண்ட்';
-    return 'நெக்பேண்ட்';
-  }
-  if (lower.includes('charger')) {
-    if (lower.includes('portronics')) return 'போர்ட்ரானிக்ஸ் சார்ஜர்';
-    return 'சார்ஜர்';
-  }
-  if (lower.includes('customized back cover') || lower.includes('custom cover') || lower.includes('custom case') || (lower.includes('cover') && lower.includes('custom'))) {
-    return '3D போட்டோ கவர்';
-  }
-  if (lower.includes('waterproof') || lower.includes('water proof')) {
-    return 'வாட்டர்ப்ரூப் கவர்';
-  }
-  if (lower.includes('otg') || lower.includes('adaptor') || lower.includes('adapter')) {
-    if (lower.includes('portronics')) return 'போர்ட்ரானிக்ஸ் OTG';
-    return 'OTG அடாப்டர்';
-  }
-  if (lower.includes('photo frame') || lower.includes('frame')) {
-    if (lower.includes('wooden')) return 'மர போட்டோ பிரேம்';
-    if (lower.includes('glass') || lower.includes('acrylic')) return 'கிளாஸ் போட்டோ பிரேம்';
-    return 'போட்டோ பிரேம்';
-  }
-  if (lower.includes('speaker')) {
-    return 'ஸ்பீக்கர்';
-  }
-
-  const words = englishTitle.split(/\s+/).slice(0, 2).join(' ');
-  return autoTranslateToTamil(words);
+  return englishTitle || '';
 };
 
-export const getProductTitle = (product, lang = 'en') => {
+export const getProductTitle = (product) => {
   if (!product) return '';
-  const englishTitle = typeof product === 'string' ? product : (product.title || product.name || '');
-  if (!englishTitle) return '';
-  if (lang !== 'ta') return englishTitle;
-
-  // Check explicit Tamil title override first
-  if (typeof product === 'object' && product.tamilTitle && typeof product.tamilTitle === 'string' && product.tamilTitle.trim()) {
-    if (/[\u0B80-\u0BFF]/.test(product.tamilTitle)) {
-      return product.tamilTitle;
-    }
-  }
-
-  // Generate full automatic Tamil translation for dynamic new products
-  const tamilTranslated = autoTranslateToTamil(englishTitle);
-  if (tamilTranslated && /[\u0B80-\u0BFF]/.test(tamilTranslated)) {
-    return tamilTranslated;
-  }
-
-  const shortTamilName = getShortTamilName(englishTitle);
-  if (!shortTamilName) return englishTitle;
-
-  return shortTamilName;
+  return typeof product === 'string' ? product : (product.title || product.name || '');
 };
 
-export const getProductDesc = (product, lang = 'en') => {
+export const getProductDesc = (product) => {
   if (!product) return '';
-  const desc = (typeof product === 'object' && product.description) || '';
-  if (lang !== 'ta') return desc;
-
-  if (typeof product === 'object' && product.tamilDesc && typeof product.tamilDesc === 'string' && product.tamilDesc.trim()) {
-    if (/[\u0B80-\u0BFF]/.test(product.tamilDesc)) {
-      return product.tamilDesc;
-    }
-  }
-
-  const title = typeof product === 'object' ? (product.title || product.name || '') : product;
-  const translatedTitle = autoTranslateToTamil(title || desc);
-
-  return `${translatedTitle} - 100% அசல் உத்திரவாதத்துடன் கூடிய உயர்தர பிரண்ட்ஸ் மொபைல் தயாரிப்பு.`;
+  return (typeof product === 'object' && product.description) || '';
 };
 
 export const translations = {
   en: {
     // Brand & Store Info
     brandName: 'FRIENDS MOBILE',
-    storeTagline: 'Madurai Flagship Store • 100% Genuine Products',
-    maduraiLocation: 'South Gandhigramam, Karur / Madurai, Tamil Nadu',
+    storeTagline: 'Karur Flagship Store • 100% Genuine Products',
+    maduraiLocation: 'South Gandhigramam, Karur, Tamil Nadu',
 
     // Header & Navigation
     navHome: 'Home',
@@ -275,9 +50,6 @@ export const translations = {
 
     // Mobile Drawer & Bottom Navigation
     mobileMenu: 'Navigation Menu',
-    switchLanguage: 'Switch Language / மொழி',
-    english: 'English',
-    tamil: 'தமிழ் (Tamil)',
 
     // Hero Banners
     heroTitle1: 'Premium Mobile Accessories & Gadgets',
@@ -330,7 +102,7 @@ export const translations = {
     serviceRepair: 'Express Mobile Repair & Screen Replacement',
     serviceTempered: '3D Curved Tempered Glass Installation',
     serviceCustom: 'Instant Custom Printing & Framing',
-    serviceDelivery: 'Same Day Store Delivery in Madurai / Karur',
+    serviceDelivery: 'Same Day Store Delivery in Karur',
 
     // Trust Badges
     genuineProducts: '100% Original Products',
@@ -363,131 +135,9 @@ export const translations = {
     // Footer
     quickLinks: 'Quick Navigation',
     customerSupport: 'Customer Care & Support',
-    contactAddress: 'Double Tank, South Gandhigramam, Karur / Madurai, Tamil Nadu - 639004',
-    contactPhone: 'Phone: +91 74485 78507',
+    contactAddress: 'Double Tank, South Gandhigramam, Karur, Tamil Nadu - 639004',
+    contactPhone: 'Phone: +91 93445 22086',
     contactEmail: 'Email: support@friendsmobile.in',
     rightsReserved: 'All Rights Reserved. FRIENDS MOBILE Flagship Store.'
-  },
-
-  ta: {
-    // Brand & Store Info
-    brandName: 'பிரண்ட்ஸ் மொபைல்',
-    storeTagline: 'மதுரை தலைமை ஷோரூம் • 100% அசல் உத்தரவாதப் பொருட்கள்',
-    maduraiLocation: 'தெற்கு காந்தி கிராமம், கரூர் / மதுரை, தமிழ்நாடு',
-
-    // Header & Navigation
-    navHome: 'முகப்பு',
-    navPhones: 'மொபைல்கள்',
-    navAccessories: 'அக்சஸரீஸ்',
-    navChargers: 'சார்ஜர் & கேபிள்',
-    navPhotoFrames: 'போட்டோ பிரேம்கள்',
-    navCustomCovers: 'கஸ்டமைஸ் கவர்',
-    navShopAll: 'அனைத்து பொருட்கள்',
-    navServices: 'சேவைகள்',
-    navOffers: 'சிறப்பு ஆஃபர்கள்',
-    navContact: 'தொடர்புக்கு',
-    searchPlaceholder: 'மொபைல் பொருட்கள், பிராண்டுகளைத் தேடவும்...',
-    cart: 'கார்ட்',
-    wishlist: 'விருப்பங்கள்',
-    myAccount: 'என் கணக்கு',
-    adminPortal: 'அட்மின் போர்டல்',
-    loginSignUp: 'லாகின் / பதிவு',
-    logout: 'லாக்அவுட்',
-    care247: '24/7 உதவி',
-    customize: 'கஸ்டமைஸ்',
-
-    // Mobile Drawer & Bottom Navigation
-    mobileMenu: 'பொருளடக்கம்',
-    switchLanguage: 'மொழி மாற்றம் / Switch Language',
-    english: 'English (ஆங்கிலம்)',
-    tamil: 'தமிழ் (Tamil)',
-
-    // Hero Banners
-    heroTitle1: 'உயர்தர மொபைல் அக்சஸரீஸ் & சாதனங்கள்',
-    heroTitle2: 'உங்கள் புகைப்படத்துடன் 3D மொபைல் கவர்',
-    heroSub2: 'உங்களுக்கு பிடித்த புகைப்படங்களை மொபைல் கவரில் உயர்தரத்தில் பிரிண்ட் செய்யுங்கள்!',
-    heroTitle3: 'கஸ்டம் போட்டோ பிரேம்கள்',
-    heroSub3: 'அக்ரிலிக் மற்றும் மர போட்டோ பிரேம்கள் அன்பானவர்களுக்கு பரிசளிக்க',
-    shopNow: 'இப்போதே வாங்கவும்',
-    exploreCatalog: 'பொருட்களை பார்க்கவும்',
-
-    // Category Grid
-    categoriesTitle: 'முக்கிய பொருட்கள் வகைகள்',
-    catEarphones: 'இயர்போன்கள் & TWS',
-    catPowerBanks: 'பவர் பேங்க்',
-    catChargers: 'பாஸ்ட் சார்ஜர்கள் & கேபிள்கள்',
-    catCovers: 'கஸ்டமைஸ் பேக் கவர்கள்',
-    catFrames: 'போட்டோ பிரேம்கள்',
-    catAccessories: 'ஸ்மார்ட் அக்சஸரீஸ்',
-
-    // Trending Products
-    trendingTitle: 'அதிகமாக விற்பனையாகும் சிறந்த பொருட்கள்',
-    viewAll: 'அனைத்து பொருட்களையும் பார்க்கவும்',
-    addToCart: 'கார்ட்டில் சேர்க்கவும்',
-    buyNow: 'உடனே வாங்கவும்',
-    inStock: 'இருப்பில் உள்ளது',
-    outOfStock: 'இருப்பில் இல்லை',
-    off: 'தள்ளுபடி',
-    rating: 'மதிப்பீடு',
-    reviews: 'மதிப்புரைகள்',
-
-    // Custom Studios
-    customCoverStudioTitle: '3D கஸ்டமைஸ் பேக் கவர் ஸ்டுடியோ',
-    customCoverSub: 'உங்கள் புகைப்படத்தை பதிவேற்றி உடனடியாக மொபைல் கவர் டிசைன் செய்யுங்கள்!',
-    selectMobileBrand: 'மொபைல் பிராண்டை தேர்ந்தெடுக்கவும்',
-    selectMobileModel: 'மொபைல் மாடலை தேர்ந்தெடுக்கவும்',
-    uploadPhoto: 'புகைப்படத்தை பதிவேற்றவும்',
-    coverFinish: 'கவர் ஃபினிஷ் வகை',
-    matteFinish: 'மேட் ஃபினிஷ் (ஸ்க்ராட்ச் ப்ரூஃப்)',
-    glossyFinish: 'கிளாஸ் கிளாஸி ஃபினிஷ் (பிரீமியம்)',
-    previewDesign: '3D கவர் நேரடி தோற்றம்',
-
-    customFrameTitle: 'கஸ்டமைஸ் போட்டோ பிரேம் ஸ்டுடியோ',
-    customFrameSub: 'அக்ரிலிக் மற்றும் மர போட்டோ பிரேம்கள் தயாரிக்கவும்',
-    frameSize: 'பிரேம் அளவை தேர்ந்தெடுக்கவும்',
-    frameMaterial: 'பிரேம் பொருளை தேர்ந்தெடுக்கவும்',
-
-    // Services Section
-    servicesTitle: 'எங்கள் ஷோரூம் சிறப்பு சேவைகள்',
-    serviceRepair: 'விரைவு மொபைல் சர்வீஸ் & டிஸ்பிளே மாற்றுதல்',
-    serviceTempered: '3D கர்வ்ட் டெம்பர்ட் கிளாஸ் பொருத்துதல்',
-    serviceCustom: 'உடனடி கஸ்டம் பிரிண்டிங் & பிரேமிங்',
-    serviceDelivery: 'மதுரை / கரூர் பகுதிகளில் அன்றைய தினமே டெலிவரி',
-
-    // Trust Badges
-    genuineProducts: '100% அசல் தயாரிப்புகள்',
-    fastShipping: 'வேகமான எக்ஸ்பிரஸ் டெலிவரி',
-    securePayment: '100% பாதுகாப்பான பணம் செலுத்துதல்',
-    easyReturns: 'எளிதான 7 நாட்கள் பரிமாற்றம்',
-
-    // Cart Modal
-    shoppingCart: 'ஷாப்பிங் கார்ட்',
-    emptyCart: 'உங்கள் கார்ட் காலியாக உள்ளது',
-    subtotal: 'மொத்த விலை',
-    shippingFee: 'டெலிவரி கட்டணம்',
-    freeShipping: 'இலவச டெலிவரி',
-    grandTotal: 'முழு மொத்த தொகை',
-    checkout: 'ஆர்டர் செய்ய தொடரவும்',
-    appliedCoupon: 'கூப்பன் இணைக்கப்பட்டது',
-
-    // Order Placement & Auth Modal
-    loginTitle: 'வாடிக்கையாளர் லாகின் / பதிவு',
-    enterPhone: 'மொபைல் எண்ணை உள்ளிடவும்',
-    enterPassword: 'கடவுச்சொல்லை உள்ளிடவும்',
-    fullName: 'முழு பெயர்',
-    deliveryAddress: 'டெலிவரி முகவரி',
-    pincode: 'பின்கோடு',
-    placeOrder: 'ஆர்டரை உறுதிசெய்யவும்',
-    paymentMethod: 'பணம் செலுத்தும் முறை',
-    cashOnDelivery: 'டெலிவரியின் போது பணம் செலுத்துதல் (COD)',
-    onlineUpi: 'யுபிஐ / ஆன்லைன் பேமெண்ட்',
-
-    // Footer
-    quickLinks: 'விரைவு இணைப்புகள்',
-    customerSupport: 'வாடிக்கையாளர் உதவி மையம்',
-    contactAddress: 'தெற்கு காந்தி கிராமம், கரூர் / மதுரை, தமிழ்நாடு - 639004',
-    contactPhone: 'போன்: +91 74485 78507',
-    contactEmail: 'மின்னஞ்சல்: support@friendsmobile.in',
-    rightsReserved: 'அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை. பிரண்ட்ஸ் மொபைல்.'
   }
 };

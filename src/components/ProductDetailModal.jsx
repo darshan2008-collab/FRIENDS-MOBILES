@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight, ZoomIn, Check, Zap, ShieldCheck } from 'lucide-react';
-import { getProductTitle, getProductDesc } from '../data/translations';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
-
 export default function ProductDetailModal({
   product,
   products = [],
@@ -13,7 +9,6 @@ export default function ProductDetailModal({
   onToggleWishlist,
   onAddToCart,
   onSelectProduct,
-  language = 'en',
   t = (k) => k
 }) {
   const [reviewsList, setReviewsList] = useState([]);

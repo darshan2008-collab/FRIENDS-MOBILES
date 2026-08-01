@@ -11,7 +11,8 @@ import { getProductTitle } from '../data/translations';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
-export default function UserAccountModal({ isOpen, onClose, user, orders: allOrders, onLogout, addToast, language = 'en', t = (k) => k }) {
+export default function UserAccountModal({ isOpen, onClose, user, orders: allOrders, onLogout, addToast, t = (k) => k }) {
+
   useEffect(() => {
     if (isOpen && typeof document !== 'undefined') {
       document.body.style.overflow = 'hidden';
@@ -22,11 +23,32 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
   }, [isOpen]);
 
   if (!isOpen || typeof document === 'undefined') return null;
-  const isTamil = language === 'ta';
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile' | 'addresses' | 'offers' | 'support'
   const [userOrders, setUserOrders] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [copiedCoupon, setCopiedCoupon] = useState('');
+
+  const handleCopyCoupon = (code) => {
+    if (!code) return;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = code;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setCopiedCoupon(code);
+      if (addToast) addToast(`Copied Coupon Code: ${code}`, '📋');
+      setTimeout(() => setCopiedCoupon(''), 3000);
+    } catch (_) {
+      setCopiedCoupon(code);
+      if (addToast) addToast(`Copied Coupon Code: ${code}`, '📋');
+      setTimeout(() => setCopiedCoupon(''), 3000);
+    }
+  };
 
   // Cancel Order Modal State
   const [cancelTargetOrder, setCancelTargetOrder] = useState(null);
@@ -71,7 +93,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
   // Client-side Styled Excel (.xls) Exporter for Customer Order History
   const handleExportUserOrdersExcel = () => {
     if (!userOrders || userOrders.length === 0) {
-      if (addToast) addToast(isTamil ? 'பதிவிறக்கம் செய்ய ஆர்டர்கள் எதுவும் இல்லை!' : 'No order history available to export!', '⚠️');
+      if (addToast) addToast('No order history available to export!', '⚠️');
       return;
     }
 
@@ -188,7 +210,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    if (addToast) addToast(isTamil ? 'எக்செல் ஆர்டர் ரிப்போர்ட் பதிவிறக்கம் செய்யப்பட்டது!' : 'Excel Order Report downloaded successfully!', '📊');
+    if (addToast) addToast('Excel Order Report downloaded successfully!', '📊');
   };
 
   const handleConfirmReturnOrder = async () => {
@@ -449,13 +471,6 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
     if (s.includes('shipped')) return 2;
     if (s.includes('processing')) return 1;
     return 0; // Order Placed
-  };
-
-  const handleCopyCoupon = (code) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCoupon(code);
-    if (addToast) addToast(`Coupon code "${code}" copied!`, '🎟️');
-    setTimeout(() => setCopiedCoupon(''), 3000);
   };
 
   const handleAddAddressSubmit = (e) => {
@@ -1050,6 +1065,41 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '24px' }}>Apply these codes at checkout for instant savings</p>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+                    {/* Claimed Reward Coupons */}
+                    {Array.isArray(user?.claimedCoupons) && user.claimedCoupons.map((c, idx) => (
+                      <div key={idx} className="dash-coupon-card" style={{ border: '1.5px solid #22c55e', background: 'rgba(34,197,94,0.06)' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                            <Sparkles size={18} color="#22c55e" />
+                            <strong style={{ fontSize: '1.1rem', color: '#FF5500', fontFamily: 'monospace' }}>{c.code}</strong>
+                            <span style={{ fontSize: '0.7rem', background: '#22c55e', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontWeight: 'bold' }}>
+                              REWARD OFFER
+                            </span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: '600' }}>{c.title || `${c.code} Discount Coupon`}</p>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Valid on orders above ₹{c.minOrderValue || 299}</span>
+                        </div>
+                        <button 
+                          onClick={() => handleCopyCoupon(c.code)}
+                          style={{
+                            padding: '10px 18px',
+                            borderRadius: '10px',
+                            border: 'none',
+                            background: copiedCoupon === c.code ? '#22c55e' : '#FF5500',
+                            color: '#ffffff',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <Copy size={16} /> {copiedCoupon === c.code ? 'COPIED!' : 'COPY CODE'}
+                        </button>
+                      </div>
+                    ))}
+
                     <div className="dash-coupon-card">
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -1065,7 +1115,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                           padding: '10px 18px',
                           borderRadius: '10px',
                           border: 'none',
-                          background: '#FF5500',
+                          background: copiedCoupon === 'FRIENDS10' ? '#22c55e' : '#FF5500',
                           color: '#ffffff',
                           fontWeight: 'bold',
                           cursor: 'pointer',
@@ -1093,7 +1143,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                           padding: '10px 18px',
                           borderRadius: '10px',
                           border: 'none',
-                          background: '#10b981',
+                          background: copiedCoupon === 'FREESHIP' ? '#10b981' : '#FF5500',
                           color: '#ffffff',
                           fontWeight: 'bold',
                           cursor: 'pointer',

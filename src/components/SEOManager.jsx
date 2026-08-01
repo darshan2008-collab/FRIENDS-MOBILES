@@ -18,30 +18,22 @@ export default function SEOManager({
   isCustomCoverOpen, 
   isCustomFrameOpen,
   isShopOpen,
-  language = 'en',
   products = []
 }) {
   useEffect(() => {
-    const isTamil = language === 'ta';
     const baseUrl = 'https://friendsmobile.in';
 
     // Default Fallback Metadata
-    let title = isTamil 
-      ? 'பிரண்ட்ஸ் மொபைல் - 3D போட்டோ கஸ்டம் கவர், போன் கேஸ்கள் & மொபைல் அசெஸரீஸ் ஷோரூம்'
-      : 'FRIENDS MOBILE - Customized Back Covers, Phone Cases & Mobile Accessories Store India | பிரண்ட்ஸ் மொபைல்';
+    let title = 'FRIENDS MOBILE - Customized Back Covers, Phone Cases & Mobile Accessories Store India';
 
-    let description = isTamil
-      ? 'பிரண்ட்ஸ் மொபைல் ஷோரூம்: 3D போட்டோ பிரிண்ட் மொபைல் பேக் கஸ்டம் கவர், iPhone கேஸ்கள், boAt இயர்பட்ஸ், பாஸ்ட் சார்ஜர்கள், பவர் பேங்க் & போட்டோ பிரேம்கள். 100% ஒரிஜினல் தரம் & கேஷ் ஆன் டெலிவரி.'
-      : 'Shop 3D Customized Phone Back Covers, iPhone Cases, boAt Bluetooth Earbuds, Fast Chargers, Power Banks & Custom Photo Frames at FRIENDS MOBILE. Best Prices & Express Cash on Delivery Across India.';
+    let description = 'Shop 3D Customized Phone Back Covers, iPhone Cases, boAt Bluetooth Earbuds, Fast Chargers, Power Banks & Custom Photo Frames at FRIENDS MOBILE. Best Prices & Express Cash on Delivery Across India.';
 
-    let keywords = isTamil
-      ? 'பிரண்ட்ஸ் மொபைல், மொபைல் கவர் ஆன்லைன், 3D போட்டோ கவர், போன் கேஸ்கள், சார்ஜர், இயர்பட்ஸ், கரூர், மதுரை, தமிழ்நாடு மொபைல் கடை, ஆன்லைன் மொபைல் ஷாப்பிங்'
-      : 'FRIENDS MOBILE, customized back cover, phone cases India, custom phone cover online, iPhone 15 pro custom case, Samsung back covers, boAt air dopes, fast charger, power bank 20000mAh, photo frames Karur, mobile accessories Madurai, Tamil Nadu mobile store';
+    let keywords = 'FRIENDS MOBILE, customized back cover, phone cases India, custom phone cover online, iPhone 15 pro custom case, Samsung back covers, boAt air dopes, fast charger, power bank 20000mAh, photo frames Karur, mobile accessories Madurai, Tamil Nadu mobile store';
 
     let canonical = `${baseUrl}/`;
     let ogType = 'website';
     let ogImage = `${baseUrl}/images/prod_custom_cover.png`;
-    let categoryBreadcrumb = isTamil ? 'முகப்பு' : 'Home';
+    let categoryBreadcrumb = 'Home';
     let productSchemaData = null;
 
     // -------------------------------------------------------------
@@ -160,7 +152,7 @@ export default function SEOManager({
     // -------------------------------------------------------------
 
     // A. Language Code
-    document.documentElement.lang = isTamil ? 'ta-IN' : 'en-IN';
+    document.documentElement.lang = 'en-IN';
 
     // B. Title
     document.title = title;
@@ -329,7 +321,7 @@ export default function SEOManager({
       document.head.appendChild(pScript);
     }
 
-  }, [selectedProduct, shopCategory, isCustomCoverOpen, isCustomFrameOpen, isShopOpen, language, products]);
+  }, [selectedProduct, shopCategory, isCustomCoverOpen, isCustomFrameOpen, isShopOpen, products]);
 
   return null;
 }

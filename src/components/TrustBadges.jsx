@@ -1,28 +1,26 @@
 import React from 'react';
 import { CheckCircle2, Truck, RefreshCw, Headphones } from 'lucide-react';
 
-export default function TrustBadges({ t = (k) => k, language = 'en' }) {
-  const isTamil = language === 'ta';
-
+export default function TrustBadges({ t = (k) => k }) {
   const badges = [
     { 
-      title: t('genuineProducts') || (isTamil ? '100% அசல் தயாரிப்புகள்' : '100% Original'), 
-      desc: isTamil ? 'அனைத்தும் ஒரிஜினல்' : 'Genuine Products', 
+      title: t('genuineProducts') || '100% Original', 
+      desc: 'Genuine Products', 
       icon: CheckCircle2 
     },
     { 
-      title: t('fastShipping') || (isTamil ? 'வேகமான எக்ஸ்பிரஸ் டெலிவரி' : 'Fast Delivery'), 
-      desc: isTamil ? 'இந்தியா முழுவதும்' : 'Across India', 
+      title: t('fastShipping') || 'Fast Delivery', 
+      desc: 'Across India', 
       icon: Truck 
     },
     { 
-      title: t('easyReturns') || (isTamil ? 'எளிதான 7 நாட்கள் பரிமாற்றம்' : '7 Days Return'), 
-      desc: isTamil ? 'எளிதான ரிட்டர்ன்ஸ்' : 'Easy Returns', 
+      title: t('easyReturns') || '7 Days Return', 
+      desc: 'Easy Returns', 
       icon: RefreshCw 
     },
     { 
-      title: t('care247') || (isTamil ? '24/7 சேவை ஆதரவு' : 'Best Support'), 
-      desc: isTamil ? '24/7 வாடிக்கையாளர் சேவை' : '24/7 Support', 
+      title: t('care247') || 'Best Support', 
+      desc: '24/7 Support', 
       icon: Headphones 
     },
   ];

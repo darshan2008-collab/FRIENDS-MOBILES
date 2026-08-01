@@ -1,12 +1,10 @@
 import React from 'react';
-import { X, User, LogOut, ShoppingBag, Languages } from 'lucide-react';
+import { X, User, LogOut, ShoppingBag } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
 export default function MobileDrawer({ 
   isOpen, 
   onClose, 
-  language = 'en',
-  toggleLanguage,
   t = (k) => k,
   currentUser, 
   onOpenAuth, 
@@ -33,45 +31,6 @@ export default function MobileDrawer({
           <button className="drawer-close-btn" onClick={onClose} aria-label="Close menu">
             <X size={24} />
           </button>
-        </div>
-
-        {/* Language Selection Card */}
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-card)' }}>
-          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '800', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Languages size={15} color="#FF5500" /> {t('switchLanguage') || 'Switch Language / மொழி'}
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <button
-              onClick={() => toggleLanguage && toggleLanguage('en')}
-              style={{
-                padding: '7px',
-                borderRadius: '8px',
-                border: language === 'en' ? '2px solid #FF5500' : '1px solid var(--border-color)',
-                background: language === 'en' ? 'rgba(255, 85, 0, 0.12)' : 'var(--bg-input)',
-                color: language === 'en' ? '#FF5500' : 'var(--text-primary)',
-                fontWeight: 'bold',
-                fontSize: '0.78rem',
-                cursor: 'pointer'
-              }}
-            >
-              🇬🇧 English
-            </button>
-            <button
-              onClick={() => toggleLanguage && toggleLanguage('ta')}
-              style={{
-                padding: '7px',
-                borderRadius: '8px',
-                border: language === 'ta' ? '2px solid #FF5500' : '1px solid var(--border-color)',
-                background: language === 'ta' ? 'rgba(255, 85, 0, 0.12)' : 'var(--bg-input)',
-                color: language === 'ta' ? '#FF5500' : 'var(--text-primary)',
-                fontWeight: 'bold',
-                fontSize: '0.78rem',
-                cursor: 'pointer'
-              }}
-            >
-              🇮🇳 தமிழ்
-            </button>
-          </div>
         </div>
 
         {/* Account & Logout section in Mobile Menu */}

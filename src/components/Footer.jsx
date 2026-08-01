@@ -1,8 +1,8 @@
 import React from 'react';
-import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, MessageSquare, Clock, ShieldCheck, Sparkles, Navigation, Award, CheckCircle2, ArrowRight, Smartphone, Palette, Frame, Watch, Headphones, Zap, Languages } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, MessageSquare, Clock, ShieldCheck, Sparkles, Navigation, Award, CheckCircle2, ArrowRight, Smartphone, Palette, Frame, Watch, Headphones, Zap } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
-export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }) {
+export default function Footer({ t = (k) => k }) {
   return (
     <footer className="main-footer" id="contact" style={{
       background: 'var(--bg-card)',
@@ -69,7 +69,7 @@ export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }
             </div>
             <div>
               <div style={{ fontSize: '0.96rem', fontWeight: '900', color: 'var(--text-primary)', letterSpacing: '0.4px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                <span>{language === 'ta' ? 'கரூர் #1 மொபைல் போன் ஷோரூம் 🏆' : "KARUR'S #1 MULTI-BRAND MOBILE SHOWROOM"}</span>
+                <span>KARUR'S #1 MULTI-BRAND MOBILE SHOWROOM</span>
                 <span style={{ 
                   fontSize: '0.72rem', 
                   background: 'rgba(34, 197, 94, 0.12)', 
@@ -83,11 +83,11 @@ export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }
                   gap: '6px'
                 }}>
                   <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 8px #22c55e' }} />
-                  {language === 'ta' ? 'இன்று திறந்துள்ளது' : 'OPEN TODAY'}
+                  OPEN TODAY
                 </span>
               </div>
               <div style={{ fontSize: '0.84rem', color: 'var(--text-secondary)', fontWeight: '500', lineHeight: '1.4' }}>
-                {language === 'ta' ? 'எங்கள் ஷோரூமுக்கு நேரில் வருகை தரவும் அல்லது ஆன்லைனில் 30 நிமிட கஸ்டமைஸ் கவர்களை ஆர்டர் செய்யவும்!' : 'Visit our Flagship Store or Order Online for Express 30-Min Custom Case Printing!'}
+                Visit our Flagship Store or Order Online for Express 30-Min Custom Case Printing!
               </div>
             </div>
           </div>
@@ -129,7 +129,7 @@ export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }
                 transition: 'all 0.2s ease'
               }}
             >
-              <MessageSquare size={16} /> {language === 'ta' ? 'வாட்ஸ்அப்பில் தொடர்பு கொள்ள' : 'Connect With Showroom'}
+              <MessageSquare size={16} /> Connect With Showroom
             </a>
           </div>
         </div>
@@ -156,15 +156,15 @@ export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
               <div style={{ fontSize: '0.84rem', fontWeight: '750', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px', lineHeight: '1.3' }}>
                 <CheckCircle2 size={17} color="#22c55e" style={{ flexShrink: 0 }} />
-                <span>{language === 'ta' ? '100% அசல் பிராண்ட் உத்தரவாதம்' : '100% Original Brand Guarantee'}</span>
+                <span>100% Original Brand Guarantee</span>
               </div>
               <div style={{ fontSize: '0.84rem', fontWeight: '750', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px', lineHeight: '1.3' }}>
                 <CheckCircle2 size={17} color="#22c55e" style={{ flexShrink: 0 }} />
-                <span>{language === 'ta' ? '3D போட்டோ கவர் டிசைனிங் ஸ்டுடியோ' : 'Real-time 3D Phone Case Studio'}</span>
+                <span>Real-time 3D Phone Case Studio</span>
               </div>
               <div style={{ fontSize: '0.84rem', fontWeight: '750', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px', lineHeight: '1.3' }}>
                 <CheckCircle2 size={17} color="#22c55e" style={{ flexShrink: 0 }} />
-                <span>{language === 'ta' ? 'இந்தியா முழுவதும் அதிவேக டெலிவரி' : 'Pan-India Express Delivery'}</span>
+                <span>Pan-India Express Delivery</span>
               </div>
             </div>
 
@@ -198,7 +198,7 @@ export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }
           {/* Col 3: Showroom Contact & Live Address Card */}
           <div className="footer-col contact-col">
             <h4 className="footer-title" style={{ margin: 0, padding: 0 }}>
-              {language === 'ta' ? 'ஷோரூம் முகவரி & தொடர்பு' : 'SHOWROOM LOCATION'}
+              SHOWROOM LOCATION
             </h4>
             <div style={{ width: '48px', height: '3.5px', background: 'linear-gradient(90deg, #FF5500, #ff8800)', borderRadius: '2px', marginTop: '6px', marginBottom: '18px' }} />
 
@@ -207,13 +207,9 @@ export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }
                 <MapPin size={20} color="#FF5500" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                   <strong style={{ display: 'block', color: 'var(--text-primary)', fontSize: '0.9rem', marginBottom: '2px' }}>
-                    {language === 'ta' ? 'பிரண்ட்ஸ் மொபைல் தலைமை ஷோரூம்' : 'Friends Mobile Flagship Store'}
+                    Friends Mobile Flagship Store
                   </strong>
-                  {language === 'ta' ? (
-                    <>இரட்டை குளம் அருகில், தெற்கு காந்தி கிராமம்,<br />கரூர் - 639004, தமிழ்நாடு, இந்தியா</>
-                  ) : (
-                    <>Double Tank, South Gandhigramam,<br />Karur - 639004, Tamil Nadu, India</>
-                  )}
+                  Double Tank, South Gandhigramam,<br />Karur - 639004, Tamil Nadu, India
                 </div>
               </div>
 
@@ -253,7 +249,7 @@ export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }
                   transition: 'all 0.2s ease'
                 }}
               >
-                <Navigation size={15} color="#ffffff" /> {language === 'ta' ? 'ஷோரூம் வழியை பார்க்க (Google Maps)' : 'Get Directions to Showroom'}
+                <Navigation size={15} color="#ffffff" /> Get Directions to Showroom
               </a>
             </div>
           </div>
@@ -290,7 +286,7 @@ export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }
               textTransform: 'uppercase'
             }}>
               <ShieldCheck size={14} color="#22c55e" />
-              {language === 'ta' ? '100% பாதுகாப்பான கட்டண முறை' : '100% SECURE & TRUSTED PAYMENTS'}
+              100% SECURE & TRUSTED PAYMENTS
             </div>
 
             {/* Compact Micro-Sized Single Row Payment Badges */}
@@ -388,28 +384,6 @@ export default function Footer({ language = 'en', toggleLanguage, t = (k) => k }
                 </svg>
                 <span style={{ fontSize: '0.6rem', fontWeight: '900', color: '#15803d', letterSpacing: '0.3px' }}>COD</span>
               </div>
-
-              {/* Language Switcher Footer Widget */}
-              <button
-                onClick={() => toggleLanguage && toggleLanguage()}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '4px 12px',
-                  borderRadius: '16px',
-                  border: '1px solid #FF5500',
-                  background: 'rgba(255, 85, 0, 0.1)',
-                  color: '#FF5500',
-                  fontWeight: 'bold',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer'
-                }}
-                title={language === 'en' ? 'Switch to Tamil / தமிழ்' : 'Switch to English'}
-              >
-                <Languages size={14} />
-                <span>{language === 'en' ? 'தமிழ் (Tamil)' : 'English'}</span>
-              </button>
 
             </div>
           </div>

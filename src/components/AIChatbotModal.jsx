@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   X, Send, Bot, User, Mic, MicOff, Phone, MessageSquare, 
-  RefreshCw, Volume2, VolumeX, Languages, ShieldCheck, CheckCircle2, 
+  RefreshCw, Volume2, VolumeX, ShieldCheck, CheckCircle2, 
   AlertTriangle, Package, Truck, ArrowRight, CornerDownRight, Sparkles
 } from 'lucide-react';
 import { getProductTitle, autoTranslateToTamil } from '../data/translations';
@@ -13,7 +13,6 @@ export default function AIChatbotModal({
   orders = [], 
   products = [],
   currentUser, 
-  language = 'en',
   onOpenCustomCover, 
   onOpenCustomFrame,
   onOpenShop,
@@ -30,7 +29,7 @@ export default function AIChatbotModal({
   }, [isOpen]);
 
   if (!isOpen || typeof document === 'undefined') return null;
-  const [botLang, setBotLang] = useState(language);
+
   const [messages, setMessages] = useState([]);
   const [inputQuery, setInputQuery] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -39,15 +38,7 @@ export default function AIChatbotModal({
   const recognitionRef = useRef(null);
 
   // Amazon / Flipkart style Fixed Chart categories
-  const FIXED_CHART_CATEGORIES = botLang === 'ta' ? [
-    { id: 'track_order', label: '📦 ஆர்டர் கண்காணிப்பு', desc: 'உங்கள் பார்சல் நிலவரத்தை அறிய' },
-    { id: 'returns_cancel', label: '🔄 ரத்து & மாற்று பாலிசி', desc: '7 நாட்கள் இலவச மாற்று பாலிசி' },
-    { id: 'payments_refund', label: '💳 கட்டணம் & ரீஃபண்ட்', desc: 'COD, UPI & பணம் திரும்பப்பெறுதல்' },
-    { id: 'custom_studio', label: '🎨 கஸ்டமைஸ் கவர் & பிரேம்', desc: '3D போட்டோ கவர்கள் & பிரேம்கள்' },
-    { id: 'mobile_repair', label: '🛠️ 30 நிமிட பழுதுநீக்கம்', desc: 'டிஸ்பிளே & பேட்டரி மாற்றுதல்' },
-    { id: 'offers_rewards', label: '🎁 சிறப்புச் சலுகைகள்', desc: 'கூப்பன்கள் & ரிவார்ட்ஸ் புள்ளிகள்' },
-    { id: 'complaint_escalate', label: '⚠️ புகார்கள் & மேலாண்மைத் தொடர்பு', desc: 'நேரடித் தொலைபேசி எண்கள் & வாட்ஸ்அப்' }
-  ] : [
+  const FIXED_CHART_CATEGORIES = [
     { id: 'track_order', label: '📦 Order Tracking', desc: 'Where is my parcel?' },
     { id: 'returns_cancel', label: '🔄 Returns & Cancellation', desc: 'Cancel order / 7 days replacement' },
     { id: 'payments_refund', label: '💳 Payments & Refund', desc: 'COD, UPI & refund status' },
@@ -57,20 +48,13 @@ export default function AIChatbotModal({
     { id: 'complaint_escalate', label: '⚠️ Report Complaint', desc: 'Direct owner contact & WhatsApp' }
   ];
 
-  // Sync initial language when prop updates
-  useEffect(() => {
-    setBotLang(language);
-  }, [language]);
-
   const hasInitializedRef = useRef(false);
 
   // Initialize welcome message & fixed chart menu when opened
   useEffect(() => {
     if (isOpen && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
-      const welcomeText = botLang === 'ta'
-        ? `வணக்கம்! 🖐️ பிரண்ட்ஸ் மொபைல் உங்களை அன்போடு வரவேற்கின்றது.\n\nகீழே உள்ள பிரதான சேவை வரைபடத்தைப் பயன்படுத்தி உங்களின் ஆர்டர் மற்றும் வினாக்களுக்கு உடனடித் தீர்வைப் பெறலாம்:`
-        : `Welcome to FRIENDS MOBILE 24/7 Support Center! 🚀\n\nPlease select an option from our **Fixed Support Chart** below or enter your Order ID / query:`;
+      const welcomeText = `Welcome to FRIENDS MOBILE 24/7 Support Center! 🚀\n\nPlease select an option from our **Fixed Support Chart** below or enter your Order ID / query:`;
 
       const welcomeMsg = {
         id: 'welcome-1',
@@ -349,35 +333,6 @@ export default function AIChatbotModal({
           </div>
 
           <div className="ai-chatbot-header-right">
-            {/* Inline Language Selection Switcher */}
-            <button 
-              className="ai-lang-pill-btn"
-              onClick={() => {
-                const nextLang = botLang === 'ta' ? 'en' : 'ta';
-                setBotLang(nextLang);
-                const switchMsgId = `welcome-${Date.now()}`;
-
-                const switchMsg = {
-                  id: switchMsgId,
-                  sender: 'bot',
-                  text: nextLang === 'ta'
-                    ? `வணக்கம்! 🖐️ பிரண்ட்ஸ் மொபைல் 24/7 வாடிக்கையாளர் உதவி மையத்திற்கு வரவேற்கிறோம். கீழே உள்ள **பிரதான உதவி வரைபடத்தை (Fixed Support Chart)** பயன்படுத்தவும் அல்லது கேள்விகளை உள்ளிடவும்:`
-                    : `Welcome to FRIENDS MOBILE 24/7 Support Center! 🚀\n\nPlease select an option from our **Fixed Support Chart** below or enter your query:`,
-                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                  isChartMenu: true,
-                  quickReplies: nextLang === 'ta' 
-                    ? ['📦 ஆர்டர் கண்காணிப்பு', '🔄 ரத்து & மாற்று பாலிசி', '💳 கட்டணம் & ரீஃபண்ட்', '🎨 கஸ்டமைஸ் கவர்', '⚠️ புகார்கள் & நேரடி உதவி']
-                    : ['📦 Track My Order', '🔄 Returns & Cancellation', '💳 Payments & Refund', '🎨 Custom Covers', '⚠️ Report Complaint']
-                };
-
-                setMessages(prev => [...prev, switchMsg]);
-              }}
-              title="Switch Language / மொழி மாற்றம்"
-            >
-              <Languages size={15} color="#ffffff" />
-              <span>{botLang === 'ta' ? 'தமிழ் (Tamil)' : 'English (ஆங்கிலம்)'}</span>
-            </button>
-
             <button 
               className="ai-close-btn" 
               onClick={() => {

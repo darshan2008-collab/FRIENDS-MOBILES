@@ -10,7 +10,7 @@ const defaultUnsplashMap = {
   5: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=600&auto=format&fit=crop'
 };
 
-export default function TrendingProducts({ products, wishlist, onToggleWishlist, onAddToCart, searchQuery, onSelectProduct, onOpenShop, language = 'en', t = (k) => k }) {
+export default function TrendingProducts({ products, wishlist, onToggleWishlist, onAddToCart, searchQuery, onSelectProduct, onOpenShop, t = (k) => k }) {
   // Preload all product images into memory for instant rendering
   useEffect(() => {
     products.forEach(p => {
@@ -80,7 +80,7 @@ export default function TrendingProducts({ products, wishlist, onToggleWishlist,
                     onClick={() => onOpenShop ? onOpenShop(prod.category || 'All') : onSelectProduct(prod)}
                     style={{ cursor: 'pointer' }}
                   >
-                    {getProductTitle(prod, language)}
+                    {prod.title}
                   </h3>
                   
                   {prod.reviews > 0 && (

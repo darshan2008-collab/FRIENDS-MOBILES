@@ -18,7 +18,6 @@ export default function ShoppingPortal({
   initialCategory = 'All',
   cartCount = 0,
   onOpenCart,
-  language = 'en',
   t = (k) => k
 }) {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
@@ -404,7 +403,6 @@ export default function ShoppingPortal({
                       onToggleWishlist={onToggleWishlist}
                       onSelectProduct={onSelectProduct}
                       handleImgError={handleImgError}
-                      language={language}
                     />
                   ))}
                 </div>
@@ -437,7 +435,6 @@ export default function ShoppingPortal({
                             onToggleWishlist={onToggleWishlist}
                             onSelectProduct={onSelectProduct}
                             handleImgError={handleImgError}
-                            language={language}
                           />
                         ))}
                       </div>
@@ -459,7 +456,7 @@ export default function ShoppingPortal({
 }
 
 /* Individual Product Card Component */
-function ProductCard({ product, onAddToCart, isLiked, onToggleWishlist, onSelectProduct, handleImgError, language = 'en' }) {
+function ProductCard({ product, onAddToCart, isLiked, onToggleWishlist, onSelectProduct, handleImgError }) {
   return (
     <div className="shop-product-card">
       
@@ -501,7 +498,7 @@ function ProductCard({ product, onAddToCart, isLiked, onToggleWishlist, onSelect
           className="card-product-title"
           onClick={() => onSelectProduct(product)}
         >
-          {getProductTitle(product, language)}
+          {product.title}
         </h4>
 
         {/* Rating Row */}

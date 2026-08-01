@@ -5,8 +5,6 @@ export default function MobileBottomBar({
   cartCount, 
   wishlistCount = 0,
   currentUser, 
-  language = 'en',
-  toggleLanguage,
   t = (k) => k,
   onOpenAuth, 
   onOpenUserAccount, 

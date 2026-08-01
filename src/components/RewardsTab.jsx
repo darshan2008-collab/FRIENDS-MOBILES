@@ -121,10 +121,26 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
   };
 
   const handleCopyCode = (code) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(code);
-    if (addToast) addToast(`Copied Unique Redeem Code: ${code}`, '📋');
-    setTimeout(() => setCopiedCode(''), 3000);
+    if (!code) return;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = code;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setCopiedCode(code);
+      if (addToast) addToast(`Copied Unique Redeem Code: ${code}`, '📋');
+      setTimeout(() => setCopiedCode(''), 3000);
+    } catch (_) {
+      setCopiedCode(code);
+      if (addToast) addToast(`Redeem Code: ${code}`, '📋');
+      setTimeout(() => setCopiedCode(''), 3000);
+    }
   };
 
   return (
@@ -161,6 +177,55 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
           ✨ Buy products at Friends Mobile to earn points! Redeem points to generate **unique random discount codes** (10%, 15%, 20%, Flat ₹200, 50% OFF).
         </div>
       </div>
+
+      {/* Active Unlocked Claimed Coupons Section */}
+      {claimedCoupons.length > 0 && (
+        <div style={{ background: 'var(--bg-input)', border: '1.5px solid #22c55e', borderRadius: '16px', padding: '18px' }}>
+          <h4 style={{ fontSize: '1rem', fontWeight: '800', margin: '0 0 12px 0', color: '#15803d', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <CheckCircle2 size={18} color="#22c55e" /> Your Unlocked Unique Redeem Codes ({claimedCoupons.length})
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {claimedCoupons.map((c, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', background: 'var(--bg-card)', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontFamily: 'monospace', fontWeight: '900', fontSize: '1.1rem', color: '#FF5500', letterSpacing: '1px', background: 'rgba(255,85,0,0.1)', padding: '4px 10px', borderRadius: '8px' }}>
+                      {c.code}
+                    </span>
+                    <span style={{ fontSize: '0.72rem', background: '#22c55e', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontWeight: '800' }}>
+                      {c.title || 'DISCOUNT'}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                    Min. Order ₹{c.minOrderValue || 299} • Copy and apply in Cart Checkout
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleCopyCode(c.code)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: copiedCode === c.code ? '#22c55e' : '#FF5500',
+                    color: '#ffffff',
+                    fontWeight: '800',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 12px rgba(255,85,0,0.2)'
+                  }}
+                >
+                  {copiedCode === c.code ? '✓ COPIED TO CLIPBOARD' : '📋 COPY CODE'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Claimable Reward Coupons Section */}
       <div>
@@ -227,7 +292,7 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
                       gap: '6px'
                     }}
                   >
-                    <CheckCircle2 size={14} /> {copiedCode === latestClaimed.code ? 'Copied!' : `Copy Redeem Code: ${latestClaimed.code}`}
+                    <CheckCircle2 size={14} /> {copiedCode === latestClaimed.code ? '✓ Copied to Clipboard!' : `📋 Copy Redeem Code: ${latestClaimed.code}`}
                   </button>
                 ) : (
                   <button
