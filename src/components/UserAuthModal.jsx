@@ -684,11 +684,24 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
             </div>
 
             {/* Segmented Neumorphic Tab Bar */}
-            <div className="neu-tab-bar">
+            <div className="neu-tab-bar" style={{ display: 'flex', padding: '4px', borderRadius: '14px', background: 'var(--bg-input, #f1f5f9)', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '24px', gap: '4px' }}>
               <button 
                 type="button"
                 onClick={() => { setActiveTab('login'); setForgotStep(1); }}
                 className={`neu-tab-btn ${activeTab === 'login' ? 'active' : ''}`}
+                style={{
+                  flex: 1,
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: activeTab === 'login' ? 'var(--bg-card, #ffffff)' : 'transparent',
+                  color: activeTab === 'login' ? '#FF5500' : 'var(--text-muted, #64748b)',
+                  fontWeight: '700',
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  boxShadow: activeTab === 'login' ? '0 4px 12px rgba(0, 0, 0, 0.08)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
               >
                 Log In
               </button>
@@ -696,6 +709,19 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                 type="button"
                 onClick={() => { setActiveTab('signup'); setForgotStep(1); }}
                 className={`neu-tab-btn ${activeTab === 'signup' ? 'active' : ''}`}
+                style={{
+                  flex: 1,
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: activeTab === 'signup' ? 'var(--bg-card, #ffffff)' : 'transparent',
+                  color: activeTab === 'signup' ? '#FF5500' : 'var(--text-muted, #64748b)',
+                  fontWeight: '700',
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  boxShadow: activeTab === 'signup' ? '0 4px 12px rgba(0, 0, 0, 0.08)' : 'none',
+                  transition: 'all 0.2s ease'
+                }}
               >
                 Sign Up
               </button>
@@ -703,6 +729,18 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                 <button 
                   type="button"
                   className="neu-tab-btn active"
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: 'var(--bg-card, #ffffff)',
+                    color: '#FF5500',
+                    fontWeight: '700',
+                    fontSize: '0.88rem',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
+                  }}
                 >
                   Reset
                 </button>
@@ -811,6 +849,23 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                   onClick={handleLoginSubmit}
                   disabled={isSubmitting}
                   className="neu-btn-primary"
+                  style={{
+                    width: '100%',
+                    padding: '13px 20px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #FF5500 0%, #ff7700 100%)',
+                    color: '#ffffff',
+                    fontWeight: '800',
+                    fontSize: '0.96rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 6px 20px rgba(255, 85, 0, 0.3)',
+                    transition: 'all 0.2s ease'
+                  }}
                 >
                   {isSubmitting ? (
                     <RefreshCw size={18} className="animate-spin" />
@@ -821,9 +876,9 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
                 {/* Divider */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '6px 0' }}>
-                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color)', opacity: 0.6 }}></div>
+                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color, #e2e8f0)', opacity: 0.6 }}></div>
                   <span style={{ fontSize: '12px', color: '#64748B', fontWeight: '600', textTransform: 'lowercase' }}>or</span>
-                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color)', opacity: 0.6 }}></div>
+                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color, #e2e8f0)', opacity: 0.6 }}></div>
                 </div>
 
                 {/* Two Secondary Buttons Side-by-Side: Google + Demo */}
@@ -832,6 +887,23 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                     type="button" 
                     onClick={handleGoogleLogin}
                     className="neu-btn-secondary"
+                    style={{
+                      flex: 1,
+                      padding: '11px 16px',
+                      borderRadius: '12px',
+                      border: '1.5px solid var(--border-color, #cbd5e1)',
+                      background: 'var(--bg-card, #ffffff)',
+                      color: 'var(--text-primary, #1e293b)',
+                      fontWeight: '700',
+                      fontSize: '0.86rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)',
+                      transition: 'all 0.2s ease'
+                    }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -846,7 +918,23 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                     type="button" 
                     onClick={handleDemoArunLogin}
                     className="neu-btn-secondary"
-                    style={{ color: '#FF5500' }}
+                    style={{
+                      flex: 1,
+                      padding: '11px 16px',
+                      borderRadius: '12px',
+                      border: '1.5px solid rgba(255, 85, 0, 0.3)',
+                      background: 'rgba(255, 85, 0, 0.05)',
+                      color: '#FF5500',
+                      fontWeight: '700',
+                      fontSize: '0.86rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 6px rgba(255, 85, 0, 0.08)',
+                      transition: 'all 0.2s ease'
+                    }}
                   >
                     ⚡ Demo Login
                   </button>
@@ -950,34 +1038,53 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
                 <button 
                   type="submit" 
-                  className="auth-submit-btn"
+                  className="neu-btn-primary"
                   disabled={isSubmitting}
+                  style={{
+                    width: '100%',
+                    padding: '13px 20px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #FF5500 0%, #ff7700 100%)',
+                    color: '#ffffff',
+                    fontWeight: '800',
+                    fontSize: '0.96rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 6px 20px rgba(255, 85, 0, 0.3)',
+                    transition: 'all 0.2s ease'
+                  }}
                 >
                   {isSubmitting ? 'Creating Account...' : 'Create Account & Continue'} <ArrowRight size={16} />
                 </button>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '2px 0' }}>
-                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }}></div>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>OR</span>
-                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }}></div>
+                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color, #e2e8f0)' }}></div>
+                  <span style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>OR</span>
+                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color, #e2e8f0)' }}></div>
                 </div>
 
                 <button 
                   type="button" 
                   onClick={handleGoogleLogin}
+                  className="neu-btn-secondary"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '10px',
-                    background: 'var(--bg-input)',
-                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-card, #ffffff)',
+                    border: '1.5px solid var(--border-color, #cbd5e1)',
                     borderRadius: '12px',
                     padding: '11px',
                     fontSize: '0.86rem',
                     fontWeight: '700',
-                    color: 'var(--text-primary)',
+                    color: 'var(--text-primary, #1e293b)',
                     cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)',
                     transition: 'all 0.2s ease'
                   }}
                 >
