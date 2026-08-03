@@ -636,15 +636,15 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                 <Sparkles size={16} /> MEMBER PRIVILEGES
               </div>
 
-              <h2 style={{ fontSize: '2.1rem', fontWeight: '900', lineHeight: '1.22', margin: '0 0 16px 0', color: '#ffffff', letterSpacing: '-0.5px' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '900', lineHeight: '1.22', margin: '0 0 12px 0', color: '#ffffff', letterSpacing: '-0.5px' }}>
                 Your One Stop Mobile Destination
               </h2>
               
-              <p style={{ fontSize: '0.94rem', opacity: '0.9', lineHeight: '1.65', margin: '0 0 32px 0' }}>
+              <p style={{ fontSize: '0.88rem', opacity: '0.9', lineHeight: '1.55', margin: '0 0 20px 0' }}>
                 {redirectMessage || 'Sign in to access your orders, track real-time delivery across India, save delivery addresses, and unlock exclusive discounts.'}
               </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div className="auth-feature-card">
                   <div className="auth-icon-circle"><ShieldCheck size={18} /></div>
                   <span>100% Genuine Products &amp; Guarantee</span>
@@ -660,31 +660,31 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
               </div>
             </div>
 
-            <div style={{ marginTop: '36px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.2)', fontSize: '0.82rem', opacity: '0.88' }}>
+            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.2)', fontSize: '0.82rem', opacity: '0.88' }}>
               Need assistance? Call support: <strong style={{ color: '#ffffff' }}>+91 74485 78507</strong>
             </div>
           </div>
 
           {/* Right Login / Signup / Forgot Password Workspace */}
-          <div className="auth-workspace" style={{ padding: '36px 32px' }}>
+          <div className="auth-workspace">
             
-            {/* Circular Raised Logo Badge (64px) */}
+            {/* Circular Raised Logo Badge (54px) */}
             <div className="neu-logo-badge">
-              <CompanyLogo size={36} />
+              <CompanyLogo size={32} />
             </div>
 
             {/* Heading & Subtext */}
-            <div style={{ textAlign: 'center', marginBottom: '22px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: '600', color: 'var(--text-primary)', margin: '0 0 4px 0', letterSpacing: '-0.3px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+              <h2 style={{ fontSize: '22px', fontWeight: '600', color: 'var(--text-primary)', margin: '0 0 4px 0', letterSpacing: '-0.3px' }}>
                 {activeTab === 'login' ? 'Welcome back' : activeTab === 'signup' ? 'Create Account' : 'Reset Password'}
               </h2>
-              <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>
+              <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
                 {activeTab === 'login' ? 'Sign in to continue' : activeTab === 'signup' ? 'Join Friends Mobile for exclusive member perks' : 'Enter your email or phone to reset password'}
               </p>
             </div>
 
             {/* Segmented Neumorphic Tab Bar */}
-            <div className="neu-tab-bar" style={{ display: 'flex', padding: '4px', borderRadius: '14px', background: 'var(--bg-input, #f1f5f9)', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '24px', gap: '4px' }}>
+            <div className="neu-tab-bar" style={{ display: 'flex', padding: '4px', borderRadius: '14px', background: 'var(--bg-input, #f1f5f9)', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '16px', gap: '4px' }}>
               <button 
                 type="button"
                 onClick={() => { setActiveTab('login'); setForgotStep(1); }}
