@@ -226,7 +226,7 @@ export default function CartModal({
           if (data && data.success && data.paymentStatus === 'Paid') {
             clearInterval(intervalId);
             setIsAutoVerifying(false);
-            if (addToast) addToast('⚡ Payment Confirmed via Webhook Auto-Verification!', '🎉');
+            if (addToast) addToast('Payment Confirmed via Webhook Auto-Verification!', 'success');
             const verifiedOrder = {
               ...pendingOrder,
               paymentMethod: 'UPI QR Code (Webhook Auto-Verified)',
@@ -249,7 +249,7 @@ export default function CartModal({
   async function handleSimulatePaymentSuccess() {
     if (!pendingOrder) return;
     try {
-      if (addToast) addToast('Simulating Instant Webhook Auto-Verification...', '⚡');
+      if (addToast) addToast('Simulating Instant Webhook Auto-Verification...', 'loading');
       const res = await fetch(`${API_BASE}/payments/simulate-qr-success`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -257,7 +257,7 @@ export default function CartModal({
       });
       const data = await res.json();
       if (data && data.success) {
-        if (addToast) addToast(`✅ Auto-Verified Payment for Order #${pendingOrder.orderId}!`, '🎉');
+        if (addToast) addToast(`Auto-Verified Payment for Order #${pendingOrder.orderId}!`, 'success');
         const verifiedOrder = {
           ...pendingOrder,
           paymentMethod: 'UPI QR Code (Auto-Verified)',
@@ -267,7 +267,7 @@ export default function CartModal({
         executeOrderPlacement(verifiedOrder);
       }
     } catch (err) {
-      if (addToast) addToast(`Simulation status: ${err.message}`, 'ℹ️');
+      if (addToast) addToast(`Simulation status: ${err.message}`, 'info');
     }
   }
 
@@ -284,7 +284,7 @@ export default function CartModal({
     if (userClaimed) {
       const minVal = userClaimed.minOrderValue || 299;
       if (currentSubtotal < minVal) {
-        if (addToast) addToast(`Redeem Code "${code}" requires a minimum order of ₹${minVal}.`, '⚠️');
+        if (addToast) addToast(`Redeem Code "${code}" requires a minimum order of ₹${minVal}.`, 'warning');
         return;
       }
       setAppliedCoupon({
@@ -293,65 +293,65 @@ export default function CartModal({
         flatDiscount: userClaimed.flatDiscount || 0,
         title: userClaimed.title || `${code} Offer Coupon`
       });
-      if (addToast) addToast(`Applied Unique Redeem Code ${code}!`, '🎉');
+      if (addToast) addToast(`Applied Unique Redeem Code ${code}!`, 'success');
       return;
     }
 
     // 2. Pattern Match for dynamic generated prefixes (e.g. FM-10OFF-XXXX, FM-50OFF-XXXX)
     if (code.startsWith('FM-10OFF-')) {
       if (currentSubtotal < 299) {
-        if (addToast) addToast('Coupon FM-10OFF requires minimum order of ₹299.', '⚠️');
+        if (addToast) addToast('Coupon FM-10OFF requires minimum order of ₹299.', 'warning');
         return;
       }
       setAppliedCoupon({ code, discountPct: 10, title: '10% OFF Welcome Coupon' });
-      if (addToast) addToast('Applied 10% OFF Welcome Coupon!', '🎉');
+      if (addToast) addToast('Applied 10% OFF Welcome Coupon!', 'success');
       return;
     }
     if (code.startsWith('FM-50OFF-')) {
       if (currentSubtotal < 499) {
-        if (addToast) addToast('Coupon FM-50OFF requires minimum order of ₹499.', '⚠️');
+        if (addToast) addToast('Coupon FM-50OFF requires minimum order of ₹499.', 'warning');
         return;
       }
       setAppliedCoupon({ code, flatDiscount: 50, title: '₹50 OFF Flat Discount' });
-      if (addToast) addToast('Applied ₹50 Flat Discount Coupon!', '🎉');
+      if (addToast) addToast('Applied ₹50 Flat Discount Coupon!', 'success');
       return;
     }
     if (code.startsWith('FM-100OFF-')) {
       if (currentSubtotal < 799) {
-        if (addToast) addToast('Coupon FM-100OFF requires minimum order of ₹799.', '⚠️');
+        if (addToast) addToast('Coupon FM-100OFF requires minimum order of ₹799.', 'warning');
         return;
       }
       setAppliedCoupon({ code, flatDiscount: 100, title: '₹100 OFF Special Coupon' });
-      if (addToast) addToast('Applied ₹100 Flat Discount Coupon!', '🎉');
+      if (addToast) addToast('Applied ₹100 Flat Discount Coupon!', 'success');
       return;
     }
     if (code.startsWith('FM-200OFF-')) {
       if (currentSubtotal < 999) {
-        if (addToast) addToast('Coupon FM-200OFF requires minimum order of ₹999.', '⚠️');
+        if (addToast) addToast('Coupon FM-200OFF requires minimum order of ₹999.', 'warning');
         return;
       }
       setAppliedCoupon({ code, flatDiscount: 200, title: '₹200 OFF Mega Coupon' });
-      if (addToast) addToast('Applied ₹200 Flat Discount Coupon!', '🎉');
+      if (addToast) addToast('Applied ₹200 Flat Discount Coupon!', 'success');
       return;
     }
     if (code.startsWith('FM-300OFF-')) {
       if (currentSubtotal < 1499) {
-        if (addToast) addToast('Coupon FM-300OFF requires minimum order of ₹1499.', '⚠️');
+        if (addToast) addToast('Coupon FM-300OFF requires minimum order of ₹1499.', 'warning');
         return;
       }
       setAppliedCoupon({ code, flatDiscount: 300, title: '₹300 OFF Festival Coupon' });
-      if (addToast) addToast('Applied ₹300 Flat Discount Coupon!', '🎉');
+      if (addToast) addToast('Applied ₹300 Flat Discount Coupon!', 'success');
       return;
     }
 
     if (code === 'FRIENDS10') {
       setAppliedCoupon({ code: 'FRIENDS10', discountPct: 10, title: '10% OFF First Purchase' });
-      if (addToast) addToast('Applied FRIENDS10 - 10% OFF!', '🎉');
+      if (addToast) addToast('Applied FRIENDS10 - 10% OFF!', 'success');
     } else if (code === 'FREESHIP') {
       setAppliedCoupon({ code: 'FREESHIP', isFreeShip: true, title: 'FREE Express Delivery' });
-      if (addToast) addToast('Applied FREESHIP - FREE Shipping Unlocked!', '🎉');
+      if (addToast) addToast('Applied FREESHIP - FREE Shipping Unlocked!', 'success');
     } else {
-      if (addToast) addToast(`Invalid Coupon Code "${code}". Please check your code.`, '❌');
+      if (addToast) addToast(`Invalid Coupon Code "${code}". Please check your code.`, 'error');
     }
   }
 
@@ -466,7 +466,7 @@ export default function CartModal({
     if (onUpdateUserProfile) {
       onUpdateUserProfile(updatedUser);
     }
-    if (addToast) addToast(`🎉 You earned +${earned} Friends Reward Points! Total: ${updatedPts} PTS`, '🎁');
+    if (addToast) addToast(`You earned +${earned} Friends Reward Points! Total: ${updatedPts} PTS`, 'coupon');
   }
 
   function executeOrderPlacement(orderToPlace) {
@@ -721,9 +721,9 @@ export default function CartModal({
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '6px' }}>
                       <span style={{ fontWeight: '700' }}>
                         {isFirstOrder 
-                          ? '🎉 1st Order Special Offer: FREE Shipping Unlocked!' 
+                          ? '1st Order Special Offer: FREE Shipping Unlocked!' 
                           : (isFreeShipping 
-                              ? '🎉 Congratulations! You unlocked FREE Shipping' 
+                              ? 'Congratulations! You unlocked FREE Shipping' 
                               : `Add ₹${amountToFreeShipping} more for FREE Express Delivery (Free Shipping Above ₹${freeThreshold})`)}
                       </span>
                       <span style={{ color: '#FF5500', fontWeight: '800' }}>{progressPercent}%</span>
@@ -912,7 +912,7 @@ export default function CartModal({
                       <span>Delivery Charge:</span>
                       <strong style={{ color: isFreeShipping ? '#22c55e' : 'var(--text-primary)' }}>
                         {isFreeShipping 
-                          ? (isFirstOrder ? '🎉 FREE (1st Order Offer!)' : 'FREE (Above ₹1,000)') 
+                          ? (isFirstOrder ? 'FREE (1st Order Offer!)' : 'FREE (Above ₹1,000)') 
                           : `₹${shippingFeeVal}`}
                       </strong>
                     </div>

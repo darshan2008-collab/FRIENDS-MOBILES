@@ -302,7 +302,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       });
 
       if (ok && data && data.success && data.user) {
-        onLoginSuccess(data.user);
+        onLoginSuccess({ ...data.user, isNewUser: true });
         if (addToast) addToast(data.message || `Account created! Welcome, ${data.user.name}`, 'success');
         onClose();
       } else {
@@ -500,16 +500,16 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         });
         if (ok && data?.user) {
           if (onLoginSuccess) onLoginSuccess(data.user);
-          if (addToast) addToast(`Welcome, ${data.user.name}! Signed in with Google. ✅`, 'success');
+          if (addToast) addToast(`Welcome, ${data.user.name}! Signed in with Google.`, 'success');
         } else {
           const u = { id: Date.now(), name: name || email.split('@')[0], email: email.trim(), phone: '', picture: picture || '', authProvider: 'google' };
           if (onLoginSuccess) onLoginSuccess(u);
-          if (addToast) addToast(`Welcome, ${u.name}! ✅`, 'success');
+          if (addToast) addToast(`Welcome, ${u.name}!`, 'success');
         }
       } catch (_) {
         const u = { id: Date.now(), name: name || email.split('@')[0], email: email.trim(), phone: '', picture: picture || '', authProvider: 'google' };
         if (onLoginSuccess) onLoginSuccess(u);
-        if (addToast) addToast(`Signed in with Google as ${u.name}! ✅`, 'success');
+        if (addToast) addToast(`Signed in with Google as ${u.name}!`, 'success');
       }
       setIsSubmitting(false);
       if (onClose) onClose();
@@ -936,7 +936,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                       transition: 'all 0.2s ease'
                     }}
                   >
-                    ⚡ Demo Login
+                    <Zap size={16} /> Demo Login
                   </button>
                 </div>
 

@@ -265,13 +265,13 @@ export default function AdminModal({
         if (ok && data && data.success) {
           const counts = data.restoredCounts || {};
           const msg = `Restored successfully! (${counts.users || 0} users, ${counts.orders || 0} orders, ${counts.products || 0} products)`;
-          if (addToast) addToast(`✅ ${msg}`, '🎉');
+          if (addToast) addToast(msg, 'success');
           setTimeout(() => window.location.reload(), 1200);
         } else {
-          if (addToast) addToast(`Restore error: ${data?.message || data?.error || 'Failed to restore file'}`, '⚠️');
+          if (addToast) addToast(`Restore error: ${data?.message || data?.error || 'Failed to restore file'}`, 'warning');
         }
       } catch (err) {
-        if (addToast) addToast(`Invalid JSON file: ${err.message}`, '❌');
+        if (addToast) addToast(`Invalid JSON file: ${err.message}`, 'error');
       } finally {
         setIsRestoringUpload(false);
         if (e.target) e.target.value = '';
@@ -285,7 +285,7 @@ export default function AdminModal({
       return;
     }
     setIsSyncingGDrive(true);
-    if (addToast) addToast('Connecting to Google Drive to download latest backup...', '☁️');
+    if (addToast) addToast('Connecting to Google Drive to download latest backup...', 'info');
 
     try {
       const apiHost = getApiHost();
@@ -294,10 +294,10 @@ export default function AdminModal({
       });
 
       if (ok && data && data.success) {
-        if (addToast) addToast(`✅ Restored from Google Drive snapshot "${data.source || 'Latest'}"!`, '🎉');
+        if (addToast) addToast(`Restored from Google Drive snapshot "${data.source || 'Latest'}"!`, 'success');
         setTimeout(() => window.location.reload(), 1200);
       } else {
-        if (addToast) addToast(`Google Drive sync notice: ${data?.message || 'Drive file synced'}`, 'ℹ️');
+        if (addToast) addToast(`Google Drive sync notice: ${data?.message || 'Drive file synced'}`, 'info');
       }
     } catch (err) {
       if (addToast) addToast(`Drive restore status: ${err.message}`, 'ℹ️');

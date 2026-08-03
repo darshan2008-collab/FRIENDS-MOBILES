@@ -710,13 +710,13 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                           type="button"
                           onClick={handleExportUserOrdersExcel}
                           style={{
-                            padding: '8px 16px',
-                            borderRadius: '10px',
-                            border: '1px solid rgba(16, 185, 129, 0.4)',
-                            background: 'rgba(16, 185, 129, 0.1)',
-                            color: '#10b981',
-                            fontWeight: '800',
-                            fontSize: '0.82rem',
+                            padding: '6px 14px',
+                            borderRadius: '20px',
+                            border: 'none',
+                            background: '#10b981',
+                            color: '#ffffff',
+                            fontWeight: '700',
+                            fontSize: '0.8rem',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -724,7 +724,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                             boxShadow: '0 2px 8px rgba(16, 185, 129, 0.15)'
                           }}
                         >
-                          📊 {isTamil ? 'எக்செல் பதிவிறக்கம்' : 'Download Excel Sheet'}
+                          {isTamil ? 'எக்செல் பதிவிறக்கம்' : 'Download Excel Sheet'}
                         </button>
                       )}
 
@@ -771,7 +771,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                     borderRadius: '12px',
                                     fontWeight: '800'
                                   }}>
-                                    {(order.status || '').toLowerCase().includes('cancel') ? '🔴 Cancelled' : (order.status || '').toLowerCase().includes('return') ? '🔄 ' + order.status : (order.status || 'Order Placed')}
+                                    {(order.status || '').toLowerCase().includes('cancel') ? 'Cancelled' : order.status || 'Order Placed'}
                                   </span>
                                 </div>
                                 {order.cancellationReason && (
@@ -855,7 +855,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                     transition: 'all 0.2s ease'
                                   }}
                                 >
-                                  🚫 {isTamil ? 'ஆர்டரை ரத்து செய்க' : 'Cancel Order'}
+                                  {isTamil ? 'ஆர்டரை ரத்து செய்க' : 'Cancel Order'}
                                 </button>
                               )}
 
@@ -878,13 +878,13 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                     transition: 'all 0.2s ease'
                                   }}
                                 >
-                                  🔄 {isTamil ? 'பொருளைத் திருப்புக / மாற்றுக' : 'Return / Exchange Product'}
+                                  {isTamil ? 'பொருளைத் திருப்புக / மாற்றுக' : 'Return / Exchange Product'}
                                 </button>
                               )}
 
                               {String(order.paymentMethod || '').toLowerCase().includes('cod') || String(order.paymentMethod || '').toLowerCase().includes('cash') ? (
                                 <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic', background: 'var(--bg-card)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                                  📦 {isTamil ? 'கேஷ் ஆன் டெலிவரி (COD ஆர்டர்களுக்கு E-Bill கிடைக்காது)' : 'Cash on Delivery (E-Bill unavailable for COD)'}
+                                  {isTamil ? 'கேஷ் ஆன் டெலிவரி (COD ஆர்டர்களுக்கு E-Bill கிடைக்காது)' : 'Cash on Delivery (E-Bill unavailable for COD)'}
                                 </span>
                               ) : (
                                 <button
@@ -1232,7 +1232,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
             }}
           >
             <h3 style={{ margin: '0 0 8px 0', fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🚫 {isTamil ? 'ஆர்டர் ரத்து செய்தல் #' : 'Cancel Order #'}{cancelTargetOrder.orderId}
+              {isTamil ? 'ஆர்டர் ரத்து செய்தல் #' : 'Cancel Order #'}{cancelTargetOrder.orderId}
             </h3>
             <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.5' }}>
               {isTamil ? 'இந்த ஆர்டரை நிச்சயமாக ரத்து செய்ய விரும்புகிறீர்களா? கீழே உள்ள காரணத்தைத் தேர்ந்தெடுக்கவும்:' : 'Are you sure you want to cancel this order? Please select a reason below to process your cancellation:'}
@@ -1344,7 +1344,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
             }}
           >
             <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', fontWeight: '800', color: '#a855f7', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🔄 {isTamil ? 'பொருளைத் திருப்புதல் / மாற்றுதல் #' : 'Return / Exchange Order #'}{returnTargetOrder.orderId}
+              {isTamil ? 'பொருளைத் திருப்புதல் / மாற்றுதல் #' : 'Return / Exchange Order #'}{returnTargetOrder.orderId}
             </h3>
             <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.5' }}>
               {isTamil ? 'பொருளைத் திரும்ப அனுப்ப அல்லது மாற்ற கோரிக்கை சமர்ப்பிக்கவும். எங்கள் 7 நாள் உத்தரவாதத்தின் கீழ் 24 மணி நேரத்திற்குள் செயல்படுத்தப்படும்:' : 'Submit a return or replacement request. Our FRIENDS MOBILE support team will process your request within 24 hours under our 7-Day Guarantee:'}
@@ -1367,7 +1367,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                     fontWeight: '800', fontSize: '0.8rem', cursor: 'pointer'
                   }}
                 >
-                  🔄 {isTamil ? 'இலவசமாக மாற்றுக' : 'Free Replacement'}
+                  {isTamil ? 'இலவசமாக மாற்றுக' : 'Free Replacement'}
                 </button>
                 <button
                   type="button"

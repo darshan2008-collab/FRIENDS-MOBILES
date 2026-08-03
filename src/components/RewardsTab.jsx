@@ -117,7 +117,7 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
       onUpdateUserProfile(updatedUser);
     }
 
-    if (addToast) addToast(`🎉 Unlocked Unique Redeem Code: ${uniqueRedeemCode}`, '✨');
+    if (addToast) addToast(`Unlocked Unique Redeem Code: ${uniqueRedeemCode}`, 'success');
   };
 
   const handleCopyCode = (code) => {

@@ -110,7 +110,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
     };
 
     onAddToCart(customCoverProduct);
-    if (addToast) addToast(`Customized Back Cover for ${selectedBrand} ${finalModel} added to cart!`, '🎉');
+    if (addToast) addToast(`Customized Back Cover for ${selectedBrand} ${finalModel} added to cart!`, 'cart');
     onClose();
   };
 

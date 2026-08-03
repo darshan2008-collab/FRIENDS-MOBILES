@@ -16,6 +16,7 @@ import CustomBackCoverModal from './components/CustomBackCoverModal';
 import CustomPhotoFrameModal from './components/CustomPhotoFrameModal';
 import MobileBottomBar from './components/MobileBottomBar';
 import CartModal from './components/CartModal';
+import WelcomeOnboardingModal from './components/WelcomeOnboardingModal';
 import ProductDetailModal from './components/ProductDetailModal';
 import BrandMarquee from './components/BrandMarquee';
 import ShoppingPortal from './components/ShoppingPortal';
@@ -162,6 +163,8 @@ export default function App() {
   const [shopCategory, setShopCategory] = useState('All');
   const [authRedirectMessage, setAuthRedirectMessage] = useState('');
   const [openCartAfterLogin, setOpenCartAfterLogin] = useState(false);
+  const [isWelcomeOnboardingOpen, setIsWelcomeOnboardingOpen] = useState(false);
+  const [onboardingUser, setOnboardingUser] = useState(null);
 
   const handleOpenShop = (category = 'All') => {
     setShopCategory(category);
@@ -518,6 +521,19 @@ export default function App() {
       localStorage.setItem('fm_user', JSON.stringify(user));
     } catch {}
     setIsAuthOpen(false);
+
+    // Trigger Flipkart/Amazon style Welcome Onboarding Guide for first-time login / signup
+    const userKey = user.id || user.email || user.phone || 'user';
+    const hasBeenOnboarded = localStorage.getItem(`fm_onboarded_${userKey}`);
+    if (user.isNewUser || !hasBeenOnboarded) {
+      try {
+        localStorage.setItem(`fm_onboarded_${userKey}`, 'true');
+      } catch (_) {}
+      setOnboardingUser(user);
+      setTimeout(() => {
+        setIsWelcomeOnboardingOpen(true);
+      }, 350);
+    }
 
     if (pendingCartItem) {
       const itemToCart = pendingCartItem;
@@ -904,6 +920,17 @@ export default function App() {
           redirectMessage={authRedirectMessage}
           onOpenAdmin={() => setIsAdminOpen(true)}
           t={t}
+        />
+      )}
+
+      {isWelcomeOnboardingOpen && (
+        <WelcomeOnboardingModal 
+          isOpen={isWelcomeOnboardingOpen}
+          onClose={() => setIsWelcomeOnboardingOpen(false)}
+          user={onboardingUser || currentUser}
+          onOpenCustomCover={() => setIsCustomCoverOpen(true)}
+          onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+          addToast={addToast}
         />
       )}
 
