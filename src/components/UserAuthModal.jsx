@@ -499,6 +499,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     setIsSubmitting(true);
 
     const completeGoogleAuth = async (email, name, picture, credentialToken) => {
+      let finalUser = null;
       try {
         const { ok, data } = await safeFetchApi('/auth/google', {
           method: 'POST',
@@ -511,21 +512,51 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
           })
         });
         if (ok && data?.user) {
+          finalUser = data.user;
           if (onLoginSuccess) onLoginSuccess(data.user);
           if (addToast) addToast(`Welcome, ${data.user.name}! Signed in with Google.`, 'success');
         } else {
-          const u = { id: Date.now(), name: name || email.split('@')[0], email: email.trim(), phone: '', picture: picture || '', authProvider: 'google' };
-          if (onLoginSuccess) onLoginSuccess(u);
-          if (addToast) addToast(`Welcome, ${u.name}!`, 'success');
+          finalUser = { id: Date.now(), name: name || email.split('@')[0], email: email.trim(), phone: '', picture: picture || '', authProvider: 'google' };
+          if (onLoginSuccess) onLoginSuccess(finalUser);
+          if (addToast) addToast(`Welcome, ${finalUser.name}!`, 'success');
         }
       } catch (_) {
-        const u = { id: Date.now(), name: name || email.split('@')[0], email: email.trim(), phone: '', picture: picture || '', authProvider: 'google' };
-        if (onLoginSuccess) onLoginSuccess(u);
-        if (addToast) addToast(`Signed in with Google as ${u.name}!`, 'success');
+        finalUser = { id: Date.now(), name: name || email.split('@')[0], email: email.trim(), phone: '', picture: picture || '', authProvider: 'google' };
+        if (onLoginSuccess) onLoginSuccess(finalUser);
+        if (addToast) addToast(`Signed in with Google as ${finalUser.name}!`, 'success');
       }
+
+      // If login completed on website via APK request, trigger deep link back to APK app
+      try {
+        const apkRedirect = sessionStorage.getItem('fm_apk_redirect');
+        if (apkRedirect && finalUser) {
+          sessionStorage.removeItem('fm_apk_redirect');
+          const targetUrl = `${apkRedirect}?user=${encodeURIComponent(JSON.stringify(finalUser))}`;
+          window.location.href = targetUrl;
+          return;
+        }
+      } catch (_) {}
+
       setIsSubmitting(false);
       if (onClose) onClose();
     };
+
+    const isCapacitorApp = typeof window !== 'undefined' && (
+      window.Capacitor !== undefined ||
+      window.location.protocol === 'capacitor:' ||
+      (window.location.hostname === 'localhost' && window.location.port !== '5173' && window.location.port !== '3000' && window.location.port !== '5000')
+    );
+
+    if (isCapacitorApp) {
+      try {
+        // Open official website Google Auth bridge endpoint to avoid Google Access Blocked error
+        const officialSiteUrl = `https://friendsmobiles.unitaryx.org/?open_auth=google&app_redirect=${encodeURIComponent('com.friendsmobile.app://auth-success')}`;
+        window.open(officialSiteUrl, '_system') || window.open(officialSiteUrl, '_blank');
+      } catch (_) {}
+      setIsSubmitting(false);
+      if (addToast) addToast('Opening Google Sign-In on official site... Completing login will return to app.', 'info');
+      return;
+    }
 
     // ─── 1. Primary: Try In-App Google Identity Services Token Client (No browser redirect needed)
     if (typeof window !== 'undefined' && window.google?.accounts?.oauth2) {
@@ -558,27 +589,8 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         tokenClient.requestAccessToken({ prompt: 'select_account' });
         return;
       } catch (e) {
-        // fall through to deep link
+        // fall through
       }
-    }
-
-    // ─── 2. Capacitor / Native Android Deep Link Fallback (com.friendsmobile.app://)
-    const isCapacitorApp = typeof window !== 'undefined' && (
-      window.Capacitor !== undefined ||
-      window.location.protocol === 'capacitor:' ||
-      (window.location.hostname === 'localhost' && window.location.port !== '5173' && window.location.port !== '3000' && window.location.port !== '5000')
-    );
-
-    if (isCapacitorApp) {
-      try {
-        // Redirect uri uses custom app scheme to return directly to APK
-        const appRedirectUri = 'com.friendsmobile.app://google-auth';
-        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(appRedirectUri)}&response_type=token&scope=email%20profile%20openid`;
-        window.open(authUrl, '_system') || window.open(authUrl, '_blank');
-      } catch (_) {}
-      setIsSubmitting(false);
-      if (addToast) addToast('Opening Google Sign-In... Please complete in browser to return to app.', 'info');
-      return;
     }
 
     // ─── 3. Fallback: GSI ID One Tap for Web

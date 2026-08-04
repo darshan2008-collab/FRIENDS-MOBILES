@@ -62,7 +62,7 @@ exports.sendOtp = async (req, res) => {
       existingUser = fileUsers.find(u => u && u.email && u.email.toLowerCase().trim() === cleanEmail);
     }
 
-    if (!existingUser) {
+    if (!existingUser && (purpose === 'password_reset' || purpose === 'reset')) {
       return res.status(404).json({
         success: false,
         message: 'No registered account found with this email address.'

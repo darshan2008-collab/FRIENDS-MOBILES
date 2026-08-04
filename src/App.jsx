@@ -312,6 +312,89 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // ─── Deep Link & Web-to-APK Google Auth Handler ─────────────────────────────
+  useEffect(() => {
+    const handleAuthRedirectAndDeepLink = async () => {
+      try {
+        const href = window.location.href;
+        let search = window.location.search;
+        let hash = window.location.hash;
+
+        if (href.includes('?')) {
+          search = '?' + href.split('?')[1].split('#')[0];
+        }
+        if (href.includes('#')) {
+          hash = '#' + href.split('#')[1];
+        }
+
+        const params = new URLSearchParams(search || hash.replace('#', '?'));
+        
+        // 1. If website opened with open_auth=google (from APK redirect request)
+        if (params.get('open_auth') === 'google') {
+          const redirectScheme = params.get('app_redirect') || 'com.friendsmobile.app://auth-success';
+          sessionStorage.setItem('fm_apk_redirect', redirectScheme);
+          setIsAuthModalOpen(true);
+        }
+
+        // 2. If APK opened from deep link com.friendsmobile.app://auth-success?user=...
+        const userParam = params.get('user') || params.get('userProfile');
+        const tokenParam = params.get('token') || params.get('access_token');
+        const emailParam = params.get('email');
+
+        if (userParam) {
+          try {
+            const parsedUser = JSON.parse(decodeURIComponent(userParam));
+            if (parsedUser && parsedUser.email) {
+              setCurrentUser(parsedUser);
+              localStorage.setItem('fm_user', JSON.stringify(parsedUser));
+              addToast(`Welcome back, ${parsedUser.name || parsedUser.email}! Signed in with Google.`, 'success');
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          } catch (_) {}
+        } else if (tokenParam && !tokenParam.startsWith('rst_')) {
+          try {
+            const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+              headers: { Authorization: `Bearer ${tokenParam}` }
+            });
+            const info = await res.json();
+            if (info && info.email) {
+              const u = {
+                id: Date.now(),
+                name: info.name || info.email.split('@')[0],
+                email: info.email.trim(),
+                picture: info.picture || '',
+                authProvider: 'google'
+              };
+              setCurrentUser(u);
+              localStorage.setItem('fm_user', JSON.stringify(u));
+              addToast(`Signed in with Google as ${u.name}!`, 'success');
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          } catch (_) {}
+        } else if (emailParam) {
+          const u = {
+            id: Date.now(),
+            name: params.get('name') ? decodeURIComponent(params.get('name')) : emailParam.split('@')[0],
+            email: decodeURIComponent(emailParam).trim(),
+            authProvider: 'google'
+          };
+          setCurrentUser(u);
+          localStorage.setItem('fm_user', JSON.stringify(u));
+          addToast(`Signed in with Google as ${u.name}!`, 'success');
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } catch (_) {}
+    };
+
+    handleAuthRedirectAndDeepLink();
+    window.addEventListener('hashchange', handleAuthRedirectAndDeepLink);
+    window.addEventListener('popstate', handleAuthRedirectAndDeepLink);
+    return () => {
+      window.removeEventListener('hashchange', handleAuthRedirectAndDeepLink);
+      window.removeEventListener('popstate', handleAuthRedirectAndDeepLink);
+    };
+  }, []);
+
   // High-Performance Smooth Scroll Observer
   useEffect(() => {
     const observerCallback = (entries) => {
