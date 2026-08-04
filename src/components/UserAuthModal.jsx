@@ -142,6 +142,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     setShowSignupPassword(false);
     setShowNewPassword(false);
     setShowConfirmPassword(false);
+    setIsSubmitting(false);
   };
 
   // Reset credentials & form inputs whenever modal opens
@@ -221,7 +222,9 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   if (!isOpen) return null;
 
   const handleLoginSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (isSubmitting) return;
+
     if (!loginIdentity || !loginIdentity.trim()) {
       if (addToast) addToast('Please enter your username, email address, or phone number', 'warning');
       return;
@@ -231,65 +234,71 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       return;
     }
 
-    const cleanIdentity = loginIdentity.trim().toLowerCase();
-    const cleanPassword = (loginPassword || '').trim().toLowerCase();
+    setIsSubmitting(true);
+    try {
+      const cleanIdentity = loginIdentity.trim().toLowerCase();
+      const cleanPassword = (loginPassword || '').trim().toLowerCase();
 
-    // Admin Login Check (matches username 'Friendsmobile', 'admin', 'admin@friendsmobile.com', or passwords starting with 'fm@')
-    if (
-      cleanIdentity === 'friendsmobile' || 
-      cleanIdentity === 'admin' || 
-      cleanIdentity.includes('admin') || 
-      cleanIdentity.includes('friendsmobile') || 
-      cleanPassword.startsWith('fm@') || 
-      cleanPassword.includes('friendsmobile')
-    ) {
+      // Admin Login Check (matches username 'Friendsmobile', 'admin', 'admin@friendsmobile.com', or passwords starting with 'fm@')
+      if (
+        cleanIdentity === 'friendsmobile' || 
+        cleanIdentity === 'admin' || 
+        cleanIdentity.includes('admin') || 
+        cleanIdentity.includes('friendsmobile') || 
+        cleanPassword.startsWith('fm@') || 
+        cleanPassword.includes('friendsmobile')
+      ) {
+        try {
+          const { data, ok } = await safeFetchApi('/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: loginIdentity.trim(),
+              password: loginPassword
+            })
+          });
+
+          if (data && data.success) {
+            sessionStorage.setItem('fm_admin_pending_2fa', 'true');
+            sessionStorage.setItem('fm_admin_username', loginIdentity.trim());
+            if (data.token) {
+              sessionStorage.setItem('fm_admin_token', data.token);
+              sessionStorage.removeItem('fm_admin_pending_2fa');
+              if (addToast) addToast('👑 Executive Admin Portal Authenticated & Unlocked!', 'success');
+            } else {
+              if (addToast) addToast('Primary credentials verified! Enter your 6-digit Security PIN.', 'info');
+            }
+            setIsSubmitting(false);
+            onClose();
+            if (onOpenAdmin) onOpenAdmin();
+            return;
+          }
+        } catch (adminErr) {
+          console.warn("Admin login check failed, attempting standard customer login:", adminErr);
+        }
+      }
+
+      // Standard Customer Login
       try {
-        const { data, ok } = await safeFetchApi('/admin/login', {
+        const { data, ok } = await safeFetchApi('/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: loginIdentity.trim(),
-            password: loginPassword
-          })
+          body: JSON.stringify({ identity: loginIdentity.trim(), password: loginPassword })
         });
 
-        if (data && data.success) {
-          sessionStorage.setItem('fm_admin_pending_2fa', 'true');
-          sessionStorage.setItem('fm_admin_username', loginIdentity.trim());
-          if (data.token) {
-            sessionStorage.setItem('fm_admin_token', data.token);
-            sessionStorage.removeItem('fm_admin_pending_2fa');
-            if (addToast) addToast('👑 Executive Admin Portal Authenticated & Unlocked!', 'success');
-          } else {
-            if (addToast) addToast('Primary credentials verified! Enter your 6-digit Security PIN.', 'info');
-          }
+        if (data && data.success && data.user) {
+          onLoginSuccess(data.user);
+          if (addToast) addToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
           onClose();
-          if (onOpenAdmin) onOpenAdmin();
-          return;
+        } else {
+          if (addToast) addToast((data && data.message) || 'Invalid username/email or password', 'error');
         }
-      } catch (adminErr) {
-        console.warn("Admin login check failed, attempting standard customer login:", adminErr);
+      } catch (err) {
+        console.warn("Login connection error:", err);
+        if (addToast) addToast('Failed to connect to login server. Please try again.', 'error');
       }
-    }
-
-    // Standard Customer Login
-    try {
-      const { data, ok } = await safeFetchApi('/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identity: loginIdentity.trim(), password: loginPassword })
-      });
-
-      if (data && data.success && data.user) {
-        onLoginSuccess(data.user);
-        if (addToast) addToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
-        onClose();
-      } else {
-        if (addToast) addToast((data && data.message) || 'Invalid username/email or password', 'error');
-      }
-    } catch (err) {
-      console.warn("Login connection error:", err);
-      if (addToast) addToast('Failed to connect to login server. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -741,7 +750,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
             <div className="neu-tab-bar" style={{ display: 'flex', padding: '4px', borderRadius: '14px', background: 'var(--bg-input, #f1f5f9)', border: '1px solid var(--border-color, #e2e8f0)', marginBottom: '16px', gap: '4px' }}>
               <button 
                 type="button"
-                onClick={() => { setActiveTab('login'); setForgotStep(1); }}
+                onClick={() => { setActiveTab('login'); setForgotStep(1); setIsSubmitting(false); }}
                 className={`neu-tab-btn ${activeTab === 'login' ? 'active' : ''}`}
                 style={{
                   flex: 1,
@@ -761,7 +770,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
               </button>
               <button 
                 type="button"
-                onClick={() => { setActiveTab('signup'); setForgotStep(1); }}
+                onClick={() => { setActiveTab('signup'); setForgotStep(1); setIsSubmitting(false); }}
                 className={`neu-tab-btn ${activeTab === 'signup' ? 'active' : ''}`}
                 style={{
                   flex: 1,
