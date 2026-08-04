@@ -527,24 +527,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       if (onClose) onClose();
     };
 
-    const isCapacitorApp = typeof window !== 'undefined' && (
-      window.Capacitor !== undefined ||
-      window.location.protocol === 'capacitor:' ||
-      (window.location.hostname === 'localhost' && window.location.port !== '5173' && window.location.port !== '3000' && window.location.port !== '5000')
-    );
-
-    if (isCapacitorApp) {
-      try {
-        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent('https://friendsmobiles.unitaryx.org')}&response_type=token&scope=email%20profile%20openid`;
-        window.open(authUrl, '_system') || window.open(authUrl, '_blank');
-      } catch (_) {}
-      setIsSubmitting(false);
-      if (addToast) addToast('Google OAuth opened in system browser. Or sign in instantly via Email OTP below!', 'info');
-      setActiveTab('otp');
-      return;
-    }
-
-    // ─── Primary: Google Identity Services Token Client (no redirect URI needed)
+    // ─── 1. Primary: Try In-App Google Identity Services Token Client (No browser redirect needed)
     if (typeof window !== 'undefined' && window.google?.accounts?.oauth2) {
       try {
         const tokenClient = window.google.accounts.oauth2.initTokenClient({
@@ -553,7 +536,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
           callback: async (tokenResponse) => {
             if (tokenResponse?.error) {
               setIsSubmitting(false);
-              if (addToast) addToast(`Google Sign-In: ${tokenResponse.error}. Please try Email OTP below.`, 'error');
+              if (addToast) addToast(`Google Sign-In: ${tokenResponse.error}. Switched to Email OTP.`, 'error');
               setActiveTab('otp');
               return;
             }
@@ -575,11 +558,30 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         tokenClient.requestAccessToken({ prompt: 'select_account' });
         return;
       } catch (e) {
-        // fall through
+        // fall through to deep link
       }
     }
 
-    // ─── Fallback: GSI ID One Tap
+    // ─── 2. Capacitor / Native Android Deep Link Fallback (com.friendsmobile.app://)
+    const isCapacitorApp = typeof window !== 'undefined' && (
+      window.Capacitor !== undefined ||
+      window.location.protocol === 'capacitor:' ||
+      (window.location.hostname === 'localhost' && window.location.port !== '5173' && window.location.port !== '3000' && window.location.port !== '5000')
+    );
+
+    if (isCapacitorApp) {
+      try {
+        // Redirect uri uses custom app scheme to return directly to APK
+        const appRedirectUri = 'com.friendsmobile.app://google-auth';
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(appRedirectUri)}&response_type=token&scope=email%20profile%20openid`;
+        window.open(authUrl, '_system') || window.open(authUrl, '_blank');
+      } catch (_) {}
+      setIsSubmitting(false);
+      if (addToast) addToast('Opening Google Sign-In... Please complete in browser to return to app.', 'info');
+      return;
+    }
+
+    // ─── 3. Fallback: GSI ID One Tap for Web
     if (typeof window !== 'undefined' && window.google?.accounts?.id) {
       try {
         window.google.accounts.id.initialize({
@@ -610,11 +612,9 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
     // ─── GSI not loaded yet — switch to OTP tab for immediate user access
     setIsSubmitting(false);
-    if (addToast) addToast('Google Sign-In unavailable on mobile webview. Please use Email OTP sign-in!', 'info');
+    if (addToast) addToast('Google Sign-In unavailable. Please use instant Email OTP sign-in!', 'info');
     setActiveTab('otp');
   };
-
-
 
   useEffect(() => {
     if (isOpen && typeof document !== 'undefined') {
