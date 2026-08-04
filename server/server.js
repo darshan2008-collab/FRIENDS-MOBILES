@@ -38,13 +38,56 @@ dirsToEnsure.forEach(dir => {
   }
 });
 
-// Initialize OTP log file
-const otpLogPath = path.join(__dirname, 'data/otp_debug.log');
-if (!fs.existsSync(otpLogPath)) {
-  try {
-    fs.writeFileSync(otpLogPath, `=== FRIENDS MOBILE OTP Debug Log initialized at ${new Date().toISOString()} ===\n`, 'utf8');
-  } catch (_) {}
-}
+// ─── Bootstrap PWA PNG Icons for PWABuilder ──────────────────────────────────
+try {
+  const zlib = require('zlib');
+  const pubDir = path.join(__dirname, '../public');
+  function generateValidPng(width, height) {
+    const lineLength = width * 4 + 1;
+    const rawData = Buffer.alloc(height * lineLength);
+    for (let y = 0; y < height; y++) {
+      const offset = y * lineLength;
+      rawData[offset] = 0;
+      for (let x = 0; x < width; x++) {
+        const px = offset + 1 + x * 4;
+        const dx = x - width / 2;
+        const dy = y - height / 2;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < (width * 0.35)) {
+          rawData[px] = 255; rawData[px + 1] = 255; rawData[px + 2] = 255; rawData[px + 3] = 255;
+        } else {
+          rawData[px] = 255; rawData[px + 1] = 85; rawData[px + 2] = 0; rawData[px + 3] = 255;
+        }
+      }
+    }
+    const compressed = zlib.deflateSync(rawData);
+    function crc32(buf) {
+      let c = 0xffffffff;
+      const table = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) {
+        let code = n;
+        for (let k = 0; k < 8; k++) code = (code & 1) ? (0xedb88320 ^ (code >>> 1)) : (code >>> 1);
+        table[n] = code;
+      }
+      for (let i = 0; i < buf.length; i++) c = table[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
+      return (c ^ 0xffffffff) >>> 0;
+    }
+    function createChunk(type, data) {
+      const len = Buffer.alloc(4); len.writeUInt32BE(data.length, 0);
+      const typeAndData = Buffer.concat([Buffer.from(type, 'binary'), data]);
+      const crcBuf = Buffer.alloc(4); crcBuf.writeUInt32BE(crc32(typeAndData), 0);
+      return Buffer.concat([len, typeAndData, crcBuf]);
+    }
+    const sig = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+    const ihdr = Buffer.alloc(13);
+    ihdr.writeUInt32BE(width, 0); ihdr.writeUInt32BE(height, 4);
+    ihdr[8] = 8; ihdr[9] = 6; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
+    return Buffer.concat([sig, createChunk('IHDR', ihdr), createChunk('IDAT', compressed), createChunk('IEND', Buffer.alloc(0))]);
+  }
+  if (!fs.existsSync(path.join(pubDir, 'icon-192.png'))) fs.writeFileSync(path.join(pubDir, 'icon-192.png'), generateValidPng(192, 192));
+  if (!fs.existsSync(path.join(pubDir, 'icon-512.png'))) fs.writeFileSync(path.join(pubDir, 'icon-512.png'), generateValidPng(512, 512));
+  if (!fs.existsSync(path.join(pubDir, 'icon-512-maskable.png'))) fs.writeFileSync(path.join(pubDir, 'icon-512-maskable.png'), generateValidPng(512, 512));
+} catch (_) {}
 
 // ─── Bootstrap Default Data Files ─────────────────────────────────────────────
 const defaultFiles = {

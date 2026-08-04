@@ -1,19 +1,48 @@
 {
+  "id": "https://friendsmobile.in/",
+  "scope": "/",
+  "start_url": "/",
   "short_name": "FRIENDS MOBILE",
-  "name": "FRIENDS MOBILE - Custom Covers & Accessories Store",
-  "description": "Shop 3D Customized Phone Back Covers, iPhone Cases, Bluetooth Earbuds, Fast Chargers & Photo Frames at FRIENDS MOBILE.",
+  "name": "FRIENDS MOBILE - Custom Phone Covers & Accessories Store",
+  "description": "Shop 3D Customized Phone Back Covers, iPhone Cases, boAt Bluetooth Earbuds, Fast Chargers, Power Banks & Custom Photo Frames at FRIENDS MOBILE.",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FF5500",
+  "prefer_related_applications": false,
   "icons": [
     {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/icon-192.svg",
+      "sizes": "192x192",
       "type": "image/svg+xml",
-      "sizes": "192x192 192x192",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512.svg",
+      "sizes": "512x512",
       "type": "image/svg+xml",
-      "sizes": "512x512 512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "screenshots": [
@@ -22,20 +51,31 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "FRIENDS MOBILE Shopping Experience"
+      "label": "FRIENDS MOBILE Store Front & 3D Studio"
     },
     {
       "src": "/images/banner_backcover.png",
       "sizes": "640x1136",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "3D Custom Phone Cover Designer"
+      "label": "3D Custom Mobile Back Cover Designer"
     }
   ],
-  "start_url": "/",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FF5500",
-  "display": "standalone",
-  "orientation": "portrait",
+  "shortcuts": [
+    {
+      "name": "Custom Back Covers",
+      "short_name": "Custom Covers",
+      "description": "Design 3D Customized Back Cover",
+      "url": "/#custom-cover",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Personalized Photo Frames",
+      "short_name": "Photo Frames",
+      "description": "Custom Acrylic & Wooden Frames",
+      "url": "/#photo-frames",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
   "categories": ["shopping", "lifestyle", "electronics"]
 }
