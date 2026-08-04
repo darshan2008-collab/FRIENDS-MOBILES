@@ -4,16 +4,32 @@
   "description": "Shop 3D Customized Phone Back Covers, iPhone Cases, Bluetooth Earbuds, Fast Chargers & Photo Frames at FRIENDS MOBILE.",
   "icons": [
     {
-      "src": "/images/logo.png",
-      "type": "image/png",
-      "sizes": "192x192",
+      "src": "/icon-192.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "/images/logo.png",
-      "type": "image/png",
-      "sizes": "512x512",
+      "src": "/icon-512.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512 512x512",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/hero_devices.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "FRIENDS MOBILE Shopping Experience"
+    },
+    {
+      "src": "/images/banner_backcover.png",
+      "sizes": "640x1136",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "3D Custom Phone Cover Designer"
     }
   ],
   "start_url": "/",
