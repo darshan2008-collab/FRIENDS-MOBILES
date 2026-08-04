@@ -586,11 +586,10 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       }
     }
 
-    // ─── 2. Fallback: External Browser OAuth Redirect
+    // ─── 2. Fallback: External Browser OAuth Redirect (Implicit Token Flow)
     if (isCapacitorApp) {
-      const redirectUri = 'https://friendsmobiles.unitaryx.org/api/auth/google/callback';
-      const statePayload = btoa(JSON.stringify({ mode: 'apk', targetScheme: 'com.friendsmobile.app://auth-success' }));
-      const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid%20email%20profile&prompt=select_account&state=${encodeURIComponent(statePayload)}`;
+      const redirectUri = 'https://friendsmobiles.unitaryx.org/';
+      const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=openid%20email%20profile&prompt=select_account&state=apk`;
 
       try {
         Browser.open({ url: googleOAuthUrl }).catch(() => {

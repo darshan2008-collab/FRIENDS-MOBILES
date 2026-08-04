@@ -36,11 +36,9 @@ export default function ShoppingPortal({
   }, [isOpen, initialCategory]);
 
   useEffect(() => {
-    if (isOpen && typeof document !== 'undefined') {
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = '';
-      };
+    // Keep document body scrollable for Android WebView touch scrolling
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.style.overflow = 'auto';
     }
   }, [isOpen]);
 

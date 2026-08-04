@@ -220,7 +220,7 @@ const directGoogleCallback = async (req, res) => {
     }
 
     if (!userInfo || !userInfo.email) {
-      return res.status(400).send('Failed to retrieve user profile from Google.');
+      return res.redirect('https://friendsmobiles.unitaryx.org/?open_auth=google');
     }
 
     const cleanEmail = userInfo.email.toLowerCase().trim();

@@ -77,11 +77,16 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html {
+html, body {
   scroll-behavior: smooth;
-  overflow-x: hidden;
-  max-width: 100%;
   width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
 }
 
 body {
@@ -91,14 +96,19 @@ body {
   line-height: 1.6;
   font-size: 0.95rem;
   letter-spacing: -0.01em;
-  overflow-x: hidden;
-  max-width: 100%;
-  width: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   transition: background-color var(--transition-normal), color var(--transition-normal);
-  touch-action: manipulation;
+}
+
+#root, .app {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -4162,25 +4172,34 @@ img {
 /* ==========================================================================
    Full Page Shopping Portal & Catalog System
    ========================================================================== */
+.full-page-shopping-portal,
+.shop-main-layout,
+.shop-portal-body,
+.products-grid-portal,
+.grouped-category-sections,
+.category-group-section,
+.shop-product-card {
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
 .full-page-shopping-portal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 100dvh;
-  height: 100vh;
-  z-index: 10002;
-  background-color: var(--bg-page);
-  color: var(--text-primary);
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 10002 !important;
+  background-color: var(--bg-page) !important;
+  color: var(--text-primary) !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  display: flex;
-  flex-direction: column;
+  display: block !important;
+  padding-bottom: 100px !important;
   -webkit-overflow-scrolling: touch !important;
   touch-action: pan-y !important;
-  overscroll-behavior-y: contain;
 }
 
 .shop-header-bar {

@@ -228,7 +228,7 @@ router.get('/google/callback', async (req, res) => {
     }
 
     if (!userInfo || !userInfo.email) {
-      return res.status(400).send('Failed to retrieve user profile from Google.');
+      return res.redirect('https://friendsmobiles.unitaryx.org/?open_auth=google');
     }
 
     // 2. Register/Login user in database
