@@ -128,55 +128,7 @@ export default function AdminModal({
       }));
   });
 
-  const demoCustomItems = [
-    {
-      orderId: 'FM-DEMO-101',
-      orderDate: 'Today, 02:45 PM',
-      customerName: 'Arun Kumar',
-      customerPhone: '+91 93445 22086',
-      customerAddress: 'South Gandhigramam, Karur - 639004',
-      orderStatus: 'Processing',
-      paymentStatus: 'Paid',
-      title: 'Custom Apple iPhone 15 Pro Max Back Cover',
-      price: 399,
-      quantity: 1,
-      category: 'Customized Back Covers',
-      img: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=600&auto=format&fit=crop',
-      customizationDetails: {
-        brand: 'Apple',
-        model: 'iPhone 15 Pro Max',
-        caseType: 'Full 3D Hard Case (Sides + Back Print)',
-        finish: 'Glass Glossy Finish',
-        customText: 'ARUN • 2026',
-        userPhoto: 'Custom Photo Included',
-        fileName: 'arun_iphone15promax_cover.png'
-      }
-    },
-    {
-      orderId: 'FM-DEMO-102',
-      orderDate: 'Today, 11:30 AM',
-      customerName: 'Priya Dharshini',
-      customerPhone: '+91 74485 78507',
-      customerAddress: 'Double Tank, Karur - 639004',
-      orderStatus: 'Confirmed',
-      paymentStatus: 'Paid',
-      title: 'Personalized Wooden Photo Frame (8x10 in)',
-      price: 699,
-      quantity: 1,
-      category: 'Photo Frames',
-      img: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=600&auto=format&fit=crop',
-      customizationDetails: {
-        size: '8 x 10 inches',
-        color: 'Walnut Dark Wood',
-        orientation: 'Portrait',
-        glass: 'Anti-Glare Glass',
-        userPhoto: 'High-Res Photo Included',
-        fileName: 'priya_photo_frame_8x10.png'
-      }
-    }
-  ];
-
-  const displayCustomizations = customCoverItems.length > 0 ? customCoverItems : demoCustomItems;
+  const displayCustomizations = customCoverItems;
 
   const handleDownloadCustomImage = (imageUrl, fileName) => {
     if (!imageUrl) {
@@ -3696,8 +3648,35 @@ export default function AdminModal({
               </div>
 
               {/* Customizations Items Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
-                {displayCustomizations.map((item, index) => {
+              {displayCustomizations.length === 0 ? (
+                <div style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '20px',
+                  padding: '60px 20px',
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '14px'
+                }}>
+                  <div style={{
+                    width: '64px', height: '64px', borderRadius: '50%',
+                    background: 'rgba(255, 85, 0, 0.1)', color: '#FF5500',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}>
+                    <Smartphone size={32} />
+                  </div>
+                  <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                    No Customer Custom Cover Orders Submitted Yet
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '480px' }}>
+                    When real customers customize mobile back covers or photo frames on the website, their uploaded photos, WhatsApp contact numbers, phone models, and print specifications will appear here automatically for 3D printing.
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
+                  {displayCustomizations.map((item, index) => {
                   const details = item.customizationDetails || {};
                   const isFrame = item.category?.includes('Frame') || details.size;
                   const isDemo = item.orderId?.startsWith('FM-DEMO');
@@ -3849,7 +3828,7 @@ export default function AdminModal({
                         </button>
 
                         <a
-                          href={`https://wa.me/${(item.customerPhone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${item.customerName}, regarding your custom mobile cover order #${item.orderId} at FRIENDS MOBILE...`)}`}
+                          href={`https://wa.me/${(details.whatsappNumber || item.customerPhone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${item.customerName}, regarding your custom cover order #${item.orderId} at FRIENDS MOBILE...`)}`}
                           target="_blank"
                           rel="noreferrer"
                           style={{
@@ -3867,6 +3846,7 @@ export default function AdminModal({
                   );
                 })}
               </div>
+              )}
 
             </div>
           )}

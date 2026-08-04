@@ -20,6 +20,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
   const [caseType, setCaseType] = useState('Full 3D Hard Case (Sides + Back Print)'); // 'Full 3D Hard Case' | 'Soft Silicone TPU' | 'Glass Finish'
   const [caseFinish, setCaseFinish] = useState('Matte Finish'); // 'Matte Finish' | 'Glossy Finish'
   const [customText, setCustomText] = useState('');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
   const [uploadedPhoto, setUploadedPhoto] = useState(null);
   const [uploadedFileInfo, setUploadedFileInfo] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,6 +96,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
       img: uploadedPhoto && !uploadedFileInfo?.isDoc ? uploadedPhoto : 'images/prod_custom_cover.png',
       discount: '-20%',
       customizationDetails: {
+        whatsappNumber: whatsappNumber || 'Not specified',
         brand: selectedBrand,
         model: finalModel,
         caseType,
@@ -1417,6 +1419,37 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
                   fontSize: '0.92rem'
                 }}
               />
+            </div>
+
+            {/* WhatsApp Contact Number Input */}
+            <div>
+              <label className="option-section-title">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Phone size={15} color="#22c55e" /> WhatsApp Contact Number (For Proof Approval) *</span>
+              </label>
+              <div style={{ position: 'relative' }}>
+                <MessageSquare size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#22c55e' }} />
+                <input 
+                  type="tel" 
+                  required
+                  placeholder="Enter your WhatsApp number (e.g. +91 93445 22086)"
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 12px 12px 42px',
+                    borderRadius: '10px',
+                    border: '1.5px solid #22c55e',
+                    background: 'var(--bg-input)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.92rem',
+                    fontWeight: 'bold',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+              <small style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                Our 3D printing studio will send a high-definition preview to this WhatsApp number before printing.
+              </small>
             </div>
 
             {/* Submit Button */}
