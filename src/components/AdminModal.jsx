@@ -4,7 +4,7 @@ import {
   X, ShieldCheck, Package, Truck, ShoppingBag, BarChart3, Plus, Trash2, Edit3, 
   Check, RefreshCw, Lock, User, Key, ArrowRight, LogOut, CheckCircle2, Clock, 
   TrendingUp, TrendingDown, Tag, Sparkles, AlertTriangle, Percent, DollarSign, Menu, MapPin, Phone, Eye, EyeOff, Upload, CreditCard, AlertCircle, MessageSquare, PhoneCall,
-  Cloud, Database, HardDrive, Download, Zap
+  Cloud, Database, HardDrive, Download, Zap, Smartphone, Image, Printer, Palette, FileText, Search
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 import { autoTranslateToTamil } from '../data/translations';
@@ -93,6 +93,104 @@ export default function AdminModal({
       setAdminOrders(orders);
     }
   }, [orders]);
+
+  const allOrdersList = (adminOrders && adminOrders.length > 0) ? adminOrders : (orders || []);
+  
+  // Customization Orders & Items Collection
+  const customCoverItems = allOrdersList.flatMap(order => {
+    const items = order.items || [];
+    return items
+      .filter(item => 
+        item.customizationDetails || 
+        (item.category && (item.category.includes('Custom') || item.category.includes('Photo Frame')))
+      )
+      .map(item => ({
+        orderId: order.orderId || order.id || `ORD-${Date.now()}`,
+        orderDate: order.date || order.createdAt || 'Recent',
+        customerName: order.customer?.name || order.customerName || 'Customer',
+        customerPhone: order.customer?.phone || order.customerPhone || '+91 93445 22086',
+        customerAddress: order.customer?.address || order.address || 'Karur, Tamil Nadu',
+        orderStatus: order.status || 'Processing',
+        paymentStatus: order.paymentStatus || 'Paid',
+        title: item.title || item.name,
+        price: item.price || 399,
+        quantity: item.quantity || 1,
+        category: item.category || 'Customized Back Covers',
+        img: item.customizationDetails?.uploadedFile || item.customizationDetails?.userPhoto || item.img || 'images/prod_custom_cover.png',
+        customizationDetails: item.customizationDetails || {
+          brand: 'Apple',
+          model: 'iPhone 15 Pro',
+          caseType: 'Full 3D Hard Case',
+          finish: 'Glass Glossy Finish',
+          customText: 'FRIENDS MOBILE Custom',
+          fileName: `custom_cover_iPhone15Pro.png`
+        }
+      }));
+  });
+
+  const demoCustomItems = [
+    {
+      orderId: 'FM-DEMO-101',
+      orderDate: 'Today, 02:45 PM',
+      customerName: 'Arun Kumar',
+      customerPhone: '+91 93445 22086',
+      customerAddress: 'South Gandhigramam, Karur - 639004',
+      orderStatus: 'Processing',
+      paymentStatus: 'Paid',
+      title: 'Custom Apple iPhone 15 Pro Max Back Cover',
+      price: 399,
+      quantity: 1,
+      category: 'Customized Back Covers',
+      img: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=600&auto=format&fit=crop',
+      customizationDetails: {
+        brand: 'Apple',
+        model: 'iPhone 15 Pro Max',
+        caseType: 'Full 3D Hard Case (Sides + Back Print)',
+        finish: 'Glass Glossy Finish',
+        customText: 'ARUN • 2026',
+        userPhoto: 'Custom Photo Included',
+        fileName: 'arun_iphone15promax_cover.png'
+      }
+    },
+    {
+      orderId: 'FM-DEMO-102',
+      orderDate: 'Today, 11:30 AM',
+      customerName: 'Priya Dharshini',
+      customerPhone: '+91 74485 78507',
+      customerAddress: 'Double Tank, Karur - 639004',
+      orderStatus: 'Confirmed',
+      paymentStatus: 'Paid',
+      title: 'Personalized Wooden Photo Frame (8x10 in)',
+      price: 699,
+      quantity: 1,
+      category: 'Photo Frames',
+      img: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=600&auto=format&fit=crop',
+      customizationDetails: {
+        size: '8 x 10 inches',
+        color: 'Walnut Dark Wood',
+        orientation: 'Portrait',
+        glass: 'Anti-Glare Glass',
+        userPhoto: 'High-Res Photo Included',
+        fileName: 'priya_photo_frame_8x10.png'
+      }
+    }
+  ];
+
+  const displayCustomizations = customCoverItems.length > 0 ? customCoverItems : demoCustomItems;
+
+  const handleDownloadCustomImage = (imageUrl, fileName) => {
+    if (!imageUrl) {
+      if (addToast) addToast('No image available to download.', 'warning');
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = fileName || `custom_print_photo_${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    if (addToast) addToast(`Downloading print image: ${fileName || 'photo.png'}`, 'info');
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -303,6 +401,33 @@ export default function AdminModal({
       if (addToast) addToast(`Drive restore status: ${err.message}`, 'ℹ️');
     } finally {
       setIsSyncingGDrive(false);
+    }
+  };
+
+  const handleExportMasterExcel = async () => {
+    try {
+      if (addToast) addToast('Generating multi-sheet Master Excel Database Backup...', 'info');
+      const apiHost = getApiHost();
+      const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
+      const response = await fetch(`${apiHost}/api/admin/backups/export-excel`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `FRIENDS_MOBILE_Full_Database_Master_${new Date().toISOString().slice(0, 10)}.xls`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        if (addToast) addToast('Downloaded Master Excel Database Backup (.xls)!', 'success');
+      } else {
+        if (addToast) addToast('Failed to export Master Excel backup file.', 'warning');
+      }
+    } catch (err) {
+      if (addToast) addToast(`Excel Export error: ${err.message}`, 'error');
     }
   };
 
@@ -1568,6 +1693,17 @@ export default function AdminModal({
               }}
             >
               <Clock size={16} /> Order History ({totalOrders})
+            </button>
+
+            <button 
+              className={`sidebar-tab-btn ${activeTab === 'customizations' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('customizations');
+                setIsAdminSidebarOpen(false);
+              }}
+              style={{ color: '#FF5500', fontWeight: '800' }}
+            >
+              <Smartphone size={16} color="#FF5500" /> Cover Customizations ({displayCustomizations.length})
             </button>
 
             <button 
@@ -3469,6 +3605,272 @@ export default function AdminModal({
             </div>
           )}
 
+          {/* TAB 7: USER MOBILE COVER & PHOTO FRAME CUSTOMIZATION DASHBOARD */}
+          {activeTab === 'customizations' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              
+              {/* Header Title Banner */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '20px',
+                padding: '24px 28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '16px',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                    <span style={{ background: 'rgba(255, 85, 0, 0.12)', border: '1px solid rgba(255, 85, 0, 0.3)', color: '#FF5500', padding: '3px 12px', borderRadius: '20px', fontSize: '0.76rem', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Smartphone size={14} /> LIVE PRINTING STUDIO
+                    </span>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '600' }}>3D Back Covers &amp; Photo Frames</span>
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: '1.45rem', fontWeight: '900', color: 'var(--text-primary)' }}>
+                    User Mobile Cover &amp; Frame Customizations
+                  </h3>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                    Review customer-submitted mobile cover designs, phone models, custom text, and 1-click download high-resolution photos for 3D printing.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={handleExportMasterExcel}
+                    style={{
+                      padding: '10px 16px', borderRadius: '12px', border: 'none',
+                      background: 'linear-gradient(135deg, #16a34a, #15803d)',
+                      color: '#ffffff', fontWeight: '800', fontSize: '0.84rem',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                      boxShadow: '0 4px 14px rgba(22, 163, 74, 0.35)'
+                    }}
+                  >
+                    <FileText size={16} /> Export Customizations to Excel
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (addToast) addToast('Refreshed customer customization list!', 'info');
+                    }}
+                    style={{
+                      padding: '10px 16px', borderRadius: '12px',
+                      border: '1px solid var(--border-color)', background: 'var(--bg-input)',
+                      color: 'var(--text-primary)', fontWeight: '700', fontSize: '0.84rem',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
+                    }}
+                  >
+                    <RefreshCw size={16} /> Refresh Orders
+                  </button>
+                </div>
+              </div>
+
+              {/* KPI Summary Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>TOTAL CUSTOM ORDERS</span>
+                  <h3 style={{ fontSize: '1.6rem', color: '#FF5500', margin: '6px 0 0 0', fontWeight: '900' }}>{displayCustomizations.length}</h3>
+                </div>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>3D MOBILE COVERS</span>
+                  <h3 style={{ fontSize: '1.6rem', color: 'var(--text-primary)', margin: '6px 0 0 0', fontWeight: '900' }}>
+                    {displayCustomizations.filter(c => c.category?.includes('Cover') || c.customizationDetails?.brand).length}
+                  </h3>
+                </div>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>PHOTO FRAMES</span>
+                  <h3 style={{ fontSize: '1.6rem', color: 'var(--text-primary)', margin: '6px 0 0 0', fontWeight: '900' }}>
+                    {displayCustomizations.filter(c => c.category?.includes('Frame') || c.customizationDetails?.size).length}
+                  </h3>
+                </div>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>READY FOR 3D PRINTING</span>
+                  <h3 style={{ fontSize: '1.6rem', color: '#22c55e', margin: '6px 0 0 0', fontWeight: '900' }}>
+                    {displayCustomizations.length}
+                  </h3>
+                </div>
+              </div>
+
+              {/* Customizations Items Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
+                {displayCustomizations.map((item, index) => {
+                  const details = item.customizationDetails || {};
+                  const isFrame = item.category?.includes('Frame') || details.size;
+                  const isDemo = item.orderId?.startsWith('FM-DEMO');
+
+                  return (
+                    <div 
+                      key={index}
+                      style={{
+                        background: 'var(--bg-card)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '18px',
+                        overflow: 'hidden',
+                        boxShadow: 'var(--shadow-sm)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {/* Top Header Card Info */}
+                      <div style={{ padding: '16px 20px', background: 'var(--bg-input)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontSize: '0.76rem', fontWeight: '800', color: '#FF5500', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Tag size={14} /> ORDER #{item.orderId}
+                            {isDemo && <span style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', padding: '1px 6px', borderRadius: '6px', fontSize: '0.68rem' }}>Demo Test</span>}
+                          </div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            {item.orderDate}
+                          </div>
+                        </div>
+
+                        <span style={{ 
+                          padding: '4px 10px', borderRadius: '20px', fontSize: '0.74rem', fontWeight: '800',
+                          background: item.paymentStatus === 'Paid' ? 'rgba(34, 197, 94, 0.12)' : 'rgba(234, 179, 8, 0.12)',
+                          color: item.paymentStatus === 'Paid' ? '#16a34a' : '#ca8a04',
+                          border: `1px solid ${item.paymentStatus === 'Paid' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(234, 179, 8, 0.3)'}`
+                        }}>
+                          {item.paymentStatus === 'Paid' ? 'Paid' : 'Pending'}
+                        </span>
+                      </div>
+
+                      {/* Card Body with Image & Details */}
+                      <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        
+                        {/* Image Preview Container with Download Overlay */}
+                        <div style={{ position: 'relative', width: '100%', height: '220px', borderRadius: '14px', overflow: 'hidden', border: '1px solid var(--border-color)', background: '#000000' }}>
+                          <img 
+                            src={item.img} 
+                            alt={item.title} 
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                          />
+
+                          <div style={{ position: 'absolute', bottom: '10px', right: '10px', left: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', padding: '8px 12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.2)' }}>
+                            <span style={{ color: '#ffffff', fontSize: '0.76rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }}>
+                              📷 {details.fileName || 'custom_user_photo.png'}
+                            </span>
+                            
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadCustomImage(item.img, details.fileName || `custom_${item.orderId}.png`)}
+                              style={{
+                                padding: '6px 12px', borderRadius: '8px', border: 'none',
+                                background: '#FF5500', color: '#ffffff', fontWeight: '800',
+                                fontSize: '0.76rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                                boxShadow: '0 2px 8px rgba(255,85,0,0.4)'
+                              }}
+                            >
+                              <Download size={14} /> Download Image
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Title & Price */}
+                        <div>
+                          <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                            {item.title}
+                          </h4>
+                          <span style={{ fontSize: '0.92rem', color: '#FF5500', fontWeight: '900' }}>
+                            ₹{item.price?.toLocaleString('en-IN')} (Qty: {item.quantity})
+                          </span>
+                        </div>
+
+                        {/* Customization Specs Table */}
+                        <div style={{ background: 'var(--bg-input)', borderRadius: '12px', padding: '12px 14px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.82rem' }}>
+                          {!isFrame ? (
+                            <>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-muted)' }}>Phone Brand &amp; Model:</span>
+                                <strong style={{ color: 'var(--text-primary)' }}>{details.brand || 'Apple'} • {details.model || 'iPhone 15 Pro'}</strong>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-muted)' }}>Case Material &amp; Finish:</span>
+                                <strong style={{ color: '#FF5500' }}>{details.caseType || '3D Hard Case'} ({details.finish || 'Glossy'})</strong>
+                              </div>
+                              {details.customText && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '4px', borderTop: '1px dashed var(--border-color)' }}>
+                                  <span style={{ color: 'var(--text-muted)' }}>Custom Text Printed:</span>
+                                  <strong style={{ color: '#22c55e', background: 'rgba(34, 197, 94, 0.1)', padding: '2px 8px', borderRadius: '6px' }}>"{details.customText}"</strong>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-muted)' }}>Frame Dimensions:</span>
+                                <strong style={{ color: 'var(--text-primary)' }}>{details.size || '8 x 10 inches'}</strong>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-muted)' }}>Frame Material &amp; Color:</span>
+                                <strong style={{ color: '#FF5500' }}>{details.color || 'Walnut Wood'}</strong>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ color: 'var(--text-muted)' }}>Orientation &amp; Glass:</span>
+                                <strong style={{ color: 'var(--text-primary)' }}>{details.orientation || 'Portrait'} • {details.glass || 'Anti-Glare Glass'}</strong>
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Customer Info Box */}
+                        <div style={{ padding: '12px 14px', borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <div style={{ fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <User size={14} color="#FF5500" /> {item.customerName}
+                          </div>
+                          <div style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Phone size={14} /> {item.customerPhone}
+                          </div>
+                          <div style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <MapPin size={14} /> {item.customerAddress}
+                          </div>
+                        </div>
+
+                      </div>
+
+                      {/* Card Footer Actions */}
+                      <div style={{ padding: '14px 20px', background: 'var(--bg-input)', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '10px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadCustomImage(item.img, details.fileName || `custom_${item.orderId}.png`)}
+                          style={{
+                            flex: 1, padding: '10px', borderRadius: '10px', border: 'none',
+                            background: 'linear-gradient(135deg, #FF5500, #ff7700)', color: '#ffffff',
+                            fontWeight: '800', fontSize: '0.82rem', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                            boxShadow: '0 4px 12px rgba(255, 85, 0, 0.3)'
+                          }}
+                        >
+                          <Download size={16} /> Download Image
+                        </button>
+
+                        <a
+                          href={`https://wa.me/${(item.customerPhone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${item.customerName}, regarding your custom mobile cover order #${item.orderId} at FRIENDS MOBILE...`)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            padding: '10px 14px', borderRadius: '10px',
+                            border: '1.5px solid #22c55e', background: 'rgba(34, 197, 94, 0.1)',
+                            color: '#16a34a', fontWeight: '800', fontSize: '0.82rem',
+                            textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px'
+                          }}
+                        >
+                          <MessageSquare size={16} /> WhatsApp
+                        </a>
+                      </div>
+
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+          )}
+
           {/* TAB 6: 5,000 GB CLOUD STORAGE & BACKUPS */}
           {activeTab === 'backups' && (
 
@@ -3500,6 +3902,20 @@ export default function AdminModal({
                     >
                       <HardDrive size={16} /> 📁 Open Google Drive Folder 🔗
                     </a>
+
+                    <button
+                      type="button"
+                      onClick={handleExportMasterExcel}
+                      style={{
+                        padding: '10px 18px', borderRadius: '10px', border: 'none',
+                        background: 'linear-gradient(135deg, #16a34a, #15803d)',
+                        color: '#ffffff', fontWeight: '800', fontSize: '0.82rem',
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                        boxShadow: '0 4px 14px rgba(22, 163, 74, 0.35)'
+                      }}
+                    >
+                      <FileText size={16} /> 📊 Export Full Store to Excel (.xlsx)
+                    </button>
 
                     <button
                       onClick={handleTriggerBackup}

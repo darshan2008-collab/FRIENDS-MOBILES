@@ -243,11 +243,22 @@ const BackupService = {
 
       console.log(`[Real Data Backup Success] Master (${users.length} users, ${orders.length} orders, ${products.length} prods) + Dedicated Files Created.`);
 
+      // 4. Create Multi-Sheet Master Excel Backup File (.xls)
+      let excelResult = null;
+      try {
+        excelResult = await BackupService.generateExcelMasterBackup();
+      } catch (err) {
+        console.error('[Excel Auto-Backup Error]', err.message);
+      }
+
       // Upload files to Google Drive
       const driveResult = await GoogleDriveService.uploadBackupSnapshot(filePath, filename);
       await GoogleDriveService.uploadBackupSnapshot(usersFilePath, usersFilename).catch(() => {});
       await GoogleDriveService.uploadBackupSnapshot(ordersFilePath, ordersFilename).catch(() => {});
       await GoogleDriveService.uploadBackupSnapshot(productsFilePath, productsFilename).catch(() => {});
+      if (excelResult && excelResult.filePath) {
+        await GoogleDriveService.uploadBackupSnapshot(excelResult.filePath, excelResult.filename).catch(() => {});
+      }
 
       return {
         success: true,
@@ -446,6 +457,225 @@ const BackupService = {
       console.log(`[Real-Time Backup Event] Triggered backup snapshot due to: ${reason}`);
       BackupService.createBackup().catch(e => console.error('[Real-Time Backup Error]', e.message));
     }, 3000);
+  },
+
+  // Multi-Worksheet Master Excel Database Backup (.xls / .xlsx)
+  generateExcelMasterBackup: async () => {
+    try {
+      const { users, products, orders, complaints } = await getMergedStoreData();
+      if (!fs.existsSync(backupsDir)) {
+        try { fs.mkdirSync(backupsDir, { recursive: true }); } catch (_) {}
+      }
+
+      const escapeXml = (str) => {
+        if (str === null || str === undefined) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+      };
+
+      const orderRows = (orders || []).map(o => {
+        const dateStr = o.date || o.createdAt ? new Date(o.date || o.createdAt).toLocaleString('en-IN') : 'N/A';
+        const cName = escapeXml(o.customer?.name || o.customerName || 'N/A');
+        const cPhone = escapeXml(o.customer?.phone || o.customerPhone || 'N/A');
+        const cAddress = escapeXml(o.customer?.address || o.address || 'N/A');
+        const itemsStr = escapeXml((o.items || []).map(i => `${i.title || i.name || 'Item'} (x${i.quantity || 1}) - ₹${i.price || 0}`).join(' | '));
+        const subtotal = o.subtotal || 0;
+        const shipping = o.shipping === 'FREE' || o.shipping === 0 ? 0 : (typeof o.shipping === 'number' ? o.shipping : 0);
+        const total = o.total || (subtotal + shipping);
+        const payMethod = escapeXml(o.paymentMethod || 'COD');
+        const payStatus = escapeXml(o.paymentStatus || 'Pending');
+        const ordStatus = escapeXml(o.status || 'Processing');
+        const reason = escapeXml(o.cancellationReason || o.returnReason || '');
+
+        return `<Row>
+    <Cell><Data ss:Type="String">${escapeXml(o.orderId || o.id)}</Data></Cell>
+    <Cell><Data ss:Type="String">${dateStr}</Data></Cell>
+    <Cell><Data ss:Type="String">${cName}</Data></Cell>
+    <Cell><Data ss:Type="String">${cPhone}</Data></Cell>
+    <Cell><Data ss:Type="String">${cAddress}</Data></Cell>
+    <Cell><Data ss:Type="String">${itemsStr}</Data></Cell>
+    <Cell><Data ss:Type="String">₹${subtotal.toLocaleString('en-IN')}</Data></Cell>
+    <Cell><Data ss:Type="String">${shipping === 0 ? 'FREE' : `₹${shipping}`}</Data></Cell>
+    <Cell><Data ss:Type="String">₹${total.toLocaleString('en-IN')}</Data></Cell>
+    <Cell><Data ss:Type="String">${payMethod}</Data></Cell>
+    <Cell><Data ss:Type="String">${payStatus}</Data></Cell>
+    <Cell><Data ss:Type="String">${ordStatus}</Data></Cell>
+    <Cell><Data ss:Type="String">${reason}</Data></Cell>
+   </Row>`;
+      }).join('\n');
+
+      const userRows = (users || []).map(u => {
+        const uId = escapeXml(u.id || u._id || 'N/A');
+        const uName = escapeXml(u.name || 'N/A');
+        const uEmail = escapeXml(u.email || 'N/A');
+        const uPhone = escapeXml(u.phone || 'N/A');
+        const points = u.rewardPoints || 0;
+        const provider = escapeXml(u.authProvider || 'Email/Phone');
+        const joined = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN') : 'N/A';
+        const userOrdCount = (orders || []).filter(o => o.customer?.email === u.email || o.customer?.phone === u.phone).length;
+
+        return `<Row>
+    <Cell><Data ss:Type="String">${uId}</Data></Cell>
+    <Cell><Data ss:Type="String">${uName}</Data></Cell>
+    <Cell><Data ss:Type="String">${uEmail}</Data></Cell>
+    <Cell><Data ss:Type="String">${uPhone}</Data></Cell>
+    <Cell><Data ss:Type="String">${points} PTS</Data></Cell>
+    <Cell><Data ss:Type="String">${provider}</Data></Cell>
+    <Cell><Data ss:Type="String">${userOrdCount} Orders</Data></Cell>
+    <Cell><Data ss:Type="String">${joined}</Data></Cell>
+   </Row>`;
+      }).join('\n');
+
+      const productRows = (products || []).map(p => {
+        const pId = escapeXml(p.id || p._id || 'N/A');
+        const pTitle = escapeXml(p.title || p.name || 'N/A');
+        const pCategory = escapeXml(p.category || 'General');
+        const pPrice = p.price || 0;
+        const pOrigPrice = p.originalPrice || pPrice;
+        const pStock = escapeXml(p.inStock !== false ? 'In Stock' : 'Out of Stock');
+        const pRating = p.rating || 4.5;
+        const pDesc = escapeXml((p.description || '').slice(0, 100));
+
+        return `<Row>
+    <Cell><Data ss:Type="String">${pId}</Data></Cell>
+    <Cell><Data ss:Type="String">${pTitle}</Data></Cell>
+    <Cell><Data ss:Type="String">${pCategory}</Data></Cell>
+    <Cell><Data ss:Type="String">₹${pPrice.toLocaleString('en-IN')}</Data></Cell>
+    <Cell><Data ss:Type="String">₹${pOrigPrice.toLocaleString('en-IN')}</Data></Cell>
+    <Cell><Data ss:Type="String">${pStock}</Data></Cell>
+    <Cell><Data ss:Type="String">⭐ ${pRating}</Data></Cell>
+    <Cell><Data ss:Type="String">${pDesc}</Data></Cell>
+   </Row>`;
+      }).join('\n');
+
+      const customItems = (orders || []).flatMap(o => {
+        return (o.items || []).filter(i => i.customizationDetails || (i.category && (i.category.includes('Custom') || i.category.includes('Photo Frame')))).map(i => ({
+          orderId: o.orderId || o.id,
+          customerName: o.customer?.name || 'Customer',
+          customerPhone: o.customer?.phone || 'N/A',
+          title: i.title || i.name,
+          category: i.category || 'Custom Covers',
+          details: i.customizationDetails || {}
+        }));
+      });
+
+      const customizationRows = customItems.map(c => {
+        const d = c.details;
+        const brandModel = escapeXml(d.brand ? `${d.brand} ${d.model}` : (d.size ? `Frame Size: ${d.size}` : 'N/A'));
+        const typeFinish = escapeXml(d.caseType ? `${d.caseType} (${d.finish || 'Matte'})` : (d.color ? `${d.color} • ${d.orientation || 'Portrait'}` : 'N/A'));
+        const text = escapeXml(d.customText || 'None');
+        const file = escapeXml(d.fileName || 'custom_photo.png');
+
+        return `<Row>
+    <Cell><Data ss:Type="String">${escapeXml(c.orderId)}</Data></Cell>
+    <Cell><Data ss:Type="String">${escapeXml(c.customerName)}</Data></Cell>
+    <Cell><Data ss:Type="String">${escapeXml(c.customerPhone)}</Data></Cell>
+    <Cell><Data ss:Type="String">${escapeXml(c.category)}</Data></Cell>
+    <Cell><Data ss:Type="String">${brandModel}</Data></Cell>
+    <Cell><Data ss:Type="String">${typeFinish}</Data></Cell>
+    <Cell><Data ss:Type="String">${text}</Data></Cell>
+    <Cell><Data ss:Type="String">${file}</Data></Cell>
+   </Row>`;
+      }).join('\n');
+
+      const xmlDocument = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Header">
+   <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#FF5500" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+  </Style>
+ </Styles>
+
+ <Worksheet ss:Name="Customer Orders History">
+  <Table>
+   <Row ss:StyleID="Header">
+    <Cell><Data ss:Type="String">Order ID</Data></Cell>
+    <Cell><Data ss:Type="String">Date &amp; Time</Data></Cell>
+    <Cell><Data ss:Type="String">Customer Name</Data></Cell>
+    <Cell><Data ss:Type="String">Phone Number</Data></Cell>
+    <Cell><Data ss:Type="String">Delivery Address</Data></Cell>
+    <Cell><Data ss:Type="String">Purchased Items</Data></Cell>
+    <Cell><Data ss:Type="String">Subtotal</Data></Cell>
+    <Cell><Data ss:Type="String">Shipping</Data></Cell>
+    <Cell><Data ss:Type="String">Grand Total</Data></Cell>
+    <Cell><Data ss:Type="String">Payment Method</Data></Cell>
+    <Cell><Data ss:Type="String">Payment Status</Data></Cell>
+    <Cell><Data ss:Type="String">Order Status</Data></Cell>
+    <Cell><Data ss:Type="String">Cancellation Reason</Data></Cell>
+   </Row>
+   ${orderRows}
+  </Table>
+ </Worksheet>
+
+ <Worksheet ss:Name="User Accounts &amp; Members">
+  <Table>
+   <Row ss:StyleID="Header">
+    <Cell><Data ss:Type="String">User ID</Data></Cell>
+    <Cell><Data ss:Type="String">Customer Name</Data></Cell>
+    <Cell><Data ss:Type="String">Email Address</Data></Cell>
+    <Cell><Data ss:Type="String">Phone Number</Data></Cell>
+    <Cell><Data ss:Type="String">Reward Points</Data></Cell>
+    <Cell><Data ss:Type="String">Auth Provider</Data></Cell>
+    <Cell><Data ss:Type="String">Total Orders</Data></Cell>
+    <Cell><Data ss:Type="String">Joined Date</Data></Cell>
+   </Row>
+   ${userRows}
+  </Table>
+ </Worksheet>
+
+ <Worksheet ss:Name="Product Catalog">
+  <Table>
+   <Row ss:StyleID="Header">
+    <Cell><Data ss:Type="String">Product ID</Data></Cell>
+    <Cell><Data ss:Type="String">Product Title</Data></Cell>
+    <Cell><Data ss:Type="String">Category</Data></Cell>
+    <Cell><Data ss:Type="String">Price (INR)</Data></Cell>
+    <Cell><Data ss:Type="String">Original Price</Data></Cell>
+    <Cell><Data ss:Type="String">Stock Status</Data></Cell>
+    <Cell><Data ss:Type="String">Rating</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+   </Row>
+   ${productRows}
+  </Table>
+ </Worksheet>
+
+ <Worksheet ss:Name="Cover Customizations">
+  <Table>
+   <Row ss:StyleID="Header">
+    <Cell><Data ss:Type="String">Order ID</Data></Cell>
+    <Cell><Data ss:Type="String">Customer Name</Data></Cell>
+    <Cell><Data ss:Type="String">Phone Number</Data></Cell>
+    <Cell><Data ss:Type="String">Product Category</Data></Cell>
+    <Cell><Data ss:Type="String">Phone Model / Size</Data></Cell>
+    <Cell><Data ss:Type="String">Case Type &amp; Finish</Data></Cell>
+    <Cell><Data ss:Type="String">Printed Custom Text</Data></Cell>
+    <Cell><Data ss:Type="String">Image Filename</Data></Cell>
+   </Row>
+   ${customizationRows}
+  </Table>
+ </Worksheet>
+</Workbook>`;
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const excelFilename = `friends_mobile_master_excel_backup_${timestamp}.xls`;
+      const excelFilePath = path.join(backupsDir, excelFilename);
+      fs.writeFileSync(excelFilePath, xmlDocument, 'utf8');
+
+      return { filename: excelFilename, filePath: excelFilePath, content: xmlDocument };
+    } catch (err) {
+      console.error('Failed to generate Excel Master Backup:', err);
+      return null;
+    }
   }
 };
 

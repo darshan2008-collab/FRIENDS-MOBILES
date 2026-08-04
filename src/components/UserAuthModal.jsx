@@ -248,7 +248,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
             sessionStorage.removeItem('fm_admin_pending_2fa');
             if (addToast) addToast('👑 Executive Admin Portal Authenticated & Unlocked!', 'success');
           } else {
-            if (addToast) addToast('Primary credentials verified! Enter your 6-digit Security PIN (994411).', '🔐');
+            if (addToast) addToast('Primary credentials verified! Enter your 6-digit Security PIN.', 'info');
           }
           onClose();
           if (onOpenAdmin) onOpenAdmin();

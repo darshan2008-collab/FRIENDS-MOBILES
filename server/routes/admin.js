@@ -120,7 +120,7 @@ router.post('/login', adminAuthLimiter, (req, res) => {
       success: true,
       requiresPin: true,
       tempToken,
-      message: 'Primary credentials verified. Enter 6-digit Security PIN (994411) to unlock portal.'
+      message: 'Primary credentials verified. Enter 6-digit Security PIN to unlock portal.'
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server auth failure', error: err.message });
@@ -137,7 +137,7 @@ router.post('/verify-pin', adminAuthLimiter, (req, res) => {
 
     const cleanPin = String(pin).trim();
     if (cleanPin !== '994411' && cleanPin !== DEFAULT_ADMIN_PIN) {
-      return res.status(401).json({ success: false, message: 'Invalid 6-Digit Admin Security PIN. (Use PIN: 994411)' });
+      return res.status(401).json({ success: false, message: 'Invalid 6-Digit Admin Security PIN. Please try again.' });
     }
 
     const cleanUser = username ? String(username).trim().toLowerCase() : DEFAULT_ADMIN_USER;
@@ -409,6 +409,24 @@ router.get('/orders/export-excel', async (req, res) => {
     res.sendFile(path.resolve(filePath));
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to export Excel report', error: err.message });
+  }
+});
+
+// GET /api/admin/backups/export-excel (Download Multi-Sheet Excel Master Database Backup)
+router.get('/backups/export-excel', async (req, res) => {
+  try {
+    const BackupService = require('../services/backupService');
+    const result = await BackupService.generateExcelMasterBackup();
+    if (!result || !result.filePath || !fs.existsSync(result.filePath)) {
+      return res.status(500).json({ success: false, message: 'Failed to generate Excel database backup' });
+    }
+
+    const filename = `FRIENDS_MOBILE_Full_Database_Master_${new Date().toISOString().slice(0, 10)}.xls`;
+    res.setHeader('Content-Type', 'application/vnd.ms-excel; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.sendFile(path.resolve(result.filePath));
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to export Master Excel database backup', error: err.message });
   }
 });
 
