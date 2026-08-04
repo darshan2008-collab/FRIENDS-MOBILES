@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 import { autoTranslateToTamil } from '../data/translations';
+import { getApiHost as centralGetApiHost } from '../data/apiConfig';
 
 export default function AdminModal({ 
   isOpen, 
@@ -213,13 +214,7 @@ export default function AdminModal({
   const [isBackingUp, setIsBackingUp] = useState(false);
 
   const getApiHost = () => {
-    if (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL !== '/api') {
-      return import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '').replace(/\/api$/, '');
-    }
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port === '5173') {
-      return 'http://localhost:5000';
-    }
-    return '';
+    return centralGetApiHost();
   };
 
   const safeJsonFetch = async (url, options = {}) => {

@@ -3101,11 +3101,40 @@ img {
 }
 
 .welcome-header {
-  padding: 22px 24px 18px 24px;
+  padding: 20px 24px 16px 24px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-color, #f1f5f9);
+  gap: 12px;
+}
+
+.welcome-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.welcome-header-title-box {
+  min-width: 0;
+  flex: 1;
+}
+
+.welcome-title {
+  margin: 4px 0 0 0;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--text-primary, #0f172a);
+  line-height: 1.3;
+}
+
+.welcome-subtitle {
+  margin: 0 0 16px 0;
+  font-size: 0.88rem;
+  color: var(--text-secondary, #64748b);
+  font-weight: 600;
 }
 
 .welcome-pill-badge {
@@ -3132,6 +3161,7 @@ img {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
   transition: all 0.2s ease;
 }
 
@@ -3142,7 +3172,7 @@ img {
 }
 
 .welcome-coupon-banner {
-  margin: 0 24px;
+  margin: 16px 24px 0 24px;
   padding: 16px 20px;
   border-radius: 16px;
   background: linear-gradient(135deg, #e64a00 0%, #FF5500 50%, #ff7700 100%);
@@ -3150,8 +3180,36 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   box-shadow: 0 8px 20px rgba(255, 85, 0, 0.28);
+}
+
+.welcome-coupon-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.welcome-coupon-text-group {
+  min-width: 0;
+  flex: 1;
+}
+
+.welcome-coupon-tag {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.95;
+  white-space: nowrap;
+}
+
+.welcome-coupon-heading {
+  font-size: 1.05rem;
+  font-weight: 900;
+  line-height: 1.25;
 }
 
 .welcome-coupon-icon {
@@ -3177,6 +3235,8 @@ img {
   font-weight: 800;
   font-size: 0.9rem;
   cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   transition: all 0.2s ease;
 }
@@ -3218,6 +3278,32 @@ img {
   gap: 14px;
 }
 
+.welcome-feat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.welcome-feat-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.welcome-feat-title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--text-primary, #1e293b);
+}
+
+.welcome-feat-desc {
+  margin: 4px 0 0 0;
+  font-size: 0.84rem;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.5;
+}
+
 .welcome-feat-icon-box {
   width: 44px;
   height: 44px;
@@ -3237,6 +3323,7 @@ img {
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.5px;
+  flex-shrink: 0;
 }
 
 .welcome-feat-action-btn {
@@ -3270,9 +3357,19 @@ img {
   gap: 16px;
 }
 
+.welcome-footer-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #64748B);
+  font-weight: 600;
+}
+
 .welcome-main-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 12px 24px;
   border-radius: 12px;
@@ -3284,6 +3381,84 @@ img {
   cursor: pointer;
   box-shadow: 0 6px 20px rgba(255, 85, 0, 0.3);
   transition: all 0.2s ease;
+}
+
+.welcome-main-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(255, 85, 0, 0.42);
+}
+
+@media (max-width: 580px) {
+  .welcome-onboarding-portal {
+    padding: 10px;
+  }
+  .welcome-card {
+    max-height: 94vh;
+    border-radius: 20px;
+  }
+  .welcome-header {
+    padding: 16px;
+  }
+  .welcome-title {
+    font-size: 1.05rem;
+  }
+  .welcome-coupon-banner {
+    margin: 12px 14px 0 14px;
+    padding: 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    text-align: center;
+  }
+  .welcome-coupon-content {
+    justify-content: center;
+  }
+  .welcome-coupon-tag {
+    white-space: normal;
+    font-size: 0.7rem;
+  }
+  .welcome-coupon-heading {
+    font-size: 0.95rem;
+  }
+  .welcome-coupon-code-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 16px;
+  }
+  .welcome-body {
+    padding: 14px;
+  }
+  .welcome-subtitle {
+    font-size: 0.82rem;
+    margin-bottom: 12px;
+  }
+  .welcome-feature-card {
+    padding: 12px;
+    border-radius: 14px;
+  }
+  .welcome-feat-header {
+    gap: 10px;
+  }
+  .welcome-feat-icon-box {
+    width: 38px;
+    height: 38px;
+  }
+  .welcome-footer {
+    padding: 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    text-align: center;
+  }
+  .welcome-footer-badge {
+    justify-content: center;
+    font-size: 0.78rem;
+  }
+  .welcome-main-btn {
+    width: 100%;
+    padding: 13px;
+    font-size: 0.9rem;
+  }
 }
 
 .welcome-main-btn:hover {

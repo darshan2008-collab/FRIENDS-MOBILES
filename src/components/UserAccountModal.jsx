@@ -8,8 +8,9 @@ import {
 import CompanyLogo from './CompanyLogo';
 import RewardsTab from './RewardsTab';
 import { getProductTitle } from '../data/translations';
+import { getApiBaseUrl } from '../data/apiConfig';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = getApiBaseUrl();
 
 export default function UserAccountModal({ isOpen, onClose, user, orders: allOrders, onLogout, addToast, t = (k) => k }) {
   const isTamil = false;

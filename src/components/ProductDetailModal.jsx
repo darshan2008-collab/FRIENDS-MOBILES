@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight, ZoomIn, Check, Zap, ShieldCheck } from 'lucide-react';
+import { getApiBaseUrl } from '../data/apiConfig';
+
+const API_BASE = getApiBaseUrl();
 export default function ProductDetailModal({
   product,
   products = [],

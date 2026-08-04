@@ -23,10 +23,11 @@ import ShoppingPortal from './components/ShoppingPortal';
 import SEOManager from './components/SEOManager';
 import AIChatbotModal from './components/AIChatbotModal';
 import { translations, autoTranslateToTamil } from './data/translations';
+import { getApiBaseUrl } from './data/apiConfig';
 
 import './styles/theme.css';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = getApiBaseUrl();
 
 const initialProducts = [
   {

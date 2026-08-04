@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, CheckCircle2, CreditCard, Sparkles, Copy, Check, Lock, Phone } from 'lucide-react';
 import { getProductTitle } from '../data/translations';
+import { getApiBaseUrl } from '../data/apiConfig';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = getApiBaseUrl();
 
 export default function CartModal({ 
   isOpen, 

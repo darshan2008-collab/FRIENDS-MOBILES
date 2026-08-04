@@ -96,13 +96,13 @@ export default function WelcomeOnboardingModal({
       <div className="welcome-card animate-scale-up">
         {/* Header Ribbon */}
         <div className="welcome-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="welcome-header-left">
             <CompanyLogo size={36} />
-            <div>
+            <div className="welcome-header-title-box">
               <div className="welcome-pill-badge">
                 <Sparkles size={13} /> WELCOME PRIVILEGES
               </div>
-              <h2 style={{ margin: '4px 0 0 0', fontSize: '1.25rem', fontWeight: '900', color: '#0f172a' }}>
+              <h2 className="welcome-title">
                 Welcome to FRIENDS <span style={{ color: '#FF5500' }}>MOBILE</span>, {userName}!
               </h2>
             </div>
@@ -115,15 +115,15 @@ export default function WelcomeOnboardingModal({
 
         {/* Coupon Highlight Box */}
         <div className="welcome-coupon-banner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="welcome-coupon-content">
             <div className="welcome-coupon-icon">
               <Zap size={22} color="#ffffff" />
             </div>
-            <div>
-              <div style={{ fontSize: '0.78rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', opacity: 0.9 }}>
+            <div className="welcome-coupon-text-group">
+              <div className="welcome-coupon-tag">
                 NEW MEMBER EXCLUSIVE GIFT
               </div>
-              <div style={{ fontSize: '1.05rem', fontWeight: '900' }}>
+              <div className="welcome-coupon-heading">
                 Get ₹100 OFF on Your First Order!
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function WelcomeOnboardingModal({
 
         {/* Feature Highlights Grid / Tabs */}
         <div className="welcome-body">
-          <p style={{ margin: '0 0 16px 0', fontSize: '0.88rem', color: '#64748B', fontWeight: '600' }}>
+          <p className="welcome-subtitle">
             Here is your quick guide to get the most out of your shopping experience:
           </p>
 
@@ -152,14 +152,14 @@ export default function WelcomeOnboardingModal({
                   <div className="welcome-feat-icon-box">
                     {feat.icon}
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className="welcome-feat-content">
+                    <div className="welcome-feat-title-row">
                       <span className="welcome-feat-badge">{feat.badge}</span>
-                      <h3 style={{ margin: 0, fontSize: '0.98rem', fontWeight: '800', color: '#1e293b' }}>
+                      <h3 className="welcome-feat-title">
                         {feat.title}
                       </h3>
                     </div>
-                    <p style={{ margin: '4px 0 0 0', fontSize: '0.84rem', color: '#64748b', lineHeight: '1.5' }}>
+                    <p className="welcome-feat-desc">
                       {feat.description}
                     </p>
                   </div>
@@ -183,7 +183,7 @@ export default function WelcomeOnboardingModal({
 
         {/* Footer Action Bar */}
         <div className="welcome-footer">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: '#64748B', fontWeight: '600' }}>
+          <div className="welcome-footer-badge">
             <ShieldCheck size={16} color="#10B981" /> 100% Genuine Quality Guarantee
           </div>
 

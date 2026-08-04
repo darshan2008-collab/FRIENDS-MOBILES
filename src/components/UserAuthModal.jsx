@@ -2,23 +2,35 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, Eye, EyeOff, AlertCircle, Clock, RefreshCw, Zap } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
+import { getApiBaseUrl, getApiHost } from '../data/apiConfig';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = getApiBaseUrl();
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '929652702793-02ve5do6kgq0fv4hns0vd31g7of00lak.apps.googleusercontent.com';
 
 const getApiEndpoints = (endpoint) => {
   const endpoints = [];
+  const base = getApiBaseUrl();
 
-  // Primary: relative /api path (works in Docker via nginx proxy and Vercel)
-  endpoints.push(`/api${endpoint}`);
-
-  // One fallback alternate route
-  if (endpoint.startsWith('/auth/send-otp')) {
-    endpoints.push('/api/otp/send');
-  } else if (endpoint.startsWith('/auth/verify-otp')) {
-    endpoints.push('/api/otp/verify');
-  } else if (endpoint.startsWith('/auth/reset-password')) {
-    endpoints.push('/api/otp/reset-password');
+  if (base.startsWith('http')) {
+    const cleanBase = base.replace(/\/api$/, '');
+    endpoints.push(`${cleanBase}/api${endpoint}`);
+    if (endpoint.startsWith('/auth/send-otp')) {
+      endpoints.push(`${cleanBase}/api/otp/send`);
+    } else if (endpoint.startsWith('/auth/verify-otp')) {
+      endpoints.push(`${cleanBase}/api/otp/verify`);
+    } else if (endpoint.startsWith('/auth/reset-password')) {
+      endpoints.push(`${cleanBase}/api/otp/reset-password`);
+    }
+  } else {
+    endpoints.push(`/api${endpoint}`);
+    if (endpoint.startsWith('/auth/send-otp')) {
+      endpoints.push('/api/otp/send');
+    } else if (endpoint.startsWith('/auth/verify-otp')) {
+      endpoints.push('/api/otp/verify');
+    } else if (endpoint.startsWith('/auth/reset-password')) {
+      endpoints.push('/api/otp/reset-password');
+    }
+    endpoints.push(`https://friendsmobiles.unitaryx.org/api${endpoint}`);
   }
 
   return [...new Set(endpoints)];
@@ -515,6 +527,23 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       if (onClose) onClose();
     };
 
+    const isCapacitorApp = typeof window !== 'undefined' && (
+      window.Capacitor !== undefined ||
+      window.location.protocol === 'capacitor:' ||
+      (window.location.hostname === 'localhost' && window.location.port !== '5173' && window.location.port !== '3000' && window.location.port !== '5000')
+    );
+
+    if (isCapacitorApp) {
+      try {
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent('https://friendsmobiles.unitaryx.org')}&response_type=token&scope=email%20profile%20openid`;
+        window.open(authUrl, '_system') || window.open(authUrl, '_blank');
+      } catch (_) {}
+      setIsSubmitting(false);
+      if (addToast) addToast('Google OAuth opened in system browser. Or sign in instantly via Email OTP below!', 'info');
+      setActiveTab('otp');
+      return;
+    }
+
     // ─── Primary: Google Identity Services Token Client (no redirect URI needed)
     if (typeof window !== 'undefined' && window.google?.accounts?.oauth2) {
       try {
@@ -524,7 +553,8 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
           callback: async (tokenResponse) => {
             if (tokenResponse?.error) {
               setIsSubmitting(false);
-              if (addToast) addToast(`Google Sign-In failed: ${tokenResponse.error}`, 'error');
+              if (addToast) addToast(`Google Sign-In: ${tokenResponse.error}. Please try Email OTP below.`, 'error');
+              setActiveTab('otp');
               return;
             }
             if (tokenResponse?.access_token) {
@@ -568,7 +598,8 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
         window.google.accounts.id.prompt((notification) => {
           if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
             setIsSubmitting(false);
-            if (addToast) addToast('Google Sign-In popup was blocked. Please allow popups for this site.', 'error');
+            if (addToast) addToast('Google Sign-In popup blocked. Switched to Email OTP sign-in.', 'info');
+            setActiveTab('otp');
           }
         });
         return;
@@ -577,9 +608,10 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       }
     }
 
-    // ─── GSI not loaded yet — show clear error
+    // ─── GSI not loaded yet — switch to OTP tab for immediate user access
     setIsSubmitting(false);
-    if (addToast) addToast('Google Sign-In is loading. Please wait a moment and try again.', 'info');
+    if (addToast) addToast('Google Sign-In unavailable on mobile webview. Please use Email OTP sign-in!', 'info');
+    setActiveTab('otp');
   };
 
 
