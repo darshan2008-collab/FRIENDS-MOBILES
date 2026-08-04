@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { 
   X, ArrowLeft, Search, Filter, ShoppingBag, Heart, Star, Smartphone, 
   Zap, Headphones, Watch, Frame, Palette, CheckCircle2, SlidersHorizontal, 
-  Sparkles, ShieldCheck, ArrowUpDown, ChevronRight, Tag, RefreshCw, DollarSign
+  Sparkles, ShieldCheck, ArrowUpDown, ChevronLeft, ChevronRight, Tag, RefreshCw, DollarSign
 } from 'lucide-react';
 import { getProductTitle } from '../data/translations';
 
@@ -27,6 +27,15 @@ export default function ShoppingPortal({
   const [inStockOnly, setInStockOnly] = useState(false);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const sliderRefs = React.useRef({});
+  const handleScrollSlider = (catName, direction) => {
+    const el = sliderRefs.current[catName];
+    if (el) {
+      const scrollAmount = direction === 'left' ? -320 : 320;
+      el.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Synchronize category when initialCategory prop changes on open
   useEffect(() => {
@@ -413,15 +422,41 @@ export default function ShoppingPortal({
                           <h3>{group.categoryName}</h3>
                           <span className="group-badge">{group.items.length} Products</span>
                         </div>
-                        <button 
-                          className="btn-view-category-all"
-                          onClick={() => setSelectedCategory(group.categoryName)}
-                        >
-                          View All {group.categoryName} <ChevronRight size={16} />
-                        </button>
+
+                        <div className="group-header-actions">
+                          {/* Navigation Arrows matching reference screenshot */}
+                          <div className="carousel-nav-arrows">
+                            <button 
+                              className="carousel-arrow-btn"
+                              onClick={() => handleScrollSlider(group.categoryName, 'left')}
+                              aria-label="Previous Products"
+                              type="button"
+                            >
+                              <ChevronLeft size={18} />
+                            </button>
+                            <button 
+                              className="carousel-arrow-btn"
+                              onClick={() => handleScrollSlider(group.categoryName, 'right')}
+                              aria-label="Next Products"
+                              type="button"
+                            >
+                              <ChevronRight size={18} />
+                            </button>
+                          </div>
+
+                          <button 
+                            className="btn-view-category-all"
+                            onClick={() => setSelectedCategory(group.categoryName)}
+                          >
+                            View All {group.categoryName} <ChevronRight size={16} />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="products-grid-portal">
+                      <div 
+                        className="products-horizontal-slider-portal"
+                        ref={el => sliderRefs.current[group.categoryName] = el}
+                      >
                         {group.items.map(product => (
                           <ProductCard 
                             key={product.id}

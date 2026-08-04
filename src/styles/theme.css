@@ -4833,6 +4833,88 @@ img {
   transform: translateX(4px);
 }
 
+.group-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.carousel-nav-arrows {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.carousel-arrow-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.carousel-arrow-btn:hover {
+  border-color: #FF5500;
+  color: #FF5500;
+  background: var(--orange-light);
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(255, 85, 0, 0.2);
+}
+
+.carousel-arrow-btn:active {
+  transform: scale(0.95);
+}
+
+.products-horizontal-slider-portal {
+  display: flex !important;
+  gap: 20px !important;
+  overflow-x: auto !important;
+  scroll-behavior: smooth !important;
+  padding: 8px 4px 20px 4px !important;
+  touch-action: pan-x pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin;
+  scrollbar-color: #FF5500 transparent;
+}
+
+.products-horizontal-slider-portal::-webkit-scrollbar {
+  height: 6px;
+}
+
+.products-horizontal-slider-portal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.products-horizontal-slider-portal::-webkit-scrollbar-thumb {
+  background: rgba(255, 85, 0, 0.4);
+  border-radius: 6px;
+}
+
+.products-horizontal-slider-portal::-webkit-scrollbar-thumb:hover {
+  background: #FF5500;
+}
+
+.products-horizontal-slider-portal > .shop-product-card {
+  flex: 0 0 260px !important;
+  min-width: 260px !important;
+  max-width: 260px !important;
+}
+
+@media (max-width: 640px) {
+  .products-horizontal-slider-portal > .shop-product-card {
+    flex: 0 0 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
+  }
+}
+
 .empty-catalog-state {
   display: flex;
   flex-direction: column;
