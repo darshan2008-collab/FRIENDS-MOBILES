@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, Eye, EyeOff, AlertCircle, Clock, RefreshCw, Zap } from 'lucide-react';
+import { Browser } from '@capacitor/browser';
 import CompanyLogo from './CompanyLogo';
 import { getApiBaseUrl, getApiHost } from '../data/apiConfig';
 
@@ -377,18 +378,20 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   // Step 2 Core: Execute Verify Gmail OTP
   const executeVerifyOtp = async (codeToVerify) => {
     if (isSubmitting) return;
-    const code = codeToVerify || otpInput;
-    if (!code || code.trim().length < 6) {
+    const rawCode = codeToVerify || otpInput;
+    const code = (rawCode || '').replace(/\D/g, '').trim();
+    if (!code || code.length !== 6) {
       if (addToast) addToast('Please enter the full 6-digit OTP code sent to your Gmail inbox', 'warning');
       return;
     }
 
     setIsSubmitting(true);
     try {
+      const targetEmail = (sentEmail || forgotPhone || '').trim().toLowerCase();
       const { data, ok } = await safeFetchApi('/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: sentEmail, phone: forgotPhone, otp: code.trim() })
+        body: JSON.stringify({ email: targetEmail, phone: forgotPhone, otp: code })
       });
 
       if (ok && data && data.success) {
@@ -543,22 +546,13 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
     const isCapacitorApp = typeof window !== 'undefined' && (
       window.Capacitor !== undefined ||
+      (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) ||
       window.location.protocol === 'capacitor:' ||
+      window.location.protocol === 'file:' ||
       (window.location.hostname === 'localhost' && window.location.port !== '5173' && window.location.port !== '3000' && window.location.port !== '5000')
     );
 
-    if (isCapacitorApp) {
-      try {
-        // Open official website Google Auth bridge endpoint to avoid Google Access Blocked error
-        const officialSiteUrl = `https://friendsmobiles.unitaryx.org/?open_auth=google&app_redirect=${encodeURIComponent('com.friendsmobile.app://auth-success')}`;
-        window.open(officialSiteUrl, '_system') || window.open(officialSiteUrl, '_blank');
-      } catch (_) {}
-      setIsSubmitting(false);
-      if (addToast) addToast('Opening Google Sign-In on official site... Completing login will return to app.', 'info');
-      return;
-    }
-
-    // ─── 1. Primary: Try In-App Google Identity Services Token Client (No browser redirect needed)
+    // ─── 1. Primary: Try In-App Google Identity Services Token Client Popup (Stays inside APK / Web)
     if (typeof window !== 'undefined' && window.google?.accounts?.oauth2) {
       try {
         const tokenClient = window.google.accounts.oauth2.initTokenClient({
@@ -567,8 +561,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
           callback: async (tokenResponse) => {
             if (tokenResponse?.error) {
               setIsSubmitting(false);
-              if (addToast) addToast(`Google Sign-In: ${tokenResponse.error}. Switched to Email OTP.`, 'error');
-              setActiveTab('otp');
+              if (addToast) addToast(`Google Sign-In: ${tokenResponse.error}.`, 'error');
               return;
             }
             if (tokenResponse?.access_token) {
@@ -591,6 +584,24 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       } catch (e) {
         // fall through
       }
+    }
+
+    // ─── 2. Fallback: External Browser OAuth Redirect
+    if (isCapacitorApp) {
+      const redirectUri = 'https://friendsmobiles.unitaryx.org/api/auth/google/callback';
+      const statePayload = btoa(JSON.stringify({ mode: 'apk', targetScheme: 'com.friendsmobile.app://auth-success' }));
+      const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid%20email%20profile&prompt=select_account&state=${encodeURIComponent(statePayload)}`;
+
+      try {
+        Browser.open({ url: googleOAuthUrl }).catch(() => {
+          window.open(googleOAuthUrl, '_system') || window.open(googleOAuthUrl, '_blank');
+        });
+      } catch (_) {
+        window.open(googleOAuthUrl, '_system') || window.open(googleOAuthUrl, '_blank');
+      }
+      setIsSubmitting(false);
+      if (addToast) addToast('Opening Google Account Chooser...', 'info');
+      return;
     }
 
     // ─── 3. Fallback: GSI ID One Tap for Web

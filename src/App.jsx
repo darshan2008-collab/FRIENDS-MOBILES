@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { App as CapApp } from '@capacitor/app';
 import { Headphones } from 'lucide-react';
 import Header from './components/Header';
 import MobileDrawer from './components/MobileDrawer';
@@ -314,9 +315,9 @@ export default function App() {
 
   // ─── Deep Link & Web-to-APK Google Auth Handler ─────────────────────────────
   useEffect(() => {
-    const handleAuthRedirectAndDeepLink = async () => {
+    const handleAuthRedirectAndDeepLink = async (targetHref) => {
       try {
-        const href = window.location.href;
+        const href = targetHref || window.location.href;
         let search = window.location.search;
         let hash = window.location.hash;
 
@@ -333,7 +334,7 @@ export default function App() {
         if (params.get('open_auth') === 'google') {
           const redirectScheme = params.get('app_redirect') || 'com.friendsmobile.app://auth-success';
           sessionStorage.setItem('fm_apk_redirect', redirectScheme);
-          setIsAuthModalOpen(true);
+          setIsAuthOpen(true);
         }
 
         // 2. If APK opened from deep link com.friendsmobile.app://auth-success?user=...
@@ -348,7 +349,7 @@ export default function App() {
               setCurrentUser(parsedUser);
               localStorage.setItem('fm_user', JSON.stringify(parsedUser));
               addToast(`Welcome back, ${parsedUser.name || parsedUser.email}! Signed in with Google.`, 'success');
-              window.history.replaceState({}, document.title, window.location.pathname);
+              if (window.history.pushState) window.history.replaceState({}, document.title, window.location.pathname);
             }
           } catch (_) {}
         } else if (tokenParam && !tokenParam.startsWith('rst_')) {
@@ -368,7 +369,23 @@ export default function App() {
               setCurrentUser(u);
               localStorage.setItem('fm_user', JSON.stringify(u));
               addToast(`Signed in with Google as ${u.name}!`, 'success');
-              window.history.replaceState({}, document.title, window.location.pathname);
+              if (window.history.pushState) window.history.replaceState({}, document.title, window.location.pathname);
+
+              // If request came from APK (state=apk or fm_apk_redirect)
+              const stateVal = params.get('state') || params.get('mode');
+              const apkRedirect = sessionStorage.getItem('fm_apk_redirect');
+              if (stateVal === 'apk' || apkRedirect) {
+                if (sessionStorage) sessionStorage.removeItem('fm_apk_redirect');
+                const userJsonStr = encodeURIComponent(JSON.stringify(u));
+                const customSchemeUrl = `com.friendsmobile.app://auth-success?user=${userJsonStr}`;
+                const intentUrl = `intent://auth-success?user=${userJsonStr}#Intent;scheme=com.friendsmobile.app;package=com.friendsmobile.app;end`;
+
+                // Auto-launch Android Intent URI back to APK
+                window.location.href = intentUrl;
+                setTimeout(() => {
+                  window.location.href = customSchemeUrl;
+                }, 250);
+              }
             }
           } catch (_) {}
         } else if (emailParam) {
@@ -381,17 +398,30 @@ export default function App() {
           setCurrentUser(u);
           localStorage.setItem('fm_user', JSON.stringify(u));
           addToast(`Signed in with Google as ${u.name}!`, 'success');
-          window.history.replaceState({}, document.title, window.location.pathname);
+          if (window.history.pushState) window.history.replaceState({}, document.title, window.location.pathname);
         }
       } catch (_) {}
     };
 
     handleAuthRedirectAndDeepLink();
-    window.addEventListener('hashchange', handleAuthRedirectAndDeepLink);
-    window.addEventListener('popstate', handleAuthRedirectAndDeepLink);
+    window.addEventListener('hashchange', () => handleAuthRedirectAndDeepLink());
+    window.addEventListener('popstate', () => handleAuthRedirectAndDeepLink());
+
+    let appUrlListener = null;
+    try {
+      CapApp.addListener('appUrlOpen', (data) => {
+        if (data?.url) {
+          handleAuthRedirectAndDeepLink(data.url);
+        }
+      }).then(l => { appUrlListener = l; }).catch(() => {});
+    } catch (_) {}
+
     return () => {
-      window.removeEventListener('hashchange', handleAuthRedirectAndDeepLink);
-      window.removeEventListener('popstate', handleAuthRedirectAndDeepLink);
+      window.removeEventListener('hashchange', () => handleAuthRedirectAndDeepLink());
+      window.removeEventListener('popstate', () => handleAuthRedirectAndDeepLink());
+      if (appUrlListener && typeof appUrlListener.remove === 'function') {
+        appUrlListener.remove();
+      }
     };
   }, []);
 

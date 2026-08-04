@@ -160,63 +160,138 @@ router.post('/signup', signupLimiter, async (req, res) => {
   }
 });
 
-// POST /api/auth/google-auth (Google OAuth Registration & Login Database Sync)
-router.post('/google-auth', async (req, res) => {
+const handleGoogleRedirect = (req, res) => {
   try {
-    const { email, name, googleId, picture, phone } = req.body;
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '929652702793-02ve5do6kgq0fv4hns0vd31g7of00lak.apps.googleusercontent.com';
+    const REDIRECT_URI = process.env.PUBLIC_APP_URL ? `${process.env.PUBLIC_APP_URL.replace(/\/+$/, '')}/api/auth/google/callback` : 'https://friendsmobiles.unitaryx.org/api/auth/google/callback';
+    const mode = req.query.mode || 'web';
+    const targetScheme = req.query.redirect || 'com.friendsmobile.app://auth-success';
+    const state = Buffer.from(JSON.stringify({ mode, targetScheme })).toString('base64');
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=openid%20email%20profile&state=${encodeURIComponent(state)}&prompt=select_account`;
+    return res.redirect(authUrl);
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'OAuth initialization failed', error: err.message });
+  }
+};
 
-    if (!email || !email.includes('@')) {
-      return res.status(400).json({ success: false, message: 'Valid Google email address is required' });
+router.get('/google/login', handleGoogleRedirect);
+router.get('/google/redirect', handleGoogleRedirect);
+router.get('/google/auth', handleGoogleRedirect);
+router.get('/google', (req, res, next) => {
+  if (req.method === 'GET' && !req.body?.email) {
+    return handleGoogleRedirect(req, res);
+  }
+  next();
+});
+
+// GET /api/auth/google/callback (Google OAuth Code Callback & Deep Link Redirect back to APK)
+router.get('/google/callback', async (req, res) => {
+  const { code, state, error } = req.query;
+  if (error || !code) {
+    return res.send(`<html><body style="font-family:sans-serif;text-align:center;padding:40px;"><h2>Google sign-in was cancelled.</h2><p><a href="com.friendsmobile.app://auth-failed">Return to App</a></p><script>setTimeout(() => window.location.href="com.friendsmobile.app://auth-failed", 1500);</script></body></html>`);
+  }
+
+  let stateData = { mode: 'web', targetScheme: 'com.friendsmobile.app://auth-success' };
+  try {
+    if (state) stateData = JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
+  } catch (_) {}
+
+  try {
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '929652702793-02ve5do6kgq0fv4hns0vd31g7of00lak.apps.googleusercontent.com';
+    const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+    const REDIRECT_URI = process.env.PUBLIC_APP_URL ? `${process.env.PUBLIC_APP_URL.replace(/\/+$/, '')}/api/auth/google/callback` : 'https://friendsmobiles.unitaryx.org/api/auth/google/callback';
+
+    // 1. Exchange code with Google token endpoint
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        redirect_uri: REDIRECT_URI,
+        grant_type: 'authorization_code'
+      })
+    });
+
+    const tokenData = await tokenRes.json();
+    let userInfo = null;
+
+    if (tokenData.access_token) {
+      const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${tokenData.access_token}` }
+      });
+      userInfo = await userRes.json();
+    } else if (tokenData.id_token) {
+      const payload = tokenData.id_token.split('.')[1];
+      userInfo = JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
     }
 
-    const cleanEmail = sanitizeInput(email).toLowerCase().trim();
-    const cleanName = name ? sanitizeInput(name) : cleanEmail.split('@')[0];
-    const cleanPhone = phone ? normalizePhone(phone) : '';
+    if (!userInfo || !userInfo.email) {
+      return res.status(400).send('Failed to retrieve user profile from Google.');
+    }
 
+    // 2. Register/Login user in database
+    const cleanEmail = sanitizeInput(userInfo.email).toLowerCase().trim();
+    const cleanName = userInfo.name ? sanitizeInput(userInfo.name) : cleanEmail.split('@')[0];
     const users = await getUsersAsync();
     let existing = users.find(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
+    let userProfile = null;
 
     if (existing) {
-      const updatedUser = {
-        ...existing,
-        name: existing.name || cleanName,
-        googleId: googleId || existing.googleId || 'google_' + Date.now(),
-        updatedAt: new Date().toISOString()
+      userProfile = { id: existing.id, name: existing.name || cleanName, email: existing.email, phone: existing.phone || '', picture: userInfo.picture || '' };
+    } else {
+      const newId = users.length > 0 ? Math.max(...users.map(u => u.id || 0)) + 1 : 1;
+      const newUser = {
+        id: newId,
+        name: cleanName,
+        email: cleanEmail,
+        phone: '',
+        password: hashPassword('google_oauth_' + Math.random().toString(36).substring(2)),
+        picture: userInfo.picture || '',
+        googleId: userInfo.sub || 'google_' + Date.now(),
+        role: 'customer',
+        createdAt: new Date().toISOString()
       };
-      await saveUserAsync(updatedUser);
-      const userProfile = { id: updatedUser.id, name: updatedUser.name, email: updatedUser.email, phone: updatedUser.phone || '', address: updatedUser.address || '' };
-
-      return res.json({
-        success: true,
-        message: `Welcome back, ${updatedUser.name}!`,
-        user: userProfile
-      });
+      await saveUserAsync(newUser);
+      userProfile = { id: newUser.id, name: newUser.name, email: newUser.email, phone: '', picture: newUser.picture };
     }
 
-    const newId = users.length > 0 ? Math.max(...users.map(u => u.id || 0)) + 1 : 1;
-    const newUser = {
-      id: newId,
-      name: cleanName,
-      email: cleanEmail,
-      phone: cleanPhone,
-      password: hashPassword('google_oauth_' + Math.random().toString(36).substring(2)),
-      address: 'Tamil Nadu',
-      googleId: googleId || 'google_' + Date.now(),
-      role: 'customer',
-      createdAt: new Date().toISOString()
-    };
+    const userJsonStr = encodeURIComponent(JSON.stringify(userProfile));
+    const deepLinkUrl = `com.friendsmobile.app://auth-success?user=${userJsonStr}`;
+    const intentUrl = `intent://auth-success?user=${userJsonStr}#Intent;scheme=com.friendsmobile.app;package=com.friendsmobile.app;end`;
 
-    await saveUserAsync(newUser);
-    const userProfile = { id: newUser.id, name: newUser.name, email: newUser.email, phone: newUser.phone, address: newUser.address };
-
-    res.status(201).json({
-      success: true,
-      message: `Account registered with Google! Welcome, ${newUser.name}.`,
-      user: userProfile
-    });
+    return res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Google Sign-In Success</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #0f172a; color: #ffffff; text-align: center; }
+          .card { background: #1e293b; padding: 32px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 360px; width: 90%; border: 1px solid #334155; }
+          .btn { display: inline-block; margin-top: 16px; padding: 12px 24px; background: #FF5500; color: #ffffff; border-radius: 12px; text-decoration: none; font-weight: 800; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h2 style="color:#FF5500; margin-top:0;">Signed In Successfully!</h2>
+          <p>Welcome, <strong>${userProfile.name}</strong>!</p>
+          <p style="font-size:0.88rem; color:#94a3b8;">Returning to FRIENDS MOBILE App...</p>
+          <a href="${intentUrl}" class="btn">Open FRIENDS MOBILE App</a>
+        </div>
+        <script>
+          window.location.href = "${intentUrl}";
+          setTimeout(function() {
+            window.location.href = "${deepLinkUrl}";
+          }, 300);
+        </script>
+      </body>
+      </html>
+    `);
   } catch (err) {
-    console.error("[Google Auth Error]", err);
-    res.status(500).json({ success: false, message: 'Google authentication failed', error: err.message });
+    console.error("[Google OAuth Callback Error]", err);
+    res.status(500).send("Authentication error: " + err.message);
   }
 });
 

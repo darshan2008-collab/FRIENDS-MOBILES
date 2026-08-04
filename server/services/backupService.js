@@ -251,14 +251,8 @@ const BackupService = {
         console.error('[Excel Auto-Backup Error]', err.message);
       }
 
-      // Upload files to Google Drive
-      const driveResult = await GoogleDriveService.uploadBackupSnapshot(filePath, filename);
-      await GoogleDriveService.uploadBackupSnapshot(usersFilePath, usersFilename).catch(() => {});
-      await GoogleDriveService.uploadBackupSnapshot(ordersFilePath, ordersFilename).catch(() => {});
-      await GoogleDriveService.uploadBackupSnapshot(productsFilePath, productsFilename).catch(() => {});
-      if (excelResult && excelResult.filePath) {
-        await GoogleDriveService.uploadBackupSnapshot(excelResult.filePath, excelResult.filename).catch(() => {});
-      }
+      // Upload Product Data Catalog Backup ONLY to Google Drive
+      const driveResult = await GoogleDriveService.uploadBackupSnapshot(productsFilePath, productsFilename).catch(() => null);
 
       return {
         success: true,

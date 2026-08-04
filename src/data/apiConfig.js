@@ -7,7 +7,9 @@ export const getApiBaseUrl = () => {
 
   const isCapacitor = typeof window !== 'undefined' && (
     window.Capacitor !== undefined ||
+    (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) ||
     window.location.protocol === 'capacitor:' ||
+    window.location.protocol === 'file:' ||
     (window.location.hostname === 'localhost' && window.location.port !== '5173' && window.location.port !== '3000' && window.location.port !== '5000')
   );
 

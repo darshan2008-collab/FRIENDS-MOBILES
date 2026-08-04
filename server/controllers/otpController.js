@@ -167,7 +167,7 @@ exports.verifyOtp = async (req, res) => {
     }
 
     const cleanEmail = email.toLowerCase().trim();
-    const cleanOtp = otp.toString().trim();
+    const cleanOtp = otp.toString().replace(/\D/g, '').trim();
 
     // OTP must contain exactly 6 digits
     if (!/^\d{6}$/.test(cleanOtp)) {
@@ -177,63 +177,72 @@ exports.verifyOtp = async (req, res) => {
       });
     }
 
-    // 2. Find Active OTP Document (DB or In-Memory Store)
-    let record = null;
-    try {
-      record = await OtpVerification.findOne({ email: cleanEmail }).sort({ createdAt: -1 });
-    } catch (_) {}
-    let isMemoryRecord = false;
+    // 2. Collect candidate OTP records from both In-Memory store & Database
+    const candidateRecords = [];
 
-
-    if (!record && inMemoryOtpStore.has(cleanEmail)) {
-      const memData = inMemoryOtpStore.get(cleanEmail);
-      record = {
-        _id: 'mem_' + Date.now(),
-        email: cleanEmail,
-        otpHash: memData.otpHash,
-        attempts: memData.attempts || 0,
-        expiresAt: new Date(memData.expiresAt),
-        save: async function() {
-          memData.attempts = this.attempts;
-          inMemoryOtpStore.set(cleanEmail, memData);
-        }
-      };
-      isMemoryRecord = true;
+    if (inMemoryOtpStore.has(cleanEmail)) {
+      const mem = inMemoryOtpStore.get(cleanEmail);
+      if (mem && mem.expiresAt > Date.now()) {
+        candidateRecords.push({
+          source: 'memory',
+          otpHash: mem.otpHash,
+          attempts: mem.attempts || 0,
+          expiresAt: mem.expiresAt
+        });
+      }
     }
 
-    if (!record) {
+    try {
+      const dbDocs = await OtpVerification.find({ email: cleanEmail }).sort({ createdAt: -1 });
+      for (const doc of (dbDocs || [])) {
+        if (doc.expiresAt && new Date(doc.expiresAt).getTime() > Date.now()) {
+          candidateRecords.push({
+            source: 'db',
+            _id: doc._id,
+            otpHash: doc.otpHash,
+            attempts: doc.attempts || 0,
+            expiresAt: new Date(doc.expiresAt).getTime()
+          });
+        }
+      }
+    } catch (_) {}
+
+    if (candidateRecords.length === 0) {
       return res.status(410).json({
         success: false,
         message: 'OTP has expired or is invalid. Please request a new OTP.'
       });
     }
 
-    // 3. Check Expiry
-    if (new Date() > record.expiresAt) {
-      if (!isMemoryRecord) try { await OtpVerification.deleteOne({ _id: record._id }); } catch (_) {}
+    // Check attempt count on latest record
+    if (candidateRecords[0].attempts >= 5) {
       inMemoryOtpStore.delete(cleanEmail);
-      return res.status(410).json({
-        success: false,
-        message: 'OTP has expired. Please request a new OTP.'
-      });
-    }
-
-    // 4. Check Maximum Attempts (Limit: 5)
-    if (record.attempts >= 5) {
-      if (!isMemoryRecord) try { await OtpVerification.deleteOne({ _id: record._id }); } catch (_) {}
-      inMemoryOtpStore.delete(cleanEmail);
+      try { await OtpVerification.deleteMany({ email: cleanEmail }); } catch (_) {}
       return res.status(429).json({
         success: false,
         message: 'Maximum verification attempts exceeded. Please request a new OTP.'
       });
     }
 
-    // 5. Compare bcrypt hash — only accept real generated OTP
-    const isMatch = await bcrypt.compare(cleanOtp, record.otpHash);
+    // 3. Test OTP code against candidates
+    let isMatched = false;
+    for (const record of candidateRecords) {
+      if (await bcrypt.compare(cleanOtp, record.otpHash)) {
+        isMatched = true;
+        break;
+      }
+    }
 
-    if (!isMatch) {
-      record.attempts += 1;
-      await record.save();
+    if (!isMatched) {
+      // Increment attempt counter in memory & DB
+      if (inMemoryOtpStore.has(cleanEmail)) {
+        const mem = inMemoryOtpStore.get(cleanEmail);
+        mem.attempts = (mem.attempts || 0) + 1;
+        inMemoryOtpStore.set(cleanEmail, mem);
+      }
+      try {
+        await OtpVerification.updateMany({ email: cleanEmail }, { $inc: { attempts: 1 } });
+      } catch (_) {}
 
       return res.status(401).json({
         success: false,
@@ -241,9 +250,9 @@ exports.verifyOtp = async (req, res) => {
       });
     }
 
-    // 6. Successful Verification: Delete OTP Document
-    if (!isMemoryRecord) try { await OtpVerification.deleteOne({ _id: record._id }); } catch (_) {}
+    // 4. Successful Verification: Clean up OTP records
     inMemoryOtpStore.delete(cleanEmail);
+    try { await OtpVerification.deleteMany({ email: cleanEmail }); } catch (_) {}
     console.log(`[OTP Info] OTP Verified for ${cleanEmail}`);
 
     // Generate secure single-use reset token
