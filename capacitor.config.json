@@ -1,0 +1,16 @@
+{
+  "appId": "com.friendsmobile.app",
+  "appName": "FRIENDS MOBILE",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#FF5500",
+      "showSpinner": false
+    }
+  }
+}
