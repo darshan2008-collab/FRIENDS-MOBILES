@@ -1,108 +1,31 @@
 import os
-import math
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw
 
-def cubic_bezier(p0, p1, p2, p3, steps=120):
-    pts = []
-    for i in range(steps + 1):
-        t = i / steps
-        u = 1 - t
-        x = u**3 * p0[0] + 3*u**2*t * p1[0] + 3*u*t**2 * p2[0] + t**3 * p3[0]
-        y = u**3 * p0[1] + 3*u**2*t * p1[1] + 3*u*t**2 * p2[1] + t**3 * p3[1]
-        pts.append((x, y))
-    return pts
+LOGO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'public', 'logo.png')
 
-def render_logo(size=1024, emblem_scale=1.0):
-    """
-    Renders FRIENDS MOBILE emblem on a transparent canvas of size x size.
-    emblem_scale controls the relative size of the emblem within the canvas.
-    """
-    img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
+def get_logo_image(size, emblem_scale=1.0):
+    logo = Image.open(LOGO_PATH).convert('RGBA')
+    target_dim = int(size * emblem_scale)
+    resized_logo = logo.resize((target_dim, target_dim), Image.Resampling.LANCZOS)
     
-    # Base viewBox is 0 0 100 100
-    # Center emblem at (size/2, size/2)
-    center = size / 2.0
-    scale = (size / 100.0) * emblem_scale
-    offset_x = center - (50 * scale)
-    offset_y = center - (50 * scale)
-
-    # 1. Main Orange Circle (#FF5500)
-    cx = 50 * scale + offset_x
-    cy = 50 * scale + offset_y
-    r = 46 * scale
-    stroke_w = max(1, int(2.5 * scale))
-    draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill='#FF5500', outline='#000000', width=stroke_w)
-    
-    # 2. Top Black Dot (#000000)
-    td_cx = 50 * scale + offset_x
-    td_cy = 23 * scale + offset_y
-    td_r = 9 * scale
-    draw.ellipse([td_cx - td_r, td_cy - td_r, td_cx + td_r, td_cy + td_r], fill='#000000')
-    
-    # 3. Bottom 'U' Emblem (#000000)
-    path_pts = []
-    # M 24 41
-    path_pts.append((24 * scale + offset_x, 41 * scale + offset_y))
-    # H 39
-    path_pts.append((39 * scale + offset_x, 41 * scale + offset_y))
-    # V 58
-    path_pts.append((39 * scale + offset_x, 58 * scale + offset_y))
-    # C 39 65 44 71 50 71
-    path_pts.extend(cubic_bezier(
-        (39*scale + offset_x, 58*scale + offset_y),
-        (39*scale + offset_x, 65*scale + offset_y),
-        (44*scale + offset_x, 71*scale + offset_y),
-        (50*scale + offset_x, 71*scale + offset_y)
-    ))
-    # C 56 71 61 65 61 58
-    path_pts.extend(cubic_bezier(
-        (50*scale + offset_x, 71*scale + offset_y),
-        (56*scale + offset_x, 71*scale + offset_y),
-        (61*scale + offset_x, 65*scale + offset_y),
-        (61*scale + offset_x, 58*scale + offset_y)
-    ))
-    # V 41
-    path_pts.append((61 * scale + offset_x, 41 * scale + offset_y))
-    # H 76
-    path_pts.append((76 * scale + offset_x, 41 * scale + offset_y))
-    # V 58
-    path_pts.append((76 * scale + offset_x, 58 * scale + offset_y))
-    # C 76 73 65 86 50 86
-    path_pts.extend(cubic_bezier(
-        (76*scale + offset_x, 58*scale + offset_y),
-        (76*scale + offset_x, 73*scale + offset_y),
-        (65*scale + offset_x, 86*scale + offset_y),
-        (50*scale + offset_x, 86*scale + offset_y)
-    ))
-    # C 35 86 24 73 24 58
-    path_pts.extend(cubic_bezier(
-        (50*scale + offset_x, 86*scale + offset_y),
-        (35*scale + offset_x, 86*scale + offset_y),
-        (24*scale + offset_x, 73*scale + offset_y),
-        (24*scale + offset_x, 58*scale + offset_y)
-    ))
-    
-    draw.polygon(path_pts, fill='#000000')
-    return img
+    canvas = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+    pos = (size - target_dim) // 2
+    canvas.alpha_composite(resized_logo, (pos, pos))
+    return canvas
 
 def create_square_icon(target_size=192):
-    # Render at 1024 super-resolution
     canvas_size = 1024
     img = Image.new('RGBA', (canvas_size, canvas_size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     
-    # White rounded rectangle background
     corner_radius = int(canvas_size * 0.22)
     padding = int(canvas_size * 0.04)
     card_rect = [padding, padding, canvas_size - padding, canvas_size - padding]
     draw.rounded_rectangle(card_rect, radius=corner_radius, fill='#FFFFFF', outline='#E2E8F0', width=int(canvas_size * 0.01))
     
-    # Render logo in center
-    logo_img = render_logo(size=canvas_size, emblem_scale=0.72)
+    logo_img = get_logo_image(size=canvas_size, emblem_scale=0.78)
     img.alpha_composite(logo_img)
-    
-    return img.resize((target_size, target_size), Image.LANCZOS)
+    return img.resize((target_size, target_size), Image.Resampling.LANCZOS)
 
 def create_round_icon(target_size=192):
     canvas_size = 1024
@@ -112,35 +35,30 @@ def create_round_icon(target_size=192):
     padding = int(canvas_size * 0.04)
     draw.ellipse([padding, padding, canvas_size - padding, canvas_size - padding], fill='#FFFFFF', outline='#E2E8F0', width=int(canvas_size * 0.01))
     
-    logo_img = render_logo(size=canvas_size, emblem_scale=0.70)
+    logo_img = get_logo_image(size=canvas_size, emblem_scale=0.78)
     img.alpha_composite(logo_img)
-    
-    return img.resize((target_size, target_size), Image.LANCZOS)
+    return img.resize((target_size, target_size), Image.Resampling.LANCZOS)
 
 def create_foreground_icon(target_size=432):
     canvas_size = 1024
-    # Adaptive foreground canvas uses central 60% for emblem
-    logo_img = render_logo(size=canvas_size, emblem_scale=0.55)
-    return logo_img.resize((target_size, target_size), Image.LANCZOS)
+    logo_img = get_logo_image(size=canvas_size, emblem_scale=0.62)
+    return logo_img.resize((target_size, target_size), Image.Resampling.LANCZOS)
 
 def create_splash_screen(width, height):
-    # Dark modern atmosphere splash screen (#0F172A)
     canvas_w = max(width, 1024)
     canvas_h = max(height, 1024)
     img = Image.new('RGBA', (canvas_w, canvas_h), '#0F172A')
     
-    # Center emblem
-    emblem_dim = int(min(canvas_w, canvas_h) * 0.35)
-    logo_img = render_logo(size=emblem_dim, emblem_scale=0.88)
+    emblem_dim = int(min(canvas_w, canvas_h) * 0.38)
+    logo_img = get_logo_image(size=emblem_dim, emblem_scale=1.0)
     
     pos_x = (canvas_w - emblem_dim) // 2
     pos_y = (canvas_h - emblem_dim) // 2 - int(canvas_h * 0.03)
     img.alpha_composite(logo_img, (pos_x, pos_y))
-    
-    return img.resize((width, height), Image.LANCZOS)
+    return img.resize((width, height), Image.Resampling.LANCZOS)
 
 def main():
-    res_base = r'd:\FRIENDS MOBILE\android\app\src\main\res'
+    res_base = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'android', 'app', 'src', 'main', 'res')
     
     densities = {
         'mipmap-mdpi': (48, 108),
