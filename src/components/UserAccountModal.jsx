@@ -27,6 +27,7 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
   if (!isOpen || typeof document === 'undefined') return null;
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile' | 'addresses' | 'offers' | 'support'
   const [userOrders, setUserOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [copiedCoupon, setCopiedCoupon] = useState('');
 
   const handleCopyCoupon = (code) => {
