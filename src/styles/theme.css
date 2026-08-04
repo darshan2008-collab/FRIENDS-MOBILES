@@ -4936,10 +4936,13 @@ img {
   grid-template-columns: 1fr;
   gap: 0;
   padding-top: 20px;
-  padding-bottom: 60px;
+  padding-bottom: 120px !important;
   flex: 1;
   position: relative;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
 }
+
 
 .shop-main-layout.filter-open {
   grid-template-columns: 260px 1fr;
@@ -6350,7 +6353,6 @@ img {
 }
 
 /* Fullscreen Shopping Catalog, User Auth, Dashboard & Admin Portals */
-.full-page-shopping-portal,
 .full-page-user-auth-portal,
 .full-page-user-dashboard,
 .full-page-admin-portal {
@@ -6369,6 +6371,28 @@ img {
   overflow: hidden !important;
   animation: fadeInOverlay 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
+
+.full-page-shopping-portal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  background: var(--bg-page, #060708) !important;
+  color: var(--text-primary, #ffffff) !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+  animation: fadeInOverlay 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
 
 .admin-workspace-layout {
   height: calc(100vh - 65px) !important;
