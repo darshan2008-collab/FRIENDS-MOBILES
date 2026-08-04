@@ -1310,7 +1310,6 @@ a.nav-link.active {
     border-radius: 16px !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
-  }  flex-shrink: 0 !important;
   }
 
   .theme-toggle-btn {
