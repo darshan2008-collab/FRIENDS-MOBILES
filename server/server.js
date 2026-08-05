@@ -97,7 +97,7 @@ app.use((req, res, next) => {
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: true, // Allow production Vercel frontend & local development origins
+  origin: true, // Allow production & local development origins
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -146,7 +146,7 @@ app.use('/images', express.static(path.join(__dirname, '../public/images')));
 app.use('/images', express.static(path.join(__dirname, '../images')));
 app.use(express.static(path.join(__dirname, '../')));
 
-// ─── API Routes (Dual-mounted for Vercel Serverless & Express compatibility) ──
+// ─── API Routes ─────────────────────────────────────────────────────────────
 app.use('/api/products', productsRouter);
 app.use('/products', productsRouter);
 
@@ -321,9 +321,19 @@ app.get('/api/health-mail', async (req, res) => {
   }
 });
 
+// ─── Google Site Verification Explicit Route ──────────────────────────────────
+app.get('/google59412e20cd0a6f03.html', (req, res) => {
+  const gFile = path.join(__dirname, '../public/google59412e20cd0a6f03.html');
+  const distFile = path.join(__dirname, '../dist/google59412e20cd0a6f03.html');
+  if (fs.existsSync(distFile)) return res.sendFile(distFile);
+  if (fs.existsSync(gFile)) return res.sendFile(gFile);
+  res.type('text/plain').send('google-site-verification: google59412e20cd0a6f03.html');
+});
+
 // ─── Production SPA Fallback Routing ─────────────────────────────────────────
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api') || req.path.startsWith('/images')) return next();
+  if (req.path.includes('google59412e20cd0a6f03.html')) return next();
   const distIndex = path.join(__dirname, '../dist/index.html');
   const rootIndex = path.join(__dirname, '../index.html');
   if (fs.existsSync(distIndex)) {
