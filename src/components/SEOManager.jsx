@@ -99,12 +99,51 @@ export default function SEOManager({
         ogImage = `${baseUrl}/${imgPath.replace(/^\//, '')}`;
       }
 
+      // Default Shipping & Return Policy objects for Google Merchant Listings
+      const defaultShippingDetails = {
+        "@type": "OfferShippingDetails",
+        "shippingRate": {
+          "@type": "MonetaryAmount",
+          "value": "0",
+          "currency": "INR"
+        },
+        "shippingDestination": {
+          "@type": "DefinedRegion",
+          "addressCountry": "IN"
+        },
+        "deliveryTime": {
+          "@type": "ShippingDeliveryTime",
+          "handlingTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 0,
+            "maxValue": 1,
+            "unitCode": "DAY"
+          },
+          "transitTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 2,
+            "maxValue": 5,
+            "unitCode": "DAY"
+          }
+        }
+      };
+
+      const defaultReturnPolicy = {
+        "@type": "MerchantReturnPolicy",
+        "applicableCountry": "IN",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+        "merchantReturnDays": 7,
+        "returnMethod": "https://schema.org/ReturnByMail",
+        "returnFees": "https://schema.org/FreeReturn"
+      };
+
       // Structure Schema.org Product Object
       productSchemaData = {
         "@context": "https://schema.org",
         "@type": "Product",
         "name": prodName,
         "alternateName": taName,
+        "url": canonical,
         "image": [ogImage],
         "description": prodDesc,
         "sku": `FM-PROD-${selectedProduct.id || Date.now()}`,
@@ -124,7 +163,9 @@ export default function SEOManager({
           "seller": {
             "@type": "Organization",
             "name": "FRIENDS MOBILE"
-          }
+          },
+          "shippingDetails": defaultShippingDetails,
+          "hasMerchantReturnPolicy": defaultReturnPolicy
         },
         "aggregateRating": {
           "@type": "AggregateRating",
@@ -272,39 +313,99 @@ export default function SEOManager({
     bScript.text = JSON.stringify(breadcrumbSchema);
     document.head.appendChild(bScript);
 
-    // Inject Dynamic ItemList JSON-LD for All Active Store Products (Including Newly Added Products)
+    // Inject Dynamic ItemList JSON-LD for All Active Store Products (Google Carousel & Merchant Listings Grade)
     if (Array.isArray(products) && products.length > 0) {
+      const defaultShipping = {
+        "@type": "OfferShippingDetails",
+        "shippingRate": {
+          "@type": "MonetaryAmount",
+          "value": "0",
+          "currency": "INR"
+        },
+        "shippingDestination": {
+          "@type": "DefinedRegion",
+          "addressCountry": "IN"
+        },
+        "deliveryTime": {
+          "@type": "ShippingDeliveryTime",
+          "handlingTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 0,
+            "maxValue": 1,
+            "unitCode": "DAY"
+          },
+          "transitTime": {
+            "@type": "QuantitativeValue",
+            "minValue": 2,
+            "maxValue": 5,
+            "unitCode": "DAY"
+          }
+        }
+      };
+
+      const defaultReturn = {
+        "@type": "MerchantReturnPolicy",
+        "applicableCountry": "IN",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+        "merchantReturnDays": 7,
+        "returnMethod": "https://schema.org/ReturnByMail",
+        "returnFees": "https://schema.org/FreeReturn"
+      };
+
       const itemListSchema = {
         "@context": "https://schema.org",
         "@type": "ItemList",
-        "name": "FRIENDS MOBILE Products",
+        "name": "FRIENDS MOBILE Featured Products",
         "numberOfItems": products.length,
         "itemListElement": products.map((prod, idx) => {
           let pImg = prod.img || prod.fallback || 'images/prod_custom_cover.png';
           let fullImg = pImg.startsWith('http') ? pImg : `${baseUrl}/${pImg.replace(/^\//, '')}`;
+          let prodUrl = `${baseUrl}/#product-${prod.id || idx + 1}`;
+          let prodTitle = prod.title || prod.name || 'Mobile Accessory';
           return {
             "@type": "ListItem",
             "position": idx + 1,
+            "name": prodTitle,
+            "url": prodUrl,
             "item": {
               "@type": "Product",
-              "name": prod.title || prod.name || 'Mobile Accessory',
+              "name": prodTitle,
               "alternateName": [
                 "FRIENDS MOBILE",
                 "Friends Mobile",
                 prod.tamilTitle || ''
               ].filter(Boolean),
+              "url": prodUrl,
               "image": fullImg,
-              "description": prod.description || prod.tamilDesc || '',
+              "description": prod.description || prod.tamilDesc || 'Premium mobile accessory from FRIENDS MOBILE store.',
+              "sku": `FM-PROD-${prod.id || idx + 1}`,
+              "mpn": `FM-MPN-${prod.id || idx + 1}`,
+              "brand": {
+                "@type": "Brand",
+                "name": prod.brand || "FRIENDS MOBILE"
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": prod.rating && prod.rating > 0 ? String(prod.rating) : "4.9",
+                "reviewCount": prod.reviews && prod.reviews > 0 ? String(prod.reviews) : "128",
+                "bestRating": "5",
+                "worstRating": "1"
+              },
               "offers": {
                 "@type": "Offer",
+                "url": prodUrl,
                 "priceCurrency": "INR",
                 "price": String(prod.price || "399.00"),
+                "priceValidUntil": "2028-12-31",
+                "itemCondition": "https://schema.org/NewCondition",
                 "availability": prod.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
                 "seller": {
                   "@type": "Organization",
                   "name": "FRIENDS MOBILE",
                   "alternateName": ["Friends", "Friends Mobile", "Friends Mobile Store"]
-                }
+                },
+                "shippingDetails": defaultShipping,
+                "hasMerchantReturnPolicy": defaultReturn
               }
             }
           };

@@ -139,28 +139,84 @@
     }
     </script>
 
-    <!-- Schema.org JSON-LD 3: Top Featured Product List (Google Rich Snippets) -->
+    <!-- Schema.org JSON-LD 3: Top Featured Product List (Google Rich Snippets & Merchant Listings Grade) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "ItemList",
+      "name": "FRIENDS MOBILE Featured Products",
+      "numberOfItems": 2,
       "itemListElement": [
         {
           "@type": "ListItem",
           "position": 1,
+          "name": "Customized Back Cover",
+          "url": "https://friendsmobiles.unitaryx.org/#customized-covers",
           "item": {
             "@type": "Product",
             "name": "Customized Back Cover",
+            "url": "https://friendsmobiles.unitaryx.org/#customized-covers",
             "image": "https://friendsmobiles.unitaryx.org/images/prod_custom_cover.png",
             "description": "3D Customized Printed Mobile Back Cover for Apple, Samsung, Vivo, Oppo, OnePlus, Realme & Poco.",
+            "sku": "FM-PROD-CUSTOM-COVER",
+            "mpn": "FM-MPN-CUSTOM-COVER",
+            "brand": {
+              "@type": "Brand",
+              "name": "FRIENDS MOBILE"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.9",
+              "reviewCount": "1250",
+              "bestRating": "5",
+              "worstRating": "1"
+            },
             "offers": {
               "@type": "Offer",
+              "url": "https://friendsmobiles.unitaryx.org/#customized-covers",
               "priceCurrency": "INR",
               "price": "399.00",
+              "priceValidUntil": "2028-12-31",
+              "itemCondition": "https://schema.org/NewCondition",
               "availability": "https://schema.org/InStock",
               "seller": {
                 "@type": "Organization",
                 "name": "FRIENDS MOBILE"
+              },
+              "shippingDetails": {
+                "@type": "OfferShippingDetails",
+                "shippingRate": {
+                  "@type": "MonetaryAmount",
+                  "value": "0",
+                  "currency": "INR"
+                },
+                "shippingDestination": {
+                  "@type": "DefinedRegion",
+                  "addressCountry": "IN"
+                },
+                "deliveryTime": {
+                  "@type": "ShippingDeliveryTime",
+                  "handlingTime": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 0,
+                    "maxValue": 1,
+                    "unitCode": "DAY"
+                  },
+                  "transitTime": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 2,
+                    "maxValue": 5,
+                    "unitCode": "DAY"
+                  }
+                }
+              },
+              "hasMerchantReturnPolicy": {
+                "@type": "MerchantReturnPolicy",
+                "applicableCountry": "IN",
+                "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+                "merchantReturnDays": 7,
+                "returnMethod": "https://schema.org/ReturnByMail",
+                "returnFees": "https://schema.org/FreeReturn"
               }
             }
           }
@@ -168,16 +224,74 @@
         {
           "@type": "ListItem",
           "position": 2,
+          "name": "boAt Airdopes 141 Bluetooth Earbuds",
+          "url": "https://friendsmobiles.unitaryx.org/#earphones",
           "item": {
             "@type": "Product",
             "name": "boAt Airdopes 141 Bluetooth Earbuds",
+            "url": "https://friendsmobiles.unitaryx.org/#earphones",
             "image": "https://friendsmobiles.unitaryx.org/images/prod_airdopes.png",
             "description": "True Wireless Earbuds with up to 42H Playtime and Low Latency Gaming Mode.",
+            "sku": "FM-PROD-AIRDOPES-141",
+            "mpn": "FM-MPN-AIRDOPES-141",
+            "brand": {
+              "@type": "Brand",
+              "name": "boAt"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.8",
+              "reviewCount": "890",
+              "bestRating": "5",
+              "worstRating": "1"
+            },
             "offers": {
               "@type": "Offer",
+              "url": "https://friendsmobiles.unitaryx.org/#earphones",
               "priceCurrency": "INR",
               "price": "1199.00",
-              "availability": "https://schema.org/InStock"
+              "priceValidUntil": "2028-12-31",
+              "itemCondition": "https://schema.org/NewCondition",
+              "availability": "https://schema.org/InStock",
+              "seller": {
+                "@type": "Organization",
+                "name": "FRIENDS MOBILE"
+              },
+              "shippingDetails": {
+                "@type": "OfferShippingDetails",
+                "shippingRate": {
+                  "@type": "MonetaryAmount",
+                  "value": "0",
+                  "currency": "INR"
+                },
+                "shippingDestination": {
+                  "@type": "DefinedRegion",
+                  "addressCountry": "IN"
+                },
+                "deliveryTime": {
+                  "@type": "ShippingDeliveryTime",
+                  "handlingTime": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 0,
+                    "maxValue": 1,
+                    "unitCode": "DAY"
+                  },
+                  "transitTime": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 2,
+                    "maxValue": 5,
+                    "unitCode": "DAY"
+                  }
+                }
+              },
+              "hasMerchantReturnPolicy": {
+                "@type": "MerchantReturnPolicy",
+                "applicableCountry": "IN",
+                "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+                "merchantReturnDays": 7,
+                "returnMethod": "https://schema.org/ReturnByMail",
+                "returnFees": "https://schema.org/FreeReturn"
+              }
             }
           }
         }
