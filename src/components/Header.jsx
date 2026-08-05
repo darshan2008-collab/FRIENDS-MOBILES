@@ -96,10 +96,10 @@ export default function Header({
                   if (onOpenCart) onOpenCart();
                 }}
                 title="Cart"
-                style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px' }}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '4px 8px 4px 4px', marginRight: '4px' }}
               >
-                <div className="icon-wrap">
-                  <ShoppingBag size={20} />
+                <div className="icon-wrap" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShoppingBag size={22} />
                   <span className="badge">{cartCount}</span>
                 </div>
               </button>

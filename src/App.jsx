@@ -348,6 +348,8 @@ export default function App() {
             if (parsedUser && parsedUser.email) {
               setCurrentUser(parsedUser);
               localStorage.setItem('fm_user', JSON.stringify(parsedUser));
+              setIsAuthOpen(false);
+              setIsAccountOpen(true);
               addToast(`Welcome back, ${parsedUser.name || parsedUser.email}! Signed in with Google.`, 'success');
               if (window.history.pushState) window.history.replaceState({}, document.title, window.location.pathname);
             }
@@ -368,6 +370,8 @@ export default function App() {
               };
               setCurrentUser(u);
               localStorage.setItem('fm_user', JSON.stringify(u));
+              setIsAuthOpen(false);
+              setIsAccountOpen(true);
               addToast(`Signed in with Google as ${u.name}!`, 'success');
               if (window.history.pushState) window.history.replaceState({}, document.title, window.location.pathname);
 
@@ -397,6 +401,8 @@ export default function App() {
           };
           setCurrentUser(u);
           localStorage.setItem('fm_user', JSON.stringify(u));
+          setIsAuthOpen(false);
+          setIsAccountOpen(true);
           addToast(`Signed in with Google as ${u.name}!`, 'success');
           if (window.history.pushState) window.history.replaceState({}, document.title, window.location.pathname);
         }
@@ -667,6 +673,8 @@ export default function App() {
     } else if (openCartAfterLogin) {
       setIsCartOpen(true);
       setOpenCartAfterLogin(false);
+    } else {
+      setIsAccountOpen(true);
     }
   };
 

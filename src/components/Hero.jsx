@@ -87,14 +87,14 @@ export default function Hero({ theme, slides, t = (k) => k }) {
               display: 'inline-flex', 
               alignItems: 'center', 
               gap: '8px', 
-              background: 'rgba(255, 85, 0, 0.12)', 
-              color: 'var(--text-primary)', 
+              background: isDark ? 'rgba(255, 85, 0, 0.16)' : 'rgba(255, 85, 0, 0.12)', 
+              color: isDark ? '#ffffff' : 'var(--text-primary)', 
               padding: '7px 16px', 
               borderRadius: '24px', 
               fontSize: 'clamp(0.78rem, 2.5vw, 0.86rem)', 
               fontWeight: '800', 
               letterSpacing: '0.6px',
-              border: '1px solid rgba(255, 85, 0, 0.3)',
+              border: isDark ? '1px solid rgba(255, 85, 0, 0.4)' : '1px solid rgba(255, 85, 0, 0.3)',
               boxShadow: '0 2px 8px rgba(255, 85, 0, 0.12)'
             }}>
               <Sparkles size={15} style={{ color: '#FF5500' }} /> {activeSlide.tag || "WELCOME TO FRIENDS MOBILE"}
@@ -106,7 +106,7 @@ export default function Hero({ theme, slides, t = (k) => k }) {
             fontSize: 'clamp(1.25rem, 4.2vw, 2.3rem)',
             lineHeight: '1.2'
           }}>
-            <span className="hero-heading-white" style={{ fontWeight: '900', fontSize: 'inherit' }}>
+            <span className="hero-heading-white" style={{ fontWeight: '900', fontSize: 'inherit', color: isDark ? '#ffffff' : 'var(--text-primary)' }}>
               {activeSlide.titleWhite || "Your One Stop"}
             </span>
             <br />
