@@ -321,19 +321,21 @@ app.get('/api/health-mail', async (req, res) => {
   }
 });
 
-// ─── Google Site Verification Explicit Route ──────────────────────────────────
-app.get('/google59412e20cd0a6f03.html', (req, res) => {
-  const gFile = path.join(__dirname, '../public/google59412e20cd0a6f03.html');
-  const distFile = path.join(__dirname, '../dist/google59412e20cd0a6f03.html');
+// ─── Google Site Verification Dynamic Route ──────────────────────────────────
+app.get('/google:code.html', (req, res) => {
+  const filename = `google${req.params.code}.html`;
+  const gFile = path.join(__dirname, '../public', filename);
+  const distFile = path.join(__dirname, '../dist', filename);
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
   if (fs.existsSync(distFile)) return res.sendFile(distFile);
   if (fs.existsSync(gFile)) return res.sendFile(gFile);
-  res.type('text/plain').send('google-site-verification: google59412e20cd0a6f03.html');
+  res.status(200).send(`google-site-verification: ${filename}`);
 });
 
 // ─── Production SPA Fallback Routing ─────────────────────────────────────────
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api') || req.path.startsWith('/images')) return next();
-  if (req.path.includes('google59412e20cd0a6f03.html')) return next();
+  if (req.path.startsWith('/google') && req.path.endsWith('.html')) return next();
   const distIndex = path.join(__dirname, '../dist/index.html');
   const rootIndex = path.join(__dirname, '../index.html');
   if (fs.existsSync(distIndex)) {
