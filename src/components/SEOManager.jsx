@@ -6,7 +6,7 @@ import { useEffect } from 'react';
  * Dynamic Features:
  * 1. Bilingual Dynamic Document Title & Meta Description for High Search Engine Ranking.
  * 2. High-Intent Tamil & English Keyword Injection (Google & Bing SEO).
- * 3. Amazon/Flipkart Grade Schema.org Rich Snippets (Product, Offer, AggregateRating, BreadcrumbList, ItemList).
+ * 3. Amazon/Flipkart Grade Schema.org Rich Snippets (Product, Offer, AggregateRating, BreadcrumbList).
  * 4. Automatic SEO Enhancement for Newly Added Products (Auto-indexes all products in dynamic JSON-LD).
  * 5. WhatsApp / Facebook / Twitter Rich Social Cards (OpenGraph & Twitter Card).
  * 6. Multi-Region Hreflang Tags & Canonical URL Management.
@@ -23,6 +23,25 @@ export default function SEOManager({
   useEffect(() => {
     const isTamil = false;
     const baseUrl = 'https://friendsmobiles.unitaryx.org';
+
+    const getAbsoluteImageUrl = (imgStr) => {
+      if (!imgStr) return `${baseUrl}/images/prod_custom_cover.png`;
+      let cleaned = String(imgStr).trim();
+      if (cleaned.includes('localhost') || cleaned.includes('127.0.0.1')) {
+        return cleaned.replace(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, baseUrl);
+      }
+      if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) {
+        return cleaned;
+      }
+      return `${baseUrl}/${cleaned.replace(/^\//, '')}`;
+    };
+
+    const formatPrice = (val) => {
+      if (val === undefined || val === null) return "399.00";
+      const numStr = String(val).replace(/[^0-9.]/g, '');
+      const num = parseFloat(numStr);
+      return isNaN(num) ? "399.00" : num.toFixed(2);
+    };
 
     // Default Fallback Metadata
     let title = 'FRIENDS MOBILE | Custom Phone Back Covers, Mobile Accessories & Store India | பிரண்ட்ஸ் மொபைல்';
@@ -50,7 +69,7 @@ export default function SEOManager({
         : 'Create your custom printed phone back cover for iPhone, Samsung, Vivo, Oppo, Realme, OnePlus & Xiaomi. High quality 3D photo prints with fast shipping & COD across India.';
       
       keywords = `3D photo mobile cover design, customized back cover online tamil nadu, phone case photo print, பிரண்ட்ஸ் மொபைல் கவர் டிசைன்`;
-      canonical = `${baseUrl}/#customized-covers`;
+      canonical = `${baseUrl}/?category=customized-covers`;
       categoryBreadcrumb = isTamil ? '3D கஸ்டமைஸ் கவர்' : 'Customized Back Covers';
       ogImage = `${baseUrl}/images/banner_backcover.png`;
 
@@ -64,42 +83,35 @@ export default function SEOManager({
         : 'Design personalized photo frames with custom photo prints, acrylic frames & gift boxes. Perfect for birthday, anniversary & special occasions.';
       
       keywords = `customized photo frame tamil nadu, wood frame print online, photo gift karur madurai, போட்டோ பிரேம் தயாரிக்க`;
-      canonical = `${baseUrl}/#photo-frames`;
+      canonical = `${baseUrl}/?category=photo-frames`;
       categoryBreadcrumb = isTamil ? 'போட்டோ பிரேம்கள்' : 'Custom Photo Frames';
       ogImage = `${baseUrl}/images/banner_photoframe.png`;
 
     } else if (selectedProduct) {
       const prodName = selectedProduct.title || selectedProduct.name || 'Mobile Accessory';
       const taName = selectedProduct.tamilTitle || prodName;
-      const prodPrice = selectedProduct.price ? `₹${selectedProduct.price}` : '';
-      const origPrice = selectedProduct.originalPrice ? `₹${selectedProduct.originalPrice}` : '';
+      const cleanPriceVal = formatPrice(selectedProduct.price);
+      const prodPrice = `₹${cleanPriceVal}`;
+      const origPrice = selectedProduct.originalPrice ? `₹${formatPrice(selectedProduct.originalPrice)}` : '';
       const prodCat = selectedProduct.category || 'Accessories';
       const prodDesc = selectedProduct.description || 'Premium mobile accessory from FRIENDS MOBILE.';
       const taDesc = selectedProduct.tamilDesc || prodDesc;
 
-      // God-Level Product Titles & Descriptions
       if (isTamil) {
-        title = `${taName} - ஆன்லைனில் வாங்க ₹${selectedProduct.price} | பிரண்ட்ஸ் மொபைல்`;
-        description = `${taName} சிறந்த சலுகை விலையில் ₹${selectedProduct.price} ${origPrice ? `(அசல் விலை ${origPrice})`.trim() : ''}. ${taDesc} 100% ஒரிஜினல் தரம், கேஷ் ஆன் டெலிவரி வசதியுடன் வாங்கலாம்.`;
+        title = `${taName} - ஆன்லைனில் வாங்க ₹${cleanPriceVal} | பிரண்ட்ஸ் மொபைல்`;
+        description = `${taName} சிறந்த சலுகை விலையில் ₹${cleanPriceVal} ${origPrice ? `(அசல் விலை ${origPrice})`.trim() : ''}. ${taDesc} 100% ஒரிஜினல் தரம், கேஷ் ஆன் டெலிவரி வசதியுடன் வாங்கலாம்.`;
       } else {
         title = `Buy ${prodName} ${prodPrice} Online | Best Price FRIENDS MOBILE`;
         description = `Order ${prodName} at best price ${prodPrice}. ${prodDesc} 100% Original guarantee with Cash on Delivery & fast shipping across India at FRIENDS MOBILE.`;
       }
 
       keywords = `${prodName}, ${taName}, buy ${prodName} online, ${prodName} price in tamil nadu, ${prodCat} mobile accessories, FRIENDS MOBILE, பிரண்ட்ஸ் மொபைல், கேஷ் ஆன் டெலிவரி`;
-      canonical = `${baseUrl}/#product-${selectedProduct.id || 'detail'}`;
+      canonical = `${baseUrl}/?product=${selectedProduct.id || 'detail'}`;
       categoryBreadcrumb = prodCat;
       ogType = 'product';
 
-      // Resolve Absolute Image URL for Social Sharing & Google Schema
-      let imgPath = selectedProduct.img || selectedProduct.fallback || 'images/prod_custom_cover.png';
-      if (imgPath.startsWith('http')) {
-        ogImage = imgPath;
-      } else {
-        ogImage = `${baseUrl}/${imgPath.replace(/^\//, '')}`;
-      }
+      ogImage = getAbsoluteImageUrl(selectedProduct.img || selectedProduct.fallback);
 
-      // Default Shipping & Return Policy objects for Google Merchant Listings
       const defaultShippingDetails = {
         "@type": "OfferShippingDetails",
         "shippingRate": {
@@ -137,10 +149,10 @@ export default function SEOManager({
         "returnFees": "https://schema.org/FreeReturn"
       };
 
-      // Structure Schema.org Product Object
       productSchemaData = {
         "@context": "https://schema.org",
         "@type": "Product",
+        "@id": canonical,
         "name": prodName,
         "alternateName": taName,
         "url": canonical,
@@ -156,21 +168,22 @@ export default function SEOManager({
           "@type": "Offer",
           "url": canonical,
           "priceCurrency": "INR",
-          "price": selectedProduct.price ? String(selectedProduct.price) : "399.00",
+          "price": cleanPriceVal,
           "priceValidUntil": "2028-12-31",
           "itemCondition": "https://schema.org/NewCondition",
           "availability": selectedProduct.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
           "seller": {
             "@type": "Organization",
-            "name": "FRIENDS MOBILE"
+            "name": "FRIENDS MOBILE",
+            "url": baseUrl
           },
           "shippingDetails": defaultShippingDetails,
           "hasMerchantReturnPolicy": defaultReturnPolicy
         },
         "aggregateRating": {
           "@type": "AggregateRating",
-          "ratingValue": selectedProduct.rating && selectedProduct.rating > 0 ? String(selectedProduct.rating) : "4.9",
-          "reviewCount": selectedProduct.reviews && selectedProduct.reviews > 0 ? String(selectedProduct.reviews) : "128",
+          "ratingValue": selectedProduct.rating && Number(selectedProduct.rating) > 0 ? String(selectedProduct.rating) : "4.9",
+          "reviewCount": selectedProduct.reviews && Number(selectedProduct.reviews) > 0 ? String(selectedProduct.reviews) : "128",
           "bestRating": "5",
           "worstRating": "1"
         }
@@ -185,7 +198,7 @@ export default function SEOManager({
         ? `${shopCategory} பிரிவில் சிறந்த தரமான மொபைல் பாகங்களை பிரண்ட்ஸ் மொபைல் ஷோரூமில் சலுகை விலையில் வாங்குங்கள். வேகமான டெலிவரி.`
         : `Explore wide collection of ${shopCategory} at FRIENDS MOBILE. Genuine quality products with warranty, discount offers & fast delivery across India.`;
       
-      canonical = `${baseUrl}/#category-${shopCategory.toLowerCase().replace(/\s+/g, '-')}`;
+      canonical = `${baseUrl}/?category=${encodeURIComponent(shopCategory.toLowerCase())}`;
       categoryBreadcrumb = shopCategory;
     }
 
@@ -193,13 +206,9 @@ export default function SEOManager({
     // 2. HTML HEAD DOM UPDATES
     // -------------------------------------------------------------
 
-    // A. Language Code
     document.documentElement.lang = 'en-IN';
-
-    // B. Title
     document.title = title;
 
-    // C. Meta Description
     let metaDesc = document.querySelector('meta[name="description"]');
     if (!metaDesc) {
       metaDesc = document.createElement('meta');
@@ -208,7 +217,6 @@ export default function SEOManager({
     }
     metaDesc.setAttribute('content', description);
 
-    // D. Meta Keywords
     let metaKeywords = document.querySelector('meta[name="keywords"]');
     if (!metaKeywords) {
       metaKeywords = document.createElement('meta');
@@ -217,7 +225,6 @@ export default function SEOManager({
     }
     metaKeywords.setAttribute('content', keywords);
 
-    // E. Canonical URL
     let linkCanonical = document.querySelector('link[rel="canonical"]');
     if (!linkCanonical) {
       linkCanonical = document.createElement('link');
@@ -226,7 +233,6 @@ export default function SEOManager({
     }
     linkCanonical.setAttribute('href', canonical);
 
-    // F. OpenGraph (Facebook / WhatsApp) Meta Tags
     const ogTags = {
       'og:title': title,
       'og:description': description,
@@ -237,7 +243,7 @@ export default function SEOManager({
     };
 
     if (ogType === 'product' && selectedProduct) {
-      ogTags['product:price:amount'] = String(selectedProduct.price || '');
+      ogTags['product:price:amount'] = formatPrice(selectedProduct.price);
       ogTags['product:price:currency'] = 'INR';
       ogTags['product:availability'] = selectedProduct.inStock !== false ? 'in stock' : 'out of stock';
     }
@@ -252,7 +258,6 @@ export default function SEOManager({
       tag.setAttribute('content', content);
     });
 
-    // G. Twitter Card Meta Tags
     const twitterTags = {
       'twitter:card': 'summary_large_image',
       'twitter:title': title,
@@ -270,7 +275,6 @@ export default function SEOManager({
       tag.setAttribute('content', content);
     });
 
-    // H. Dynamic Hreflang Tags (Multilingual SEO)
     let hrefEn = document.querySelector('link[hreflang="en-in"]');
     if (hrefEn) hrefEn.setAttribute('href', `${canonical}?lang=en`);
 
@@ -278,16 +282,14 @@ export default function SEOManager({
     if (hrefTa) hrefTa.setAttribute('href', `${canonical}?lang=ta`);
 
     // -------------------------------------------------------------
-    // 3. SCHEMA.ORG JSON-LD INJECTION (BREADCRUMB, ITEMLIST & PRODUCT SCHEMAS)
+    // 3. SCHEMA.ORG JSON-LD INJECTION (BREADCRUMB & PRODUCTS SCHEMAS)
     // -------------------------------------------------------------
 
-    // Clean Existing Dynamic Schemas
-    ['dynamic-breadcrumb-jsonld', 'dynamic-product-jsonld', 'dynamic-itemlist-jsonld'].forEach(id => {
+    ['dynamic-breadcrumb-jsonld', 'dynamic-product-jsonld', 'dynamic-itemlist-jsonld', 'dynamic-products-jsonld'].forEach(id => {
       const oldScript = document.getElementById(id);
       if (oldScript) oldScript.remove();
     });
 
-    // Inject Breadcrumb JSON-LD
     const breadcrumbSchema = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -313,7 +315,7 @@ export default function SEOManager({
     bScript.text = JSON.stringify(breadcrumbSchema);
     document.head.appendChild(bScript);
 
-    // Inject Dynamic ItemList JSON-LD for All Active Store Products (Google Carousel & Merchant Listings Grade)
+    // Inject Dynamic Products @graph JSON-LD for All Active Store Products (Google Merchant Listings Grade)
     if (Array.isArray(products) && products.length > 0) {
       const defaultShipping = {
         "@type": "OfferShippingDetails",
@@ -352,74 +354,63 @@ export default function SEOManager({
         "returnFees": "https://schema.org/FreeReturn"
       };
 
-      const itemListSchema = {
+      const productsGraphSchema = {
         "@context": "https://schema.org",
-        "@type": "ItemList",
-        "name": "FRIENDS MOBILE Featured Products",
-        "numberOfItems": products.length,
-        "itemListElement": products.map((prod, idx) => {
-          let pImg = prod.img || prod.fallback || 'images/prod_custom_cover.png';
-          let fullImg = pImg.startsWith('http') ? pImg : `${baseUrl}/${pImg.replace(/^\//, '')}`;
-          let prodUrl = `${baseUrl}/#product-${prod.id || idx + 1}`;
+        "@graph": products.map((prod, idx) => {
+          let fullImg = getAbsoluteImageUrl(prod.img || prod.fallback);
+          let prodId = prod.id || idx + 1;
+          let prodUrl = `${baseUrl}/?product=${prodId}`;
           let prodTitle = prod.title || prod.name || 'Mobile Accessory';
+          let cleanPriceVal = formatPrice(prod.price);
+
           return {
-            "@type": "ListItem",
-            "position": idx + 1,
+            "@type": "Product",
+            "@id": prodUrl,
             "name": prodTitle,
+            "alternateName": prod.tamilTitle || undefined,
             "url": prodUrl,
-            "item": {
-              "@type": "Product",
-              "name": prodTitle,
-              "alternateName": [
-                "FRIENDS MOBILE",
-                "Friends Mobile",
-                prod.tamilTitle || ''
-              ].filter(Boolean),
+            "image": [fullImg],
+            "description": prod.description || prod.tamilDesc || 'Premium mobile accessory from FRIENDS MOBILE store.',
+            "sku": `FM-PROD-${prodId}`,
+            "mpn": `FM-MPN-${prodId}`,
+            "brand": {
+              "@type": "Brand",
+              "name": prod.brand || "FRIENDS MOBILE"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": prod.rating && Number(prod.rating) > 0 ? String(prod.rating) : "4.9",
+              "reviewCount": prod.reviews && Number(prod.reviews) > 0 ? String(prod.reviews) : "128",
+              "bestRating": "5",
+              "worstRating": "1"
+            },
+            "offers": {
+              "@type": "Offer",
               "url": prodUrl,
-              "image": fullImg,
-              "description": prod.description || prod.tamilDesc || 'Premium mobile accessory from FRIENDS MOBILE store.',
-              "sku": `FM-PROD-${prod.id || idx + 1}`,
-              "mpn": `FM-MPN-${prod.id || idx + 1}`,
-              "brand": {
-                "@type": "Brand",
-                "name": prod.brand || "FRIENDS MOBILE"
+              "priceCurrency": "INR",
+              "price": cleanPriceVal,
+              "priceValidUntil": "2028-12-31",
+              "itemCondition": "https://schema.org/NewCondition",
+              "availability": prod.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              "seller": {
+                "@type": "Organization",
+                "name": "FRIENDS MOBILE",
+                "url": baseUrl
               },
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": prod.rating && prod.rating > 0 ? String(prod.rating) : "4.9",
-                "reviewCount": prod.reviews && prod.reviews > 0 ? String(prod.reviews) : "128",
-                "bestRating": "5",
-                "worstRating": "1"
-              },
-              "offers": {
-                "@type": "Offer",
-                "url": prodUrl,
-                "priceCurrency": "INR",
-                "price": String(prod.price || "399.00"),
-                "priceValidUntil": "2028-12-31",
-                "itemCondition": "https://schema.org/NewCondition",
-                "availability": prod.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-                "seller": {
-                  "@type": "Organization",
-                  "name": "FRIENDS MOBILE",
-                  "alternateName": ["Friends", "Friends Mobile", "Friends Mobile Store"]
-                },
-                "shippingDetails": defaultShipping,
-                "hasMerchantReturnPolicy": defaultReturn
-              }
+              "shippingDetails": defaultShipping,
+              "hasMerchantReturnPolicy": defaultReturn
             }
           };
         })
       };
 
-      const itemListScript = document.createElement('script');
-      itemListScript.id = 'dynamic-itemlist-jsonld';
-      itemListScript.type = 'application/ld+json';
-      itemListScript.text = JSON.stringify(itemListSchema);
-      document.head.appendChild(itemListScript);
+      const productsScript = document.createElement('script');
+      productsScript.id = 'dynamic-products-jsonld';
+      productsScript.type = 'application/ld+json';
+      productsScript.text = JSON.stringify(productsGraphSchema);
+      document.head.appendChild(productsScript);
     }
 
-    // Inject Specific Product JSON-LD (If viewing a product detail)
     if (productSchemaData) {
       const pScript = document.createElement('script');
       pScript.id = 'dynamic-product-jsonld';
