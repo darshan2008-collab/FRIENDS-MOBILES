@@ -22,14 +22,14 @@ export default function SEOManager({
 }) {
   useEffect(() => {
     const isTamil = false;
-    const baseUrl = 'https://friendsmobile.in';
+    const baseUrl = 'https://friendsmobiles.unitaryx.org';
 
     // Default Fallback Metadata
-    let title = 'FRIENDS MOBILE - Customized Back Covers, Phone Cases & Mobile Accessories Store India';
+    let title = 'FRIENDS MOBILE | Custom Phone Back Covers, Mobile Accessories & Store India | பிரண்ட்ஸ் மொபைல்';
 
-    let description = 'Shop 3D Customized Phone Back Covers, iPhone Cases, boAt Bluetooth Earbuds, Fast Chargers, Power Banks & Custom Photo Frames at FRIENDS MOBILE. Best Prices & Express Cash on Delivery Across India.';
+    let description = 'Official FRIENDS MOBILE Online Store & Shop India. Buy 3D Customized Phone Back Covers, iPhone Cases, boAt Earbuds, Fast Chargers, Power Banks & Custom Photo Frames at FRIENDS MOBILE.';
 
-    let keywords = 'FRIENDS MOBILE, customized back cover, phone cases India, custom phone cover online, iPhone 15 pro custom case, Samsung back covers, boAt air dopes, fast charger, power bank 20000mAh, photo frames Karur, mobile accessories Madurai, Tamil Nadu mobile store';
+    let keywords = 'FRIENDS MOBILE, Friends, friends mobile, friends mobile store, friends mobile shop, friends mobile online, customized back cover, phone cases India, custom phone cover online, iPhone 15 pro custom case, Samsung back covers, boAt air dopes, fast charger, power bank 20000mAh, photo frames Karur, mobile accessories Madurai, Tamil Nadu mobile store, பிரண்ட்ஸ் மொபைல்';
 
     let canonical = `${baseUrl}/`;
     let ogType = 'website';
@@ -288,7 +288,11 @@ export default function SEOManager({
             "item": {
               "@type": "Product",
               "name": prod.title || prod.name || 'Mobile Accessory',
-              "alternateName": prod.tamilTitle || '',
+              "alternateName": [
+                "FRIENDS MOBILE",
+                "Friends Mobile",
+                prod.tamilTitle || ''
+              ].filter(Boolean),
               "image": fullImg,
               "description": prod.description || prod.tamilDesc || '',
               "offers": {
@@ -298,7 +302,8 @@ export default function SEOManager({
                 "availability": prod.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
                 "seller": {
                   "@type": "Organization",
-                  "name": "FRIENDS MOBILE"
+                  "name": "FRIENDS MOBILE",
+                  "alternateName": ["Friends", "Friends Mobile", "Friends Mobile Store"]
                 }
               }
             }

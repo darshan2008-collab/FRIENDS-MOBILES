@@ -3,9 +3,30 @@ User-agent: *
 Allow: /
 Allow: /images/
 Allow: /api/products
+Allow: /logo.png
+Allow: /sitemap.xml
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /images/
+Allow: /logo.png
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Yandex
+Allow: /
 
 Disallow: /admin
 Disallow: /api/admin
 
-# Sitemap Location
+# Official Sitemap Location
 Sitemap: https://friendsmobiles.unitaryx.org/sitemap.xml

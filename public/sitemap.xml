@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <!-- Homepage & Brand Hub -->
   <url>
     <loc>https://friendsmobiles.unitaryx.org/</loc>
     <lastmod>2026-08-05</lastmod>
-    <changefreq>daily</changefreq>
+    <changefreq>always</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://friendsmobiles.unitaryx.org/logo.png</image:loc>
+      <image:title>FRIENDS MOBILE Store Logo</image:title>
+    </image:image>
   </url>
+  
+  <!-- 3D Customized Phone Back Covers Studio -->
   <url>
     <loc>https://friendsmobiles.unitaryx.org/#customized-covers</loc>
     <lastmod>2026-08-05</lastmod>
@@ -14,37 +21,51 @@
     <priority>0.95</priority>
     <image:image>
       <image:loc>https://friendsmobiles.unitaryx.org/images/prod_custom_cover.png</image:loc>
-      <image:title>Customized Back Covers India</image:title>
+      <image:title>3D Customized Phone Back Covers India - FRIENDS MOBILE</image:title>
     </image:image>
   </url>
+
+  <!-- Mobile Accessories & Products Store -->
   <url>
     <loc>https://friendsmobiles.unitaryx.org/#products</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <priority>0.90</priority>
   </url>
+
+  <!-- Bluetooth Earbuds & Headphones -->
   <url>
     <loc>https://friendsmobiles.unitaryx.org/#earphones</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://friendsmobiles.unitaryx.org/images/prod_airdopes.png</image:loc>
+      <image:title>boAt Airdopes Bluetooth Wireless Earbuds - FRIENDS MOBILE</image:title>
+    </image:image>
   </url>
+
+  <!-- High Capacity Power Banks -->
   <url>
     <loc>https://friendsmobiles.unitaryx.org/#power-banks</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
+
+  <!-- Fast Chargers & Type-C Cables -->
   <url>
     <loc>https://friendsmobiles.unitaryx.org/#chargers</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
+
+  <!-- Custom Photo Frames & Gifts -->
   <url>
     <loc>https://friendsmobiles.unitaryx.org/#photo-frames</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.80</priority>
   </url>
 </urlset>
