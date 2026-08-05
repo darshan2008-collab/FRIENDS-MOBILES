@@ -37,9 +37,15 @@ const InvoiceService = {
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>E-Bill Invoice #${orderId} - FRIENDS MOBILE</title>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; }
+    .action-bar { max-width: 650px; margin: 0 auto 16px auto; display: flex; gap: 12px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .btn-return { display: inline-flex; align-items: center; gap: 8px; background: #0f172a; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 13px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15); transition: background 0.2s ease; }
+    .btn-return:hover { background: #1e293b; }
+    .btn-print { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #FF5500, #E03E00); color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 85, 0, 0.25); transition: transform 0.2s ease; }
+    .btn-print:hover { transform: translateY(-1px); }
     .invoice-card { max-width: 650px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
     .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #FF5500; padding-bottom: 16px; margin-bottom: 20px; }
     .brand-title { font-size: 24px; font-weight: 900; color: #FF5500; margin: 0; }
@@ -56,15 +62,28 @@ const InvoiceService = {
     .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
     .summary-row.total { font-size: 16px; font-weight: 900; color: #c2410c; border-top: 1.5px dashed #fdba74; padding-top: 8px; margin-bottom: 0; }
     .footer-note { text-align: center; font-size: 11px; color: #94a3b8; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 12px; }
-    @media print { body { background: none; padding: 0; } .invoice-card { box-shadow: none; border: none; } }
+    @media print { 
+      .no-print { display: none !important; }
+      body { background: none; padding: 0; } 
+      .invoice-card { box-shadow: none; border: none; } 
+    }
   </style>
 </head>
 <body>
+  <div class="action-bar no-print">
+    <a href="https://friendsmobiles.unitaryx.org/" class="btn-return">
+      🏠 Return to Main Website
+    </a>
+    <button onclick="window.print()" class="btn-print">
+      🖨️ Print / Save as PDF
+    </button>
+  </div>
+
   <div class="invoice-card">
     <div class="header">
       <div>
         <h1 class="brand-title">📱 FRIENDS MOBILE</h1>
-        <p class="brand-subtitle">Madurai, Tamil Nadu • Support: +91 74485 78507</p>
+        <p class="brand-subtitle">South Gandhigramam, Karur / Madurai, Tamil Nadu • Support: +91 74485 78507</p>
       </div>
       <div>
         <span class="badge-paid">✓ OFFICIAL E-BILL / RECEIPT</span>
@@ -122,6 +141,14 @@ const InvoiceService = {
       <p style="margin: 0;">This is a computer-generated tax invoice and requires no signature.</p>
     </div>
   </div>
+
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    };
+  </script>
 </body>
 </html>`;
   }

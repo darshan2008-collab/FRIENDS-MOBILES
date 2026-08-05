@@ -320,10 +320,22 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
           .total-row { display: flex; justify-content: space-between; font-size: 14px; padding: 5px 0; }
           .grand-total { font-size: 20px; font-weight: 900; color: #ff5500; border-top: 2px solid #fdba74; padding-top: 10px; margin-top: 8px; }
           .paid-stamp { position: absolute; top: 120px; right: 60px; font-size: 42px; font-weight: 900; color: rgba(22, 101, 52, 0.15); border: 4px solid rgba(22, 101, 52, 0.2); padding: 8px 24px; border-radius: 12px; transform: rotate(-12deg); pointer-events: none; letter-spacing: 4px; }
-          .footer { text-align: center; margin-top: 48px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+          .action-bar { max-width: 800px; margin: 0 auto 20px auto; display: flex; gap: 12px; justify-content: space-between; align-items: center; }
+          .btn-return { display: inline-flex; align-items: center; gap: 8px; background: #0f172a; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 13px; }
+          .btn-print { display: inline-flex; align-items: center; gap: 8px; background: #ff5500; color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; }
+          @media print { .no-print { display: none !important; } }
         </style>
       </head>
       <body>
+        <div class="action-bar no-print">
+          <a href="https://friendsmobiles.unitaryx.org/" class="btn-return">
+            🏠 Return to Main Website
+          </a>
+          <button onclick="window.print()" class="btn-print">
+            🖨️ Print / Save as PDF
+          </button>
+        </div>
+
         ${isUPI ? '<div class="paid-stamp">PAID</div>' : ''}
         
         <div class="header">
@@ -884,24 +896,18 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                                 </button>
                               )}
 
-                              {String(order.paymentMethod || '').toLowerCase().includes('cod') || String(order.paymentMethod || '').toLowerCase().includes('cash') ? (
-                                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic', background: 'var(--bg-card)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                                  {isTamil ? 'கேஷ் ஆன் டெலிவரி (COD ஆர்டர்களுக்கு E-Bill கிடைக்காது)' : 'Cash on Delivery (E-Bill unavailable for COD)'}
-                                </span>
-                              ) : (
-                                <button
-                                  onClick={() => handleDownloadInvoice(order)}
-                                  style={{
-                                    padding: '8px 16px', borderRadius: '10px', border: 'none',
-                                    background: 'linear-gradient(135deg, #10b981, #059669)',
-                                    color: '#ffffff', fontWeight: '800', fontSize: '0.8rem',
-                                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-                                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'
-                                  }}
-                                >
-                                  📄 {isTamil ? 'பில் பதிவிறக்கம் (Tax Invoice)' : 'Download E-Bill (Tax Invoice)'}
-                                </button>
-                              )}
+                              <button
+                                onClick={() => handleDownloadInvoice(order)}
+                                style={{
+                                  padding: '8px 16px', borderRadius: '10px', border: 'none',
+                                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                                  color: '#ffffff', fontWeight: '800', fontSize: '0.8rem',
+                                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'
+                                }}
+                              >
+                                📄 {isTamil ? 'பில் பதிவிறக்கம் (Tax Invoice)' : 'Download E-Bill (Tax Invoice)'}
+                              </button>
                             </div>
 
                           </div>
