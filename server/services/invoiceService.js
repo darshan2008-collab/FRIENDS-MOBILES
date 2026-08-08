@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const InvoiceService = {
-  // Generate HTML template for printable E-Bill Tax Invoice
+  // Generate HTML template for printable / downloadable E-Bill Tax Invoice
   generateInvoiceHtml: (order) => {
     if (!order) return '';
 
@@ -81,6 +81,7 @@ const InvoiceService = {
       text-align: center;
       box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
       transition: background 0.2s ease;
+      cursor: pointer;
     }
     .btn-return:hover { background: #1e293b; }
     .btn-print {
@@ -273,11 +274,11 @@ const InvoiceService = {
 <body>
   <div class="invoice-wrapper">
     <div class="action-bar no-print">
-      <a href="https://friendsmobiles.unitaryx.org/" class="btn-return">
-        🏠 Return to Main Website
+      <a href="https://friendsmobiles.unitaryx.org/" id="btn-return-link" class="btn-return">
+        🏠 Return to Website
       </a>
       <button onclick="window.print()" class="btn-print">
-        🖨️ Print / Save as PDF
+        🖨️ Save as PDF / Print
       </button>
     </div>
 
@@ -286,7 +287,7 @@ const InvoiceService = {
         <div>
           <h1 class="logo-title">📱 FRIENDS MOBILE</h1>
           <div class="sub-title">South Gandhigramam, Karur / Madurai, Tamil Nadu - 639004</div>
-          <div class="sub-title">Customer Support: +91 74485 78507 | noreplyfriendsmobiles@gmail.com</div>
+          <div class="sub-title">Customer Care: +91 74485 78507 | noreplyfriendsmobiles@gmail.com</div>
         </div>
         <div class="header-right">
           <div class="invoice-tag">OFFICIAL E-BILL TAX INVOICE</div>
@@ -345,11 +346,33 @@ const InvoiceService = {
   </div>
 
   <script>
-    window.onload = function() {
-      setTimeout(function() {
-        window.print();
-      }, 400);
-    };
+    (function() {
+      var isAPK = typeof window !== 'undefined' && (
+        window.Capacitor !== undefined ||
+        window.location.protocol === 'capacitor:' ||
+        window.location.protocol === 'file:' ||
+        navigator.userAgent.indexOf('Capacitor') !== -1 ||
+        window.location.search.indexOf('app=true') !== -1
+      );
+
+      var returnBtn = document.getElementById('btn-return-link');
+      if (returnBtn) {
+        if (isAPK) {
+          returnBtn.innerHTML = '📱 Return to App';
+          returnBtn.onclick = function(e) {
+            e.preventDefault();
+            if (window.history && window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.close();
+            }
+          };
+        } else {
+          returnBtn.innerHTML = '🏠 Return to Website';
+          returnBtn.href = 'https://friendsmobiles.unitaryx.org/';
+        }
+      }
+    })();
   </script>
 </body>
 </html>`;

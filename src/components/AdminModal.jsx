@@ -9,6 +9,7 @@ import {
 import CompanyLogo from './CompanyLogo';
 import { autoTranslateToTamil } from '../data/translations';
 import { getApiHost as centralGetApiHost } from '../data/apiConfig';
+import { copyToClipboard } from '../utils/clipboard';
 
 export default function AdminModal({ 
   isOpen, 
@@ -2825,9 +2826,9 @@ export default function AdminModal({
                           </strong>
                           <button
                             type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(order.orderId);
-                              if (addToast) addToast(`Copied Order Number: ${order.orderId}`, '📋');
+                            onClick={async () => {
+                              const ok = await copyToClipboard(order.orderId);
+                              if (ok && addToast) addToast(`Copied Order Number: ${order.orderId}`, '📋');
                             }}
                             style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '2px 8px', fontSize: '0.72rem', fontWeight: 'bold', cursor: 'pointer', color: 'var(--text-muted)' }}
                           >

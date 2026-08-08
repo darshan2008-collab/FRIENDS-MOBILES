@@ -4,6 +4,7 @@ import {
   X, Sparkles, Smartphone, Image, Gift, Truck, Bot, ArrowRight, Check, Copy, ShieldCheck, Zap
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
+import { copyToClipboard } from '../utils/clipboard';
 
 export default function WelcomeOnboardingModal({ 
   isOpen, 

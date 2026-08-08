@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Gift, Award, Sparkles, CheckCircle2, Zap } from 'lucide-react';
+import { copyToClipboard } from '../utils/clipboard';
 
 export const REWARD_COUPONS = [
   {
@@ -84,7 +85,7 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
     { id: 2, type: 'credit', points: 100, title: 'First Order Reward Bonus', date: 'Just Now' }
   ];
 
-  const handleClaimCoupon = (coupon) => {
+  const handleClaimCoupon = async (coupon) => {
     if (currentPoints < coupon.pointsRequired) {
       if (addToast) addToast(`You need ${coupon.pointsRequired - currentPoints} more points to claim this coupon!`, '⚠️');
       return;
@@ -117,30 +118,23 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
       onUpdateUserProfile(updatedUser);
     }
 
-    if (addToast) addToast(`Unlocked Unique Redeem Code: ${uniqueRedeemCode}`, 'success');
+    // Auto-copy newly generated code immediately
+    await copyToClipboard(uniqueRedeemCode);
+    setCopiedCode(uniqueRedeemCode);
+    if (addToast) addToast(`Unlocked & Copied Unique Code: ${uniqueRedeemCode}`, 'success');
+    setTimeout(() => setCopiedCode(''), 4000);
   };
 
-  const handleCopyCode = (code) => {
+  const handleCopyCode = async (code) => {
     if (!code) return;
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(code);
-      } else {
-        const textArea = document.createElement('textarea');
-        textArea.value = code;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-      }
-      setCopiedCode(code);
-      if (addToast) addToast(`Copied Unique Redeem Code: ${code}`, '📋');
-      setTimeout(() => setCopiedCode(''), 3000);
-    } catch (_) {
-      setCopiedCode(code);
-      if (addToast) addToast(`Redeem Code: ${code}`, '📋');
-      setTimeout(() => setCopiedCode(''), 3000);
+    const ok = await copyToClipboard(code);
+    setCopiedCode(code);
+    if (ok && addToast) {
+      addToast(`Copied Unique Redeem Code: ${code}`, '📋');
+    } else if (addToast) {
+      addToast(`Redeem Code: ${code}`, '📋');
     }
+    setTimeout(() => setCopiedCode(''), 3000);
   };
 
   return (
@@ -189,7 +183,22 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
               <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', background: 'var(--bg-card)', padding: '12px 14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontFamily: 'monospace', fontWeight: '900', fontSize: '1.1rem', color: '#FF5500', letterSpacing: '1px', background: 'rgba(255,85,0,0.1)', padding: '4px 10px', borderRadius: '8px' }}>
+                    <span 
+                      onClick={() => handleCopyCode(c.code)}
+                      title="Click to copy redeem code"
+                      style={{ 
+                        fontFamily: 'monospace', 
+                        fontWeight: '900', 
+                        fontSize: '1.1rem', 
+                        color: '#FF5500', 
+                        letterSpacing: '1px', 
+                        background: 'rgba(255,85,0,0.1)', 
+                        padding: '4px 10px', 
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        userSelect: 'all'
+                      }}
+                    >
                       {c.code}
                     </span>
                     <span style={{ fontSize: '0.72rem', background: '#22c55e', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontWeight: '800' }}>

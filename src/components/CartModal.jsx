@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, CheckCircle2, CreditCard, Sparkles, Copy, Check, Lock, Phone } from 'lucide-react';
 import { getProductTitle } from '../data/translations';
 import { getApiBaseUrl } from '../data/apiConfig';
+import { copyToClipboard } from '../utils/clipboard';
 
 const API_BASE = getApiBaseUrl();
 
@@ -1186,9 +1187,9 @@ export default function CartModal({
                           </div>
                           <button
                             type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(storeUpi);
-                              if (addToast) addToast('Copied UPI ID!', '📋');
+                            onClick={async () => {
+                              const ok = await copyToClipboard(storeUpi);
+                              if (ok && addToast) addToast('Copied UPI ID!', '📋');
                             }}
                             style={{ padding: '4px 10px', fontSize: '0.72rem', borderRadius: '6px', background: '#FF5500', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
                           >
@@ -1238,11 +1239,9 @@ export default function CartModal({
               <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '14px', marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: '0.82rem', fontWeight: '700' }}>Order ID: #{placedOrderDetails.orderId}</span>
                 <button 
-                  onClick={() => {
-                    if (navigator.clipboard) {
-                      navigator.clipboard.writeText(placedOrderDetails.orderId);
-                      if (addToast) addToast(`Copied Order Number: ${placedOrderDetails.orderId}`, '📋');
-                    }
+                  onClick={async () => {
+                    const ok = await copyToClipboard(placedOrderDetails.orderId);
+                    if (ok && addToast) addToast(`Copied Order Number: ${placedOrderDetails.orderId}`, '📋');
                   }}
                   style={{ background: '#FF5500', color: '#fff', border: 'none', borderRadius: '6px', padding: '4px 10px', fontSize: '0.72rem', fontWeight: '800', cursor: 'pointer' }}
                 >

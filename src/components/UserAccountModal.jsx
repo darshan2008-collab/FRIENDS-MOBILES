@@ -9,6 +9,7 @@ import CompanyLogo from './CompanyLogo';
 import RewardsTab from './RewardsTab';
 import { getProductTitle } from '../data/translations';
 import { getApiBaseUrl } from '../data/apiConfig';
+import { copyToClipboard } from '../utils/clipboard';
 
 const API_BASE = getApiBaseUrl();
 
@@ -30,27 +31,16 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
   const [isLoading, setIsLoading] = useState(false);
   const [copiedCoupon, setCopiedCoupon] = useState('');
 
-  const handleCopyCoupon = (code) => {
+  const handleCopyCoupon = async (code) => {
     if (!code) return;
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(code);
-      } else {
-        const textArea = document.createElement('textarea');
-        textArea.value = code;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-      }
-      setCopiedCoupon(code);
-      if (addToast) addToast(`Copied Coupon Code: ${code}`, '📋');
-      setTimeout(() => setCopiedCoupon(''), 3000);
-    } catch (_) {
-      setCopiedCoupon(code);
-      if (addToast) addToast(`Copied Coupon Code: ${code}`, '📋');
-      setTimeout(() => setCopiedCoupon(''), 3000);
+    const ok = await copyToClipboard(code);
+    setCopiedCoupon(code);
+    if (ok && addToast) {
+      addToast(`Copied Coupon Code: ${code}`, '📋');
+    } else if (addToast) {
+      addToast(`Coupon Code: ${code}`, '📋');
     }
+    setTimeout(() => setCopiedCoupon(''), 3000);
   };
 
   // Cancel Order Modal State

@@ -262,10 +262,11 @@ router.post('/webhook', async (req, res) => {
   }
 });
 
-// GET /api/payments/invoice/:orderId — Printable E-Bill Tax Receipt Endpoint
+// GET /api/payments/invoice/:orderId — Downloadable E-Bill Tax Receipt Endpoint
 router.get('/invoice/:orderId', async (req, res) => {
   try {
     const { orderId } = req.params;
+    const { download } = req.query;
     const cleanId = orderId.toLowerCase();
 
     let foundOrder = null;
@@ -285,6 +286,11 @@ router.get('/invoice/:orderId', async (req, res) => {
 
     const htmlContent = InvoiceService.generateInvoiceHtml(foundOrder);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    
+    if (download === 'true' || download === '1' || download !== 'false') {
+      res.setHeader('Content-Disposition', `attachment; filename="FRIENDS_MOBILE_Invoice_${orderId}.html"`);
+    }
+
     res.send(htmlContent);
   } catch (err) {
     res.status(500).send('<h3>Error Generating Invoice: ' + err.message + '</h3>');
