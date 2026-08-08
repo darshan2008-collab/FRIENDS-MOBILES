@@ -701,9 +701,9 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
               <button 
                 onClick={() => setActiveTab('rewards')}
                 className={`dash-nav-item ${activeTab === 'rewards' ? 'active' : ''}`}
-                style={{ color: '#FF5500', fontWeight: '800' }}
+                style={{ color: activeTab === 'rewards' ? '#ffffff' : '#FF5500', fontWeight: '800' }}
               >
-                <Sparkles size={18} color="#FF5500" /> {isTamil ? '🎁 பிரண்ட்ஸ் ரிவார்டுகள் (' : '🎁 Friends Rewards ('}{user?.rewardPoints || 150} {isTamil ? 'புள்ளிகள்)' : 'PTS)'}
+                <Sparkles size={18} color={activeTab === 'rewards' ? '#ffffff' : '#FF5500'} /> {isTamil ? '🎁 பிரண்ட்ஸ் ரிவார்டுகள் (' : '🎁 Friends Rewards ('}{user?.rewardPoints || 150} {isTamil ? 'புள்ளிகள்)' : 'PTS)'}
               </button>
 
               <button 

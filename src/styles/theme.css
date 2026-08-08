@@ -3864,8 +3864,13 @@ img {
 
 .dash-nav-item.active {
   background: linear-gradient(135deg, #FF5500 0%, #E03E00 100%);
-  color: #ffffff;
+  color: #ffffff !important;
   box-shadow: 0 6px 20px rgba(255, 85, 0, 0.35);
+}
+
+.dash-nav-item.active svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 .dash-workspace-card {
