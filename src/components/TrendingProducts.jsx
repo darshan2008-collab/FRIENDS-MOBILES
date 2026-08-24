@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Heart, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Heart, ShoppingBag, ArrowRight, Share2 } from 'lucide-react';
 import { getProductTitle } from '../data/translations';
 
 const defaultUnsplashMap = {
@@ -101,6 +101,16 @@ export default function TrendingProducts({ products, wishlist, onToggleWishlist,
                     </div>
 
                     <div className="card-actions">
+                      <button 
+                        type="button"
+                        className="wishlist-icon-btn"
+                        onClick={() => onSelectProduct(prod)}
+                        title="Share Product"
+                        style={{ color: '#FF5500' }}
+                      >
+                        <Share2 size={16} color="#FF5500" />
+                      </button>
+
                       <button 
                         className={`wishlist-icon-btn ${isLiked ? 'liked' : ''}`}
                         onClick={() => onToggleWishlist(prod)}

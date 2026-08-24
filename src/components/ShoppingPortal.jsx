@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { 
   X, ArrowLeft, Search, Filter, ShoppingBag, Heart, Star, Smartphone, 
   Zap, Headphones, Watch, Frame, Palette, CheckCircle2, SlidersHorizontal, 
-  Sparkles, ShieldCheck, ArrowUpDown, ChevronLeft, ChevronRight, Tag, RefreshCw, DollarSign
+  Sparkles, ShieldCheck, ArrowUpDown, ChevronLeft, ChevronRight, Tag, RefreshCw, DollarSign, Share2
 } from 'lucide-react';
 import { getProductTitle } from '../data/translations';
 
@@ -496,16 +496,31 @@ function ProductCard({ product, onAddToCart, isLiked, onToggleWishlist, onSelect
         {product.discount && (
           <span className="badge-discount">{product.discount}</span>
         )}
-        <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleWishlist(product.id);
-          }}
-          className={`wishlist-btn ${isLiked ? 'liked' : ''}`}
-          aria-label="Add to wishlist"
-        >
-          <Heart size={16} fill={isLiked ? '#FF5500' : 'none'} color={isLiked ? '#FF5500' : 'currentColor'} />
-        </button>
+        <div style={{ display: 'flex', gap: '6px', marginLeft: 'auto' }}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectProduct(product);
+            }}
+            className="wishlist-btn"
+            title="Share Product"
+            aria-label="Share product"
+          >
+            <Share2 size={15} color="#FF5500" />
+          </button>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleWishlist(product.id);
+            }}
+            className={`wishlist-btn ${isLiked ? 'liked' : ''}`}
+            aria-label="Add to wishlist"
+            title="Add to wishlist"
+          >
+            <Heart size={16} fill={isLiked ? '#FF5500' : 'none'} color={isLiked ? '#FF5500' : 'currentColor'} />
+          </button>
+        </div>
       </div>
 
       {/* Product Image */}

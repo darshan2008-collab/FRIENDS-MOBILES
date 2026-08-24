@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight, ZoomIn, Check, Zap, ShieldCheck } from 'lucide-react';
+import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight, ZoomIn, Check, Zap, ShieldCheck, Share2, Copy, CheckCircle2, ExternalLink } from 'lucide-react';
 import { getApiBaseUrl } from '../data/apiConfig';
 
 const API_BASE = getApiBaseUrl();
@@ -28,6 +28,8 @@ export default function ProductDetailModal({
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const [selectedSize, setSelectedSize] = useState('Standard');
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const horizontalScrollRef = useRef(null);
 
@@ -155,6 +157,68 @@ export default function ProductDetailModal({
       product.rating = averageRating;
     } catch (err) {
       console.error("Failed to save review dynamically to server", err);
+    }
+  };
+
+  const getProductShareUrl = () => {
+    if (typeof window !== 'undefined') {
+      const origin = window.location.origin;
+      const pathname = window.location.pathname;
+      return `${origin}${pathname}?product=${product.id || product._id || ''}`;
+    }
+    return `https://friendsmobiles.unitaryx.org/?product=${product.id}`;
+  };
+
+  const shareUrl = getProductShareUrl();
+  const shareTitle = product.title || 'FRIENDS MOBILE Product';
+  const shareText = `🔥 Check out "${shareTitle}" on FRIENDS MOBILE for just ₹${product.price?.toLocaleString('en-IN') || ''}${product.discount ? ` (${product.discount} OFF)` : ''}!\n\nBuy now: ${shareUrl}`;
+
+  const handleCopyLink = () => {
+    try {
+      navigator.clipboard.writeText(shareUrl);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    } catch (_) {
+      const textarea = document.createElement('textarea');
+      textarea.value = shareUrl;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    }
+  };
+
+  const handleShareWhatsApp = () => {
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+  };
+
+  const handleShareFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
+  };
+
+  const handleShareTwitter = () => {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, '_blank');
+  };
+
+  const handleShareTelegram = () => {
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`, '_blank');
+  };
+
+  const handleNativeShare = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: `Check out ${shareTitle} at FRIENDS MOBILE!`,
+          url: shareUrl
+        });
+      } catch (_) {
+        setIsShareModalOpen(true);
+      }
+    } else {
+      setIsShareModalOpen(true);
     }
   };
 
@@ -395,9 +459,31 @@ export default function ProductDetailModal({
                 <button 
                   className={`wishlist-icon-btn ${isLiked ? 'liked' : ''}`}
                   onClick={() => onToggleWishlist(product)}
-                  style={{ width: '48px', height: '48px', border: '1px solid var(--border-color)', borderRadius: '12px' }}
+                  style={{ width: '48px', height: '48px', border: '1px solid var(--border-color)', borderRadius: '12px', flexShrink: 0 }}
+                  title="Add to Wishlist"
                 >
                   <Heart size={20} fill={isLiked ? '#FF5500' : 'none'} color={isLiked ? '#FF5500' : 'currentColor'} />
+                </button>
+                <button 
+                  type="button"
+                  onClick={handleNativeShare}
+                  style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    border: '1px solid var(--border-color)', 
+                    borderRadius: '12px',
+                    background: 'var(--bg-input)',
+                    color: '#FF5500',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease',
+                    flexShrink: 0
+                  }}
+                  title="Share Product"
+                >
+                  <Share2 size={20} color="#FF5500" />
                 </button>
               </div>
             </div>
@@ -903,6 +989,217 @@ export default function ProductDetailModal({
                 <img src={img} alt={`Thumb ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </button>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Social Media Share Modal Popover */}
+      {isShareModalOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.78)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setIsShareModalOpen(false)}
+        >
+          <div 
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '24px',
+              width: '100%',
+              maxWidth: '460px',
+              padding: '24px',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              animation: 'fadeIn 0.25s ease'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ background: 'rgba(255, 85, 0, 0.15)', padding: '10px', borderRadius: '14px', color: '#FF5500', display: 'flex' }}>
+                  <Share2 size={22} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                    Share Product
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    Share direct link on WhatsApp, Facebook &amp; socials
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsShareModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', padding: '4px' }}
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            {/* Product Preview Card */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px',
+              padding: '12px 14px',
+              background: 'var(--bg-input)',
+              borderRadius: '16px',
+              border: '1px solid var(--border-color)'
+            }}>
+              <img 
+                src={selectedImage || product.img} 
+                alt={product.title} 
+                style={{ width: '56px', height: '56px', objectFit: 'contain', borderRadius: '10px', background: '#fff', padding: '4px' }}
+              />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {product.title}
+                </h4>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#FF5500' }}>
+                    ₹{product.price?.toLocaleString('en-IN')}
+                  </span>
+                  {product.discount && (
+                    <span style={{ fontSize: '0.72rem', background: 'rgba(255,85,0,0.12)', color: '#FF5500', fontWeight: 700, padding: '2px 6px', borderRadius: '6px' }}>
+                      {product.discount}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Social Channels Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', textAlign: 'center' }}>
+              {/* WhatsApp */}
+              <button 
+                onClick={handleShareWhatsApp}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              >
+                <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 4px 14px rgba(37, 211, 102, 0.35)' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.764.459 3.487 1.332 5.003l-1.417 5.176 5.302-1.39a9.943 9.943 0 0 0 4.77 1.215h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.668-1.037-5.176-2.924-7.062a9.923 9.923 0 0 0-7.066-2.945zm.004 18.155h-.003a8.27 8.27 0 0 1-4.218-1.157l-.302-.18-3.136.822.836-3.056-.197-.314a8.27 8.27 0 0 1-1.272-4.436c0-4.568 3.717-8.283 8.286-8.283 2.213 0 4.293.862 5.858 2.428a8.243 8.243 0 0 1 2.427 5.856c0 4.569-3.718 8.284-8.281 8.284z"/></svg>
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>WhatsApp</span>
+              </button>
+
+              {/* Facebook */}
+              <button 
+                onClick={handleShareFacebook}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              >
+                <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#1877F2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 4px 14px rgba(24, 119, 242, 0.35)' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Facebook</span>
+              </button>
+
+              {/* Twitter / X */}
+              <button 
+                onClick={handleShareTwitter}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              >
+                <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 4px 14px rgba(0, 0, 0, 0.3)', border: '1px solid var(--border-color)' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Twitter / X</span>
+              </button>
+
+              {/* Telegram */}
+              <button 
+                onClick={handleShareTelegram}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              >
+                <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: '#229ED9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 4px 14px rgba(34, 158, 217, 0.35)' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Telegram</span>
+              </button>
+
+              {/* Instagram / Direct Copy */}
+              <button 
+                onClick={handleCopyLink}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              >
+                <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 4px 14px rgba(220, 39, 67, 0.35)' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                </div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>Instagram</span>
+              </button>
+            </div>
+
+            {/* Copy Direct Link Input Bar */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                Or copy unique link:
+              </span>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                background: 'var(--bg-input)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '14px',
+                padding: '6px 6px 6px 14px',
+                gap: '8px'
+              }}>
+                <input 
+                  type="text" 
+                  readOnly 
+                  value={shareUrl} 
+                  style={{
+                    flex: 1,
+                    border: 'none',
+                    background: 'transparent',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    outline: 'none'
+                  }}
+                />
+                <button
+                  onClick={handleCopyLink}
+                  style={{
+                    padding: '10px 18px',
+                    borderRadius: '10px',
+                    background: copiedLink ? '#22c55e' : 'linear-gradient(135deg, #FF5500, #E03E00)',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 800,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s ease',
+                    boxShadow: copiedLink ? '0 4px 14px rgba(34, 197, 94, 0.4)' : '0 4px 14px rgba(255, 85, 0, 0.3)'
+                  }}
+                >
+                  {copiedLink ? (
+                    <>
+                      <CheckCircle2 size={16} /> Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={16} /> Copy
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
       )}

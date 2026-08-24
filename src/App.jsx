@@ -406,6 +406,18 @@ export default function App() {
           addToast(`Signed in with Google as ${u.name}!`, 'success');
           if (window.history.pushState) window.history.replaceState({}, document.title, window.location.pathname);
         }
+        // 3. Product Deep Link Handler: ?product=<id> or ?p=<id>
+        const productIdParam = params.get('product') || params.get('p');
+        if (productIdParam && Array.isArray(products) && products.length > 0) {
+          const matched = products.find(p => 
+            String(p.id) === String(productIdParam) || 
+            String(p._id) === String(productIdParam) ||
+            (p.title && p.title.toLowerCase().includes(decodeURIComponent(productIdParam).toLowerCase()))
+          );
+          if (matched) {
+            setSelectedProduct(matched);
+          }
+        }
       } catch (_) {}
     };
 
@@ -429,7 +441,7 @@ export default function App() {
         appUrlListener.remove();
       }
     };
-  }, []);
+  }, [products]);
 
   // High-Performance Smooth Scroll Observer
   useEffect(() => {
@@ -523,6 +535,27 @@ export default function App() {
       return;
     }
     setSelectedProduct(product);
+    if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('product', product.id || product._id);
+        window.history.pushState({ productId: product.id }, '', url.toString());
+      } catch (_) {}
+    }
+  };
+
+  const handleCloseProductDetail = () => {
+    setSelectedProduct(null);
+    if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('product') || url.searchParams.has('p')) {
+          url.searchParams.delete('product');
+          url.searchParams.delete('p');
+          window.history.pushState({}, '', url.toString());
+        }
+      } catch (_) {}
+    }
   };
 
   const handleAddToCart = (product) => {
@@ -989,7 +1022,7 @@ export default function App() {
           product={selectedProduct}
           products={products}
           wishlist={wishlist}
-          onClose={() => setSelectedProduct(null)}
+          onClose={handleCloseProductDetail}
           onToggleWishlist={handleToggleWishlist}
           onAddToCart={handleAddToCart}
           onSelectProduct={handleSelectProduct}
