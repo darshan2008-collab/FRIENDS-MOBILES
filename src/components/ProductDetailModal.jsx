@@ -206,20 +206,8 @@ export default function ProductDetailModal({
     window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`, '_blank');
   };
 
-  const handleNativeShare = async () => {
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({
-          title: shareTitle,
-          text: `Check out ${shareTitle} at FRIENDS MOBILE!`,
-          url: shareUrl
-        });
-      } catch (_) {
-        setIsShareModalOpen(true);
-      }
-    } else {
-      setIsShareModalOpen(true);
-    }
+  const handleNativeShare = () => {
+    setIsShareModalOpen(true);
   };
 
   if (!product || typeof document === 'undefined') return null;
@@ -410,7 +398,7 @@ export default function ProductDetailModal({
                 </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '12px' }}>
                 <span style={{ fontSize: '1.85rem', fontWeight: 900, color: 'var(--text-primary)' }}>₹{product.price.toLocaleString('en-IN')}</span>
                 {product.originalPrice && (
                   <span style={{ fontSize: '1rem', color: 'var(--text-dim)', textDecoration: 'line-through' }}>
@@ -420,6 +408,103 @@ export default function ProductDetailModal({
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary-orange)', marginLeft: '4px' }}>
                   Save {product.discount}
                 </span>
+              </div>
+
+              {/* Direct Social Share Pills */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '16px',
+                flexWrap: 'wrap',
+                background: 'rgba(255, 85, 0, 0.05)',
+                padding: '8px 12px',
+                borderRadius: '12px',
+                border: '1px dashed rgba(255, 85, 0, 0.3)'
+              }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#FF5500', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <Share2 size={14} color="#FF5500" /> Share:
+                </span>
+                <button
+                  type="button"
+                  onClick={handleShareWhatsApp}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '8px',
+                    background: '#25D366',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontSize: '0.74rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)'
+                  }}
+                  title="Share product on WhatsApp"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.764.459 3.487 1.332 5.003l-1.417 5.176 5.302-1.39a9.943 9.943 0 0 0 4.77 1.215h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.668-1.037-5.176-2.924-7.062a9.923 9.923 0 0 0-7.066-2.945zm.004 18.155h-.003a8.27 8.27 0 0 1-4.218-1.157l-.302-.18-3.136.822.836-3.056-.197-.314a8.27 8.27 0 0 1-1.272-4.436c0-4.568 3.717-8.283 8.286-8.283 2.213 0 4.293.862 5.858 2.428a8.243 8.243 0 0 1 2.427 5.856c0 4.569-3.718 8.284-8.281 8.284z"/></svg>
+                  WhatsApp
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '8px',
+                    background: copiedLink ? '#22c55e' : 'var(--bg-card)',
+                    color: copiedLink ? '#ffffff' : 'var(--text-primary)',
+                    border: '1px solid var(--border-color)',
+                    fontSize: '0.74rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
+                  title="Copy direct product link"
+                >
+                  {copiedLink ? <CheckCircle2 size={13} color="#ffffff" /> : <Copy size={13} />}
+                  {copiedLink ? 'Copied!' : 'Copy Link'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShareFacebook}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '8px',
+                    background: '#1877F2',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontSize: '0.74rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
+                  title="Share product on Facebook"
+                >
+                  Facebook
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsShareModalOpen(true)}
+                  style={{
+                    padding: '5px 10px',
+                    borderRadius: '8px',
+                    background: 'var(--bg-card)',
+                    color: '#FF5500',
+                    border: '1px solid #FF5500',
+                    fontSize: '0.74rem',
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                  title="More social sharing options"
+                >
+                  More...
+                </button>
               </div>
 
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.5, marginBottom: '20px' }}>
