@@ -1157,7 +1157,7 @@ export default function App() {
           handleOpenShop('Wishlist');
         }}
         onOpenCart={handleOpenCartClick}
-        onOpenChatbot={() => setIsChatbotOpen(false)}
+        onOpenChatbot={() => setIsChatbotOpen(true)}
       />
 
       {isChatbotOpen && (
