@@ -527,7 +527,35 @@ function ProductCard({ product, onAddToCart, isLiked, onToggleWishlist, onSelect
       <div 
         className="card-image-box"
         onClick={() => onSelectProduct(product)}
+        style={{ position: 'relative', cursor: 'pointer' }}
       >
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelectProduct(product);
+          }}
+          style={{
+            position: 'absolute',
+            top: '8px',
+            right: '8px',
+            zIndex: 5,
+            width: '30px',
+            height: '30px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #FF5500, #E03E00)',
+            color: '#ffffff',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 2px 6px rgba(255, 85, 0, 0.4)'
+          }}
+          title="Share Product Link"
+        >
+          <Share2 size={14} color="#ffffff" />
+        </button>
         <img 
           src={product.img} 
           alt={product.title}

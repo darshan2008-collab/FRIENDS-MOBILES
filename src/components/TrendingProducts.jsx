@@ -58,14 +58,41 @@ export default function TrendingProducts({ products, wishlist, onToggleWishlist,
             {filteredProducts.map((prod) => {
               const isLiked = wishlist.includes(prod.id);
               return (
-                <div key={prod.id} className="product-card">
+                <div key={prod.id} className="product-card" style={{ position: 'relative' }}>
                   <span className="discount-badge">{prod.discount}</span>
                   
                   <div 
                     className="prod-img-wrap" 
-                    onClick={() => onOpenShop ? onOpenShop(prod.category || 'All') : onSelectProduct(prod)}
-                    style={{ cursor: 'pointer' }}
+                    onClick={() => onSelectProduct(prod)}
+                    style={{ cursor: 'pointer', position: 'relative' }}
                   >
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectProduct(prod);
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        zIndex: 5,
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #FF5500, #E03E00)',
+                        color: '#ffffff',
+                        border: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 8px rgba(255, 85, 0, 0.4)'
+                      }}
+                      title="Share Product Link"
+                    >
+                      <Share2 size={15} color="#ffffff" />
+                    </button>
                     <img 
                       src={prod.img} 
                       onError={(e) => handleProductImgError(e, prod)} 

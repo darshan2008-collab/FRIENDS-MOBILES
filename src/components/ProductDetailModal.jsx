@@ -331,6 +331,38 @@ export default function ProductDetailModal({
               >
                 <span className="discount-badge" style={{ top: '16px', left: '16px', zIndex: 3 }}>{product.discount}</span>
                 
+                {/* Floating Product Image Share Badge (Top Right of Image) */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsShareModalOpen(true);
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: '16px',
+                    right: '16px',
+                    zIndex: 5,
+                    background: 'linear-gradient(135deg, #FF5500, #E03E00)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '24px',
+                    padding: '7px 14px',
+                    fontSize: '0.78rem',
+                    fontWeight: '800',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(255, 85, 0, 0.45)',
+                    backdropFilter: 'blur(4px)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="Share Product Link"
+                >
+                  <Share2 size={15} color="#ffffff" /> Share
+                </button>
+                
                 {/* Hover to Zoom Helper Badge */}
                 <span style={{
                   position: 'absolute',
