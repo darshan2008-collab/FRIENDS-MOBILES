@@ -3,31 +3,31 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <!-- Homepage & Brand Hub -->
   <url>
-    <loc>https://friendsmobiles.co.in/</loc>
+    <loc>https://friendsmobile.co.in/</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>always</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://friendsmobiles.co.in/logo.png</image:loc>
+      <image:loc>https://friendsmobile.co.in/logo.png</image:loc>
       <image:title>FRIENDS MOBILE Store Logo</image:title>
     </image:image>
   </url>
   
   <!-- 3D Customized Phone Back Covers Studio -->
   <url>
-    <loc>https://friendsmobiles.co.in/#customized-covers</loc>
+    <loc>https://friendsmobile.co.in/#customized-covers</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
     <image:image>
-      <image:loc>https://friendsmobiles.co.in/images/prod_custom_cover.png</image:loc>
+      <image:loc>https://friendsmobile.co.in/images/prod_custom_cover.png</image:loc>
       <image:title>3D Customized Phone Back Covers India - FRIENDS MOBILE</image:title>
     </image:image>
   </url>
 
   <!-- Mobile Accessories & Products Store -->
   <url>
-    <loc>https://friendsmobiles.co.in/#products</loc>
+    <loc>https://friendsmobile.co.in/#products</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.90</priority>
@@ -35,19 +35,19 @@
 
   <!-- Bluetooth Earbuds & Headphones -->
   <url>
-    <loc>https://friendsmobiles.co.in/#earphones</loc>
+    <loc>https://friendsmobile.co.in/#earphones</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
     <image:image>
-      <image:loc>https://friendsmobiles.co.in/images/prod_airdopes.png</image:loc>
+      <image:loc>https://friendsmobile.co.in/images/prod_airdopes.png</image:loc>
       <image:title>boAt Airdopes Bluetooth Wireless Earbuds - FRIENDS MOBILE</image:title>
     </image:image>
   </url>
 
   <!-- High Capacity Power Banks -->
   <url>
-    <loc>https://friendsmobiles.co.in/#power-banks</loc>
+    <loc>https://friendsmobile.co.in/#power-banks</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -55,7 +55,7 @@
 
   <!-- Fast Chargers & Type-C Cables -->
   <url>
-    <loc>https://friendsmobiles.co.in/#chargers</loc>
+    <loc>https://friendsmobile.co.in/#chargers</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
@@ -63,7 +63,7 @@
 
   <!-- Custom Photo Frames & Gifts -->
   <url>
-    <loc>https://friendsmobiles.co.in/#photo-frames</loc>
+    <loc>https://friendsmobile.co.in/#photo-frames</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.80</priority>

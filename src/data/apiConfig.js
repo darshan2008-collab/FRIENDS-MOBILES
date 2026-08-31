@@ -14,7 +14,7 @@ export const getApiBaseUrl = () => {
   );
 
   if (isCapacitor) {
-    return 'https://friendsmobiles.co.in/api';
+    return 'https://friendsmobile.co.in/api';
   }
 
   return '/api';

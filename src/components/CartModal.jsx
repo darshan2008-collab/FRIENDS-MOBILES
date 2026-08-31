@@ -149,7 +149,7 @@ export default function CartModal({
       <body>
         <div class="invoice-wrapper">
           <div class="action-bar no-print">
-            <a href="https://friendsmobiles.co.in/" class="btn-return">
+            <a href="https://friendsmobile.co.in/" class="btn-return">
               🏠 Return to Main Website
             </a>
             <button onclick="window.print()" class="btn-print">

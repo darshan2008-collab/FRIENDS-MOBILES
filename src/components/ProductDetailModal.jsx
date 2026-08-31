@@ -166,7 +166,7 @@ export default function ProductDetailModal({
       const pathname = window.location.pathname;
       return `${origin}${pathname}?product=${product.id || product._id || ''}`;
     }
-    return `https://friendsmobiles.co.in/?product=${product.id}`;
+    return `https://friendsmobile.co.in/?product=${product.id}`;
   };
 
   const shareUrl = getProductShareUrl();

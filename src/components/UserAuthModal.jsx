@@ -31,7 +31,7 @@ const getApiEndpoints = (endpoint) => {
     } else if (endpoint.startsWith('/auth/reset-password')) {
       endpoints.push('/api/otp/reset-password');
     }
-    endpoints.push(`https://friendsmobiles.co.in/api${endpoint}`);
+    endpoints.push(`https://friendsmobile.co.in/api${endpoint}`);
   }
 
   return [...new Set(endpoints)];
@@ -597,7 +597,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
     // ─── 2. Fallback: External Browser OAuth Redirect (Implicit Token Flow)
     if (isCapacitorApp) {
-      const redirectUri = 'https://friendsmobiles.co.in/';
+      const redirectUri = 'https://friendsmobile.co.in/';
       const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=openid%20email%20profile&prompt=select_account&state=apk`;
 
       try {
