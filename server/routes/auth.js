@@ -162,7 +162,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
 
 const handleGoogleRedirect = (req, res) => {
   try {
-    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '929652702793-02ve5do6kgq0fv4hns0vd31g7of00lak.apps.googleusercontent.com';
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '790719609329-17h6kuua100ndrtau0shkm71kb4b12r4.apps.googleusercontent.com';
     const REDIRECT_URI = process.env.PUBLIC_APP_URL ? `${process.env.PUBLIC_APP_URL.replace(/\/+$/, '')}/api/auth/google/callback` : 'https://friendsmobile.co.in/api/auth/google/callback';
     const mode = req.query.mode || 'web';
     const targetScheme = req.query.redirect || 'com.friendsmobile.app://auth-success';
@@ -197,7 +197,7 @@ router.get('/google/callback', async (req, res) => {
   } catch (_) {}
 
   try {
-    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '929652702793-02ve5do6kgq0fv4hns0vd31g7of00lak.apps.googleusercontent.com';
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '790719609329-17h6kuua100ndrtau0shkm71kb4b12r4.apps.googleusercontent.com';
     const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
     const REDIRECT_URI = process.env.PUBLIC_APP_URL ? `${process.env.PUBLIC_APP_URL.replace(/\/+$/, '')}/api/auth/google/callback` : 'https://friendsmobile.co.in/api/auth/google/callback';
 

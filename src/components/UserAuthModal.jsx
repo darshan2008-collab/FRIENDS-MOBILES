@@ -6,7 +6,7 @@ import CompanyLogo from './CompanyLogo';
 import { getApiBaseUrl, getApiHost } from '../data/apiConfig';
 
 const API_BASE = getApiBaseUrl();
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '929652702793-02ve5do6kgq0fv4hns0vd31g7of00lak.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '790719609329-17h6kuua100ndrtau0shkm71kb4b12r4.apps.googleusercontent.com';
 
 const getApiEndpoints = (endpoint) => {
   const endpoints = [];
