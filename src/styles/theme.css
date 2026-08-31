@@ -134,9 +134,11 @@ img {
 }
 
 .container {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
 /* Common Text Helpers */
@@ -256,10 +258,11 @@ img {
 .main-header {
   background-color: var(--bg-header);
   border-bottom: 1px solid var(--border-color);
-  padding: 16px 0;
+  padding: 14px 0;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }
 
 .header-container {
@@ -272,14 +275,15 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 28px;
   width: 100%;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  flex-shrink: 0;
 }
 
 .desktop-search-box {
@@ -352,14 +356,15 @@ img {
 /* Search Box */
 .search-box {
   flex: 1;
-  max-width: 420px;
-  height: 38px;
+  max-width: 580px;
+  height: 42px;
   align-items: center;
   background-color: var(--bg-input);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   transition: border-color var(--transition-fast);
+  margin: 0 auto;
 }
 
 @media (max-width: 768px) {
@@ -406,7 +411,8 @@ img {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
+  flex-shrink: 0;
 }
 
 .action-btn {
@@ -580,13 +586,16 @@ img {
 .main-nav {
   background-color: var(--bg-nav);
   border-bottom: 1px solid var(--border-color);
+  position: relative;
+  z-index: 99;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 0;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -5609,35 +5618,35 @@ img {
   /* Container Proportions for Laptops & Desktops */
   .container {
     max-width: 1280px !important;
-    padding: 0 32px !important;
+    padding: 0 28px !important;
   }
 
   /* Header & Search Alignment on Laptops */
   .header-container {
-    padding: 12px 0 !important;
-    gap: 32px !important;
+    padding: 4px 0 !important;
+    gap: 16px !important;
   }
 
   .desktop-search-box {
-    max-width: 560px !important;
+    max-width: 580px !important;
     height: 42px !important;
   }
 
   .desktop-search-box input {
     font-size: 0.88rem !important;
-    padding: 0 18px !important;
+    padding: 0 16px !important;
   }
 
   /* Hero Section Side-by-Side Laptop Grid */
   .hero-section {
-    padding: 48px 0 64px 0 !important;
+    padding: 44px 0 56px 0 !important;
   }
 
   .hero-container {
     display: grid !important;
     grid-template-columns: 1.15fr 1fr !important;
     align-items: center !important;
-    gap: 48px !important;
+    gap: 44px !important;
   }
 
   .hero-title {
@@ -5689,7 +5698,16 @@ img {
 
 @media (min-width: 1280px) {
   .container {
-    max-width: 1380px !important;
+    max-width: 1320px !important;
+    padding: 0 32px !important;
+  }
+
+  .header-top-row {
+    gap: 32px !important;
+  }
+
+  .desktop-search-box {
+    max-width: 640px !important;
   }
 
   .products-grid {
@@ -5698,18 +5716,18 @@ img {
   }
 
   .hero-title {
-    font-size: 3.6rem !important;
+    font-size: 3.4rem !important;
   }
 
   .nav-links {
-    gap: 14px !important;
+    gap: 16px !important;
   }
 
   .nav-link,
   button.nav-link,
   a.nav-link {
     font-size: 0.84rem !important;
-    padding: 8px 18px !important;
+    padding: 8px 16px !important;
   }
 }
 
