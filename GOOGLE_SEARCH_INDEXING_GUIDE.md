@@ -11,7 +11,7 @@ Google Search Console is the official tool to tell Google about your website and
 ### Steps to Submit & Index:
 1. Go to [Google Search Console](https://search.google.com/search-console).
 2. Sign in with your Google account.
-3. Add a new **URL prefix property**: `https://friendsmobiles.unitaryx.org/`.
+3. Add a new **URL prefix property**: `https://friendsmobiles.co.in/`.
 4. Verification is pre-configured via meta tag:
    ```html
    <meta name="google-site-verification" content="y40JwSTfOs02uDWD0m1sqNTxDrOcieINghQNhXYSfR4" />
@@ -19,7 +19,7 @@ Google Search Console is the official tool to tell Google about your website and
 5. Click **Verify**.
 6. After verification, navigate to **Sitemaps** in the left menu.
 7. Enter `sitemap.xml` and click **Submit**.
-8. Go to **URL Inspection**, enter `https://friendsmobiles.unitaryx.org/`, and click **Request Indexing**.
+8. Go to **URL Inspection**, enter `https://friendsmobiles.co.in/`, and click **Request Indexing**.
 
 ---
 
@@ -34,7 +34,7 @@ To rank for search queries like `"friends"`, `"friends mobile"`, or `"friends mo
 4. Enter Store Location:
    - **Address**: South Gandhigramam, Karur / Madurai, Tamil Nadu 639004.
    - **Phone Number**: +91 74485 78507
-   - **Website URL**: `https://friendsmobiles.unitaryx.org`
+   - **Website URL**: `https://friendsmobiles.co.in`
 5. Complete phone/video verification with Google.
 6. Add photos of your shop, custom 3D back covers, earbuds, fast chargers, and logo.
 
@@ -43,8 +43,8 @@ To rank for search queries like `"friends"`, `"friends mobile"`, or `"friends mo
 ## 3. Social Media & Brand Signals
 
 Linking official social media accounts helps Google establish brand entity authority for "Friends Mobile":
-- **Instagram**: Include `https://friendsmobiles.unitaryx.org` in profile bio.
-- **Facebook**: Set website link to `https://friendsmobiles.unitaryx.org`.
+- **Instagram**: Include `https://friendsmobiles.co.in` in profile bio.
+- **Facebook**: Set website link to `https://friendsmobiles.co.in`.
 - **Google Knowledge Panel**: Schema tags (`sameAs`) are configured in `index.html` to connect your social links with Google's Knowledge Graph.
 
 ---

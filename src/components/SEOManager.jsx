@@ -22,7 +22,7 @@ export default function SEOManager({
 }) {
   useEffect(() => {
     const isTamil = false;
-    const baseUrl = 'https://friendsmobiles.unitaryx.org';
+    const baseUrl = 'https://friendsmobiles.co.in';
 
     const getAbsoluteImageUrl = (imgStr) => {
       if (!imgStr) return `${baseUrl}/images/prod_custom_cover.png`;

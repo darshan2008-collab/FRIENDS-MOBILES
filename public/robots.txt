@@ -29,4 +29,4 @@ Disallow: /admin
 Disallow: /api/admin
 
 # Official Sitemap Location
-Sitemap: https://friendsmobiles.unitaryx.org/sitemap.xml
+Sitemap: https://friendsmobiles.co.in/sitemap.xml

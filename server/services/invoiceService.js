@@ -274,7 +274,7 @@ const InvoiceService = {
 <body>
   <div class="invoice-wrapper">
     <div class="action-bar no-print">
-      <a href="https://friendsmobiles.unitaryx.org/" id="btn-return-link" class="btn-return">
+      <a href="https://friendsmobiles.co.in/" id="btn-return-link" class="btn-return">
         🏠 Return to Website
       </a>
       <button onclick="window.print()" class="btn-print">
@@ -369,7 +369,7 @@ const InvoiceService = {
           };
         } else {
           returnBtn.innerHTML = '🏠 Return to Website';
-          returnBtn.href = 'https://friendsmobiles.unitaryx.org/';
+          returnBtn.href = 'https://friendsmobiles.co.in/';
         }
       }
     })();
