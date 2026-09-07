@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { App as CapApp } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
 import { Headphones } from 'lucide-react';
 import Header from './components/Header';
 import MobileDrawer from './components/MobileDrawer';
@@ -354,6 +355,7 @@ export default function App() {
               setIsAccountOpen(true);
               addToast(`Welcome back, ${parsedUser.name || parsedUser.email}! Signed in with Google.`, 'success');
               if (window.history.pushState) window.history.replaceState({}, document.title, window.location.pathname);
+              try { Browser.close().catch(() => {}); } catch (_) {}
             }
           } catch (_) {}
         } else if (tokenParam && !tokenParam.startsWith('rst_')) {

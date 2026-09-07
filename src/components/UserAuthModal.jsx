@@ -561,7 +561,24 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       (window.location.hostname === 'localhost' && window.location.port !== '5173' && window.location.port !== '3000' && window.location.port !== '5000')
     );
 
-    // ─── 1. Primary: Try In-App Google Identity Services Token Client Popup (Stays inside APK / Web)
+    // ─── 1. Primary for Capacitor Android App: External Browser OAuth Redirect
+    if (isCapacitorApp) {
+      const redirectUri = 'https://friendsmobile.co.in/';
+      const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=openid%20email%20profile&prompt=select_account&state=apk`;
+
+      try {
+        Browser.open({ url: googleOAuthUrl }).catch(() => {
+          window.open(googleOAuthUrl, '_system') || window.open(googleOAuthUrl, '_blank');
+        });
+      } catch (_) {
+        window.open(googleOAuthUrl, '_system') || window.open(googleOAuthUrl, '_blank');
+      }
+      setIsSubmitting(false);
+      if (addToast) addToast('Opening Google Account Chooser...', 'info');
+      return;
+    }
+
+    // ─── 2. Web Browser: Google Identity Services Token Client Popup
     if (typeof window !== 'undefined' && window.google?.accounts?.oauth2) {
       try {
         const tokenClient = window.google.accounts.oauth2.initTokenClient({
@@ -593,23 +610,6 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       } catch (e) {
         // fall through
       }
-    }
-
-    // ─── 2. Fallback: External Browser OAuth Redirect (Implicit Token Flow)
-    if (isCapacitorApp) {
-      const redirectUri = 'https://friendsmobile.co.in/';
-      const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=openid%20email%20profile&prompt=select_account&state=apk`;
-
-      try {
-        Browser.open({ url: googleOAuthUrl }).catch(() => {
-          window.open(googleOAuthUrl, '_system') || window.open(googleOAuthUrl, '_blank');
-        });
-      } catch (_) {
-        window.open(googleOAuthUrl, '_system') || window.open(googleOAuthUrl, '_blank');
-      }
-      setIsSubmitting(false);
-      if (addToast) addToast('Opening Google Account Chooser...', 'info');
-      return;
     }
 
     // ─── 3. Fallback: GSI ID One Tap for Web
