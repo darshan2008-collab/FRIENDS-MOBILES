@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Smartphone, Upload, Plus, AlertCircle, ShoppingCart, Camera, Image, Search, Shield, Sparkles, Type, MessageSquare, ShoppingBag, RefreshCw, CheckCircle2, Crown, Zap, Edit3, ChevronDown, ChevronUp, Move, ZoomIn, RotateCw, Sliders } from 'lucide-react';
+import { X, Smartphone, Upload, Plus, AlertCircle, ShoppingCart, Camera, Image, Search, Shield, Sparkles, Type, MessageSquare, ShoppingBag, RefreshCw, CheckCircle2, Crown, Zap, Edit3, ChevronDown, ChevronUp, Move, ZoomIn, RotateCw, Sliders, Phone, Heart, Share2, Copy, Check } from 'lucide-react';
 import { PHONE_BRANDS, PHONE_MODELS_REGISTRY, findModelSpecs } from '../data/phoneCameraRegistry';
 
 export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, addToast, t = (k) => k }) {
