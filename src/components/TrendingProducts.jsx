@@ -128,7 +128,7 @@ export default function TrendingProducts({ products, wishlist, onToggleWishlist,
                     <div className="card-actions">
                       <button 
                         type="button"
-                        className="wishlist-icon-btn"
+                        className="wishlist-icon-btn mobile-share-btn-hide"
                         onClick={() => onSelectProduct(prod)}
                         title="Share Product"
                         style={{ color: '#FF5500' }}
