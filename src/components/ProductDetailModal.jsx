@@ -161,17 +161,27 @@ export default function ProductDetailModal({
   };
 
   const getProductShareUrl = () => {
-    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      const origin = window.location.origin;
-      const pathname = window.location.pathname;
-      return `${origin}${pathname}?product=${product.id || product._id || ''}`;
+    const prodId = product?.id || product?._id || '';
+    if (typeof window !== 'undefined') {
+      const host = (window.location.hostname || '').toLowerCase();
+      if (
+        host && 
+        !host.includes('localhost') && 
+        !host.includes('127.0.0.1') && 
+        !host.includes('capacitor') && 
+        !host.startsWith('192.168.') && 
+        !host.startsWith('10.') &&
+        host.includes('.')
+      ) {
+        return `${window.location.origin}${window.location.pathname}?product=${prodId}`;
+      }
     }
-    return `https://friendsmobile.co.in/?product=${product.id || product._id || ''}`;
+    return `https://friendsmobile.co.in/?product=${prodId}`;
   };
 
   const shareUrl = getProductShareUrl();
-  const shareTitle = product.title || 'FRIENDS MOBILE Product';
-  const shareText = `🔥 Check out "${shareTitle}" on FRIENDS MOBILE for just ₹${product.price?.toLocaleString('en-IN') || ''}${product.discount ? ` (${product.discount} OFF)` : ''}!\n\nBuy now: ${shareUrl}`;
+  const shareTitle = product?.title || 'FRIENDS MOBILE Product';
+  const shareText = `🔥 Check out "${shareTitle}" on FRIENDS MOBILE for just ₹${product?.price?.toLocaleString('en-IN') || ''}${product?.discount ? ` (${product.discount} OFF)` : ''}!\n\nBuy now: ${shareUrl}`;
 
   const handleCopyLink = () => {
     try {
@@ -206,7 +216,17 @@ export default function ProductDetailModal({
     window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`, '_blank');
   };
 
-  const handleNativeShare = () => {
+  const handleNativeShare = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch (_) {}
+    }
     setIsShareModalOpen(true);
   };
 
