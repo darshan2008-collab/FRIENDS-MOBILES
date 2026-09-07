@@ -3,11 +3,11 @@ import { SplashScreen as CapSplashScreen } from '@capacitor/splash-screen';
 
 export default function SplashScreen({ onFinish }) {
   const [progress, setProgress] = useState(0);
-  const [statusText, setStatusText] = useState('FRIENDS MOBILE');
+  const [statusText, setStatusText] = useState('INITIALIZING FRIENDS MOBILE...');
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   useEffect(() => {
-    // Hide native Capacitor splash screen smoothly once web splash mounts
+    // Instantly hide native Capacitor splash screen
     const hideNativeSplash = async () => {
       try {
         await CapSplashScreen.hide();
@@ -17,41 +17,48 @@ export default function SplashScreen({ onFinish }) {
     };
     hideNativeSplash();
 
-    // Timeline guaranteed to run smoothly for at least 3.2s to 3.5s
-    const startTime = Date.now();
-    const TARGET_DURATION = 3200; // 3.2 seconds progress fill + 300ms stay = 3.5s total
+    // High-performance 60FPS requestAnimationFrame timer for exact 4.0 seconds (4000ms)
+    let animationFrameId;
+    const DURATION = 4000; // Exact 4.0 seconds duration requested by user
+    const startTime = performance.now();
 
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const pct = Math.min(Math.floor((elapsed / TARGET_DURATION) * 100), 100);
+    const updateTimeline = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const pct = Math.min(Math.floor((elapsed / DURATION) * 100), 100);
       setProgress(pct);
 
-      if (pct >= 100) {
-        clearInterval(interval);
+      if (elapsed < DURATION) {
+        animationFrameId = requestAnimationFrame(updateTimeline);
+      } else {
+        setProgress(100);
       }
-    }, 30);
+    };
 
-    return () => clearInterval(interval);
+    animationFrameId = requestAnimationFrame(updateTimeline);
+
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   useEffect(() => {
     if (progress < 25) {
       setStatusText('INITIALIZING STORE PLATFORM...');
-    } else if (progress < 60) {
-      setStatusText('SYNCING PRODUCT CATALOG & OFFERS...');
-    } else if (progress < 90) {
-      setStatusText('PREPARING CUSTOMIZATION ENGINE...');
+    } else if (progress < 55) {
+      setStatusText('SYNCING PRODUCTS & OFFERS...');
+    } else if (progress < 85) {
+      setStatusText('PREPARING 3D CUSTOM STUDIO...');
     } else if (progress < 100) {
       setStatusText('WELCOME TO FRIENDS MOBILE');
     } else {
       setStatusText('WELCOME TO FRIENDS MOBILE');
-      // Hold briefly at 100% then execute elegant luxury exit
+      // Hold smoothly at 100% then trigger lag-free 60FPS fadeout transition
       const timeout = setTimeout(() => {
         setIsFadingOut(true);
         setTimeout(() => {
           if (onFinish) onFinish();
-        }, 700); // Luxury dissolve duration
-      }, 300);
+        }, 500); // 500ms smooth fadeout
+      }, 200);
 
       return () => clearTimeout(timeout);
     }
@@ -61,7 +68,7 @@ export default function SplashScreen({ onFinish }) {
     setIsFadingOut(true);
     setTimeout(() => {
       if (onFinish) onFinish();
-    }, 500);
+    }, 400);
   };
 
   return (
@@ -70,49 +77,50 @@ export default function SplashScreen({ onFinish }) {
         position: 'fixed',
         inset: 0,
         zIndex: 99999,
-        background: 'radial-gradient(ellipse at 50% 35%, #131A2A 0%, #070A11 65%, #030408 100%)',
+        backgroundColor: '#070A11',
+        backgroundImage: 'radial-gradient(circle at 50% 35%, #111827 0%, #070A11 75%)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
-        transition: 'opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.7s cubic-bezier(0.22, 1, 0.36, 1)',
+        transition: 'opacity 0.5s ease-out, transform 0.5s ease-out',
         opacity: isFadingOut ? 0 : 1,
-        transform: isFadingOut ? 'scale(0.98)' : 'scale(1)',
-        filter: isFadingOut ? 'blur(6px)' : 'none',
+        transform: isFadingOut ? 'scale(0.97) translate3d(0, 0, 0)' : 'scale(1) translate3d(0, 0, 0)',
+        willChange: 'opacity, transform',
         pointerEvents: isFadingOut ? 'none' : 'auto',
         fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
         userSelect: 'none',
         WebkitUserSelect: 'none'
       }}
     >
-      {/* Subtle Metallic Ambient Background Glow */}
+      {/* Subtle Hardware-Accelerated Ambient Light Glow */}
       <div
         style={{
           position: 'absolute',
-          width: '500px',
-          height: '500px',
+          width: '420px',
+          height: '420px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255, 85, 0, 0.12) 0%, rgba(255, 85, 0, 0) 70%)',
+          background: 'radial-gradient(circle, rgba(255, 85, 0, 0.14) 0%, rgba(255, 85, 0, 0) 70%)',
           top: '25%',
           left: '50%',
-          transform: 'translateX(-50%)',
-          filter: 'blur(70px)',
-          animation: 'luxuryGlow 4s ease-in-out infinite alternate',
+          transform: 'translateX(-50%) translate3d(0, 0, 0)',
+          willChange: 'transform',
+          animation: 'splashGlowPulse 4s ease-in-out infinite alternate',
           pointerEvents: 'none'
         }}
       />
 
-      {/* Discrete Elegant Skip Control */}
+      {/* Discrete Skip Control */}
       <button
         onClick={handleSkip}
         style={{
           position: 'absolute',
-          top: '28px',
-          right: '28px',
-          background: 'rgba(255, 255, 255, 0.04)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          color: 'rgba(255, 255, 255, 0.55)',
+          top: '24px',
+          right: '24px',
+          background: 'rgba(255, 255, 255, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
+          color: 'rgba(255, 255, 255, 0.65)',
           borderRadius: '20px',
           padding: '6px 16px',
           fontSize: '11px',
@@ -120,24 +128,14 @@ export default function SplashScreen({ onFinish }) {
           letterSpacing: '1.2px',
           textTransform: 'uppercase',
           cursor: 'pointer',
-          transition: 'all 0.3s ease',
+          transition: 'all 0.2s ease',
           zIndex: 10
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-          e.currentTarget.style.color = '#FFFFFF';
-          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.25)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
-          e.currentTarget.style.color = 'rgba(255, 255, 255, 0.55)';
-          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
         }}
       >
         Skip
       </button>
 
-      {/* Main Luxury Brand Container */}
+      {/* Main Brand Frame */}
       <div
         style={{
           position: 'relative',
@@ -146,45 +144,47 @@ export default function SplashScreen({ onFinish }) {
           flexDirection: 'column',
           alignItems: 'center',
           textAlign: 'center',
-          maxWidth: '460px',
+          maxWidth: '420px',
           width: '88%',
-          padding: '20px'
+          transform: 'translate3d(0, 0, 0)'
         }}
       >
-        {/* Sleek Metallic Logo Frame with Smooth Scale Reveal */}
+        {/* Crisp Original Logo in Glowing Metallic Frame */}
         <div
           style={{
             position: 'relative',
-            width: '120px',
-            height: '120px',
-            marginBottom: '32px',
-            animation: 'luxuryLogoEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+            width: '124px',
+            height: '124px',
+            marginBottom: '30px',
+            transform: 'translate3d(0, 0, 0)',
+            animation: 'splashLogoScale 1s cubic-bezier(0.16, 1, 0.3, 1) forwards'
           }}
         >
-          {/* Subtle Outer Halo Ring */}
+          {/* Glowing Aura Ring */}
           <div
             style={{
               position: 'absolute',
-              inset: '-8px',
+              inset: '-6px',
               borderRadius: '50%',
-              background: 'conic-gradient(from 0deg, transparent 0%, rgba(255, 85, 0, 0.4) 50%, transparent 100%)',
-              animation: 'luxuryRingSpin 6s linear infinite'
+              background: 'conic-gradient(from 0deg, transparent 0%, rgba(255, 85, 0, 0.45) 50%, transparent 100%)',
+              animation: 'splashSpinRing 6s linear infinite',
+              transform: 'translate3d(0, 0, 0)'
             }}
           />
 
-          {/* Logo Disc Container */}
+          {/* White Disc Container for Original Logo */}
           <div
             style={{
               width: '100%',
               height: '100%',
               borderRadius: '50%',
-              background: 'linear-gradient(145deg, #FFFFFF 0%, #F1F5F9 100%)',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
+              background: '#FFFFFF',
+              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.9)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               padding: '18px',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
+              border: '1px solid rgba(255, 255, 255, 0.3)'
             }}
           >
             <img
@@ -202,47 +202,47 @@ export default function SplashScreen({ onFinish }) {
           </div>
         </div>
 
-        {/* Brand Title with High-End Metallic Gradient */}
+        {/* Brand Title */}
         <h1
           style={{
             margin: '0 0 10px 0',
             fontSize: '30px',
             fontWeight: 800,
-            letterSpacing: '3px',
+            letterSpacing: '2.5px',
             textTransform: 'uppercase',
-            background: 'linear-gradient(180deg, #FFFFFF 0%, #CBD5E1 60%, #94A3B8 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            textShadow: '0 4px 20px rgba(0,0,0,0.4)',
-            animation: 'luxuryTextFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+            color: '#FFFFFF',
+            textShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+            transform: 'translate3d(0, 0, 0)',
+            animation: 'splashTextReveal 0.8s ease-out forwards'
           }}
         >
           FRIENDS MOBILE
         </h1>
 
-        {/* Tagline with Ultra-Clean Tracking */}
+        {/* Tagline */}
         <p
           style={{
-            margin: '0 0 36px 0',
+            margin: '0 0 32px 0',
             fontSize: '11px',
             fontWeight: 600,
-            color: 'rgba(255, 255, 255, 0.5)',
-            letterSpacing: '2.5px',
+            color: 'rgba(255, 255, 255, 0.55)',
+            letterSpacing: '2px',
             textTransform: 'uppercase',
-            animation: 'luxuryTextFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+            transform: 'translate3d(0, 0, 0)',
+            animation: 'splashTextReveal 1s ease-out forwards'
           }}
         >
-          Excellence in Mobile Accessories & Custom Creations
+          Premium Accessories & Custom Creations
         </p>
 
-        {/* Ultra-Thin Minimalist Luxury Progress Bar */}
-        <div style={{ width: '100%', maxWidth: '240px', marginBottom: '16px' }}>
+        {/* Hardware-Accelerated 60FPS Progress Bar */}
+        <div style={{ width: '100%', maxWidth: '240px', marginBottom: '14px' }}>
           <div
             style={{
               width: '100%',
-              height: '2px',
-              background: 'rgba(255, 255, 255, 0.08)',
-              borderRadius: '2px',
+              height: '3px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '3px',
               overflow: 'hidden',
               position: 'relative'
             }}
@@ -252,21 +252,22 @@ export default function SplashScreen({ onFinish }) {
                 height: '100%',
                 width: `${progress}%`,
                 background: 'linear-gradient(90deg, #FF5500 0%, #F59E0B 100%)',
-                borderRadius: '2px',
+                borderRadius: '3px',
                 transition: 'width 0.05s linear',
-                boxShadow: '0 0 10px rgba(255, 85, 0, 0.6)'
+                boxShadow: '0 0 10px rgba(255, 85, 0, 0.7)',
+                willChange: 'width'
               }}
             />
           </div>
         </div>
 
-        {/* Micro Status Text */}
+        {/* Micro Status Indicator */}
         <div
           style={{
             fontSize: '10px',
             fontWeight: 600,
-            letterSpacing: '1.5px',
-            color: 'rgba(255, 255, 255, 0.4)',
+            letterSpacing: '1.2px',
+            color: 'rgba(255, 255, 255, 0.45)',
             textTransform: 'uppercase',
             height: '16px'
           }}
@@ -275,23 +276,23 @@ export default function SplashScreen({ onFinish }) {
         </div>
       </div>
 
-      {/* Keyframe Animations */}
+      {/* Hardware-Accelerated CSS Keyframes */}
       <style>{`
-        @keyframes luxuryGlow {
-          0% { transform: translateX(-50%) scale(0.85); opacity: 0.15; }
-          100% { transform: translateX(-50%) scale(1.15); opacity: 0.35; }
+        @keyframes splashGlowPulse {
+          0% { transform: translateX(-50%) scale(0.9) translate3d(0, 0, 0); opacity: 0.12; }
+          100% { transform: translateX(-50%) scale(1.1) translate3d(0, 0, 0); opacity: 0.28; }
         }
-        @keyframes luxuryRingSpin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        @keyframes splashSpinRing {
+          0% { transform: rotate(0deg) translate3d(0, 0, 0); }
+          100% { transform: rotate(360deg) translate3d(0, 0, 0); }
         }
-        @keyframes luxuryLogoEntrance {
-          0% { transform: scale(0.85); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
+        @keyframes splashLogoScale {
+          0% { transform: scale(0.88) translate3d(0, 0, 0); opacity: 0; }
+          100% { transform: scale(1) translate3d(0, 0, 0); opacity: 1; }
         }
-        @keyframes luxuryTextFade {
-          0% { transform: translateY(8px); opacity: 0; }
-          100% { transform: translateY(0); opacity: 1; }
+        @keyframes splashTextReveal {
+          0% { transform: translateY(6px) translate3d(0, 0, 0); opacity: 0; }
+          100% { transform: translateY(0) translate3d(0, 0, 0); opacity: 1; }
         }
       `}</style>
     </div>
