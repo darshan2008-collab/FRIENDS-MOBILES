@@ -110,16 +110,14 @@ export default function TrendingProducts({ products, wishlist, onToggleWishlist,
                     {prod.title}
                   </h3>
                   
-                  {prod.reviews > 0 && (
-                    <div className="rating">
-                      <span className="stars">
-                        {Array.from({ length: 5 }, (_, idx) => (
-                          idx < Math.round(prod.rating || 5) ? '★' : '☆'
-                        )).join('')}
-                      </span>
-                      <span className="rating-count">({prod.reviews})</span>
-                    </div>
-                  )}
+                  <div className="rating">
+                    <span className="stars">
+                      {Array.from({ length: 5 }, (_, idx) => (
+                        idx < Math.round(prod.rating || 5) ? '★' : '☆'
+                      )).join('')}
+                    </span>
+                    <span className="rating-count">({prod.reviews && prod.reviews > 0 ? prod.reviews : (prod.rating ? prod.rating.toFixed(1) : '5.0')})</span>
+                  </div>
 
                   <div className="price-row">
                     <div className="prices">
