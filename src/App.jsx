@@ -23,6 +23,7 @@ import BrandMarquee from './components/BrandMarquee';
 import ShoppingPortal from './components/ShoppingPortal';
 import SEOManager from './components/SEOManager';
 import AIChatbotModal from './components/AIChatbotModal';
+import SplashScreen from './components/SplashScreen';
 import { translations, autoTranslateToTamil } from './data/translations';
 import { getApiBaseUrl } from './data/apiConfig';
 
@@ -167,6 +168,7 @@ export default function App() {
   const [openCartAfterLogin, setOpenCartAfterLogin] = useState(false);
   const [isWelcomeOnboardingOpen, setIsWelcomeOnboardingOpen] = useState(false);
   const [onboardingUser, setOnboardingUser] = useState(null);
+  const [showSplash, setShowSplash] = useState(true);
 
   const handleOpenShop = (category = 'All') => {
     setShopCategory(category);
@@ -950,6 +952,7 @@ export default function App() {
 
   return (
     <div className="app">
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
       <SEOManager 
         selectedProduct={selectedProduct}
         shopCategory={shopCategory}
