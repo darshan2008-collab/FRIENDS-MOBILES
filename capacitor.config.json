@@ -2,7 +2,6 @@
   "appId": "com.friendsmobile.app",
   "appName": "FRIENDS MOBILE",
   "webDir": "dist",
-  "bundledWebRuntime": false,
   "server": {
     "androidScheme": "https"
   },
