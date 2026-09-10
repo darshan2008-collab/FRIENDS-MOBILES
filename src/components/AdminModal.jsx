@@ -4,7 +4,7 @@ import {
   X, ShieldCheck, Package, Truck, ShoppingBag, BarChart3, Plus, Trash2, Edit3, 
   Check, RefreshCw, Lock, User, Key, ArrowRight, LogOut, CheckCircle2, Clock, 
   TrendingUp, TrendingDown, Tag, Sparkles, AlertTriangle, Percent, DollarSign, Menu, MapPin, Phone, Eye, EyeOff, Upload, CreditCard, AlertCircle, MessageSquare, PhoneCall,
-  Cloud, Database, HardDrive, Download, Zap, Smartphone, Image, Printer, Palette, FileText, Search
+  Cloud, Database, HardDrive, Download, Zap, Smartphone, Image, Printer, Palette, FileText, Search, Wrench
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 import { autoTranslateToTamil } from '../data/translations';
@@ -52,10 +52,23 @@ export default function AdminModal({
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'products' | 'orders' | 'shipping' | 'slides'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'products' | 'orders' | 'repairs' | 'shipping' | 'slides'
   const [isAdminSidebarOpen, setIsAdminSidebarOpen] = useState(false);
   const [isManualCategory, setIsManualCategory] = useState(false);
   const [isEditManualCategory, setIsEditManualCategory] = useState(false);
+
+  // Service & Repair Requests State
+  const [adminServiceRequests, setAdminServiceRequests] = useState([]);
+  const [isLoadingServiceRequests, setIsLoadingServiceRequests] = useState(false);
+  const [serviceStatusFilter, setServiceStatusFilter] = useState('All');
+  const [serviceSearchTerm, setServiceSearchTerm] = useState('');
+  const [editingServiceRequestId, setEditingServiceRequestId] = useState(null);
+  const [serviceEditForm, setServiceEditForm] = useState({
+    status: '',
+    estimatedCost: '',
+    adminNotes: '',
+    pickupPreferredDate: ''
+  });
 
   // Orders State (synced from API / localStorage / props)
   const [adminOrders, setAdminOrders] = useState(() => {
@@ -676,6 +689,80 @@ export default function AdminModal({
       };
     }
   }, [isOpen]);
+
+  // --- Service Requests Data Handlers ---
+  const fetchAdminServiceRequests = async () => {
+    setIsLoadingServiceRequests(true);
+    try {
+      const apiHost = getApiHost();
+      const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
+      const res = await fetch(`${apiHost}/api/admin/service-requests`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.requests)) {
+        setAdminServiceRequests(data.requests);
+      }
+    } catch (err) {
+      console.error('Failed to fetch service requests:', err);
+    } finally {
+      setIsLoadingServiceRequests(false);
+    }
+  };
+
+  const handleUpdateServiceRequest = async (requestId, updatePayload) => {
+    try {
+      const apiHost = getApiHost();
+      const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
+      const res = await fetch(`${apiHost}/api/admin/service-requests/${requestId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updatePayload)
+      });
+      const data = await res.json();
+      if (data.success && data.request) {
+        setAdminServiceRequests(prev => prev.map(r => r.requestId === requestId ? data.request : r));
+        if (addToast) addToast(`Service request #${requestId} updated successfully!`, '✅');
+        setEditingServiceRequestId(null);
+      } else {
+        if (addToast) addToast(data.message || 'Failed to update request', '⚠️');
+      }
+    } catch (err) {
+      if (addToast) addToast('Error updating service request', '⚠️');
+    }
+  };
+
+  const handleDeleteServiceRequest = async (requestId) => {
+    if (!window.confirm(`Are you sure you want to delete repair request #${requestId}?`)) return;
+    try {
+      const apiHost = getApiHost();
+      const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
+      const res = await fetch(`${apiHost}/api/admin/service-requests/${requestId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAdminServiceRequests(prev => prev.filter(r => r.requestId !== requestId));
+        if (addToast) addToast(`Service request #${requestId} deleted`, '🗑️');
+      }
+    } catch (err) {
+      if (addToast) addToast('Failed to delete service request', '⚠️');
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && isAuthenticated) {
+      fetchAdminServiceRequests();
+    }
+  }, [isOpen, isAuthenticated]);
 
   if (!isOpen || typeof document === 'undefined') return null;
 
@@ -1652,6 +1739,18 @@ export default function AdminModal({
               style={{ color: '#FF5500', fontWeight: '800' }}
             >
               <Smartphone size={16} color="#FF5500" /> Cover Customizations ({displayCustomizations.length})
+            </button>
+
+            <button 
+              className={`sidebar-tab-btn ${activeTab === 'repairs' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('repairs');
+                fetchAdminServiceRequests();
+                setIsAdminSidebarOpen(false);
+              }}
+              style={{ color: '#FF5500', fontWeight: '800' }}
+            >
+              <Wrench size={16} color="#FF5500" /> Mobile Repairs ({adminServiceRequests.length})
             </button>
 
             <button 
@@ -3842,6 +3941,427 @@ export default function AdminModal({
                   );
                 })}
               </div>
+              )}
+
+            </div>
+          )}
+
+          {/* TAB: MOBILE REPAIRS & SERVICE MANAGEMENT */}
+          {activeTab === 'repairs' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* Header & Refresh */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                padding: '20px 24px',
+                borderRadius: '18px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '14px'
+              }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                    <Wrench size={22} color="#FF5500" /> Mobile Repair &amp; Doorstep Pickup Management
+                  </h3>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    Track device diagnosis, dispatch doorstep pickup executives, update repair cost quotes, and notify customers via WhatsApp.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={fetchAdminServiceRequests}
+                  disabled={isLoadingServiceRequests}
+                  style={{
+                    padding: '9px 18px',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-input)',
+                    color: 'var(--text-primary)',
+                    fontWeight: '700',
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <RefreshCw size={14} className={isLoadingServiceRequests ? 'animate-spin' : ''} /> Refresh List
+                </button>
+              </div>
+
+              {/* Metrics Row */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '12px'
+              }}>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>Total Requests</span>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-primary)', marginTop: '4px' }}>
+                    {adminServiceRequests.length}
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(255, 85, 0, 0.25)', padding: '16px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#FF5500', fontWeight: '600' }}>Pending Pickup</span>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#FF5500', marginTop: '4px' }}>
+                    {adminServiceRequests.filter(r => r.status === 'Pending Pickup').length}
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '16px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#3b82f6', fontWeight: '600' }}>Under Repair</span>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#3b82f6', marginTop: '4px' }}>
+                    {adminServiceRequests.filter(r => r.status === 'Under Repair' || r.status === 'Picked Up').length}
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(34, 197, 94, 0.25)', padding: '16px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#22c55e', fontWeight: '600' }}>Completed / Delivered</span>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#22c55e', marginTop: '4px' }}>
+                    {adminServiceRequests.filter(r => r.status === 'Completed').length}
+                  </div>
+                </div>
+              </div>
+
+              {/* Filters & Search */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                padding: '16px 20px',
+                borderRadius: '16px',
+                display: 'flex',
+                gap: '14px',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between'
+              }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-muted)' }}>Status:</span>
+                  {['All', 'Pending Pickup', 'Picked Up', 'Under Repair', 'Ready for Delivery', 'Completed'].map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => setServiceStatusFilter(st)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '20px',
+                        border: serviceStatusFilter === st ? '1.5px solid #FF5500' : '1px solid var(--border-color)',
+                        background: serviceStatusFilter === st ? 'rgba(255, 85, 0, 0.12)' : 'var(--bg-input)',
+                        color: serviceStatusFilter === st ? '#FF5500' : 'var(--text-secondary)',
+                        fontSize: '0.78rem',
+                        fontWeight: serviceStatusFilter === st ? '700' : '500',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {st}
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ position: 'relative', minWidth: '240px', flex: '1', maxWidth: '360px' }}>
+                  <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input 
+                    type="text"
+                    placeholder="Search by Request ID, Name, Phone..."
+                    value={serviceSearchTerm}
+                    onChange={(e) => setServiceSearchTerm(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px 8px 36px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-input)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.85rem',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Requests List */}
+              {isLoadingServiceRequests ? (
+                <div style={{ textAlign: 'center', padding: '50px', color: 'var(--text-muted)' }}>
+                  Loading service requests...
+                </div>
+              ) : adminServiceRequests.length === 0 ? (
+                <div style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '16px',
+                  padding: '40px 20px',
+                  textAlign: 'center'
+                }}>
+                  <Wrench size={40} color="var(--text-muted)" style={{ margin: '0 auto 12px auto' }} />
+                  <h4 style={{ margin: '0 0 6px 0', fontSize: '1.1rem' }}>No Service Requests Found</h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    When customers submit repair or doorstep pickup requests from the website or mobile app, they will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {adminServiceRequests
+                    .filter(req => {
+                      if (serviceStatusFilter !== 'All' && req.status !== serviceStatusFilter) return false;
+                      if (!serviceSearchTerm.trim()) return true;
+                      const q = serviceSearchTerm.toLowerCase();
+                      return (
+                        req.requestId?.toLowerCase().includes(q) ||
+                        req.customerName?.toLowerCase().includes(q) ||
+                        req.customerPhone?.includes(q) ||
+                        req.deviceModel?.toLowerCase().includes(q) ||
+                        req.defectType?.toLowerCase().includes(q)
+                      );
+                    })
+                    .map((req) => {
+                      const isEditing = editingServiceRequestId === req.requestId;
+                      return (
+                        <div
+                          key={req.requestId || req.id}
+                          style={{
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '16px',
+                            padding: '20px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px'
+                          }}
+                        >
+                          {/* Top Row: Request ID, Device, Status Dropdown, Delete */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '1.15rem', fontWeight: '800', color: '#FF5500' }}>
+                                  #{req.requestId}
+                                </span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                  ({new Date(req.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })})
+                                </span>
+                              </div>
+                              <h4 style={{ margin: '4px 0 0 0', fontSize: '1.05rem', fontWeight: '700' }}>
+                                {req.deviceBrand} {req.deviceModel}
+                              </h4>
+                              <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                Category: <strong style={{ color: 'var(--text-primary)' }}>{req.defectType}</strong>
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              {/* Quick Status Select */}
+                              <select
+                                value={req.status}
+                                onChange={(e) => handleUpdateServiceRequest(req.requestId, { status: e.target.value })}
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '10px',
+                                  border: '1px solid var(--border-color)',
+                                  background: req.status === 'Completed' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255, 85, 0, 0.15)',
+                                  color: req.status === 'Completed' ? '#22c55e' : '#FF5500',
+                                  fontWeight: '700',
+                                  fontSize: '0.82rem',
+                                  cursor: 'pointer',
+                                  outline: 'none'
+                                }}
+                              >
+                                <option value="Pending Pickup">Pending Pickup</option>
+                                <option value="Picked Up">Device Picked Up</option>
+                                <option value="Under Repair">Under Diagnosis &amp; Repair</option>
+                                <option value="Ready for Delivery">Ready for Delivery</option>
+                                <option value="Completed">Completed &amp; Delivered</option>
+                              </select>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteServiceRequest(req.requestId)}
+                                title="Delete Service Request"
+                                style={{
+                                  background: 'rgba(239, 68, 68, 0.1)',
+                                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                                  color: '#ef4444',
+                                  padding: '8px',
+                                  borderRadius: '8px',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Customer Details Grid */}
+                          <div style={{
+                            background: 'var(--bg-input)',
+                            padding: '14px 18px',
+                            borderRadius: '12px',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                            gap: '12px',
+                            fontSize: '0.82rem'
+                          }}>
+                            <div>
+                              <span style={{ color: 'var(--text-muted)', display: 'block' }}>Customer:</span>
+                              <strong>{req.customerName}</strong>
+                              <div style={{ marginTop: '2px' }}>
+                                <a href={`tel:${req.customerPhone}`} style={{ color: '#FF5500', textDecoration: 'none', fontWeight: '700' }}>
+                                  📞 +91 {req.customerPhone}
+                                </a>
+                              </div>
+                            </div>
+
+                            <div>
+                              <span style={{ color: 'var(--text-muted)', display: 'block' }}>Pickup Preferred Slot:</span>
+                              <strong>{req.pickupPreferredDate || 'Immediate / Unscheduled'}</strong>
+                            </div>
+
+                            <div style={{ gridColumn: 'span 2' }}>
+                              <span style={{ color: 'var(--text-muted)', display: 'block' }}>Doorstep Pickup Address:</span>
+                              <strong>{req.customerAddress}</strong>
+                            </div>
+                          </div>
+
+                          {/* Problem Description */}
+                          <div style={{ fontSize: '0.85rem' }}>
+                            <strong style={{ color: 'var(--text-muted)' }}>Fault Description:</strong>
+                            <p style={{ margin: '4px 0 0 0', color: 'var(--text-primary)', lineHeight: '1.5' }}>
+                              {req.defectDescription}
+                            </p>
+                          </div>
+
+                          {/* Quote & Technician Notes Editor */}
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                            gap: '12px',
+                            padding: '14px',
+                            borderRadius: '12px',
+                            background: 'rgba(255, 85, 0, 0.04)',
+                            border: '1px solid rgba(255, 85, 0, 0.15)'
+                          }}>
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                                Estimated Repair Quote (₹):
+                              </label>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <input 
+                                  type="number"
+                                  placeholder="e.g. 1500"
+                                  defaultValue={req.estimatedCost || ''}
+                                  id={`quote-${req.requestId}`}
+                                  style={{
+                                    width: '120px',
+                                    padding: '6px 10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border-color)',
+                                    background: 'var(--bg-input)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '0.85rem',
+                                    outline: 'none'
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const val = document.getElementById(`quote-${req.requestId}`)?.value;
+                                    handleUpdateServiceRequest(req.requestId, { estimatedCost: parseFloat(val) || 0 });
+                                  }}
+                                  style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    background: '#22c55e',
+                                    color: '#fff',
+                                    fontWeight: '700',
+                                    fontSize: '0.78rem',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  Save Quote
+                                </button>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                                Technician Notes / Diagnosis Update:
+                              </label>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <input 
+                                  type="text"
+                                  placeholder="e.g. Screen replaced, battery tested 100%"
+                                  defaultValue={req.adminNotes || ''}
+                                  id={`notes-${req.requestId}`}
+                                  style={{
+                                    flex: 1,
+                                    padding: '6px 10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border-color)',
+                                    background: 'var(--bg-input)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '0.85rem',
+                                    outline: 'none'
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const val = document.getElementById(`notes-${req.requestId}`)?.value;
+                                    handleUpdateServiceRequest(req.requestId, { adminNotes: val || '' });
+                                  }}
+                                  style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    background: '#FF5500',
+                                    color: '#fff',
+                                    fontWeight: '700',
+                                    fontSize: '0.78rem',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  Save Notes
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 1-Click WhatsApp Customer Button */}
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '6px' }}>
+                            <a
+                              href={`https://wa.me/91${req.customerPhone.replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(`Hello ${req.customerName}, update from FRIENDS MOBILE regarding your Repair Request #${req.requestId} (${req.deviceBrand} ${req.deviceModel}): Current Status is "${req.status}". ${req.estimatedCost ? `Estimated Quote: ₹${req.estimatedCost}.` : ''} ${req.adminNotes ? `Technician Note: ${req.adminNotes}` : ''} For doorstep pickup/delivery assistance, reply to this chat.`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                padding: '8px 16px',
+                                borderRadius: '10px',
+                                border: '1.5px solid #22c55e',
+                                background: 'rgba(34, 197, 94, 0.1)',
+                                color: '#16a34a',
+                                fontWeight: '800',
+                                fontSize: '0.82rem',
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                              }}
+                            >
+                              <MessageSquare size={16} /> Send WhatsApp Update to Customer
+                            </a>
+                          </div>
+
+                        </div>
+                      );
+                    })}
+                </div>
               )}
 
             </div>

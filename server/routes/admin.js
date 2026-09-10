@@ -8,6 +8,7 @@ const Setting = require('../models/Setting');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Complaint = require('../models/Complaint');
+const ServiceRequest = require('../models/ServiceRequest');
 const BackupService = require('../services/backupService');
 
 const settingsFilePath = path.join(__dirname, '../data/settings.json');
@@ -648,6 +649,58 @@ router.get('/backups/download/:filename', (req, res) => {
     res.sendFile(filePath);
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to download backup snapshot file', error: err.message });
+  }
+});
+
+// --- Service Requests Management Endpoints ---
+
+// GET /api/admin/service-requests — List all mobile repair requests
+router.get('/service-requests', async (req, res) => {
+  try {
+    const { status } = req.query;
+    const filter = {};
+    if (status && status !== 'All') {
+      filter.status = status;
+    }
+    const requests = await ServiceRequest.find(filter);
+    res.json({ success: true, requests });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch service requests', error: err.message });
+  }
+});
+
+// PUT /api/admin/service-requests/:id — Update status, estimated cost, notes, or pickup date
+router.put('/service-requests/:id', async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const { status, estimatedCost, adminNotes, pickupPreferredDate } = req.body;
+
+    const updated = await ServiceRequest.updateOne(
+      { requestId },
+      { status, estimatedCost, adminNotes, pickupPreferredDate }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Service request not found' });
+    }
+
+    res.json({ success: true, message: 'Service request updated successfully', request: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to update service request', error: err.message });
+  }
+});
+
+// DELETE /api/admin/service-requests/:id — Delete service request
+router.delete('/service-requests/:id', async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const deleted = await ServiceRequest.deleteOne({ requestId });
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: 'Service request not found or already deleted' });
+    }
+    res.json({ success: true, message: 'Service request deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to delete service request', error: err.message });
   }
 });
 

@@ -43,6 +43,7 @@ const defaultFiles = {
   'data/users.json': [],
   'data/orders.json': [],
   'data/products.json': [],
+  'data/service_requests.json': [],
   'data/settings.json': {
     freeShippingThreshold: 499,
     standardShippingFee: 49,
@@ -71,6 +72,7 @@ const authRouter = require('./routes/auth');
 const paymentsRouter = require('./routes/payments');
 const bannersRouter = require('./routes/banners');
 const otpRouter = require('./routes/otp');
+const serviceRequestsRouter = require('./routes/serviceRequests');
 
 // ─── App Initialization ────────────────────────────────────────────────────────
 const app = express();
@@ -161,6 +163,9 @@ app.use('/admin', adminRouter);
 
 app.use('/api/auth', authRouter);
 app.use('/auth', authRouter);
+
+app.use('/api/service-requests', serviceRequestsRouter);
+app.use('/service-requests', serviceRequestsRouter);
 
 // Direct Google OAuth Redirect Handlers for maximum compatibility
 const directGoogleRedirect = (req, res) => {

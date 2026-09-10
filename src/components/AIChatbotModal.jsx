@@ -17,6 +17,7 @@ export default function AIChatbotModal({
   onOpenCustomFrame,
   onOpenShop,
   onOpenUserAccount,
+  onOpenServiceModal,
   addToast
 }) {
   useEffect(() => {
@@ -258,10 +259,27 @@ export default function AIChatbotModal({
             ? ['📦 ஆர்டர் டிராக்கிங்', '🛠️ மொபைல் சர்வீஸ்', '📊 பிரதான வரைபடம்']
             : ['📦 Track My Order', '🛠️ Mobile Repair Service', '📊 Main Support Chart'];
 
-        } else if (queryLower.includes('mobile_repair') || queryLower.includes('repair') || queryLower.includes('service') || queryLower.includes('சர்வீஸ்')) {
+        } else if (queryLower.includes('mobile_repair') || queryLower.includes('repair') || queryLower.includes('service') || queryLower.includes('சர்வீஸ்') || queryLower.includes('ரிப்பேர்') || queryLower.includes('டிஸ்பிளே') || queryLower.includes('display')) {
           botResponseText = botLang === 'ta'
-            ? `🛠️ **30-நிமிட விரைவு மொபைல் சர்வீஸ் (Fixed Chart Step 5)**\n\nமதுரை & கரூர் பிரண்ட்ஸ் மொபைல் ஷோரூமில் 30 நிமிடங்களில் விரைவு டிஸ்பிளே மாற்றுதல், ஒரிஜினல் பேட்டரி மற்றும் மதர்போர்டு சர்வீஸ் செய்யப்படும்!`
-            : `🛠️ **30-Minute Express Repair Service (Fixed Chart Step 5)**\n\nExpress 30-minute display repair, original battery replacement, and motherboard servicing available at FRIENDS MOBILE Madurai & Karur branches!`;
+            ? `🛠️ **டோர்ஸ்டெப் மொபைல் பழுதுபார்ப்பு & சர்வீஸ் (Fixed Chart Step 5)**\n\n• **இலவச டோர்ஸ்டெப் பிக்கப்**: எங்கள் ஊழியர் உங்கள் வீட்டிற்கே வந்து போனைப் பெற்றுக்கொள்வார்!\n• **உயர்தர உதிரிபாகங்கள்**: டிஸ்பிளே மாற்றம், பேட்டரி, சார்ஜிங் பின், கேமரா & மதர்போர்டு ரிப்பேர்.\n• **நேரலை டிராக்கிங்**: உங்கள் போன் பழுதுபார்க்கும் நிலையை இணையதளத்தில் கண்காணிக்கலாம்.\n• **வாரண்டி பாதுகாப்பு**: அனைத்து பழுதுபார்ப்புகளுக்கும் சர்வீஸ் வாரண்டி உண்டு!`
+            : `🛠️ **Doorstep Mobile Repair & Executive Service (Fixed Chart Step 5)**\n\n• **Free Doorstep Pickup**: Store executive collects your device directly from your home in Karur & Madurai!\n• **Original Spares**: Broken screen/display, battery draining, charging port, motherboard & camera repairs.\n• **Live Real-time Tracking**: Track repair progress and diagnosis stages online.\n• **Official Service Warranty**: Quality tested before handover!`;
+
+          actionButtons = [
+            { 
+              label: botLang === 'ta' ? '🛠️ பிக்கப் புக் செய்க (Book Pickup)' : '🛠️ Book Doorstep Repair Pickup', 
+              onClick: () => {
+                onClose();
+                if (onOpenServiceModal) onOpenServiceModal();
+              } 
+            },
+            { 
+              label: botLang === 'ta' ? '🔍 நிலவரம் அறிக (Track Repair)' : '🔍 Track Repair Status', 
+              onClick: () => {
+                onClose();
+                if (onOpenServiceModal) onOpenServiceModal();
+              } 
+            }
+          ];
 
           quickReplies = botLang === 'ta'
             ? ['⚠️ புகார்கள் & நேரடி உதவி', '📦 ஆர்டர் டிராக்கிங்', '📊 பிரதான வரைபடம்']

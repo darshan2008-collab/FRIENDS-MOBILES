@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, User, LogOut, ShoppingBag } from 'lucide-react';
+import { X, User, LogOut, ShoppingBag, Wrench } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
 export default function MobileDrawer({ 
@@ -9,7 +9,8 @@ export default function MobileDrawer({
   currentUser, 
   onOpenAuth, 
   onOpenUserAccount, 
-  onLogout 
+  onLogout,
+  onOpenServiceModal
 }) {
   if (!isOpen) return null;
 
@@ -122,6 +123,16 @@ export default function MobileDrawer({
 
         <ul className="drawer-links">
           <li><a href="#" className="drawer-link" onClick={onClose}>{t('navHome') || 'Home'}</a></li>
+          <li>
+            <a 
+              href="#services" 
+              className="drawer-link" 
+              onClick={(e) => { e.preventDefault(); onClose(); if (onOpenServiceModal) onOpenServiceModal(); }}
+              style={{ color: '#FF5500', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <Wrench size={18} /> {t('navRepair') || 'Mobile Repair & Doorstep Pickup'}
+            </a>
+          </li>
           <li><a href="#products" className="drawer-link" onClick={onClose}>{t('navPhones') || 'Mobile Phones'}</a></li>
           <li><a href="#products" className="drawer-link" onClick={onClose}>{t('navAccessories') || 'Accessories'}</a></li>
           <li><a href="#photo-frames" className="drawer-link" onClick={onClose}>{t('navPhotoFrames') || 'Photo Frames'}</a></li>

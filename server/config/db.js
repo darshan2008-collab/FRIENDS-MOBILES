@@ -153,6 +153,24 @@ CREATE TABLE IF NOT EXISTS complaints (
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS service_requests (
+  id SERIAL PRIMARY KEY,
+  request_id VARCHAR(100) UNIQUE NOT NULL,
+  customer_name VARCHAR(255) NOT NULL,
+  customer_phone VARCHAR(50) NOT NULL,
+  customer_address TEXT NOT NULL,
+  device_brand VARCHAR(100) DEFAULT 'Other',
+  device_model VARCHAR(255) NOT NULL,
+  defect_type VARCHAR(100) DEFAULT 'General Repair',
+  defect_description TEXT NOT NULL,
+  pickup_preferred_date VARCHAR(100) DEFAULT '',
+  status VARCHAR(50) DEFAULT 'Pending Pickup',
+  estimated_cost NUMERIC(10,2) DEFAULT 0,
+  admin_notes TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
 `;
 
 const ensureDatabaseExists = async () => {

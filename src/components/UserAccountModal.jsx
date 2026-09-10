@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { 
   X, ShoppingBag, User, LogOut, PackageCheck, Clock, MapPin, Phone, Mail, 
   CheckCircle2, ShieldCheck, Tag, CreditCard, Star, ArrowRight, Heart, 
-  Sparkles, MessageCircle, HelpCircle, Copy, Truck, Lock
+  Sparkles, MessageCircle, HelpCircle, Copy, Truck, Lock, Wrench
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 import RewardsTab from './RewardsTab';
@@ -13,7 +13,16 @@ import { copyToClipboard } from '../utils/clipboard';
 
 const API_BASE = getApiBaseUrl();
 
-export default function UserAccountModal({ isOpen, onClose, user, orders: allOrders, onLogout, addToast, t = (k) => k }) {
+export default function UserAccountModal({ 
+  isOpen, 
+  onClose, 
+  user, 
+  orders: allOrders, 
+  onLogout, 
+  addToast, 
+  t = (k) => k,
+  onOpenServiceModal
+}) {
   const isTamil = false;
 
   useEffect(() => {
@@ -26,8 +35,10 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
   }, [isOpen]);
 
   if (!isOpen || typeof document === 'undefined') return null;
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'profile' | 'addresses' | 'offers' | 'support'
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'repairs' | 'profile' | 'addresses' | 'offers' | 'support'
   const [userOrders, setUserOrders] = useState([]);
+  const [userRepairs, setUserRepairs] = useState([]);
+  const [isLoadingRepairs, setIsLoadingRepairs] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedCoupon, setCopiedCoupon] = useState('');
 
@@ -480,8 +491,25 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
 
       // 3. Fetch from API in background
       fetchUserOrders();
+      fetchUserRepairs();
     }
   }, [isOpen, user, allOrders]);
+
+  const fetchUserRepairs = async () => {
+    if (!user || !user.phone) return;
+    setIsLoadingRepairs(true);
+    try {
+      const cleanPhone = String(user.phone).replace(/\D/g, '').slice(-10);
+      const res = await fetch(`${API_BASE}/api/service-requests/user/${cleanPhone}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.requests)) {
+        setUserRepairs(data.requests);
+      }
+    } catch (_) {}
+    finally {
+      setIsLoadingRepairs(false);
+    }
+  };
 
   const fetchUserOrders = async () => {
     if (!user) return;
@@ -682,6 +710,30 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
                 className={`dash-nav-item ${activeTab === 'orders' ? 'active' : ''}`}
               >
                 <ShoppingBag size={18} /> {isTamil ? 'என் ஆர்டர்கள் & டிரேக்கிங்' : 'My Orders & Tracking'}
+              </button>
+
+              <button 
+                onClick={() => {
+                  setActiveTab('repairs');
+                  fetchUserRepairs();
+                }}
+                className={`dash-nav-item ${activeTab === 'repairs' ? 'active' : ''}`}
+                style={{ position: 'relative' }}
+              >
+                <Wrench size={18} /> {isTamil ? 'மொபைல் ரிப்பேர் கோரிக்கைகள்' : 'My Repair Requests'}
+                {userRepairs.length > 0 && (
+                  <span style={{ 
+                    marginLeft: 'auto', 
+                    background: '#FF5500', 
+                    color: '#fff', 
+                    fontSize: '0.7rem', 
+                    padding: '1px 8px', 
+                    borderRadius: '12px', 
+                    fontWeight: '800' 
+                  }}>
+                    {userRepairs.length}
+                  </span>
+                )}
               </button>
 
               <button 
@@ -942,6 +994,207 @@ export default function UserAccountModal({ isOpen, onClose, user, orders: allOrd
 
                         );
                       })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB: MOBILE REPAIRS & SERVICE REQUESTS */}
+              {activeTab === 'repairs' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800' }}>
+                        {isTamil ? 'மொபைல் ரிப்பேர் கோரிக்கைகள்' : 'My Mobile Repair Requests'}
+                      </h3>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                        {isTamil ? 'டோர்ஸ்டெப் பிக்கப் மற்றும் பழுதுபார்ப்பு நிலவரம்' : 'Track your doorstep repair pickup & diagnosis progress'}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        if (onOpenServiceModal) onOpenServiceModal();
+                      }}
+                      style={{
+                        padding: '9px 18px',
+                        borderRadius: '20px',
+                        border: 'none',
+                        background: 'linear-gradient(135deg, #FF5500, #FF8800)',
+                        color: '#ffffff',
+                        fontWeight: '800',
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: '0 4px 14px rgba(255, 85, 0, 0.35)'
+                      }}
+                    >
+                      <Wrench size={16} /> {isTamil ? 'புதிய ரிப்பேர் புக் செய்க' : 'Book New Repair Pickup'}
+                    </button>
+                  </div>
+
+                  {isLoadingRepairs ? (
+                    <p style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                      Loading repair requests...
+                    </p>
+                  ) : userRepairs.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '50px 20px', background: 'var(--bg-input)', borderRadius: '20px', border: '1px solid var(--border-color)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+                        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255, 85, 0, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF5500' }}>
+                          <Wrench size={32} />
+                        </div>
+                      </div>
+                      <h3 style={{ margin: '0 0 8px 0', fontWeight: '800' }}>
+                        {isTamil ? 'எந்த ரிப்பேர் கோரிக்கையும் இல்லை' : 'No Active Repair Requests'}
+                      </h3>
+                      <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', maxWidth: '460px', margin: '0 auto 24px auto', lineHeight: '1.6' }}>
+                        {isTamil 
+                          ? 'உங்கள் மொபைலில் டிஸ்பிளே உடைந்துவிட்டதா, பேட்டரி பிரச்சனையா அல்லது ஆன் ஆகவில்லையா? எங்கள் கடை ஊழியர் உங்கள் வீட்டிற்கே வந்து மொபைலை பிக்கப் செய்து பழுது பார்த்து தருவார்!' 
+                          : 'Facing a broken screen, fast draining battery, charging port defect, or dead phone? Book our executive doorstep pickup service with live tracking!'}
+                      </p>
+                      <button 
+                        className="auth-submit-btn" 
+                        onClick={() => {
+                          onClose();
+                          if (onOpenServiceModal) onOpenServiceModal();
+                        }} 
+                        style={{ width: 'auto', padding: '12px 30px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '8px' }}
+                      >
+                        <Wrench size={18} /> {isTamil ? 'இப்போதே புக் செய்க' : 'REQUEST DOORSTEP PICKUP'} <ArrowRight size={18} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      {userRepairs.map((req) => (
+                        <div 
+                          key={req.requestId || req.id}
+                          style={{
+                            background: 'var(--bg-input)',
+                            borderRadius: '18px',
+                            border: '1px solid var(--border-color)',
+                            padding: '24px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '1.1rem', fontWeight: '800', color: '#FF5500' }}>
+                                  #{req.requestId}
+                                </span>
+                                <button
+                                  onClick={() => {
+                                    copyToClipboard(req.requestId);
+                                    if (addToast) addToast(`Copied ${req.requestId}`, '📋');
+                                  }}
+                                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}
+                                >
+                                  <Copy size={14} />
+                                </button>
+                              </div>
+                              <h4 style={{ margin: '4px 0 2px 0', fontSize: '1.05rem', fontWeight: '700' }}>
+                                {req.deviceBrand} {req.deviceModel}
+                              </h4>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                Issue: <strong style={{ color: 'var(--text-main)' }}>{req.defectType}</strong>
+                              </span>
+                            </div>
+
+                            <div style={{ textAlign: 'right' }}>
+                              <span style={{
+                                display: 'inline-block',
+                                padding: '6px 14px',
+                                borderRadius: '20px',
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold',
+                                background: req.status === 'Completed' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255, 85, 0, 0.15)',
+                                color: req.status === 'Completed' ? '#22c55e' : '#FF5500',
+                                border: `1px solid ${req.status === 'Completed' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255, 85, 0, 0.3)'}`
+                              }}>
+                                {req.status}
+                              </span>
+                              {req.estimatedCost > 0 && (
+                                <div style={{ marginTop: '6px', fontSize: '1.1rem', fontWeight: '900', color: '#22c55e' }}>
+                                  Est. Quote: ₹{req.estimatedCost}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Pickup Slot & Address */}
+                          <div style={{
+                            padding: '12px 16px',
+                            borderRadius: '12px',
+                            background: 'rgba(0,0,0,0.15)',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                            gap: '10px',
+                            fontSize: '0.82rem'
+                          }}>
+                            <div>
+                              <span style={{ color: 'var(--text-muted)', display: 'block' }}>Pickup Slot:</span>
+                              <strong>{req.pickupPreferredDate || 'As scheduled with store'}</strong>
+                            </div>
+                            <div>
+                              <span style={{ color: 'var(--text-muted)', display: 'block' }}>Pickup Address:</span>
+                              <strong>{req.customerAddress}</strong>
+                            </div>
+                          </div>
+
+                          {/* Problem Description */}
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            <strong>Problem Details:</strong> {req.defectDescription}
+                          </div>
+
+                          {/* Technician Notes */}
+                          {req.adminNotes && (
+                            <div style={{
+                              padding: '10px 14px',
+                              borderRadius: '10px',
+                              background: 'rgba(59, 130, 246, 0.1)',
+                              border: '1px solid rgba(59, 130, 246, 0.2)',
+                              fontSize: '0.82rem',
+                              color: '#93c5fd'
+                            }}>
+                              <strong>Technician Status Update:</strong> {req.adminNotes}
+                            </div>
+                          )}
+
+                          {/* Footer Action */}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px solid var(--border-color)', flexWrap: 'wrap', gap: '8px' }}>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              Registered: {new Date(req.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </span>
+
+                            <a
+                              href={`https://wa.me/919344522086?text=${encodeURIComponent(`Hello FRIENDS MOBILE, inquiring about my Repair Ticket #${req.requestId} (${req.deviceBrand} ${req.deviceModel}).`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: '8px',
+                                background: 'rgba(34, 197, 94, 0.15)',
+                                border: '1px solid rgba(34, 197, 94, 0.3)',
+                                color: '#22c55e',
+                                fontSize: '0.8rem',
+                                fontWeight: '700',
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                              }}
+                            >
+                              <MessageCircle size={14} /> WhatsApp Store Support
+                            </a>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

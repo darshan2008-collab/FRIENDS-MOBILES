@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones } from 'lucide-react';
+import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones, Wrench } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
 export default function Header({ 
@@ -18,7 +18,8 @@ export default function Header({
   onOpenCart, 
   onLogout, 
   onOpenShop, 
-  onOpenChatbot 
+  onOpenChatbot,
+  onOpenServiceModal
 }) {
   return (
     <>
@@ -196,6 +197,16 @@ export default function Header({
             </li>
             <li><a href="#photo-frames" className="nav-link">{t('navPhotoFrames')}</a></li>
             <li><a href="#customized-covers" className="nav-link">{t('navCustomCovers')}</a></li>
+            <li>
+              <a 
+                href="#services"
+                onClick={(e) => { e.preventDefault(); if (onOpenServiceModal) onOpenServiceModal(); }}
+                className="nav-link"
+                style={{ color: '#FF5500', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+              >
+                <Wrench size={14} /> {t('navRepair') || 'Mobile Repair'}
+              </a>
+            </li>
             <li>
               <a 
                 href="#shop"

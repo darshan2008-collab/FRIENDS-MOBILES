@@ -24,6 +24,7 @@ import BrandMarquee from './components/BrandMarquee';
 import ShoppingPortal from './components/ShoppingPortal';
 import SEOManager from './components/SEOManager';
 import AIChatbotModal from './components/AIChatbotModal';
+import ServiceRequestModal from './components/ServiceRequestModal';
 import SplashScreen from './components/SplashScreen';
 import { translations, autoTranslateToTamil } from './data/translations';
 import { getApiBaseUrl } from './data/apiConfig';
@@ -163,6 +164,8 @@ export default function App() {
   const [isCustomCoverOpen, setIsCustomCoverOpen] = useState(false);
   const [isCustomFrameOpen, setIsCustomFrameOpen] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [serviceInitialDefect, setServiceInitialDefect] = useState('');
   const [isShopOpen, setIsShopOpen] = useState(false);
   const [shopCategory, setShopCategory] = useState('All');
   const [authRedirectMessage, setAuthRedirectMessage] = useState('');
@@ -170,6 +173,11 @@ export default function App() {
   const [isWelcomeOnboardingOpen, setIsWelcomeOnboardingOpen] = useState(false);
   const [onboardingUser, setOnboardingUser] = useState(null);
   const [showSplash, setShowSplash] = useState(true);
+
+  const handleOpenServiceModal = (defectType = '') => {
+    setServiceInitialDefect(defectType);
+    setIsServiceModalOpen(true);
+  };
 
   const handleOpenShop = (category = 'All') => {
     setShopCategory(category);
@@ -983,6 +991,7 @@ export default function App() {
         onLogout={handleLogout}
         onOpenShop={handleOpenShop}
         onOpenChatbot={() => setIsChatbotOpen(true)}
+        onOpenServiceModal={handleOpenServiceModal}
       />
 
       <MobileDrawer 
@@ -996,6 +1005,7 @@ export default function App() {
         }}
         onOpenUserAccount={() => setIsAccountOpen(true)}
         onLogout={handleLogout}
+        onOpenServiceModal={handleOpenServiceModal}
       />
 
       <main>
@@ -1017,7 +1027,12 @@ export default function App() {
           onOpenShop={handleOpenShop}
           t={t}
         />
-        <ServicesSection t={t} />
+        <ServicesSection 
+          t={t} 
+          onOpenServiceModal={handleOpenServiceModal}
+          onOpenCustomCover={() => setIsCustomCoverOpen(true)}
+          onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+        />
       </main>
 
       <Footer t={t} />
@@ -1102,6 +1117,7 @@ export default function App() {
           orders={orders}
           onLogout={handleLogout}
           onUpdateUserProfile={handleUpdateUserProfile}
+          onOpenServiceModal={handleOpenServiceModal}
           addToast={addToast}
           t={t}
         />
@@ -1158,6 +1174,7 @@ export default function App() {
         onOpenUserAccount={() => setIsAccountOpen(true)}
         onOpenCustomCover={() => setIsCustomCoverOpen(true)}
         onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+        onOpenServiceModal={handleOpenServiceModal}
         onOpenWishlist={() => {
           handleOpenShop('Wishlist');
         }}
@@ -1175,12 +1192,23 @@ export default function App() {
           t={t}
           onOpenCustomCover={() => setIsCustomCoverOpen(true)}
           onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+          onOpenServiceModal={handleOpenServiceModal}
           onOpenShop={handleOpenShop}
           onOpenUserAccount={() => setIsAccountOpen(true)}
           addToast={addToast}
         />
       )}
 
+      {isServiceModalOpen && (
+        <ServiceRequestModal 
+          isOpen={isServiceModalOpen}
+          onClose={() => setIsServiceModalOpen(false)}
+          initialDefect={serviceInitialDefect}
+          currentUser={currentUser}
+          addToast={addToast}
+          t={t}
+        />
+      )}
 
       <ToastContainer toasts={toasts} onRemoveToast={handleRemoveToast} />
     </div>

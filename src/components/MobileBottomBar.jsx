@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Headphones, Heart, Paintbrush, ShoppingBag, User, Smartphone, Frame, Sparkles } from 'lucide-react';
+import { Headphones, Heart, Paintbrush, ShoppingBag, User, Smartphone, Frame, Sparkles, Wrench } from 'lucide-react';
 
 export default function MobileBottomBar({ 
   cartCount, 
@@ -12,7 +12,8 @@ export default function MobileBottomBar({
   onOpenCustomFrame,
   onOpenWishlist,
   onOpenCart,
-  onOpenChatbot
+  onOpenChatbot,
+  onOpenServiceModal
 }) {
   const [showCustomMenu, setShowCustomMenu] = useState(false);
 
@@ -95,6 +96,26 @@ export default function MobileBottomBar({
                 <div className="opt-text">
                   <strong>Custom Photo Frame</strong>
                   <span>Memorable Wall &amp; Desk Frames</span>
+                </div>
+              </button>
+
+              <button 
+                className="popup-opt-btn"
+                onClick={() => {
+                  setShowCustomMenu(false);
+                  if (onOpenServiceModal) onOpenServiceModal();
+                }}
+                style={{
+                  border: '1px solid rgba(255, 85, 0, 0.3)',
+                  background: 'rgba(255, 85, 0, 0.08)'
+                }}
+              >
+                <div className="opt-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Wrench size={24} color="#FF5500" />
+                </div>
+                <div className="opt-text">
+                  <strong style={{ color: '#FF5500' }}>Mobile Repair &amp; Service</strong>
+                  <span>Doorstep Pickup &amp; Warranty</span>
                 </div>
               </button>
             </div>
