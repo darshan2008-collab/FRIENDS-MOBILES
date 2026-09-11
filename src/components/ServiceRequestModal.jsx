@@ -245,22 +245,30 @@ export default function ServiceRequestModal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 99999,
-        backgroundColor: 'rgba(7, 10, 17, 0.85)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 999999,
+        backgroundColor: 'var(--bg-card, #ffffff)',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 0
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        justifyContent: 'flex-start',
+        padding: 0,
+        margin: 0,
+        borderRadius: 0,
+        overflow: 'hidden'
       }}
     >
-      {/* Full-screen Responsive Container */}
+      {/* Full-Page Container */}
       <div 
         className="service-modal-container"
         style={{
-          width: '100%',
-          height: '100%',
+          width: '100vw',
+          height: '100vh',
           maxWidth: '100vw',
           maxHeight: '100vh',
           background: 'var(--bg-card, #ffffff)',
@@ -268,7 +276,11 @@ export default function ServiceRequestModal({
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          borderRadius: 0
+          borderRadius: 0,
+          border: 'none',
+          boxShadow: 'none',
+          padding: 0,
+          margin: 0
         }}
       >
         {/* Top Sticky Header */}
@@ -913,7 +925,7 @@ export default function ServiceRequestModal({
 
           {/* TAB 2: TRACK REPAIR STATUS */}
           {activeTab === 'track' && (
-            <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+            <div style={{ maxWidth: '920px', margin: '0 auto', width: '100%' }}>
               <form onSubmit={handleTrackSearch} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
                 <input
                   type="text"
