@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview --host --port 3000"
+    "preview": "vite preview --host --port 3000",
+    "build:android": "vite build && npx cap sync android",
+    "sync:android": "vite build && npx cap sync android",
+    "open:android": "vite build && npx cap sync android && npx cap open android"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.1",

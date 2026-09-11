@@ -7,8 +7,8 @@ android {
         applicationId "com.friendsmobile.app"
         minSdkVersion 22
         targetSdkVersion 34
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -43,6 +43,18 @@ dependencies {
 }
 
 apply from: 'capacitor.build.gradle'
+
+task syncWebAssets(type: Exec) {
+    workingDir file("${rootDir}/..")
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        commandLine 'cmd', '/c', 'npm run build && npx cap copy android'
+    } else {
+        commandLine 'sh', '-c', 'npm run build && npx cap copy android'
+    }
+    ignoreExitValue true
+}
+
+preBuild.dependsOn syncWebAssets
 
 try {
     def servicesJSON = file('google-services.json')
