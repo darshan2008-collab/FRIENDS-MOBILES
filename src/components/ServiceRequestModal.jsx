@@ -48,6 +48,7 @@ export default function ServiceRequestModal({
 
   // Form Fields
   const [deviceBrand, setDeviceBrand] = useState('Apple iPhone');
+  const [customBrand, setCustomBrand] = useState('');
   const [deviceModel, setDeviceModel] = useState('');
   const [defectType, setDefectType] = useState(initialDefect || 'Display / Screen Broken');
   const [defectDescription, setDefectDescription] = useState('');
@@ -76,15 +77,15 @@ export default function ServiceRequestModal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      if (initialTab) setActiveTab(initialTab);
     } else {
       document.body.style.overflow = '';
       setCreatedRequest(null);
+      setCustomBrand('');
     }
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen, initialTab]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -113,10 +114,11 @@ export default function ServiceRequestModal({
   };
 
   const getWhatsAppUrl = (req) => {
+    const brand = req.deviceBrand === 'Other' && customBrand ? customBrand : req.deviceBrand;
     const text = `*NEW DOORSTEP MOBILE SERVICE REQUEST - FRIENDS MOBILES*%0A%0A` +
       `*Request ID:* ${req.requestId}%0A` +
       `*Customer:* ${req.customerName} (${req.customerPhone})%0A` +
-      `*Device:* ${req.deviceBrand} ${req.deviceModel}%0A` +
+      `*Device:* ${brand} ${req.deviceModel}%0A` +
       `*Issue / Defect:* ${req.defectType}%0A` +
       `*Problem Details:* ${req.defectDescription}%0A` +
       `*Pickup Address:* ${req.customerAddress}%0A` +
@@ -128,6 +130,11 @@ export default function ServiceRequestModal({
 
   const handleSubmitRequest = async (e) => {
     e.preventDefault();
+
+    if (deviceBrand === 'Other' && !customBrand.trim()) {
+      if (addToast) addToast('Please enter your smartphone brand name', 'warning');
+      return;
+    }
 
     if (!customerName.trim()) {
       if (addToast) addToast('Please enter your name', 'warning');
@@ -157,11 +164,13 @@ export default function ServiceRequestModal({
 
     setIsSubmitting(true);
 
+    const resolvedBrand = deviceBrand === 'Other' ? (customBrand.trim() || 'Other') : deviceBrand;
+
     const payload = {
       customerName: customerName.trim(),
       customerPhone: cleanPhone,
       customerAddress: customerAddress.trim(),
-      deviceBrand: deviceBrand,
+      deviceBrand: resolvedBrand,
       deviceModel: deviceModel.trim(),
       defectType: defectType,
       defectDescription: defectDescription.trim(),
@@ -584,6 +593,33 @@ export default function ServiceRequestModal({
                       ))}
                     </div>
 
+                    {/* If "Other" brand is selected, prompt user to manually enter brand name */}
+                    {deviceBrand === 'Other' && (
+                      <div style={{ marginBottom: '14px' }}>
+                        <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px', color: 'var(--primary-orange, #FF5500)' }}>
+                          Enter Your Smartphone Brand Name *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          autoFocus
+                          value={customBrand}
+                          onChange={(e) => setCustomBrand(e.target.value)}
+                          placeholder="e.g. Asus, Honor, Infinix, Tecno, Lava, Micromax, iQOO..."
+                          style={{
+                            width: '100%',
+                            padding: '12px 16px',
+                            borderRadius: '10px',
+                            border: '1.5px solid var(--primary-orange, #FF5500)',
+                            background: 'var(--bg-input)',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.92rem',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
+                    )}
+
                     <div>
                       <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
                         Specific Phone Model Name *
@@ -593,7 +629,7 @@ export default function ServiceRequestModal({
                         required
                         value={deviceModel}
                         onChange={(e) => setDeviceModel(e.target.value)}
-                        placeholder={`e.g. ${deviceBrand} Model (e.g. iPhone 13, Galaxy S23, Redmi Note 12)`}
+                        placeholder={deviceBrand === 'Other' ? (customBrand ? `e.g. ${customBrand} Model Name` : 'e.g. Specific Model Name') : `e.g. ${deviceBrand} Model (e.g. iPhone 13, Galaxy S23, Redmi Note 12)`}
                         style={{
                           width: '100%',
                           padding: '12px 16px',
