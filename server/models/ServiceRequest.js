@@ -19,6 +19,7 @@ const formatServiceRequest = (row) => {
     pickupPreferredDate: row.pickup_preferred_date || row.pickupPreferredDate || '',
     status: row.status || 'Pending Pickup',
     estimatedCost: row.estimated_cost !== undefined ? parseFloat(row.estimated_cost) : (row.estimatedCost ? parseFloat(row.estimatedCost) : 0),
+    deviceImage: row.device_image || row.deviceImage || '',
     adminNotes: row.admin_notes || row.adminNotes || '',
     createdAt: row.created_at || row.createdAt || new Date().toISOString(),
     updatedAt: row.updated_at || row.updatedAt || new Date().toISOString()
@@ -91,6 +92,7 @@ const ServiceRequest = {
       pickupPreferredDate: data.pickupPreferredDate || '',
       status: data.status || 'Pending Pickup',
       estimatedCost: data.estimatedCost || 0,
+      deviceImage: data.deviceImage || '',
       adminNotes: data.adminNotes || '',
       createdAt: now,
       updatedAt: now

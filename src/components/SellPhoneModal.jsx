@@ -9,18 +9,18 @@ import { getApiBaseUrl } from '../data/apiConfig';
 const API_BASE = getApiBaseUrl();
 
 const POPULAR_BRANDS = [
-  { name: 'Apple', icon: '🍎', baseVal: 22000 },
-  { name: 'Samsung', icon: '📱', baseVal: 15000 },
-  { name: 'OnePlus', icon: '🔴', baseVal: 14000 },
-  { name: 'Xiaomi / Redmi', icon: '🟠', baseVal: 8500 },
-  { name: 'Realme', icon: '🟡', baseVal: 8000 },
-  { name: 'Vivo', icon: '🔵', baseVal: 9000 },
-  { name: 'Oppo', icon: '🟢', baseVal: 8500 },
-  { name: 'Google Pixel', icon: '🔘', baseVal: 16000 },
-  { name: 'Poco', icon: '⚡', baseVal: 7500 },
-  { name: 'Motorola', icon: 'Ⓜ️', baseVal: 7500 },
-  { name: 'Nothing', icon: '⬛', baseVal: 12500 },
-  { name: 'Other', icon: '📱', baseVal: 6000 }
+  { name: 'Apple', code: 'APL', baseVal: 22000 },
+  { name: 'Samsung', code: 'SAM', baseVal: 15000 },
+  { name: 'OnePlus', code: '1+', baseVal: 14000 },
+  { name: 'Xiaomi / Redmi', code: 'MI', baseVal: 8500 },
+  { name: 'Realme', code: 'RME', baseVal: 8000 },
+  { name: 'Vivo', code: 'VVO', baseVal: 9000 },
+  { name: 'Oppo', code: 'OPP', baseVal: 8500 },
+  { name: 'Google Pixel', code: 'PIX', baseVal: 16000 },
+  { name: 'Poco', code: 'PCO', baseVal: 7500 },
+  { name: 'Motorola', code: 'MOT', baseVal: 7500 },
+  { name: 'Nothing', code: 'NTH', baseVal: 12500 },
+  { name: 'Other', code: 'GEN', baseVal: 6000 }
 ];
 
 const BRAND_PRESET_MODELS = {
@@ -255,7 +255,7 @@ export default function SellPhoneModal({
       const data = await res.json();
       if (data.success && data.request) {
         setCreatedSellRequest(data.request);
-        if (addToast) addToast('Sell request booked successfully! 📱💰', '✅');
+        if (addToast) addToast('Sell request booked successfully!', 'success');
       } else {
         throw new Error(data.message || 'Failed to submit request');
       }
@@ -268,7 +268,7 @@ export default function SellPhoneModal({
         createdAt: new Date().toISOString()
       };
       setCreatedSellRequest(fallbackRequest);
-      if (addToast) addToast('Sell request submitted! We will contact you shortly.', '✅');
+      if (addToast) addToast('Sell request submitted! We will contact you shortly.', 'success');
     } finally {
       setIsSubmitting(false);
     }
@@ -637,7 +637,20 @@ export default function SellPhoneModal({
                             transition: 'all 0.15s ease'
                           }}
                         >
-                          <span style={{ fontSize: '1.25rem' }}>{b.icon}</span>
+                          <span style={{
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '8px',
+                            background: selectedBrand === b.name ? 'var(--primary-orange, #ff6b00)' : 'var(--border-color, #e2e8f0)',
+                            color: selectedBrand === b.name ? '#ffffff' : 'var(--text-secondary)',
+                            fontSize: '0.72rem',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            {b.code}
+                          </span>
                           <span style={{ fontSize: '0.78rem', fontWeight: selectedBrand === b.name ? 700 : 500, textAlign: 'center' }}>
                             {b.name}
                           </span>

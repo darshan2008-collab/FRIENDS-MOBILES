@@ -21,7 +21,8 @@ router.post('/', serviceRequestLimiter, async (req, res) => {
       deviceModel,
       defectType,
       defectDescription,
-      pickupPreferredDate
+      pickupPreferredDate,
+      deviceImage
     } = req.body;
 
     if (!customerName || !customerPhone || !customerAddress || !deviceModel || !defectDescription) {
@@ -59,6 +60,7 @@ router.post('/', serviceRequestLimiter, async (req, res) => {
       defectType: cleanDefectType,
       defectDescription: cleanDefectDesc,
       pickupPreferredDate: cleanPickupDate,
+      deviceImage: deviceImage || '',
       status: 'Pending Pickup',
       estimatedCost: 0,
       adminNotes: ''

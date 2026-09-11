@@ -4330,6 +4330,27 @@ export default function AdminModal({
                             <p style={{ margin: '4px 0 0 0', color: 'var(--text-primary)', lineHeight: '1.5' }}>
                               {req.defectDescription}
                             </p>
+                            {req.deviceImage && (
+                              <div style={{ marginTop: '10px' }}>
+                                <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.76rem', fontWeight: '700', marginBottom: '4px' }}>
+                                  Customer Attached Phone Photo:
+                                </span>
+                                <a href={req.deviceImage} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block' }}>
+                                  <img
+                                    src={req.deviceImage}
+                                    alt="Phone Condition"
+                                    style={{
+                                      width: '90px',
+                                      height: '90px',
+                                      objectFit: 'cover',
+                                      borderRadius: '8px',
+                                      border: '1px solid var(--border-color)',
+                                      cursor: 'pointer'
+                                    }}
+                                  />
+                                </a>
+                              </div>
+                            )}
                           </div>
 
                           {/* Quote & Technician Notes Editor */}

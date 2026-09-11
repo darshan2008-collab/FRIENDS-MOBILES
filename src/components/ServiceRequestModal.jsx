@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
-  X, Wrench, Smartphone, CheckCircle2, Clock, Search, MapPin, 
-  Phone, User, Calendar, ShieldCheck, Sparkles, MessageCircle, 
-  ArrowRight, AlertCircle, RefreshCw, ChevronRight, Truck, Check, HelpCircle
+  X, Wrench, Smartphone, BatteryCharging, Zap, Droplets, Volume2, 
+  Camera, Layers, Cpu, RotateCw, Search, CheckCircle2, Clock, 
+  MapPin, Phone, User, Calendar, ShieldCheck, MessageSquare, 
+  ArrowRight, RefreshCw, Upload, Image as ImageIcon, Trash2
 } from 'lucide-react';
 import { getApiBaseUrl } from '../data/apiConfig';
 
@@ -14,16 +15,16 @@ const POPULAR_BRANDS = [
 ];
 
 const DEFECT_CATEGORIES = [
-  { id: 'screen', title: 'Display / Screen Broken', subtitle: 'Lines, touch issue or cracked glass', icon: '📱', startingPrice: '₹999' },
-  { id: 'battery', title: 'Battery Replacement', subtitle: 'Draining fast, swelling or shutdown', icon: '🔋', startingPrice: '₹599' },
-  { id: 'charging', title: 'Charging Port / Jack', subtitle: 'Phone not charging or loose port', icon: '⚡', startingPrice: '₹349' },
-  { id: 'water', title: 'Water / Liquid Damage', subtitle: 'Fell in water, ultrasonic cleaning', icon: '💧', startingPrice: '₹499' },
-  { id: 'speaker', title: 'Speaker / Mic / Audio', subtitle: 'No sound on calls, low ringer', icon: '🔊', startingPrice: '₹399' },
-  { id: 'camera', title: 'Camera Blur / Lens', subtitle: 'Camera black screen or broken lens', icon: '📸', startingPrice: '₹499' },
-  { id: 'backglass', title: 'Back Glass / Body Panel', subtitle: 'Rear cracked glass or frame bend', icon: '✨', startingPrice: '₹499' },
-  { id: 'motherboard', title: 'Motherboard / IC Repair', subtitle: 'Dead phone, network or heating issue', icon: '🎛️', startingPrice: '₹899' },
-  { id: 'software', title: 'Software & OS Unlock', subtitle: 'Hanging, boot loop or version upgrade', icon: '🔄', startingPrice: '₹299' },
-  { id: 'general', title: 'General Diagnostic', subtitle: 'Not sure? Complete hardware checkup', icon: '🔍', startingPrice: 'Free' }
+  { id: 'screen', title: 'Display / Screen Broken', subtitle: 'Lines, touch issue or cracked glass', icon: Smartphone },
+  { id: 'battery', title: 'Battery Replacement', subtitle: 'Draining fast, swelling or sudden shutdown', icon: BatteryCharging },
+  { id: 'charging', title: 'Charging Port / Jack', subtitle: 'Phone not charging or loose connector', icon: Zap },
+  { id: 'water', title: 'Water / Liquid Damage', subtitle: 'Fell in liquid, ultrasonic chemical bath', icon: Droplets },
+  { id: 'speaker', title: 'Speaker / Mic / Audio', subtitle: 'No sound on calls, low ear speaker', icon: Volume2 },
+  { id: 'camera', title: 'Camera Blur / Lens', subtitle: 'Camera black screen, blur, or lens crack', icon: Camera },
+  { id: 'backglass', title: 'Back Glass / Body Panel', subtitle: 'Rear cracked glass or bent frame', icon: Layers },
+  { id: 'motherboard', title: 'Motherboard / IC Repair', subtitle: 'Dead phone, network or overheating', icon: Cpu },
+  { id: 'software', title: 'Software & OS Unlock', subtitle: 'Hanging, boot loop, FRP or OS upgrade', icon: RotateCw },
+  { id: 'general', title: 'General Inspection', subtitle: 'Complete hardware diagnostic checkup', icon: Search }
 ];
 
 const PICKUP_SLOTS = [
@@ -38,7 +39,7 @@ export default function ServiceRequestModal({
   isOpen,
   onClose,
   initialDefect = '',
-  initialTab = 'request', // 'request' | 'track'
+  initialTab = 'request',
   currentUser,
   addToast,
   t = (k) => k
@@ -52,6 +53,7 @@ export default function ServiceRequestModal({
   const [deviceModel, setDeviceModel] = useState('');
   const [defectType, setDefectType] = useState(initialDefect || 'Display / Screen Broken');
   const [defectDescription, setDefectDescription] = useState('');
+  const [deviceImage, setDeviceImage] = useState('');
   const [customerName, setCustomerName] = useState(currentUser?.name || '');
   const [customerPhone, setCustomerPhone] = useState(currentUser?.phone || '');
   const [customerAddress, setCustomerAddress] = useState(currentUser?.address || '');
@@ -63,7 +65,8 @@ export default function ServiceRequestModal({
   const [trackedRequests, setTrackedRequests] = useState(null);
   const [trackError, setTrackError] = useState('');
 
-  // Update initial defect or user if changed
+  const fileInputRef = useRef(null);
+
   useEffect(() => {
     if (initialDefect) {
       setDefectType(initialDefect);
@@ -93,86 +96,126 @@ export default function ServiceRequestModal({
 
   if (!isOpen) return null;
 
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      if (addToast) addToast('Please select a photo smaller than 8MB', 'warning');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setDeviceImage(reader.result);
+      if (addToast) addToast('Mobile photo attached successfully', 'success');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setDeviceImage('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const getWhatsAppUrl = (req) => {
+    const text = `*NEW DOORSTEP MOBILE SERVICE REQUEST - FRIENDS MOBILES*%0A%0A` +
+      `*Request ID:* ${req.requestId}%0A` +
+      `*Customer:* ${req.customerName} (${req.customerPhone})%0A` +
+      `*Device:* ${req.deviceBrand} ${req.deviceModel}%0A` +
+      `*Issue / Defect:* ${req.defectType}%0A` +
+      `*Problem Details:* ${req.defectDescription}%0A` +
+      `*Pickup Address:* ${req.customerAddress}%0A` +
+      `*Preferred Slot:* ${req.pickupPreferredDate}%0A%0A` +
+      `_Please inspect and confirm doorstep pickup!_`;
+
+    return `https://wa.me/917448578507?text=${text}`;
+  };
+
   const handleSubmitRequest = async (e) => {
     e.preventDefault();
 
     if (!customerName.trim()) {
-      if (addToast) addToast('Please enter your name', '⚠️');
+      if (addToast) addToast('Please enter your name', 'warning');
       return;
     }
+
     const cleanPhone = customerPhone.replace(/\D/g, '');
     if (!cleanPhone || cleanPhone.length < 10) {
-      if (addToast) addToast('Please enter a valid 10-digit WhatsApp number', '⚠️');
+      if (addToast) addToast('Please enter a valid 10-digit mobile number', 'warning');
       return;
     }
+
     if (!deviceModel.trim()) {
-      if (addToast) addToast('Please enter your mobile phone model (e.g. iPhone 13, Redmi Note 12)', '⚠️');
+      if (addToast) addToast('Please enter your phone model', 'warning');
       return;
     }
-    if (!customerAddress.trim()) {
-      if (addToast) addToast('Please enter your complete address for doorstep pickup', '⚠️');
-      return;
-    }
+
     if (!defectDescription.trim()) {
-      if (addToast) addToast('Please describe the phone issue briefly', '⚠️');
+      if (addToast) addToast('Please describe the problem with your phone', 'warning');
+      return;
+    }
+
+    if (!customerAddress.trim()) {
+      if (addToast) addToast('Please enter your pickup address', 'warning');
       return;
     }
 
     setIsSubmitting(true);
-    try {
-      const payload = {
-        customerName: customerName.trim(),
-        customerPhone: cleanPhone.slice(-10),
-        customerAddress: customerAddress.trim(),
-        deviceBrand,
-        deviceModel: deviceModel.trim(),
-        defectType,
-        defectDescription: defectDescription.trim(),
-        pickupPreferredDate
-      };
 
+    const payload = {
+      customerName: customerName.trim(),
+      customerPhone: cleanPhone,
+      customerAddress: customerAddress.trim(),
+      deviceBrand: deviceBrand,
+      deviceModel: deviceModel.trim(),
+      defectType: defectType,
+      defectDescription: defectDescription.trim(),
+      pickupPreferredDate: pickupPreferredDate,
+      deviceImage: deviceImage || ''
+    };
+
+    try {
       const res = await fetch(`${API_BASE}/api/service-requests`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(payload)
       });
 
       const data = await res.json();
+
       if (data.success && data.request) {
         setCreatedRequest(data.request);
-        if (addToast) addToast('Repair Request Submitted! Our executive will call you shortly.', '🎉');
+        if (addToast) addToast('Service request submitted to store!', 'success');
+        // Automatically open WhatsApp direct chat to store
+        window.open(getWhatsAppUrl(data.request), '_blank');
       } else {
-        if (addToast) addToast(data.message || 'Failed to submit repair request', '⚠️');
+        throw new Error(data.message || 'Failed to submit service request');
       }
     } catch (err) {
-      console.error('[ServiceRequestModal Error]:', err);
-      // Fallback offline ticket simulation so user is never blocked
-      const fallbackReq = {
-        requestId: `SRV-${Date.now().toString().slice(-6)}`,
-        customerName: customerName.trim(),
-        customerPhone: cleanPhone.slice(-10),
-        customerAddress: customerAddress.trim(),
-        deviceBrand,
-        deviceModel: deviceModel.trim(),
-        defectType,
-        defectDescription: defectDescription.trim(),
-        pickupPreferredDate,
+      console.warn('API submission fallback:', err.message);
+      const fallbackRequest = {
+        requestId: `SRV-${Date.now().toString().slice(-4)}${Math.floor(1000 + Math.random() * 9000)}`,
+        ...payload,
         status: 'Pending Pickup',
-        estimatedCost: 0,
         createdAt: new Date().toISOString()
       };
-      setCreatedRequest(fallbackReq);
-      if (addToast) addToast('Repair Request Saved! Executive will call for pickup.', '🎉');
+      setCreatedRequest(fallbackRequest);
+      if (addToast) addToast('Service request created! Connecting to WhatsApp...', 'success');
+      window.open(getWhatsAppUrl(fallbackRequest), '_blank');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleTrackRequest = async (e) => {
-    if (e) e.preventDefault();
-    const query = trackQuery.trim();
-    if (!query) {
-      setTrackError('Please enter your Service Request ID (e.g. SRV-123456) or 10-digit Phone Number');
+  const handleTrackSearch = async (e) => {
+    e.preventDefault();
+    if (!trackQuery.trim()) {
+      setTrackError('Please enter your 10-digit phone number or Request ID');
       return;
     }
 
@@ -181,896 +224,796 @@ export default function ServiceRequestModal({
     setTrackedRequests(null);
 
     try {
-      const isPhone = /^\d{10}$/.test(query.replace(/\D/g, ''));
-      const param = isPhone ? `phone=${encodeURIComponent(query.replace(/\D/g, '').slice(-10))}` : `requestId=${encodeURIComponent(query)}`;
-      
-      const res = await fetch(`${API_BASE}/api/service-requests/track?${param}`);
+      const res = await fetch(`${API_BASE}/api/service-requests/track?query=${encodeURIComponent(trackQuery.trim())}`);
       const data = await res.json();
 
       if (data.success && Array.isArray(data.requests) && data.requests.length > 0) {
         setTrackedRequests(data.requests);
       } else {
-        setTrackError(`No active repair ticket found for "${query}". Please check your Request ID or Phone Number.`);
+        setTrackError('No active service requests found for this phone number or Request ID.');
       }
     } catch (err) {
-      console.error('[Track Error]:', err);
-      setTrackError('Unable to connect to service server. Please try again or WhatsApp +91 93445 22086.');
+      setTrackError('Unable to connect to server. Please try again or message us on WhatsApp.');
     } finally {
       setIsTracking(false);
     }
   };
 
-  const getStatusStepIndex = (status = '') => {
-    const s = status.toLowerCase();
-    if (s.includes('completed') || s.includes('delivered')) return 4;
-    if (s.includes('ready')) return 3;
-    if (s.includes('repair') || s.includes('progress') || s.includes('diagnostic')) return 2;
-    if (s.includes('picked') || s.includes('executive')) return 1;
-    return 0; // Pending Pickup
-  };
-
-  const statusSteps = [
-    { title: 'Request Booked', desc: 'Doorstep pickup assigned' },
-    { title: 'Device Picked Up', desc: 'Received at service lab' },
-    { title: 'Under Repair', desc: 'Technician diagnosis & fix' },
-    { title: 'Ready for Delivery', desc: 'Quality check passed' },
-    { title: 'Completed', desc: 'Delivered with warranty' }
-  ];
-
-  const handleDirectWhatsAppSupport = (req) => {
-    const target = req || createdRequest;
-    const reqId = target?.requestId || 'New Request';
-    const device = target ? `${target.deviceBrand} ${target.deviceModel}` : 'Mobile Phone';
-    const issue = target?.defectType || 'Repair';
-    const msg = encodeURIComponent(
-      `Hello FRIENDS MOBILE! I would like an update on my Doorstep Repair Request:\n\n*Ticket ID:* ${reqId}\n*Device:* ${device}\n*Issue:* ${issue}\n*Customer:* ${customerName || currentUser?.name || 'Customer'}\n\nPlease confirm technician visit slot.`
-    );
-    window.open(`https://wa.me/919344522086?text=${msg}`, '_blank');
-  };
-
   return (
     <div 
-      className="service-modal-overlay" 
-      onClick={onClose}
+      className="service-modal-overlay"
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(6px)',
         zIndex: 99999,
+        backgroundColor: 'rgba(7, 10, 17, 0.85)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '16px'
+        padding: 0
       }}
     >
+      {/* Full-screen Responsive Container */}
       <div 
         className="service-modal-container"
-        onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          maxWidth: '720px',
-          maxHeight: '92vh',
-          background: 'var(--bg-card, #1e2433)',
-          color: 'var(--text-primary, #ffffff)',
-          borderRadius: '24px',
-          border: '1px solid var(--border-color, rgba(255,255,255,0.1))',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          height: '100%',
+          maxWidth: '100vw',
+          maxHeight: '100vh',
+          background: 'var(--bg-card, #ffffff)',
+          color: 'var(--text-primary, #1e293b)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          animation: 'fadeIn 0.2s ease-out'
+          borderRadius: 0
         }}
       >
-        {/* Header */}
-        <div 
-          style={{
-            padding: '20px 24px',
-            borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.1))',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, rgba(255,85,0,0.08) 0%, rgba(255,136,0,0.02) 100%)'
-          }}
-        >
+        {/* Top Sticky Header */}
+        <div style={{
+          padding: '16px 20px',
+          borderBottom: '1px solid var(--border-color, #e2e8f0)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: 'var(--bg-card, #ffffff)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 30,
+          flexShrink: 0
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div 
-              style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '14px',
-                background: 'linear-gradient(135deg, #FF5500 0%, #FF8800 100%)',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 8px 16px rgba(255, 85, 0, 0.3)'
-              }}
-            >
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #FF5500, #FF8C00)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF',
+              boxShadow: '0 4px 14px rgba(255, 85, 0, 0.35)'
+            }}>
               <Wrench size={22} />
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800' }}>
-                  Mobile Repair &amp; Service
-                </h3>
-                <span 
-                  style={{
-                    fontSize: '0.7rem',
-                    fontWeight: '700',
-                    background: 'rgba(34, 197, 94, 0.15)',
-                    color: '#22c55e',
-                    border: '1px solid rgba(34, 197, 94, 0.3)',
-                    padding: '2px 8px',
-                    borderRadius: '20px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  <Truck size={12} /> Doorstep Pickup Available
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+                  Mobile Repair & Doorstep Service
+                </h2>
+                <span style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  color: '#16a34a',
+                  background: 'rgba(22, 163, 74, 0.12)',
+                  padding: '2px 8px',
+                  borderRadius: '12px'
+                }}>
+                  Doorstep Pickup Available
                 </span>
               </div>
-              <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary, #94a3b8)' }}>
-                Certified technicians • 100% Original parts • 90-Day service warranty
+              <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--text-muted, #64748b)' }}>
+                Certified Technicians • 100% Original Genuine Parts • 90-Day Warranty
               </p>
             </div>
           </div>
 
-          <button 
+          <button
+            type="button"
             onClick={onClose}
-            aria-label="Close"
             style={{
-              background: 'var(--bg-input, rgba(255,255,255,0.06))',
-              border: '1px solid var(--border-color, rgba(255,255,255,0.1))',
+              width: '38px',
+              height: '38px',
               borderRadius: '50%',
-              width: '36px',
-              height: '36px',
-              color: 'var(--text-secondary, #94a3b8)',
+              border: 'none',
+              background: 'var(--bg-secondary, #f1f5f9)',
+              color: 'var(--text-secondary, #475569)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'all 0.15s ease'
+              transition: 'background 0.2s'
             }}
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
-        {/* Tab Selector */}
-        {!createdRequest && (
-          <div 
+        {/* Tab Navigation */}
+        <div style={{
+          display: 'flex',
+          borderBottom: '1px solid var(--border-color, #e2e8f0)',
+          background: 'var(--bg-secondary, #f8fafc)',
+          padding: '4px 12px',
+          flexShrink: 0
+        }}>
+          <button
+            type="button"
+            onClick={() => setActiveTab('request')}
             style={{
+              flex: 1,
+              padding: '12px 16px',
+              border: 'none',
+              borderRadius: '10px',
+              background: activeTab === 'request' ? 'var(--bg-card, #ffffff)' : 'transparent',
+              color: activeTab === 'request' ? 'var(--primary-orange, #FF5500)' : 'var(--text-muted, #64748b)',
+              fontWeight: activeTab === 'request' ? 800 : 600,
+              fontSize: '0.88rem',
+              cursor: 'pointer',
               display: 'flex',
-              padding: '8px 24px',
-              background: 'var(--bg-input, rgba(0,0,0,0.2))',
-              borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.08))',
-              gap: '12px'
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              boxShadow: activeTab === 'request' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
             }}
           >
-            <button
-              onClick={() => setActiveTab('request')}
-              style={{
-                flex: 1,
-                padding: '10px 16px',
-                borderRadius: '12px',
-                border: 'none',
-                background: activeTab === 'request' ? '#FF5500' : 'transparent',
-                color: activeTab === 'request' ? '#ffffff' : 'var(--text-secondary, #94a3b8)',
-                fontWeight: '700',
-                fontSize: '0.88rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <Wrench size={16} /> Book Doorstep Pickup
-            </button>
+            <Wrench size={16} /> Book Doorstep Repair
+          </button>
 
-            <button
-              onClick={() => setActiveTab('track')}
-              style={{
-                flex: 1,
-                padding: '10px 16px',
-                borderRadius: '12px',
-                border: 'none',
-                background: activeTab === 'track' ? '#FF5500' : 'transparent',
-                color: activeTab === 'track' ? '#ffffff' : 'var(--text-secondary, #94a3b8)',
-                fontWeight: '700',
-                fontSize: '0.88rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <Search size={16} /> Track Repair Status
-            </button>
-          </div>
-        )}
+          <button
+            type="button"
+            onClick={() => setActiveTab('track')}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              border: 'none',
+              borderRadius: '10px',
+              background: activeTab === 'track' ? 'var(--bg-card, #ffffff)' : 'transparent',
+              color: activeTab === 'track' ? 'var(--primary-orange, #FF5500)' : 'var(--text-muted, #64748b)',
+              fontWeight: activeTab === 'track' ? 800 : 600,
+              fontSize: '0.88rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              boxShadow: activeTab === 'track' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
+            }}
+          >
+            <Clock size={16} /> Track Repair Status
+          </button>
+        </div>
 
-        {/* Modal Scrollable Body */}
-        <div 
-          style={{
-            padding: '20px 24px',
-            overflowY: 'auto',
-            flex: 1
-          }}
-        >
-          {/* VIEW 1: CREATION SUCCESS STATE */}
-          {createdRequest ? (
-            <div style={{ textAlign: 'center', padding: '16px 8px' }}>
-              <div 
-                style={{
-                  width: '72px',
-                  height: '72px',
-                  borderRadius: '50%',
-                  background: 'rgba(34, 197, 94, 0.15)',
-                  border: '2px solid #22c55e',
-                  color: '#22c55e',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 16px auto'
-                }}
-              >
-                <CheckCircle2 size={40} />
-              </div>
+        {/* Scrollable Content Body */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '20px 24px 40px',
+          WebkitOverflowScrolling: 'touch'
+        }}>
+          {activeTab === 'request' && (
+            <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+              {createdRequest ? (
+                /* Success Confirmation Screen */
+                <div style={{ textAlign: 'center', padding: '30px 16px' }}>
+                  <div style={{
+                    width: '68px',
+                    height: '68px',
+                    borderRadius: '50%',
+                    background: 'rgba(22, 163, 74, 0.12)',
+                    color: '#16a34a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px'
+                  }}>
+                    <CheckCircle2 size={40} />
+                  </div>
 
-              <h2 style={{ fontSize: '1.45rem', fontWeight: '800', margin: '0 0 6px 0' }}>
-                Doorstep Pickup Scheduled!
-              </h2>
-              <p style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '0.9rem', maxWidth: '460px', margin: '0 auto 18px auto' }}>
-                Your repair request has been logged successfully. Our service executive will call your mobile number to pick up your phone.
-              </p>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: 800, margin: '0 0 6px' }}>
+                    Repair Request Registered!
+                  </h3>
+                  <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', maxWidth: '480px', margin: '0 auto 24px' }}>
+                    Your request has been dispatched to our store portal and WhatsApp technician desk.
+                  </p>
 
-              {/* Service Ticket Badge */}
-              <div 
-                style={{
-                  maxWidth: '480px',
-                  margin: '0 auto 24px auto',
-                  background: 'var(--bg-input, rgba(255,255,255,0.04))',
-                  border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-                  borderRadius: '16px',
-                  padding: '18px',
-                  textAlign: 'left'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.08))', paddingBottom: '12px', marginBottom: '12px' }}>
-                  <div>
-                    <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-secondary, #94a3b8)', fontWeight: '700' }}>
-                      Request Ticket ID
-                    </span>
-                    <div style={{ fontSize: '1.25rem', fontWeight: '900', color: '#FF5500' }}>
-                      {createdRequest.requestId}
+                  <div style={{
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '16px',
+                    padding: '20px',
+                    maxWidth: '520px',
+                    margin: '0 auto 24px',
+                    textAlign: 'left'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', borderBottom: '1px dashed var(--border-color)', paddingBottom: '10px' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Request ID:</span>
+                      <strong style={{ color: 'var(--primary-orange)' }}>{createdRequest.requestId}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Device:</span>
+                      <strong>{createdRequest.deviceBrand} {createdRequest.deviceModel}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Issue:</span>
+                      <span>{createdRequest.defectType}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Pickup Slot:</span>
+                      <span>{createdRequest.pickupPreferredDate}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px dashed var(--border-color)' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Customer:</span>
+                      <span>{createdRequest.customerName} ({createdRequest.customerPhone})</span>
                     </div>
                   </div>
-                  <span 
-                    style={{
-                      background: 'rgba(255, 85, 0, 0.12)',
-                      color: '#FF5500',
-                      border: '1px solid rgba(255, 85, 0, 0.3)',
-                      padding: '4px 12px',
-                      borderRadius: '20px',
-                      fontSize: '0.78rem',
-                      fontWeight: '800'
-                    }}
-                  >
-                    {createdRequest.status || 'Pending Pickup'}
-                  </span>
-                </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', fontSize: '0.84rem' }}>
-                  <div>
-                    <span style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '0.75rem' }}>Device</span>
-                    <div style={{ fontWeight: '700' }}>{createdRequest.deviceBrand} {createdRequest.deviceModel}</div>
-                  </div>
-                  <div>
-                    <span style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '0.75rem' }}>Issue</span>
-                    <div style={{ fontWeight: '700' }}>{createdRequest.defectType}</div>
-                  </div>
-                  <div>
-                    <span style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '0.75rem' }}>Customer</span>
-                    <div style={{ fontWeight: '700' }}>{createdRequest.customerName}</div>
-                  </div>
-                  <div>
-                    <span style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '0.75rem' }}>Pickup Slot</span>
-                    <div style={{ fontWeight: '700' }}>{createdRequest.pickupPreferredDate || 'Today Express'}</div>
-                  </div>
-                </div>
-
-                <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed var(--border-color, rgba(255,255,255,0.1))', fontSize: '0.82rem', color: 'var(--text-secondary, #94a3b8)' }}>
-                  <MapPin size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px', color: '#FF5500' }} />
-                  <strong>Pickup Address:</strong> {createdRequest.customerAddress}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <button
-                  onClick={() => handleDirectWhatsAppSupport(createdRequest)}
-                  style={{
-                    padding: '12px 24px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    background: '#25D366',
-                    color: '#ffffff',
-                    fontWeight: '800',
-                    fontSize: '0.9rem',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    boxShadow: '0 4px 16px rgba(37, 211, 102, 0.3)'
-                  }}
-                >
-                  <MessageCircle size={18} /> Confirm via WhatsApp
-                </button>
-
-                <button
-                  onClick={() => {
-                    setTrackQuery(createdRequest.requestId);
-                    setCreatedRequest(null);
-                    setActiveTab('track');
-                    setTimeout(() => handleTrackRequest(), 100);
-                  }}
-                  style={{
-                    padding: '12px 20px',
-                    borderRadius: '12px',
-                    border: '1px solid var(--border-color, rgba(255,255,255,0.2))',
-                    background: 'var(--bg-input, rgba(255,255,255,0.06))',
-                    color: 'var(--text-primary, #ffffff)',
-                    fontWeight: '700',
-                    fontSize: '0.9rem',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  <Search size={16} /> Track Status
-                </button>
-              </div>
-
-              {/* Handover checklist */}
-              <div 
-                style={{
-                  maxWidth: '480px',
-                  margin: '24px auto 0 auto',
-                  background: 'rgba(59, 130, 246, 0.08)',
-                  border: '1px solid rgba(59, 130, 246, 0.25)',
-                  borderRadius: '12px',
-                  padding: '14px 16px',
-                  textAlign: 'left',
-                  fontSize: '0.8rem',
-                  color: 'var(--text-secondary, #94a3b8)'
-                }}
-              >
-                <div style={{ color: '#60a5fa', fontWeight: '800', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ShieldCheck size={16} /> Pre-Pickup Checklist for Customers:
-                </div>
-                <ul style={{ margin: 0, paddingLeft: '18px', lineHeight: 1.6 }}>
-                  <li>Backup confidential data or transfer to cloud if possible.</li>
-                  <li>Remove SIM card and memory card before handing over to store staff.</li>
-                  <li>Our technician will issue an acknowledgment SMS/WhatsApp receipt upon pickup.</li>
-                </ul>
-              </div>
-            </div>
-          ) : activeTab === 'request' ? (
-            /* VIEW 2: BOOK REPAIR REQUEST FORM */
-            <form onSubmit={handleSubmitRequest} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-              
-              {/* Select Defect Category */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', color: 'var(--text-secondary, #94a3b8)' }}>
-                  1. Select Phone Issue / Defect Type
-                </label>
-                <div 
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                    gap: '10px'
-                  }}
-                >
-                  {DEFECT_CATEGORIES.map(def => {
-                    const isSelected = defectType === def.title;
-                    return (
-                      <div
-                        key={def.id}
-                        onClick={() => setDefectType(def.title)}
-                        style={{
-                          padding: '12px',
-                          borderRadius: '14px',
-                          border: isSelected ? '2px solid #FF5500' : '1px solid var(--border-color, rgba(255,255,255,0.1))',
-                          background: isSelected ? 'rgba(255, 85, 0, 0.12)' : 'var(--bg-input, rgba(255,255,255,0.04))',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                          <span style={{ fontSize: '1.25rem' }}>{def.icon}</span>
-                          <span style={{ fontWeight: '700', fontSize: '0.85rem', color: isSelected ? '#FF5500' : 'inherit' }}>
-                            {def.title}
-                          </span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', fontSize: '0.74rem' }}>
-                          <span style={{ color: 'var(--text-secondary, #94a3b8)' }}>{def.subtitle}</span>
-                          <span style={{ color: '#22c55e', fontWeight: '800' }}>{def.startingPrice}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Brand & Model Selection */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', color: 'var(--text-secondary, #94a3b8)' }}>
-                  2. Device Brand &amp; Exact Model
-                </label>
-                
-                {/* Popular Brand Pills */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
-                  {POPULAR_BRANDS.map(b => (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '420px', margin: '0 auto' }}>
+                    <a
+                      href={getWhatsAppUrl(createdRequest)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-orange"
+                      style={{
+                        padding: '14px',
+                        background: '#25D366',
+                        borderColor: '#25D366',
+                        color: '#ffffff',
+                        borderRadius: '12px',
+                        fontSize: '0.95rem',
+                        fontWeight: 800,
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <MessageSquare size={18} /> Open WhatsApp Chat with Store
+                    </a>
                     <button
                       type="button"
-                      key={b}
-                      onClick={() => setDeviceBrand(b)}
+                      onClick={() => {
+                        setCreatedRequest(null);
+                        onClose();
+                      }}
                       style={{
-                        padding: '6px 12px',
-                        borderRadius: '20px',
-                        border: deviceBrand === b ? '1px solid #FF5500' : '1px solid var(--border-color, rgba(255,255,255,0.12))',
-                        background: deviceBrand === b ? '#FF5500' : 'var(--bg-input, rgba(255,255,255,0.04))',
-                        color: deviceBrand === b ? '#ffffff' : 'var(--text-secondary, #94a3b8)',
-                        fontSize: '0.78rem',
-                        fontWeight: '700',
+                        padding: '12px',
+                        borderRadius: '12px',
+                        border: '1px solid var(--border-color)',
+                        background: 'transparent',
+                        color: 'var(--text-secondary)',
+                        fontWeight: 600,
                         cursor: 'pointer'
                       }}
                     >
-                      {b}
+                      Done & Close
                     </button>
-                  ))}
+                  </div>
                 </div>
+              ) : (
+                /* Main Repair Request Form */
+                <form onSubmit={handleSubmitRequest} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
-                  <input 
-                    type="text"
-                    required
-                    placeholder="Enter Exact Model (e.g. iPhone 14 Pro, Vivo V29, Realme 11 Pro)..."
-                    value={deviceModel}
-                    onChange={(e) => setDeviceModel(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '12px',
-                      border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-                      background: 'var(--bg-input, rgba(255,255,255,0.05))',
-                      color: 'var(--text-primary, #ffffff)',
-                      fontSize: '0.88rem',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                  
-                  <textarea
-                    required
-                    rows={2}
-                    placeholder="Briefly describe the defect (e.g., screen blacked out after drop, battery dying in 2 hours)..."
-                    value={defectDescription}
-                    onChange={(e) => setDefectDescription(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      borderRadius: '12px',
-                      border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-                      background: 'var(--bg-input, rgba(255,255,255,0.05))',
-                      color: 'var(--text-primary, #ffffff)',
-                      fontSize: '0.85rem',
-                      outline: 'none',
-                      resize: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-              </div>
+                  {/* SECTION 1: UPLOAD PHOTO OF DAMAGED MOBILE */}
+                  <div style={{
+                    background: 'var(--bg-secondary, #f8fafc)',
+                    border: '1.5px dashed var(--border-color, #cbd5e1)',
+                    borderRadius: '16px',
+                    padding: '20px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <ImageIcon size={18} color="var(--primary-orange)" /> 1. Upload Photo of Phone Condition
+                        </h4>
+                        <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                          Take a photo showing screen cracks, body damage, or the problem area
+                        </p>
+                      </div>
+                      {deviceImage && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            background: 'rgba(239, 68, 68, 0.08)',
+                            color: '#ef4444',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Trash2 size={13} /> Remove Photo
+                        </button>
+                      )}
+                    </div>
 
-              {/* Customer Contact & Pickup Address */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', color: 'var(--text-secondary, #94a3b8)' }}>
-                  3. Doorstep Pickup &amp; Customer Contact
-                </label>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '10px' }}>
-                  <div>
-                    <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary, #94a3b8)' }}>Your Full Name *</span>
-                    <input 
-                      type="text"
-                      required
-                      placeholder="e.g. Ramesh Kumar"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '11px 14px',
-                        borderRadius: '12px',
-                        border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-                        background: 'var(--bg-input, rgba(255,255,255,0.05))',
-                        color: 'var(--text-primary, #ffffff)',
-                        fontSize: '0.88rem',
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                        marginTop: '4px'
-                      }}
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleImageChange}
+                      style={{ display: 'none' }}
+                      id="mobile-condition-upload"
                     />
+
+                    {deviceImage ? (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        background: 'var(--bg-card)',
+                        padding: '12px',
+                        borderRadius: '12px',
+                        border: '1px solid var(--border-color)'
+                      }}>
+                        <img 
+                          src={deviceImage} 
+                          alt="Mobile Condition" 
+                          style={{
+                            width: '90px',
+                            height: '90px',
+                            objectFit: 'cover',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border-color)'
+                          }}
+                        />
+                        <div>
+                          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#16a34a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <CheckCircle2 size={16} /> Photo Attached Successfully
+                          </span>
+                          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '4px 0 8px' }}>
+                            Our technician will inspect the damage prior to dispatching doorstep pickup.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            style={{
+                              padding: '6px 14px',
+                              borderRadius: '8px',
+                              border: '1px solid var(--border-color)',
+                              background: 'var(--bg-secondary)',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Change Photo
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label
+                        htmlFor="mobile-condition-upload"
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '24px 16px',
+                          borderRadius: '12px',
+                          background: 'var(--bg-card)',
+                          cursor: 'pointer',
+                          transition: 'border 0.2s',
+                          border: '1px solid var(--border-color)'
+                        }}
+                      >
+                        <Upload size={28} color="var(--primary-orange)" style={{ marginBottom: '8px' }} />
+                        <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                          Click to Take Photo or Choose from Gallery
+                        </span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                          Supports JPG, PNG (Max 8MB)
+                        </span>
+                      </label>
+                    )}
                   </div>
 
+                  {/* SECTION 2: SMARTPHONE BRAND & MODEL */}
                   <div>
-                    <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary, #94a3b8)' }}>WhatsApp Mobile Number *</span>
-                    <input 
-                      type="tel"
-                      required
-                      maxLength={10}
-                      placeholder="10-Digit Mobile (e.g. 9842452208)"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
-                      style={{
-                        width: '100%',
-                        padding: '11px 14px',
-                        borderRadius: '12px',
-                        border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-                        background: 'var(--bg-input, rgba(255,255,255,0.05))',
-                        color: 'var(--text-primary, #ffffff)',
-                        fontSize: '0.88rem',
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                        marginTop: '4px'
-                      }}
-                    />
+                    <h4 style={{ margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 800 }}>
+                      2. Smartphone Brand & Model
+                    </h4>
+                    
+                    {/* Brand Selector Pills */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+                      gap: '8px',
+                      marginBottom: '14px'
+                    }}>
+                      {POPULAR_BRANDS.map(b => (
+                        <button
+                          key={b}
+                          type="button"
+                          onClick={() => setDeviceBrand(b)}
+                          style={{
+                            padding: '10px 8px',
+                            borderRadius: '10px',
+                            border: deviceBrand === b ? '2px solid var(--primary-orange)' : '1px solid var(--border-color)',
+                            background: deviceBrand === b ? 'rgba(255, 85, 0, 0.08)' : 'var(--bg-secondary)',
+                            color: deviceBrand === b ? 'var(--primary-orange)' : 'var(--text-primary)',
+                            fontSize: '0.8rem',
+                            fontWeight: deviceBrand === b ? 800 : 500,
+                            cursor: 'pointer',
+                            textAlign: 'center'
+                          }}
+                        >
+                          {b}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
+                        Specific Phone Model Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={deviceModel}
+                        onChange={(e) => setDeviceModel(e.target.value)}
+                        placeholder={`e.g. ${deviceBrand} Model (e.g. iPhone 13, Galaxy S23, Redmi Note 12)`}
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          borderRadius: '10px',
+                          border: '1px solid var(--border-color)',
+                          background: 'var(--bg-input)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.92rem',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
                   </div>
 
+                  {/* SECTION 3: ISSUE CATEGORY (NO PRICES, NO EMOJIS) */}
                   <div>
-                    <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary, #94a3b8)' }}>Preferred Pickup Time *</span>
-                    <select
-                      value={pickupPreferredDate}
-                      onChange={(e) => setPickupPreferredDate(e.target.value)}
+                    <h4 style={{ margin: '0 0 10px', fontSize: '0.95rem', fontWeight: 800 }}>
+                      3. Select Defect Category
+                    </h4>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                      gap: '10px',
+                      marginBottom: '16px'
+                    }}>
+                      {DEFECT_CATEGORIES.map(cat => {
+                        const IconComponent = cat.icon;
+                        const isSelected = defectType === cat.title;
+                        return (
+                          <div
+                            key={cat.id}
+                            onClick={() => setDefectType(cat.title)}
+                            style={{
+                              padding: '14px',
+                              borderRadius: '12px',
+                              border: isSelected ? '2px solid var(--primary-orange)' : '1px solid var(--border-color)',
+                              background: isSelected ? 'rgba(255, 85, 0, 0.06)' : 'var(--bg-secondary)',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: '12px',
+                              transition: 'all 0.15s'
+                            }}
+                          >
+                            <div style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '8px',
+                              background: isSelected ? 'var(--primary-orange)' : 'var(--bg-card)',
+                              color: isSelected ? '#ffffff' : 'var(--primary-orange)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
+                            }}>
+                              <IconComponent size={18} />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.88rem', fontWeight: isSelected ? 800 : 700, color: 'var(--text-primary)' }}>
+                                {cat.title}
+                              </div>
+                              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '2px', lineHeight: 1.3 }}>
+                                {cat.subtitle}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
+                        Describe the Problem in Detail (Reason) *
+                      </label>
+                      <textarea
+                        required
+                        rows={3}
+                        value={defectDescription}
+                        onChange={(e) => setDefectDescription(e.target.value)}
+                        placeholder="Please write what happened: e.g. Phone fell down and screen is blank, charging is loose, water fell on phone..."
+                        style={{
+                          width: '100%',
+                          padding: '12px 14px',
+                          borderRadius: '10px',
+                          border: '1px solid var(--border-color)',
+                          background: 'var(--bg-input)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.9rem',
+                          fontFamily: 'inherit',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* SECTION 4: CUSTOMER DETAILS & DOORSTEP PICKUP */}
+                  <div>
+                    <h4 style={{ margin: '0 0 12px', fontSize: '0.95rem', fontWeight: 800 }}>
+                      4. Doorstep Pickup & Contact Details
+                    </h4>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginBottom: '14px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
+                          Customer Name *
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <User size={16} style={{ position: 'absolute', left: '12px', top: '14px', color: 'var(--text-muted)' }} />
+                          <input
+                            type="text"
+                            required
+                            value={customerName}
+                            onChange={(e) => setCustomerName(e.target.value)}
+                            placeholder="Full Name"
+                            style={{
+                              width: '100%',
+                              padding: '12px 14px 12px 38px',
+                              borderRadius: '10px',
+                              border: '1px solid var(--border-color)',
+                              background: 'var(--bg-input)',
+                              color: 'var(--text-primary)',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
+                          10-digit Mobile Number *
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <Phone size={16} style={{ position: 'absolute', left: '12px', top: '14px', color: 'var(--text-muted)' }} />
+                          <input
+                            type="tel"
+                            required
+                            maxLength={10}
+                            value={customerPhone}
+                            onChange={(e) => setCustomerPhone(e.target.value)}
+                            placeholder="10-digit Phone"
+                            style={{
+                              width: '100%',
+                              padding: '12px 14px 12px 38px',
+                              borderRadius: '10px',
+                              border: '1px solid var(--border-color)',
+                              background: 'var(--bg-input)',
+                              color: 'var(--text-primary)',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: '14px' }}>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
+                        Doorstep Pickup Address *
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <MapPin size={16} style={{ position: 'absolute', left: '12px', top: '14px', color: 'var(--text-muted)' }} />
+                        <textarea
+                          required
+                          rows={2}
+                          value={customerAddress}
+                          onChange={(e) => setCustomerAddress(e.target.value)}
+                          placeholder="Door No, Street Name, Landmark, Town / City (e.g. Karur, Madurai)"
+                          style={{
+                            width: '100%',
+                            padding: '12px 14px 12px 38px',
+                            borderRadius: '10px',
+                            border: '1px solid var(--border-color)',
+                            background: 'var(--bg-input)',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.9rem',
+                            fontFamily: 'inherit',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
+                        Preferred Pickup Slot
+                      </label>
+                      <select
+                        value={pickupPreferredDate}
+                        onChange={(e) => setPickupPreferredDate(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          borderRadius: '10px',
+                          border: '1px solid var(--border-color)',
+                          background: 'var(--bg-input)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        {PICKUP_SLOTS.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* SUBMIT BUTTON - DUAL SUBMIT TO ADMIN + WHATSAPP */}
+                  <div style={{ paddingTop: '8px' }}>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="btn btn-orange"
                       style={{
                         width: '100%',
-                        padding: '11px 14px',
+                        padding: '16px',
                         borderRadius: '12px',
-                        border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-                        background: 'var(--bg-input, rgba(255,255,255,0.05))',
-                        color: 'var(--text-primary, #ffffff)',
-                        fontSize: '0.85rem',
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                        marginTop: '4px',
-                        cursor: 'pointer'
+                        fontSize: '1rem',
+                        fontWeight: 800,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        opacity: isSubmitting ? 0.7 : 1,
+                        cursor: isSubmitting ? 'not-allowed' : 'pointer'
                       }}
                     >
-                      {PICKUP_SLOTS.map(slot => (
-                        <option key={slot} value={slot} style={{ background: '#1e2433', color: '#fff' }}>
-                          {slot}
-                        </option>
-                      ))}
-                    </select>
+                      <MessageSquare size={20} />
+                      {isSubmitting ? 'Registering Request...' : 'Book Doorstep Pickup & Open WhatsApp Chat'}
+                    </button>
+                    <p style={{ margin: '8px 0 0', textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      Request will be stored in our database and instantly shared with our service team on WhatsApp.
+                    </p>
                   </div>
-                </div>
 
-                <div>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary, #94a3b8)' }}>Complete Doorstep Address (Home / Office) with Pincode *</span>
-                  <input 
-                    type="text"
-                    required
-                    placeholder="House / Flat No, Street, Landmark, Area, City, PIN Code..."
-                    value={customerAddress}
-                    onChange={(e) => setCustomerAddress(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '11px 14px',
-                      borderRadius: '12px',
-                      border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
-                      background: 'var(--bg-input, rgba(255,255,255,0.05))',
-                      color: 'var(--text-primary, #ffffff)',
-                      fontSize: '0.88rem',
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                      marginTop: '4px'
-                    }}
-                  />
-                </div>
-              </div>
+                </form>
+              )}
+            </div>
+          )}
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '14px',
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #FF5500 0%, #FF8800 100%)',
-                  color: '#ffffff',
-                  fontWeight: '800',
-                  fontSize: '1rem',
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  boxShadow: '0 8px 20px rgba(255, 85, 0, 0.35)',
-                  transition: 'transform 0.15s ease'
-                }}
-              >
-                {isSubmitting ? (
-                  <>
-                    <RefreshCw size={18} className="animate-spin" /> Scheduling Pickup...
-                  </>
-                ) : (
-                  <>
-                    <Truck size={20} /> Confirm Doorstep Repair Pickup
-                  </>
-                )}
-              </button>
-
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', fontSize: '0.76rem', color: 'var(--text-secondary, #94a3b8)' }}>
-                <span>✓ Free Diagnostic Assessment</span>
-                <span>✓ No Fix No Fee Policy</span>
-                <span>✓ Pay After Delivery</span>
-              </div>
-            </form>
-          ) : (
-            /* VIEW 3: TRACK REPAIR STATUS */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              
-              {/* Search Box */}
-              <form onSubmit={handleTrackRequest} style={{ display: 'flex', gap: '10px' }}>
-                <input 
+          {/* TAB 2: TRACK REPAIR STATUS */}
+          {activeTab === 'track' && (
+            <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+              <form onSubmit={handleTrackSearch} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                <input
                   type="text"
-                  placeholder="Enter Request Ticket ID (e.g. SRV-102948) or 10-Digit Mobile..."
                   value={trackQuery}
                   onChange={(e) => setTrackQuery(e.target.value)}
+                  placeholder="Enter 10-digit Phone or Request ID (e.g. SRV-1234)"
                   style={{
                     flex: 1,
                     padding: '12px 16px',
-                    borderRadius: '12px',
-                    border: '1px solid var(--border-color, rgba(255,255,255,0.15))',
-                    background: 'var(--bg-input, rgba(255,255,255,0.05))',
-                    color: 'var(--text-primary, #ffffff)',
-                    fontSize: '0.9rem',
-                    outline: 'none'
+                    borderRadius: '10px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-input)',
+                    color: 'var(--text-primary)'
                   }}
                 />
                 <button
                   type="submit"
                   disabled={isTracking}
-                  style={{
-                    padding: '12px 22px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    background: '#FF5500',
-                    color: '#ffffff',
-                    fontWeight: '700',
-                    fontSize: '0.9rem',
-                    cursor: isTracking ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
+                  className="btn btn-orange"
+                  style={{ padding: '12px 20px', borderRadius: '10px', fontWeight: 700 }}
                 >
-                  {isTracking ? <RefreshCw size={16} className="animate-spin" /> : <Search size={16} />} Search
+                  {isTracking ? 'Searching...' : 'Track'}
                 </button>
               </form>
 
               {trackError && (
-                <div 
-                  style={{
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                    color: '#ef4444',
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  <AlertCircle size={16} /> {trackError}
+                <div style={{ padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '10px', fontSize: '0.85rem' }}>
+                  {trackError}
                 </div>
               )}
 
-              {/* Track Results */}
               {trackedRequests && trackedRequests.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {trackedRequests.map(item => {
-                    const stepIdx = getStatusStepIndex(item.status);
-                    return (
-                      <div 
-                        key={item.requestId || item.id}
-                        style={{
-                          background: 'var(--bg-input, rgba(255,255,255,0.03))',
-                          border: '1px solid var(--border-color, rgba(255,255,255,0.1))',
-                          borderRadius: '16px',
-                          padding: '20px'
-                        }}
-                      >
-                        {/* Top Info */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.08))', paddingBottom: '14px', marginBottom: '16px' }}>
-                          <div>
-                            <span style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-secondary, #94a3b8)', fontWeight: '700' }}>Ticket ID</span>
-                            <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#FF5500' }}>{item.requestId}</div>
-                            <div style={{ fontSize: '0.84rem', fontWeight: '600', marginTop: '2px' }}>
-                              {item.deviceBrand} {item.deviceModel} • <span style={{ color: 'var(--text-secondary, #94a3b8)' }}>{item.defectType}</span>
-                            </div>
-                          </div>
-
-                          <div style={{ textAlign: 'right' }}>
-                            <span 
-                              style={{
-                                background: stepIdx === 4 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255, 85, 0, 0.15)',
-                                color: stepIdx === 4 ? '#22c55e' : '#FF5500',
-                                border: `1px solid ${stepIdx === 4 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255, 85, 0, 0.3)'}`,
-                                padding: '4px 12px',
-                                borderRadius: '20px',
-                                fontSize: '0.8rem',
-                                fontWeight: '800'
-                              }}
-                            >
-                              {item.status}
-                            </span>
-                            {item.estimatedCost > 0 && (
-                              <div style={{ fontSize: '0.84rem', fontWeight: '800', color: '#22c55e', marginTop: '6px' }}>
-                                Quote: ₹{parseFloat(item.estimatedCost).toLocaleString('en-IN')}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Step Timeline Indicator */}
-                        <div style={{ margin: '20px 0 16px 0' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
-                            {/* Connecting Line */}
-                            <div 
-                              style={{
-                                position: 'absolute',
-                                top: '14px',
-                                left: '5%',
-                                right: '5%',
-                                height: '3px',
-                                background: 'var(--border-color, rgba(255,255,255,0.12))',
-                                zIndex: 1
-                              }}
-                            >
-                              <div 
-                                style={{
-                                  height: '100%',
-                                  background: '#FF5500',
-                                  width: `${(stepIdx / (statusSteps.length - 1)) * 100}%`,
-                                  transition: 'width 0.4s ease'
-                                }}
-                              />
-                            </div>
-
-                            {statusSteps.map((s, idx) => {
-                              const isPassed = idx <= stepIdx;
-                              const isCurrent = idx === stepIdx;
-                              return (
-                                <div 
-                                  key={s.title} 
-                                  style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    textAlign: 'center',
-                                    zIndex: 2,
-                                    width: '18%'
-                                  }}
-                                >
-                                  <div 
-                                    style={{
-                                      width: '28px',
-                                      height: '28px',
-                                      borderRadius: '50%',
-                                      background: isPassed ? '#FF5500' : 'var(--bg-card, #1e2433)',
-                                      border: isPassed ? '2px solid #FF5500' : '2px solid var(--border-color, rgba(255,255,255,0.2))',
-                                      color: isPassed ? '#ffffff' : 'var(--text-secondary, #94a3b8)',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      fontSize: '0.75rem',
-                                      fontWeight: '800',
-                                      boxShadow: isCurrent ? '0 0 12px rgba(255,85,0,0.6)' : 'none'
-                                    }}
-                                  >
-                                    {isPassed ? <Check size={14} /> : idx + 1}
-                                  </div>
-                                  <span style={{ fontSize: '0.72rem', fontWeight: isCurrent ? '800' : '600', marginTop: '6px', color: isPassed ? 'var(--text-primary, #fff)' : 'var(--text-secondary, #94a3b8)' }}>
-                                    {s.title}
-                                  </span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Admin Notes & Executive WhatsApp */}
-                        {item.adminNotes && (
-                          <div 
-                            style={{
-                              background: 'rgba(255, 85, 0, 0.08)',
-                              border: '1px solid rgba(255, 85, 0, 0.2)',
-                              borderRadius: '10px',
-                              padding: '10px 14px',
-                              fontSize: '0.82rem',
-                              marginTop: '12px'
-                            }}
-                          >
-                            <strong style={{ color: '#FF5500' }}>Technician Update: </strong> {item.adminNotes}
-                          </div>
-                        )}
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', fontSize: '0.78rem', color: 'var(--text-secondary, #94a3b8)' }}>
-                          <span>Updated: {new Date(item.updatedAt || item.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                          <button
-                            onClick={() => handleDirectWhatsAppSupport(item)}
-                            style={{
-                              padding: '6px 12px',
-                              borderRadius: '8px',
-                              border: '1px solid rgba(37, 211, 102, 0.4)',
-                              background: 'rgba(37, 211, 102, 0.1)',
-                              color: '#25D366',
-                              fontWeight: '700',
-                              fontSize: '0.78rem',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px'
-                            }}
-                          >
-                            <MessageCircle size={14} /> WhatsApp Support
-                          </button>
-                        </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {trackedRequests.map(req => (
+                    <div
+                      key={req.requestId || req.id}
+                      style={{
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '14px',
+                        padding: '16px',
+                        background: 'var(--bg-secondary)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <strong style={{ color: 'var(--primary-orange)' }}>#{req.requestId}</strong>
+                        <span style={{
+                          padding: '4px 10px',
+                          borderRadius: '20px',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          background: req.status === 'Completed' ? 'rgba(22, 163, 74, 0.15)' : 'rgba(255, 85, 0, 0.15)',
+                          color: req.status === 'Completed' ? '#16a34a' : 'var(--primary-orange)'
+                        }}>
+                          {req.status}
+                        </span>
                       </div>
-                    );
-                  })}
+                      <div style={{ fontSize: '0.92rem', fontWeight: 700, marginBottom: '4px' }}>
+                        {req.deviceBrand} {req.deviceModel}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                        Issue: {req.defectType} • Slot: {req.pickupPreferredDate}
+                      </div>
+                      {req.deviceImage && (
+                        <div style={{ marginBottom: '8px' }}>
+                          <img 
+                            src={req.deviceImage} 
+                            alt="Damage Condition" 
+                            style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+                          />
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px dashed var(--border-color)' }}>
+                        <a
+                          href={getWhatsAppUrl(req)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #16a34a',
+                            color: '#16a34a',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <MessageSquare size={14} /> WhatsApp Support
+                        </a>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
-
-              {/* Informational Help card */}
-              <div 
-                style={{
-                  background: 'var(--bg-input, rgba(255,255,255,0.03))',
-                  border: '1px dashed var(--border-color, rgba(255,255,255,0.12))',
-                  borderRadius: '14px',
-                  padding: '16px',
-                  fontSize: '0.82rem',
-                  color: 'var(--text-secondary, #94a3b8)',
-                  display: 'flex',
-                  gap: '12px',
-                  alignItems: 'flex-start'
-                }}
-              >
-                <HelpCircle size={20} color="#FF5500" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <div>
-                  <strong style={{ color: 'var(--text-primary, #fff)', display: 'block', marginBottom: '4px' }}>
-                    Need immediate emergency repair?
-                  </strong>
-                  Walk directly into our physical service center at Double Tank, South Gandhigramam, Karur, or call our executive directly at <strong>+91 93445 22086</strong>. Express 30-minute display replacement is available in-store!
-                </div>
-              </div>
             </div>
           )}
         </div>
+
       </div>
     </div>
   );
