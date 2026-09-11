@@ -29,7 +29,7 @@ import ServiceSellBanners from './components/ServiceSellBanners';
 import SellPhoneModal from './components/SellPhoneModal';
 import SplashScreen from './components/SplashScreen';
 import { translations, autoTranslateToTamil } from './data/translations';
-import { getApiBaseUrl } from './data/apiConfig';
+import { getApiBaseUrl, isNativeApp } from './data/apiConfig';
 
 import './styles/theme.css';
 
@@ -175,7 +175,7 @@ export default function App() {
   const [openCartAfterLogin, setOpenCartAfterLogin] = useState(false);
   const [isWelcomeOnboardingOpen, setIsWelcomeOnboardingOpen] = useState(false);
   const [onboardingUser, setOnboardingUser] = useState(null);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => isNativeApp());
 
   const handleOpenServiceModal = (defectType = '') => {
     setServiceInitialDefect(defectType);
@@ -965,7 +965,7 @@ export default function App() {
 
   return (
     <div className="app">
-      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      {showSplash && isNativeApp() && <SplashScreen onFinish={() => setShowSplash(false)} />}
       <SEOManager 
         selectedProduct={selectedProduct}
         shopCategory={shopCategory}
