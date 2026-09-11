@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Wrench, Smartphone, BatteryCharging, Zap, Droplets, Volume2, 
-  Camera, Layers, Cpu, RotateCw, Search, CheckCircle2, Clock, 
+  Camera, Layers, Cpu, RotateCw, Search, CheckCircle2, 
   MapPin, Phone, User, Calendar, ShieldCheck, MessageSquare, 
   ArrowRight, RefreshCw, Upload, Image as ImageIcon, Trash2
 } from 'lucide-react';
@@ -39,12 +39,10 @@ export default function ServiceRequestModal({
   isOpen,
   onClose,
   initialDefect = '',
-  initialTab = 'request',
   currentUser,
   addToast,
   t = (k) => k
 }) {
-  const [activeTab, setActiveTab] = useState(initialTab);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdRequest, setCreatedRequest] = useState(null);
 
@@ -58,12 +56,6 @@ export default function ServiceRequestModal({
   const [customerPhone, setCustomerPhone] = useState(currentUser?.phone || '');
   const [customerAddress, setCustomerAddress] = useState(currentUser?.address || '');
   const [pickupPreferredDate, setPickupPreferredDate] = useState(PICKUP_SLOTS[0]);
-
-  // Tracking State
-  const [trackQuery, setTrackQuery] = useState('');
-  const [isTracking, setIsTracking] = useState(false);
-  const [trackedRequests, setTrackedRequests] = useState(null);
-  const [trackError, setTrackError] = useState('');
 
   const fileInputRef = useRef(null);
 
@@ -212,33 +204,6 @@ export default function ServiceRequestModal({
     }
   };
 
-  const handleTrackSearch = async (e) => {
-    e.preventDefault();
-    if (!trackQuery.trim()) {
-      setTrackError('Please enter your 10-digit phone number or Request ID');
-      return;
-    }
-
-    setIsTracking(true);
-    setTrackError('');
-    setTrackedRequests(null);
-
-    try {
-      const res = await fetch(`${API_BASE}/api/service-requests/track?query=${encodeURIComponent(trackQuery.trim())}`);
-      const data = await res.json();
-
-      if (data.success && Array.isArray(data.requests) && data.requests.length > 0) {
-        setTrackedRequests(data.requests);
-      } else {
-        setTrackError('No active service requests found for this phone number or Request ID.');
-      }
-    } catch (err) {
-      setTrackError('Unable to connect to server. Please try again or message us on WhatsApp.');
-    } finally {
-      setIsTracking(false);
-    }
-  };
-
   return (
     <div 
       className="service-modal-overlay"
@@ -353,61 +318,6 @@ export default function ServiceRequestModal({
           </button>
         </div>
 
-        {/* Tab Navigation */}
-        <div style={{
-          display: 'flex',
-          borderBottom: '1px solid var(--border-color, #e2e8f0)',
-          background: 'var(--bg-secondary, #f8fafc)',
-          padding: '4px 12px',
-          flexShrink: 0
-        }}>
-          <button
-            type="button"
-            onClick={() => setActiveTab('request')}
-            style={{
-              flex: 1,
-              padding: '12px 16px',
-              border: 'none',
-              borderRadius: '10px',
-              background: activeTab === 'request' ? 'var(--bg-card, #ffffff)' : 'transparent',
-              color: activeTab === 'request' ? 'var(--primary-orange, #FF5500)' : 'var(--text-muted, #64748b)',
-              fontWeight: activeTab === 'request' ? 800 : 600,
-              fontSize: '0.88rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              boxShadow: activeTab === 'request' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
-            }}
-          >
-            <Wrench size={16} /> Book Doorstep Repair
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('track')}
-            style={{
-              flex: 1,
-              padding: '12px 16px',
-              border: 'none',
-              borderRadius: '10px',
-              background: activeTab === 'track' ? 'var(--bg-card, #ffffff)' : 'transparent',
-              color: activeTab === 'track' ? 'var(--primary-orange, #FF5500)' : 'var(--text-muted, #64748b)',
-              fontWeight: activeTab === 'track' ? 800 : 600,
-              fontSize: '0.88rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              boxShadow: activeTab === 'track' ? '0 2px 8px rgba(0,0,0,0.06)' : 'none'
-            }}
-          >
-            <Clock size={16} /> Track Repair Status
-          </button>
-        </div>
-
         {/* Scrollable Content Body */}
         <div style={{
           flex: 1,
@@ -415,8 +325,7 @@ export default function ServiceRequestModal({
           padding: '20px 24px 40px',
           WebkitOverflowScrolling: 'touch'
         }}>
-          {activeTab === 'request' && (
-            <div style={{ maxWidth: '920px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '920px', margin: '0 auto' }}>
               {createdRequest ? (
                 /* Success Confirmation Screen */
                 <div style={{ textAlign: 'center', padding: '30px 16px' }}>
@@ -921,112 +830,8 @@ export default function ServiceRequestModal({
                 </form>
               )}
             </div>
-          )}
-
-          {/* TAB 2: TRACK REPAIR STATUS */}
-          {activeTab === 'track' && (
-            <div style={{ maxWidth: '920px', margin: '0 auto', width: '100%' }}>
-              <form onSubmit={handleTrackSearch} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                <input
-                  type="text"
-                  value={trackQuery}
-                  onChange={(e) => setTrackQuery(e.target.value)}
-                  placeholder="Enter 10-digit Phone or Request ID (e.g. SRV-1234)"
-                  style={{
-                    flex: 1,
-                    padding: '12px 16px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-input)',
-                    color: 'var(--text-primary)'
-                  }}
-                />
-                <button
-                  type="submit"
-                  disabled={isTracking}
-                  className="btn btn-orange"
-                  style={{ padding: '12px 20px', borderRadius: '10px', fontWeight: 700 }}
-                >
-                  {isTracking ? 'Searching...' : 'Track'}
-                </button>
-              </form>
-
-              {trackError && (
-                <div style={{ padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '10px', fontSize: '0.85rem' }}>
-                  {trackError}
-                </div>
-              )}
-
-              {trackedRequests && trackedRequests.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {trackedRequests.map(req => (
-                    <div
-                      key={req.requestId || req.id}
-                      style={{
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '14px',
-                        padding: '16px',
-                        background: 'var(--bg-secondary)'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <strong style={{ color: 'var(--primary-orange)' }}>#{req.requestId}</strong>
-                        <span style={{
-                          padding: '4px 10px',
-                          borderRadius: '20px',
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          background: req.status === 'Completed' ? 'rgba(22, 163, 74, 0.15)' : 'rgba(255, 85, 0, 0.15)',
-                          color: req.status === 'Completed' ? '#16a34a' : 'var(--primary-orange)'
-                        }}>
-                          {req.status}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.92rem', fontWeight: 700, marginBottom: '4px' }}>
-                        {req.deviceBrand} {req.deviceModel}
-                      </div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                        Issue: {req.defectType} • Slot: {req.pickupPreferredDate}
-                      </div>
-                      {req.deviceImage && (
-                        <div style={{ marginBottom: '8px' }}>
-                          <img 
-                            src={req.deviceImage} 
-                            alt="Damage Condition" 
-                            style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-color)' }}
-                          />
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px dashed var(--border-color)' }}>
-                        <a
-                          href={getWhatsAppUrl(req)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            padding: '6px 12px',
-                            borderRadius: '8px',
-                            border: '1px solid #16a34a',
-                            color: '#16a34a',
-                            fontSize: '0.78rem',
-                            fontWeight: 700,
-                            textDecoration: 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                          <MessageSquare size={14} /> WhatsApp Support
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          </div>
         </div>
-
       </div>
-    </div>
   );
 }
