@@ -24,6 +24,8 @@ router.post('/', sellRequestLimiter, async (req, res) => {
       bodyCondition,
       functionalIssues,
       accessoriesIncluded,
+      specifications,
+      devicePhotos,
       estimatedQuote,
       pickupPreferredDate
     } = req.body;
@@ -47,13 +49,15 @@ router.post('/', sellRequestLimiter, async (req, res) => {
     const cleanAddress = sanitizeInput(customerAddress || 'Direct Store Drop-in / Karur');
     const cleanBrand = sanitizeInput(deviceBrand);
     const cleanModel = sanitizeInput(deviceModel);
-    const cleanStorage = sanitizeInput(deviceStorage || '128GB');
+    const cleanSpecs = sanitizeInput(specifications || '');
+    const cleanStorage = sanitizeInput(deviceStorage || 'Unspecified');
     const cleanScreen = sanitizeInput(screenCondition || 'Good');
     const cleanBody = sanitizeInput(bodyCondition || 'Good');
     const cleanFunctional = sanitizeInput(functionalIssues || 'None');
     const cleanAccessories = sanitizeInput(accessoriesIncluded || 'None');
     const cleanPickupDate = sanitizeInput(pickupPreferredDate || 'Today');
     const parsedQuote = parseFloat(estimatedQuote) || 0;
+    const cleanPhotos = Array.isArray(devicePhotos) ? devicePhotos.filter(p => typeof p === 'string' && p.startsWith('data:image/')) : [];
 
     const requestId = `SELL-${Date.now().toString().slice(-4)}${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -69,6 +73,8 @@ router.post('/', sellRequestLimiter, async (req, res) => {
       bodyCondition: cleanBody,
       functionalIssues: cleanFunctional,
       accessoriesIncluded: cleanAccessories,
+      specifications: cleanSpecs,
+      devicePhotos: cleanPhotos,
       estimatedQuote: parsedQuote,
       finalOffer: parsedQuote,
       pickupPreferredDate: cleanPickupDate,

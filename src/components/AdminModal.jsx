@@ -4756,17 +4756,36 @@ export default function AdminModal({
                               Device &amp; Physical Health
                             </span>
                             <div style={{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-primary)' }}>
-                              📱 {req.deviceBrand} {req.deviceModel} ({req.deviceStorage || '128 GB'})
+                              {req.deviceBrand} {req.deviceModel}
                             </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '3px' }}>
-                              • Screen: <strong>{req.screenCondition}</strong> | Body: <strong>{req.bodyCondition}</strong>
-                            </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                              • Included Items: {req.accessoriesIncluded || 'None'}
-                            </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                              • Issues: {req.functionalIssues || 'None (All Working)'}
-                            </div>
+                            {req.specifications && (
+                              <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)', marginTop: '4px', background: 'var(--bg-card)', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--border-color)', whiteSpace: 'pre-wrap' }}>
+                                <strong>Specs &amp; Condition:</strong> {req.specifications}
+                              </div>
+                            )}
+                            {req.devicePhotos && req.devicePhotos.length > 0 && (
+                              <div style={{ marginTop: '8px' }}>
+                                <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                                  Uploaded Condition Photos ({req.devicePhotos.length}):
+                                </span>
+                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                  {req.devicePhotos.map((photo, pIdx) => (
+                                    <a key={pIdx} href={photo} target="_blank" rel="noopener noreferrer">
+                                      <img 
+                                        src={photo} 
+                                        alt={`Device ${pIdx + 1}`} 
+                                        style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-color)', cursor: 'pointer' }}
+                                      />
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {(!req.specifications && req.screenCondition) && (
+                              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '3px' }}>
+                                • Screen: <strong>{req.screenCondition}</strong> | Body: <strong>{req.bodyCondition}</strong>
+                              </div>
+                            )}
                           </div>
                         </div>
 
