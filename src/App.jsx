@@ -119,7 +119,13 @@ const initialProducts = [
 ];
 
 export default function App() {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem('fm_theme') || 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
 
   // SEO Document Title & Description Setup
   useEffect(() => {
@@ -531,6 +537,9 @@ export default function App() {
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
+    try {
+      localStorage.setItem('fm_theme', nextTheme);
+    } catch (_) {}
   };
 
   const [pendingCartItem, setPendingCartItem] = useState(null);
