@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, User, LogOut, ShoppingBag, Wrench } from 'lucide-react';
+import { X, User, LogOut, ShoppingBag, Wrench, Smartphone } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
 export default function MobileDrawer({ 
@@ -10,7 +10,8 @@ export default function MobileDrawer({
   onOpenAuth, 
   onOpenUserAccount, 
   onLogout,
-  onOpenServiceModal
+  onOpenServiceModal,
+  onOpenSellPhoneModal
 }) {
   if (!isOpen) return null;
 
@@ -131,6 +132,16 @@ export default function MobileDrawer({
               style={{ color: '#FF5500', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}
             >
               <Wrench size={18} /> {t('navRepair') || 'Mobile Repair & Doorstep Pickup'}
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#sell-old-phone" 
+              className="drawer-link" 
+              onClick={(e) => { e.preventDefault(); onClose(); if (onOpenSellPhoneModal) onOpenSellPhoneModal(); }}
+              style={{ color: '#16a34a', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <Smartphone size={18} /> {t('navSellPhone') || 'Sell Old Phone & Instant Cash'}
             </a>
           </li>
           <li><a href="#products" className="drawer-link" onClick={onClose}>{t('navPhones') || 'Mobile Phones'}</a></li>

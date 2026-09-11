@@ -70,6 +70,20 @@ export default function AdminModal({
     pickupPreferredDate: ''
   });
 
+  // Old Phone Sell Requests State
+  const [adminSellRequests, setAdminSellRequests] = useState([]);
+  const [isLoadingSellRequests, setIsLoadingSellRequests] = useState(false);
+  const [sellStatusFilter, setSellStatusFilter] = useState('All');
+  const [sellSearchTerm, setSellSearchTerm] = useState('');
+  const [editingSellRequestId, setEditingSellRequestId] = useState(null);
+  const [sellEditForm, setSellEditForm] = useState({
+    status: '',
+    estimatedQuote: '',
+    finalOffer: '',
+    adminNotes: '',
+    pickupPreferredDate: ''
+  });
+
   // Orders State (synced from API / localStorage / props)
   const [adminOrders, setAdminOrders] = useState(() => {
     if (Array.isArray(orders) && orders.length > 0) return orders;
@@ -758,9 +772,78 @@ export default function AdminModal({
     }
   };
 
+  // --- Old Phone Sell Requests Data Handlers ---
+  const fetchAdminSellRequests = async () => {
+    setIsLoadingSellRequests(true);
+    try {
+      const apiHost = getApiHost();
+      const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
+      const res = await fetch(`${apiHost}/api/admin/sell-requests`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.requests)) {
+        setAdminSellRequests(data.requests);
+      }
+    } catch (err) {
+      console.error('Failed to fetch sell requests:', err);
+    } finally {
+      setIsLoadingSellRequests(false);
+    }
+  };
+
+  const handleUpdateSellRequest = async (requestId, updatePayload) => {
+    try {
+      const apiHost = getApiHost();
+      const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
+      const res = await fetch(`${apiHost}/api/admin/sell-requests/${requestId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updatePayload)
+      });
+      const data = await res.json();
+      if (data.success && data.request) {
+        setAdminSellRequests(prev => prev.map(r => r.requestId === requestId ? data.request : r));
+        if (addToast) addToast(`Sell request #${requestId} updated successfully!`, '✅');
+        setEditingSellRequestId(null);
+      } else {
+        if (addToast) addToast(data.message || 'Failed to update sell request', '⚠️');
+      }
+    } catch (err) {
+      if (addToast) addToast('Error updating sell request', '⚠️');
+    }
+  };
+
+  const handleDeleteSellRequest = async (requestId) => {
+    if (!window.confirm(`Are you sure you want to delete sell request #${requestId}?`)) return;
+    try {
+      const apiHost = getApiHost();
+      const token = adminToken || sessionStorage.getItem('fm_admin_token') || '';
+      const res = await fetch(`${apiHost}/api/admin/sell-requests/${requestId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAdminSellRequests(prev => prev.filter(r => r.requestId !== requestId));
+        if (addToast) addToast(`Sell request #${requestId} deleted`, '🗑️');
+      }
+    } catch (err) {
+      if (addToast) addToast('Failed to delete sell request', '⚠️');
+    }
+  };
+
   useEffect(() => {
     if (isOpen && isAuthenticated) {
       fetchAdminServiceRequests();
+      fetchAdminSellRequests();
     }
   }, [isOpen, isAuthenticated]);
 
@@ -1751,6 +1834,18 @@ export default function AdminModal({
               style={{ color: '#FF5500', fontWeight: '800' }}
             >
               <Wrench size={16} color="#FF5500" /> Mobile Repairs ({adminServiceRequests.length})
+            </button>
+
+            <button 
+              className={`sidebar-tab-btn ${activeTab === 'sellRequests' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('sellRequests');
+                fetchAdminSellRequests();
+                setIsAdminSidebarOpen(false);
+              }}
+              style={{ color: '#16a34a', fontWeight: '800' }}
+            >
+              <DollarSign size={16} color="#16a34a" /> Old Phone Buyback ({adminSellRequests.length})
             </button>
 
             <button 
@@ -4361,6 +4456,422 @@ export default function AdminModal({
                         </div>
                       );
                     })}
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* TAB: OLD MOBILE BUYBACK & EXCHANGE REQUESTS */}
+          {activeTab === 'sellRequests' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              
+              {/* Header Title & Refresh */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '16px',
+                paddingBottom: '16px',
+                borderBottom: '1px solid var(--border-color)'
+              }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                    <DollarSign size={22} color="#16a34a" /> Old Mobile Buyback &amp; Instant Cash Requests
+                  </h3>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    Manage customer smartphone selling requests, evaluate conditions, adjust final offers, and schedule doorstep cash pickup.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={fetchAdminSellRequests}
+                  disabled={isLoadingSellRequests}
+                  style={{
+                    padding: '9px 18px',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-input)',
+                    color: 'var(--text-primary)',
+                    fontWeight: '700',
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <RefreshCw size={14} className={isLoadingSellRequests ? 'animate-spin' : ''} /> Refresh List
+                </button>
+              </div>
+
+              {/* Metrics Row */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '12px'
+              }}>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>Total Requests</span>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-primary)', marginTop: '4px' }}>
+                    {adminSellRequests.length}
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(255, 107, 0, 0.25)', padding: '16px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--primary-orange)', fontWeight: '600' }}>Pending Inspection</span>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary-orange)', marginTop: '4px' }}>
+                    {adminSellRequests.filter(r => r.status === 'Pending Inspection').length}
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(59, 130, 246, 0.25)', padding: '16px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#3b82f6', fontWeight: '600' }}>Pickup Scheduled</span>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#3b82f6', marginTop: '4px' }}>
+                    {adminSellRequests.filter(r => r.status === 'Pickup Scheduled').length}
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(34, 197, 94, 0.25)', padding: '16px', borderRadius: '14px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: '600' }}>Completed &amp; Paid</span>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#16a34a', marginTop: '4px' }}>
+                    {adminSellRequests.filter(r => r.status === 'Completed / Paid').length}
+                  </div>
+                </div>
+              </div>
+
+              {/* Filters & Search */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px'
+              }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {['All', 'Pending Inspection', 'Pickup Scheduled', 'Inspected', 'Completed / Paid', 'Cancelled'].map(st => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => setSellStatusFilter(st)}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '20px',
+                        border: sellStatusFilter === st ? '1.5px solid #16a34a' : '1px solid var(--border-color)',
+                        background: sellStatusFilter === st ? 'rgba(22, 163, 74, 0.12)' : 'var(--bg-card)',
+                        color: sellStatusFilter === st ? '#16a34a' : 'var(--text-secondary)',
+                        fontSize: '0.78rem',
+                        fontWeight: sellStatusFilter === st ? '700' : '500',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {st}
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ position: 'relative', minWidth: '240px', flex: '1', maxWidth: '360px' }}>
+                  <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <input 
+                    type="text"
+                    placeholder="Search by ID, Customer, Phone, Model..."
+                    value={sellSearchTerm}
+                    onChange={(e) => setSellSearchTerm(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px 8px 36px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-input)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.85rem',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Requests List */}
+              {isLoadingSellRequests ? (
+                <div style={{ textAlign: 'center', padding: '50px', color: 'var(--text-muted)' }}>
+                  Loading sell requests...
+                </div>
+              ) : adminSellRequests.length === 0 ? (
+                <div style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '16px',
+                  padding: '40px 20px',
+                  textAlign: 'center'
+                }}>
+                  <DollarSign size={40} color="var(--text-muted)" style={{ margin: '0 auto 12px auto' }} />
+                  <h4 style={{ margin: '0 0 6px 0', fontSize: '1.1rem' }}>No Old Phone Sell Requests Found</h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    When customers submit their old mobile details from the website or mobile app, they will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {adminSellRequests
+                    .filter(req => {
+                      if (sellStatusFilter !== 'All' && req.status !== sellStatusFilter) return false;
+                      if (!sellSearchTerm.trim()) return true;
+                      const q = sellSearchTerm.toLowerCase();
+                      return (
+                        req.requestId?.toLowerCase().includes(q) ||
+                        req.customerName?.toLowerCase().includes(q) ||
+                        req.customerPhone?.includes(q) ||
+                        req.deviceBrand?.toLowerCase().includes(q) ||
+                        req.deviceModel?.toLowerCase().includes(q)
+                      );
+                    })
+                    .map((req) => (
+                      <div
+                        key={req.requestId || req.id}
+                        style={{
+                          background: 'var(--bg-card)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '16px',
+                          padding: '20px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '14px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                        }}
+                      >
+                        {/* Top Row: Request ID + Status Badge + Status Select */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <strong style={{ fontSize: '1rem', color: '#16a34a' }}>#{req.requestId}</strong>
+                            <span style={{
+                              padding: '4px 10px',
+                              borderRadius: '20px',
+                              fontSize: '0.74rem',
+                              fontWeight: '700',
+                              background: req.status === 'Completed / Paid' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255, 107, 0, 0.15)',
+                              color: req.status === 'Completed / Paid' ? '#16a34a' : 'var(--primary-orange)'
+                            }}>
+                              {req.status}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                              {new Date(req.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <select
+                              value={req.status}
+                              onChange={(e) => handleUpdateSellRequest(req.requestId, { status: e.target.value })}
+                              style={{
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border-color)',
+                                background: 'var(--bg-input)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.8rem',
+                                fontWeight: '600'
+                              }}
+                            >
+                              <option value="Pending Inspection">Pending Inspection</option>
+                              <option value="Pickup Scheduled">Pickup Scheduled</option>
+                              <option value="Inspected">Inspected</option>
+                              <option value="Completed / Paid">Completed / Paid</option>
+                              <option value="Cancelled">Cancelled</option>
+                            </select>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSellRequest(req.requestId)}
+                              style={{
+                                padding: '6px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                background: 'rgba(239, 68, 68, 0.08)',
+                                color: '#ef4444',
+                                cursor: 'pointer',
+                                fontSize: '0.8rem'
+                              }}
+                              title="Delete Request"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Customer Details & Device Info Grid */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                          gap: '14px',
+                          background: 'var(--bg-secondary)',
+                          padding: '14px',
+                          borderRadius: '12px'
+                        }}>
+                          {/* Left: Customer info */}
+                          <div>
+                            <span style={{ fontSize: '0.72rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                              Customer &amp; Pickup Address
+                            </span>
+                            <div style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+                              {req.customerName}
+                            </div>
+                            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                              📞 <a href={`tel:${req.customerPhone}`} style={{ color: 'inherit', textDecoration: 'none', fontWeight: '600' }}>{req.customerPhone}</a>
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                              📍 {req.customerAddress}
+                            </div>
+                            <div style={{ fontSize: '0.78rem', color: '#16a34a', fontWeight: '600', marginTop: '4px' }}>
+                              ⏰ Slot: {req.pickupPreferredDate || 'Standard'}
+                            </div>
+                          </div>
+
+                          {/* Right: Device & Valuation */}
+                          <div>
+                            <span style={{ fontSize: '0.72rem', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                              Device &amp; Physical Health
+                            </span>
+                            <div style={{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                              📱 {req.deviceBrand} {req.deviceModel} ({req.deviceStorage || '128 GB'})
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '3px' }}>
+                              • Screen: <strong>{req.screenCondition}</strong> | Body: <strong>{req.bodyCondition}</strong>
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                              • Included Items: {req.accessoriesIncluded || 'None'}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                              • Issues: {req.functionalIssues || 'None (All Working)'}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Valuation & Admin Price Controls */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                          gap: '12px',
+                          padding: '14px',
+                          borderRadius: '12px',
+                          background: 'rgba(22, 163, 74, 0.04)',
+                          border: '1px solid rgba(22, 163, 74, 0.15)'
+                        }}>
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                              Estimated Quote / Final Cash Offer (₹):
+                            </label>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <input 
+                                type="number"
+                                placeholder="e.g. 12000"
+                                defaultValue={req.finalOffer || req.estimatedQuote || ''}
+                                id={`sell-quote-${req.requestId}`}
+                                style={{
+                                  width: '130px',
+                                  padding: '6px 10px',
+                                  borderRadius: '8px',
+                                  border: '1px solid var(--border-color)',
+                                  background: 'var(--bg-input)',
+                                  color: 'var(--text-primary)',
+                                  fontSize: '0.85rem',
+                                  outline: 'none'
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const val = document.getElementById(`sell-quote-${req.requestId}`)?.value;
+                                  handleUpdateSellRequest(req.requestId, { finalOffer: parseFloat(val) || 0 });
+                                }}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: '8px',
+                                  border: 'none',
+                                  background: '#16a34a',
+                                  color: '#fff',
+                                  fontWeight: '700',
+                                  fontSize: '0.78rem',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Update Offer
+                              </button>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                              Admin Inspection Notes:
+                            </label>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <input 
+                                type="text"
+                                placeholder="e.g. Battery 84%, Cash paid via GPay"
+                                defaultValue={req.adminNotes || ''}
+                                id={`sell-notes-${req.requestId}`}
+                                style={{
+                                  flex: 1,
+                                  padding: '6px 10px',
+                                  borderRadius: '8px',
+                                  border: '1px solid var(--border-color)',
+                                  background: 'var(--bg-input)',
+                                  color: 'var(--text-primary)',
+                                  fontSize: '0.85rem',
+                                  outline: 'none'
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const val = document.getElementById(`sell-notes-${req.requestId}`)?.value;
+                                  handleUpdateSellRequest(req.requestId, { adminNotes: val });
+                                }}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: '8px',
+                                  border: 'none',
+                                  background: 'var(--primary-orange)',
+                                  color: '#fff',
+                                  fontWeight: '700',
+                                  fontSize: '0.78rem',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Save Note
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* WhatsApp Customer Action */}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '4px' }}>
+                          <a
+                            href={`https://wa.me/91${req.customerPhone.replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(`Hello ${req.customerName}, update from FRIENDS MOBILE regarding your Sell Phone Request #${req.requestId} (${req.deviceBrand} ${req.deviceModel}): Current Status is "${req.status}". Final Cash Offer: ₹${req.finalOffer || req.estimatedQuote}. ${req.adminNotes ? `Inspection Note: ${req.adminNotes}` : ''} Our executive will inspect and complete payment.`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              padding: '8px 16px',
+                              borderRadius: '10px',
+                              border: '1.5px solid #22c55e',
+                              background: 'rgba(34, 197, 94, 0.1)',
+                              color: '#16a34a',
+                              fontWeight: '800',
+                              fontSize: '0.82rem',
+                              textDecoration: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            <MessageSquare size={16} /> Send WhatsApp Offer to Customer
+                          </a>
+                        </div>
+
+                      </div>
+                    ))}
                 </div>
               )}
 

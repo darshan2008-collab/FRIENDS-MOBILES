@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones, Wrench } from 'lucide-react';
+import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones, Wrench, Smartphone } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
 export default function Header({ 
@@ -19,7 +19,8 @@ export default function Header({
   onLogout, 
   onOpenShop, 
   onOpenChatbot,
-  onOpenServiceModal
+  onOpenServiceModal,
+  onOpenSellPhoneModal
 }) {
   return (
     <>
@@ -205,6 +206,16 @@ export default function Header({
                 style={{ color: '#FF5500', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
                 <Wrench size={14} /> {t('navRepair') || 'Mobile Repair'}
+              </a>
+            </li>
+            <li>
+              <a 
+                href="#sell-old-phone"
+                onClick={(e) => { e.preventDefault(); if (onOpenSellPhoneModal) onOpenSellPhoneModal(); }}
+                className="nav-link"
+                style={{ color: '#16a34a', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+              >
+                <Smartphone size={14} /> {t('navSellPhone') || 'Sell Old Phone'}
               </a>
             </li>
             <li>

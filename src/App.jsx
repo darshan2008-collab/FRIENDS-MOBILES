@@ -25,6 +25,8 @@ import ShoppingPortal from './components/ShoppingPortal';
 import SEOManager from './components/SEOManager';
 import AIChatbotModal from './components/AIChatbotModal';
 import ServiceRequestModal from './components/ServiceRequestModal';
+import ServiceSellBanners from './components/ServiceSellBanners';
+import SellPhoneModal from './components/SellPhoneModal';
 import SplashScreen from './components/SplashScreen';
 import { translations, autoTranslateToTamil } from './data/translations';
 import { getApiBaseUrl } from './data/apiConfig';
@@ -166,6 +168,7 @@ export default function App() {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [serviceInitialDefect, setServiceInitialDefect] = useState('');
+  const [isSellPhoneOpen, setIsSellPhoneOpen] = useState(false);
   const [isShopOpen, setIsShopOpen] = useState(false);
   const [shopCategory, setShopCategory] = useState('All');
   const [authRedirectMessage, setAuthRedirectMessage] = useState('');
@@ -992,6 +995,7 @@ export default function App() {
         onOpenShop={handleOpenShop}
         onOpenChatbot={() => setIsChatbotOpen(true)}
         onOpenServiceModal={handleOpenServiceModal}
+        onOpenSellPhoneModal={() => setIsSellPhoneOpen(true)}
       />
 
       <MobileDrawer 
@@ -1006,6 +1010,7 @@ export default function App() {
         onOpenUserAccount={() => setIsAccountOpen(true)}
         onLogout={handleLogout}
         onOpenServiceModal={handleOpenServiceModal}
+        onOpenSellPhoneModal={() => setIsSellPhoneOpen(true)}
       />
 
       <main>
@@ -1014,6 +1019,11 @@ export default function App() {
         <PromoBanners 
           onOpenCustomCover={() => setIsCustomCoverOpen(true)}
           onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+          t={t}
+        />
+        <ServiceSellBanners 
+          onOpenServiceModal={handleOpenServiceModal}
+          onOpenSellPhoneModal={() => setIsSellPhoneOpen(true)}
           t={t}
         />
         <BrandMarquee />
@@ -1204,6 +1214,16 @@ export default function App() {
           isOpen={isServiceModalOpen}
           onClose={() => setIsServiceModalOpen(false)}
           initialDefect={serviceInitialDefect}
+          currentUser={currentUser}
+          addToast={addToast}
+          t={t}
+        />
+      )}
+
+      {isSellPhoneOpen && (
+        <SellPhoneModal 
+          isOpen={isSellPhoneOpen}
+          onClose={() => setIsSellPhoneOpen(false)}
           currentUser={currentUser}
           addToast={addToast}
           t={t}

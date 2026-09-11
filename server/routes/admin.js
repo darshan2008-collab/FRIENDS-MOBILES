@@ -9,6 +9,7 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Complaint = require('../models/Complaint');
 const ServiceRequest = require('../models/ServiceRequest');
+const SellPhoneRequest = require('../models/SellPhoneRequest');
 const BackupService = require('../services/backupService');
 
 const settingsFilePath = path.join(__dirname, '../data/settings.json');
@@ -699,8 +700,55 @@ router.delete('/service-requests/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Service request not found or already deleted' });
     }
     res.json({ success: true, message: 'Service request deleted successfully' });
+// --- Sell Phone Requests Management Endpoints ---
+
+// GET /api/admin/sell-requests — List all old phone sell requests
+router.get('/sell-requests', async (req, res) => {
+  try {
+    const { status } = req.query;
+    const filter = {};
+    if (status && status !== 'All') {
+      filter.status = status;
+    }
+    const requests = await SellPhoneRequest.find(filter);
+    res.json({ success: true, requests });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to delete service request', error: err.message });
+    res.status(500).json({ success: false, message: 'Failed to fetch sell requests', error: err.message });
+  }
+});
+
+// PUT /api/admin/sell-requests/:id — Update status, final offer, admin notes, or pickup date
+router.put('/sell-requests/:id', async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const { status, estimatedQuote, finalOffer, adminNotes, pickupPreferredDate } = req.body;
+
+    const updated = await SellPhoneRequest.updateOne(
+      { requestId },
+      { status, estimatedQuote, finalOffer, adminNotes, pickupPreferredDate }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Sell request not found' });
+    }
+
+    res.json({ success: true, message: 'Sell request updated successfully', request: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to update sell request', error: err.message });
+  }
+});
+
+// DELETE /api/admin/sell-requests/:id — Delete sell request
+router.delete('/sell-requests/:id', async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const deleted = await SellPhoneRequest.deleteOne({ requestId });
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: 'Sell request not found or already deleted' });
+    }
+    res.json({ success: true, message: 'Sell request deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to delete sell request', error: err.message });
   }
 });
 
