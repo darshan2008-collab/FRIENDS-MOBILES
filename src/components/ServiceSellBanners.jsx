@@ -16,8 +16,16 @@ export default function ServiceSellBanners({ onOpenServiceModal, onOpenSellPhone
         <div 
           className="promo-card service-sell-card" 
           id="doorstep-repair"
+          role="button"
+          tabIndex={0}
           onClick={() => onOpenServiceModal && onOpenServiceModal()}
-          style={{ cursor: 'pointer' }}
+          style={{ 
+            cursor: 'pointer', 
+            userSelect: 'none', 
+            WebkitUserSelect: 'none', 
+            touchAction: 'manipulation',
+            WebkitTapHighlightColor: 'transparent'
+          }}
         >
           <div className="promo-info">
             <span className="promo-tag">
@@ -36,16 +44,24 @@ export default function ServiceSellBanners({ onOpenServiceModal, onOpenSellPhone
                 if (onOpenServiceModal) onOpenServiceModal();
               }}
               className="btn btn-sm btn-orange"
-              style={{ cursor: 'pointer', border: 'none' }}
+              style={{ 
+                cursor: 'pointer', 
+                border: 'none',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                touchAction: 'manipulation',
+                WebkitTapHighlightColor: 'transparent'
+              }}
             >
               BOOK SERVICE
             </button>
           </div>
-          <div className="promo-img-box service-sell-img-box">
+          <div className="promo-img-box service-sell-img-box" style={{ pointerEvents: 'none' }}>
             <img 
               src="images/banner_repair_service.png" 
               onError={(e) => handleImgError(e, fallbackRepair)} 
               alt="Mobile Repair & Doorstep Service" 
+              style={{ pointerEvents: 'none' }}
             />
           </div>
         </div>
@@ -54,8 +70,16 @@ export default function ServiceSellBanners({ onOpenServiceModal, onOpenSellPhone
         <div 
           className="promo-card service-sell-card" 
           id="sell-old-phone"
+          role="button"
+          tabIndex={0}
           onClick={() => onOpenSellPhoneModal && onOpenSellPhoneModal()}
-          style={{ cursor: 'pointer' }}
+          style={{ 
+            cursor: 'pointer', 
+            userSelect: 'none', 
+            WebkitUserSelect: 'none', 
+            touchAction: 'manipulation',
+            WebkitTapHighlightColor: 'transparent'
+          }}
         >
           <div className="promo-info">
             <span className="promo-tag">
@@ -74,16 +98,24 @@ export default function ServiceSellBanners({ onOpenServiceModal, onOpenSellPhone
                 if (onOpenSellPhoneModal) onOpenSellPhoneModal();
               }}
               className="btn btn-sm btn-orange"
-              style={{ cursor: 'pointer', border: 'none' }}
+              style={{ 
+                cursor: 'pointer', 
+                border: 'none',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                touchAction: 'manipulation',
+                WebkitTapHighlightColor: 'transparent'
+              }}
             >
               SELL NOW
             </button>
           </div>
-          <div className="promo-img-box service-sell-img-box">
+          <div className="promo-img-box service-sell-img-box" style={{ pointerEvents: 'none' }}>
             <img 
               src="images/banner_sell_phone.png" 
               onError={(e) => handleImgError(e, fallbackSell)} 
               alt="Sell Your Old Phone" 
+              style={{ pointerEvents: 'none' }}
             />
           </div>
         </div>

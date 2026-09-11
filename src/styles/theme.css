@@ -6656,11 +6656,12 @@ img {
   }
 }
 
-/* Service Request Full-Screen Modal (Mobile-First) */
-.service-modal-overlay {
+/* Service & Sell Phone Full-Screen Modals (Mobile-First) */
+.service-modal-overlay,
+.sell-phone-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 99999;
+  z-index: 999999;
   background-color: rgba(7, 10, 17, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -6670,7 +6671,8 @@ img {
   padding: 0 !important;
 }
 
-.service-modal-container {
+.service-modal-container,
+.sell-phone-modal-container {
   width: 100vw !important;
   height: 100vh !important;
   max-width: 100vw !important;
@@ -6684,10 +6686,12 @@ img {
 }
 
 @media (min-width: 900px) {
-  .service-modal-overlay {
+  .service-modal-overlay,
+  .sell-phone-modal-overlay {
     padding: 24px !important;
   }
-  .service-modal-container {
+  .service-modal-container,
+  .sell-phone-modal-container {
     max-width: 920px !important;
     height: 94vh !important;
     max-height: 94vh !important;

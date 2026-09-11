@@ -317,19 +317,34 @@ export default function SellPhoneModal({
   };
 
   return (
-    <div className="modal-overlay auth-modal-overlay" style={{ zIndex: 99999 }}>
+    <div 
+      className="sell-phone-modal-overlay" 
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 999999,
+        backgroundColor: 'rgba(7, 10, 17, 0.85)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 0
+      }}
+    >
       <div 
-        className="modal-container sell-phone-modal" 
+        className="sell-phone-modal-container" 
         style={{
-          maxWidth: '780px',
-          width: '95%',
-          maxHeight: '92vh',
-          overflowY: 'auto',
-          borderRadius: '24px',
+          width: '100%',
+          height: '100%',
+          maxWidth: '100vw',
+          maxHeight: '100vh',
+          borderRadius: 0,
           background: 'var(--bg-card, #ffffff)',
           color: 'var(--text-primary, #1e293b)',
-          border: '1px solid var(--border-color, #e2e8f0)',
-          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.3)'
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
         }}
       >
         {/* Header */}
@@ -441,8 +456,15 @@ export default function SellPhoneModal({
           </button>
         </div>
 
-        {/* Tab 1: Sell Flow */}
-        {activeTab === 'sell' && (
+        {/* Scrollable Content Body */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '16px 20px 40px',
+          WebkitOverflowScrolling: 'touch'
+        }}>
+          {/* Tab 1: Sell Flow */}
+          {activeTab === 'sell' && (
           <div style={{ padding: '24px' }}>
             {createdSellRequest ? (
               /* Success Confirmation View */
@@ -1221,6 +1243,7 @@ export default function SellPhoneModal({
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );
