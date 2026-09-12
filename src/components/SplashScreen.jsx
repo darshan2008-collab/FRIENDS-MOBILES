@@ -14,7 +14,7 @@ export default function SplashScreen({ onFinish }) {
     };
     hideNativeSplash();
 
-    // 5-second cinematic experience requested by user (4.6s display + 0.4s exit transition)
+    // 4.6-second cinematic display + 0.4s exit transition
     const exitTimer = setTimeout(() => {
       triggerAppEnter();
     }, 4600);
@@ -31,78 +31,105 @@ export default function SplashScreen({ onFinish }) {
 
   return (
     <div
-      className={`fm-splash-root ${isExiting ? 'fm-splash-exit' : ''}`}
+      className={`fm-studio-splash-root ${isExiting ? 'fm-splash-exit' : ''}`}
       onClick={triggerAppEnter}
       role="button"
       tabIndex={0}
-      aria-label="Friends Mobile Splash"
+      aria-label="Friends Mobile Splash Screen"
     >
-      {/* Ambient Atmospheric Deep Glow */}
-      <div className="fm-splash-glow-core" />
-      <div className="fm-splash-ambient-rays" />
+      {/* Pristine Studio Ambient Radial Light & Soft Vignette */}
+      <div className="fm-studio-light-radial" />
+      <div className="fm-studio-soft-highlight" />
 
-      {/* Floating Micro Light Particles */}
-      <div className="fm-sparkle sp-1" />
-      <div className="fm-sparkle sp-2" />
-      <div className="fm-sparkle sp-3" />
-      <div className="fm-sparkle sp-4" />
-
-      {/* Center Brand Centerpiece */}
-      <div className="fm-splash-stage">
-        {/* Orbital 360 High-Speed Neon Energy Rings */}
-        <div className="fm-orbit-box">
-          <div className="fm-orbit-ring ring-outer" />
-          <div className="fm-orbit-ring ring-inner" />
-          <div className="fm-orbit-dot dot-1" />
-          <div className="fm-orbit-dot dot-2" />
-
-          {/* Perfect 1:1 Circular Logo Badge */}
-          <div className="fm-logo-disc">
-            <div className="fm-disc-inner">
-              <img
-                src={logoImg || '/logo.png'}
-                alt="FRIENDS MOBILE"
-                className="fm-logo-graphic"
-                onError={(e) => {
-                  e.target.src = '/logo.png';
-                }}
-              />
-              <div className="fm-disc-specular" />
+      {/* Main Studio Centerpiece Stage */}
+      <div className="fm-studio-stage">
+        
+        {/* Unified Brand Identity: Circular Logo acts directly as Initial Letter "F" */}
+        <div className="fm-brand-lockup">
+          
+          {/* Logo Badge as Initial Letter "F" */}
+          <div className="fm-logo-badge-anchor">
+            <div className="fm-logo-badge-3d">
+              <div className="fm-badge-outer-ring">
+                <div className="fm-badge-inner-circle">
+                  <img
+                    src={logoImg || '/logo.png'}
+                    alt="F"
+                    className="fm-badge-icon"
+                    onError={(e) => {
+                      e.target.src = '/logo.png';
+                    }}
+                  />
+                  {/* Subtle 3D Glass Specular Sheen */}
+                  <div className="fm-badge-specular" />
+                </div>
+              </div>
             </div>
+            {/* Ground shadow beneath the 3D logo badge */}
+            <div className="fm-badge-ground-shadow" />
+          </div>
+
+          {/* Typography animates outwards to the right: "riends Mobile" */}
+          <div className="fm-text-reveal-container">
+            <span className="fm-word-riends">riends</span>
+            <span className="fm-word-space">&nbsp;</span>
+            <span className="fm-word-mobile">Mobile</span>
           </div>
         </div>
 
-        {/* Brand Title: FRIENDS MOBILE */}
-        <div className="fm-brand-title-box">
-          <h1 className="fm-brand-title">
-            <span className="fm-title-white">FRIENDS </span>
-            <span className="fm-title-orange">MOBILE</span>
-          </h1>
-          <div className="fm-title-underline" />
-        </div>
+        {/* Studio Soft Floor Drop Shadow for the entire Lockup */}
+        <div className="fm-lockup-ground-shadow" />
 
-        {/* Modern Tagline Pill Badge */}
-        <div className="fm-brand-badge">
-          <span className="fm-badge-dot" />
-          <span className="fm-badge-text">CUSTOM CASES • ACCESSORIES • CARE</span>
-          <span className="fm-badge-dot" />
-        </div>
+        {/* Sleek Minimalist Loading Section Directly Underneath */}
+        <div className="fm-studio-loader-section">
+          <div className="fm-loader-spinner-box">
+            {/* Glowing Orange Progress Ring */}
+            <svg className="fm-loader-svg" viewBox="0 0 44 44">
+              <circle
+                className="fm-loader-bg-track"
+                cx="22"
+                cy="22"
+                r="18"
+                fill="none"
+                strokeWidth="3.2"
+              />
+              <circle
+                className="fm-loader-sweep-ring"
+                cx="22"
+                cy="22"
+                r="18"
+                fill="none"
+                strokeWidth="3.2"
+                strokeDasharray="113"
+                strokeDashoffset="75"
+                strokeLinecap="round"
+              />
+            </svg>
+            {/* Rhythmic Pulsing Glow Dot in center */}
+            <div className="fm-loader-pulse-dot" />
+          </div>
 
-        {/* Sleek Minimalist Continuous Glowing Loader Ring */}
-        <div className="fm-loader-track">
-          <div className="fm-loader-spinner" />
-          <span className="fm-loader-label">LOADING STORE...</span>
+          {/* Minimalist Status Text */}
+          <div className="fm-loader-label-group">
+            <span className="fm-loader-label">PREPARING YOUR STORE</span>
+            <span className="fm-loader-dots">
+              <span className="fmd-1">.</span>
+              <span className="fmd-2">.</span>
+              <span className="fmd-3">.</span>
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* 60FPS Hardware Accelerated Motion Styles */}
+      {/* 60FPS Hardware Accelerated Studio Motion Graphics Styles */}
       <style>{`
-        .fm-splash-root {
+        .fm-studio-splash-root {
           position: fixed;
           inset: 0;
           z-index: 9999999;
-          background-color: #070A11;
-          background-image: radial-gradient(circle at 50% 45%, #141c2e 0%, #0a0e18 60%, #070A11 100%);
+          background-color: #FFFFFF;
+          background-image: 
+            radial-gradient(circle at 50% 40%, #FFFFFF 0%, #FAFAFC 45%, #F0F2F6 100%);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -116,380 +143,353 @@ export default function SplashScreen({ onFinish }) {
           will-change: opacity, transform, filter;
         }
 
-        /* Camera Push-Through Zoom into App */
+        /* Seamless smooth exit fade & subtle push into app */
         .fm-splash-exit {
           opacity: 0 !important;
-          transform: scale3d(1.15, 1.15, 1) !important;
-          filter: blur(6px);
+          transform: scale(1.04) !important;
+          filter: blur(4px);
           pointer-events: none;
         }
 
-        /* Ambient Core Light */
-        .fm-splash-glow-core {
+        /* Ambient Studio Light Glow */
+        .fm-studio-light-radial {
           position: absolute;
-          width: 420px;
-          height: 420px;
+          width: 500px;
+          height: 500px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(255, 85, 0, 0.25) 0%, rgba(255, 140, 0, 0.07) 50%, transparent 75%);
+          background: radial-gradient(circle, rgba(255, 120, 30, 0.08) 0%, rgba(255, 170, 50, 0.03) 45%, transparent 70%);
           top: 45%;
           left: 50%;
           transform: translate(-50%, -50%);
-          animation: fmCorePulse 3s ease-in-out infinite alternate;
           pointer-events: none;
+          animation: fmStudioAmbientBreathe 4s ease-in-out infinite alternate;
         }
 
-        @keyframes fmCorePulse {
-          0% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.7; }
-          100% { transform: translate(-50%, -50%) scale(1.18); opacity: 1; }
+        @keyframes fmStudioAmbientBreathe {
+          0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.8; }
+          100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
         }
 
-        .fm-splash-ambient-rays {
+        .fm-studio-soft-highlight {
           position: absolute;
-          inset: -40px;
-          background: conic-gradient(
-            from 0deg at 50% 45%,
-            transparent 0deg,
-            rgba(255, 85, 0, 0.04) 40deg,
-            transparent 80deg,
-            rgba(255, 170, 0, 0.04) 160deg,
-            transparent 220deg,
-            rgba(255, 85, 0, 0.04) 280deg,
-            transparent 360deg
-          );
-          animation: fmRotateRays 16s linear infinite;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 40%;
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, transparent 100%);
           pointer-events: none;
         }
 
-        @keyframes fmRotateRays {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        /* Floating Micro Light Particles */
-        .fm-sparkle {
-          position: absolute;
-          border-radius: 50%;
-          background: rgba(255, 136, 0, 0.7);
-          box-shadow: 0 0 8px #FF8800;
-          pointer-events: none;
-        }
-        .sp-1 { width: 4px; height: 4px; top: 30%; left: 22%; animation: fmParticleFloat 4s ease-in-out infinite; }
-        .sp-2 { width: 5px; height: 5px; top: 65%; left: 78%; animation: fmParticleFloat 5s ease-in-out infinite 1s; }
-        .sp-3 { width: 3px; height: 3px; top: 25%; left: 70%; animation: fmParticleFloat 3.8s ease-in-out infinite 1.5s; }
-        .sp-4 { width: 4px; height: 4px; top: 70%; left: 28%; animation: fmParticleFloat 4.6s ease-in-out infinite 0.7s; }
-
-        @keyframes fmParticleFloat {
-          0% { transform: translate3d(0, 0, 0); opacity: 0.2; }
-          50% { transform: translate3d(12px, -24px, 0); opacity: 0.85; }
-          100% { transform: translate3d(-8px, -48px, 0); opacity: 0; }
-        }
-
-        /* Center Stage */
-        .fm-splash-stage {
+        /* Center Stage Container */
+        .fm-studio-stage {
           position: relative;
           z-index: 10;
           display: flex;
           flex-direction: column;
           align-items: center;
-          text-align: center;
-          padding: 20px;
+          justify-content: center;
+          padding: 24px;
           width: 100%;
-          max-width: 440px;
+          max-width: 480px;
         }
 
-        /* Orbital Energy Rings */
-        .fm-orbit-box {
+        /* Main Brand Lockup: Logo Badge ("F") + "riends Mobile" */
+        .fm-brand-lockup {
           position: relative;
-          width: 140px;
-          height: 140px;
-          margin-bottom: 24px;
           display: flex;
           align-items: center;
           justify-content: center;
+          height: 72px;
+          margin-bottom: 28px;
         }
 
-        .fm-orbit-ring {
-          position: absolute;
-          border-radius: 50%;
-          pointer-events: none;
+        /* Logo Badge Anchor */
+        .fm-logo-badge-anchor {
+          position: relative;
+          width: 66px;
+          height: 66px;
+          flex-shrink: 0;
+          z-index: 2;
         }
 
-        .ring-outer {
-          inset: -14px;
-          border: 2.5px solid transparent;
-          border-top-color: #FF5500;
-          border-right-color: #FFAA00;
-          filter: drop-shadow(0 0 12px rgba(255, 85, 0, 0.85));
-          animation: fmSpinFast 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-
-        .ring-inner {
-          inset: -7px;
-          border: 1.5px solid transparent;
-          border-bottom-color: rgba(255, 170, 0, 0.75);
-          border-left-color: rgba(255, 85, 0, 0.55);
-          animation: fmSpinRev 2.4s linear infinite;
-        }
-
-        .fm-orbit-dot {
-          position: absolute;
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: #FFF;
-          box-shadow: 0 0 12px #FF5500, 0 0 5px #FFF;
-          pointer-events: none;
-        }
-
-        .dot-1 {
-          top: -16px;
-          left: 50%;
-          transform: translateX(-50%);
-          animation: fmSparkOrbit 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-          transform-origin: 50% 86px;
-        }
-
-        .dot-2 {
-          bottom: -9px;
-          left: 50%;
-          transform: translateX(-50%);
-          animation: fmSparkOrbitRev 2.4s linear infinite;
-          transform-origin: 50% -63px;
-        }
-
-        @keyframes fmSpinFast {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        @keyframes fmSpinRev {
-          0% { transform: rotate(360deg); }
-          100% { transform: rotate(0deg); }
-        }
-
-        @keyframes fmSparkOrbit {
-          0% { transform: translateX(-50%) rotate(0deg); }
-          100% { transform: translateX(-50%) rotate(360deg); }
-        }
-
-        @keyframes fmSparkOrbitRev {
-          0% { transform: translateX(-50%) rotate(360deg); }
-          100% { transform: translateX(-50%) rotate(0deg); }
-        }
-
-        /* 1:1 Circular Logo Disc */
-        .fm-logo-disc {
+        /* 3D Elastic Bounce Entrance */
+        .fm-logo-badge-3d {
           position: relative;
           width: 100%;
           height: 100%;
           border-radius: 50%;
-          animation: fmLogoBounce 0.75s cubic-bezier(0.16, 1.25, 0.3, 1) forwards;
+          animation: fmElasticLogoIn 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
           will-change: transform, opacity;
         }
 
-        @keyframes fmLogoBounce {
+        @keyframes fmElasticLogoIn {
           0% {
-            transform: translate3d(0, -60px, 0) scale3d(0.45, 0.45, 1);
+            transform: scale3d(0.1, 0.1, 1);
             opacity: 0;
-            filter: blur(8px);
           }
-          70% {
-            transform: translate3d(0, 4px, 0) scale3d(1.05, 1.05, 1);
+          55% {
+            transform: scale3d(1.18, 1.18, 1);
             opacity: 1;
-            filter: blur(0);
+          }
+          75% {
+            transform: scale3d(0.94, 0.94, 1);
           }
           100% {
-            transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+            transform: scale3d(1, 1, 1);
             opacity: 1;
-            filter: blur(0);
           }
         }
 
-        .fm-disc-inner {
+        /* Precise outer stroke: fine white & black border with specular shadow */
+        .fm-badge-outer-ring {
           position: relative;
           width: 100%;
           height: 100%;
           border-radius: 50%;
-          background: #FFFFFF;
-          padding: 16px;
+          padding: 2.5px;
+          background: linear-gradient(145deg, #1A1A1A 0%, #000000 100%);
+          box-shadow: 
+            0 12px 28px -4px rgba(0, 0, 0, 0.22),
+            0 6px 14px -2px rgba(255, 107, 0, 0.35),
+            inset 0 1px 2px rgba(255, 255, 255, 0.7);
+        }
+
+        .fm-badge-inner-circle {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: #FF6600;
+          border: 2px solid #FFFFFF;
+          overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 
-            0 16px 40px rgba(0, 0, 0, 0.8),
-            0 0 30px rgba(255, 85, 0, 0.45),
-            inset 0 1px 3px rgba(255, 255, 255, 0.95);
-          border: 2.5px solid rgba(255, 255, 255, 0.85);
-          overflow: hidden;
         }
 
-        .fm-logo-graphic {
+        .fm-badge-icon {
           width: 100%;
           height: 100%;
           object-fit: contain;
           border-radius: 50%;
-          aspect-ratio: 1 / 1;
           display: block;
         }
 
-        .fm-disc-specular {
+        .fm-badge-specular {
           position: absolute;
           inset: 0;
           background: linear-gradient(
             135deg,
-            rgba(255, 255, 255, 0.45) 0%,
-            transparent 45%,
-            rgba(255, 85, 0, 0.15) 100%
+            rgba(255, 255, 255, 0.5) 0%,
+            rgba(255, 255, 255, 0.1) 42%,
+            transparent 60%
           );
+          pointer-events: none;
+          border-radius: 50%;
+        }
+
+        /* Badge Ground Shadow */
+        .fm-badge-ground-shadow {
+          position: absolute;
+          bottom: -12px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 54px;
+          height: 10px;
+          border-radius: 50%;
+          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.05) 55%, transparent 75%);
+          animation: fmShadowScale 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
           pointer-events: none;
         }
 
-        /* Brand Title */
-        .fm-brand-title-box {
-          position: relative;
-          margin-bottom: 12px;
-          animation: fmTitleSlide 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.15s;
-          opacity: 0;
-          will-change: transform, opacity;
+        @keyframes fmShadowScale {
+          0% { transform: translateX(-50%) scale(0.2); opacity: 0; }
+          100% { transform: translateX(-50%) scale(1); opacity: 1; }
         }
 
-        @keyframes fmTitleSlide {
+        /* Smooth Typography Reveal to the Right: "riends Mobile" */
+        .fm-text-reveal-container {
+          display: flex;
+          align-items: baseline;
+          white-space: nowrap;
+          overflow: hidden;
+          margin-left: 2px;
+          animation: fmTextExpand 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.35s;
+          opacity: 0;
+          max-width: 0;
+          will-change: max-width, opacity;
+        }
+
+        @keyframes fmTextExpand {
           0% {
-            transform: translate3d(0, -20px, 0);
+            max-width: 0;
             opacity: 0;
-            letter-spacing: 6px;
+            transform: translateX(-15px);
+          }
+          40% {
+            opacity: 0.7;
           }
           100% {
-            transform: translate3d(0, 0, 0);
+            max-width: 320px;
             opacity: 1;
-            letter-spacing: 3.5px;
+            transform: translateX(0);
           }
         }
 
-        .fm-brand-title {
-          margin: 0;
+        .fm-word-riends {
           font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          font-size: 27px;
-          font-weight: 900;
-          text-transform: uppercase;
-          line-height: 1.1;
+          font-size: 38px;
+          font-weight: 800;
+          color: #1A1D20;
+          letter-spacing: -0.5px;
+          line-height: 1;
+          display: inline-block;
         }
 
-        .fm-title-white {
-          color: #FFFFFF;
-          text-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
+        .fm-word-space {
+          font-size: 38px;
+          line-height: 1;
         }
 
-        .fm-title-orange {
+        .fm-word-mobile {
+          font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          font-size: 38px;
+          font-weight: 800;
           color: #FF5500;
-          text-shadow: 0 0 16px rgba(255, 85, 0, 0.6);
+          letter-spacing: -0.5px;
+          line-height: 1;
+          display: inline-block;
+          text-shadow: 0 4px 16px rgba(255, 85, 0, 0.25);
         }
 
-        .fm-title-underline {
-          margin: 8px auto 0;
-          width: 52px;
-          height: 2.5px;
-          border-radius: 2px;
-          background: linear-gradient(90deg, transparent, #FF5500, #FFAA00, transparent);
-          box-shadow: 0 0 10px #FF5500;
-          animation: fmUnderlineExpand 0.7s ease-out forwards 0.3s;
-          transform: scaleX(0);
-        }
-
-        @keyframes fmUnderlineExpand {
-          0% { transform: scaleX(0); opacity: 0; }
-          100% { transform: scaleX(1); opacity: 1; }
-        }
-
-        /* Tagline Pill Badge */
-        .fm-brand-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 6px 18px;
-          border-radius: 9999px;
-          background: rgba(255, 255, 255, 0.06);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 85, 0, 0.3);
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-          animation: fmBadgeRise 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.25s;
-          opacity: 0;
-          margin-bottom: 22px;
-          will-change: transform, opacity;
-        }
-
-        @keyframes fmBadgeRise {
-          0% {
-            transform: translate3d(0, 22px, 0);
-            opacity: 0;
-          }
-          100% {
-            transform: translate3d(0, 0, 0);
-            opacity: 1;
-          }
-        }
-
-        .fm-badge-dot {
-          width: 5px;
-          height: 5px;
+        /* Floor shadow under whole lockup */
+        .fm-lockup-ground-shadow {
+          width: 240px;
+          height: 12px;
+          margin-top: -12px;
+          margin-bottom: 24px;
           border-radius: 50%;
-          background: #FF5500;
-          box-shadow: 0 0 8px #FF5500;
+          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.02) 60%, transparent 80%);
+          animation: fmLockupShadowIn 0.8s ease-out forwards 0.4s;
+          opacity: 0;
+          pointer-events: none;
         }
 
-        .fm-badge-text {
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 1.6px;
-          text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.85);
+        @keyframes fmLockupShadowIn {
+          0% { opacity: 0; transform: scaleX(0.4); }
+          100% { opacity: 1; transform: scaleX(1); }
         }
 
-        /* Continuous Glowing Loader Sweep Underneath */
-        .fm-loader-track {
+        /* Loading Section Positioned Directly Underneath */
+        .fm-studio-loader-section {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 10px;
-          animation: fmLoaderReveal 0.8s ease-out forwards 0.4s;
+          gap: 12px;
+          animation: fmLoaderFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.5s;
           opacity: 0;
         }
 
-        @keyframes fmLoaderReveal {
-          0% { opacity: 0; transform: translate3d(0, 10px, 0); }
-          100% { opacity: 1; transform: translate3d(0, 0, 0); }
+        @keyframes fmLoaderFadeUp {
+          0% {
+            opacity: 0;
+            transform: translate3d(0, 16px, 0);
+          }
+          100% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+          }
         }
 
-        .fm-loader-spinner {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          border: 3px solid rgba(255, 85, 0, 0.18);
-          border-top-color: #FF5500;
-          border-right-color: #FFAA00;
-          box-shadow: 0 0 16px rgba(255, 85, 0, 0.5);
-          animation: fmSpinnerSpin 1s linear infinite;
+        /* Spinner Box */
+        .fm-loader-spinner-box {
+          position: relative;
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
-        @keyframes fmSpinnerSpin {
+        .fm-loader-svg {
+          width: 100%;
+          height: 100%;
+          animation: fmSvgSpin 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .fm-loader-bg-track {
+          stroke: rgba(255, 107, 0, 0.12);
+        }
+
+        .fm-loader-sweep-ring {
+          stroke: #FF5500;
+          filter: drop-shadow(0 0 6px rgba(255, 85, 0, 0.65));
+          animation: fmStrokeSweep 1.6s ease-in-out infinite;
+        }
+
+        @keyframes fmSvgSpin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
 
-        .fm-loader-label {
+        @keyframes fmStrokeSweep {
+          0% {
+            stroke-dashoffset: 100;
+          }
+          50% {
+            stroke-dashoffset: 25;
+          }
+          100% {
+            stroke-dashoffset: 100;
+          }
+        }
+
+        /* Center Rhythmic Pulsing Dot */
+        .fm-loader-pulse-dot {
+          position: absolute;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #FF5500;
+          box-shadow: 0 0 10px #FF5500;
+          animation: fmDotPulse 1.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes fmDotPulse {
+          0% { transform: scale(0.7); opacity: 0.4; }
+          100% { transform: scale(1.3); opacity: 1; }
+        }
+
+        /* Modern Crisp Typography for Loader Label */
+        .fm-loader-label-group {
+          display: flex;
+          align-items: center;
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-          font-size: 9px;
+          font-size: 10px;
           font-weight: 700;
-          letter-spacing: 1.8px;
+          letter-spacing: 2px;
+          color: #8C93A0;
           text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.45);
+        }
+
+        .fm-loader-dots {
+          display: inline-flex;
+          margin-left: 2px;
+        }
+
+        .fmd-1 { animation: fmDotBlink 1.4s infinite 0s; }
+        .fmd-2 { animation: fmDotBlink 1.4s infinite 0.2s; }
+        .fmd-3 { animation: fmDotBlink 1.4s infinite 0.4s; }
+
+        @keyframes fmDotBlink {
+          0%, 20% { opacity: 0; }
+          40%, 100% { opacity: 1; }
         }
       `}</style>
     </div>
   );
 }
+
 
 
 
