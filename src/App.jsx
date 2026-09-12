@@ -181,7 +181,10 @@ export default function App() {
   const [openCartAfterLogin, setOpenCartAfterLogin] = useState(false);
   const [isWelcomeOnboardingOpen, setIsWelcomeOnboardingOpen] = useState(false);
   const [onboardingUser, setOnboardingUser] = useState(null);
-  const [showSplash, setShowSplash] = useState(() => isNativeApp());
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('splash')) return true;
+    return isNativeApp();
+  });
 
   const handleOpenServiceModal = (defectType = '') => {
     setServiceInitialDefect(defectType);
@@ -974,7 +977,7 @@ export default function App() {
 
   return (
     <div className="app">
-      {showSplash && isNativeApp() && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
       <SEOManager 
         selectedProduct={selectedProduct}
         shopCategory={shopCategory}

@@ -199,15 +199,15 @@ export default function SplashScreen({ onFinish }) {
           display: flex;
           align-items: center;
           justify-content: center;
-          height: 72px;
-          margin-bottom: 28px;
+          min-height: 72px;
+          margin-bottom: 24px;
         }
 
         /* Logo Badge Anchor */
         .fm-logo-badge-anchor {
           position: relative;
-          width: 66px;
-          height: 66px;
+          width: clamp(52px, 14vw, 66px);
+          height: clamp(52px, 14vw, 66px);
           flex-shrink: 0;
           z-index: 2;
         }
@@ -249,8 +249,8 @@ export default function SplashScreen({ onFinish }) {
           padding: 2.5px;
           background: linear-gradient(145deg, #1A1A1A 0%, #000000 100%);
           box-shadow: 
-            0 12px 28px -4px rgba(0, 0, 0, 0.22),
-            0 6px 14px -2px rgba(255, 107, 0, 0.35),
+            0 12px 28px -4px rgba(0, 0, 0, 0.18),
+            0 6px 14px -2px rgba(255, 107, 0, 0.3),
             inset 0 1px 2px rgba(255, 255, 255, 0.7);
         }
 
@@ -291,13 +291,13 @@ export default function SplashScreen({ onFinish }) {
         /* Badge Ground Shadow */
         .fm-badge-ground-shadow {
           position: absolute;
-          bottom: -12px;
+          bottom: -10px;
           left: 50%;
           transform: translateX(-50%);
-          width: 54px;
-          height: 10px;
+          width: 80%;
+          height: 8px;
           border-radius: 50%;
-          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.05) 55%, transparent 75%);
+          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.04) 55%, transparent 75%);
           animation: fmShadowScale 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
           pointer-events: none;
         }
@@ -313,7 +313,7 @@ export default function SplashScreen({ onFinish }) {
           align-items: baseline;
           white-space: nowrap;
           overflow: hidden;
-          margin-left: 2px;
+          margin-left: 4px;
           animation: fmTextExpand 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.35s;
           opacity: 0;
           max-width: 0;
@@ -330,7 +330,7 @@ export default function SplashScreen({ onFinish }) {
             opacity: 0.7;
           }
           100% {
-            max-width: 320px;
+            max-width: 340px;
             opacity: 1;
             transform: translateX(0);
           }
@@ -338,7 +338,7 @@ export default function SplashScreen({ onFinish }) {
 
         .fm-word-riends {
           font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          font-size: 38px;
+          font-size: clamp(24px, 7vw, 36px);
           font-weight: 800;
           color: #1A1D20;
           letter-spacing: -0.5px;
@@ -347,13 +347,13 @@ export default function SplashScreen({ onFinish }) {
         }
 
         .fm-word-space {
-          font-size: 38px;
+          font-size: clamp(24px, 7vw, 36px);
           line-height: 1;
         }
 
         .fm-word-mobile {
           font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          font-size: 38px;
+          font-size: clamp(24px, 7vw, 36px);
           font-weight: 800;
           color: #FF5500;
           letter-spacing: -0.5px;
@@ -364,12 +364,13 @@ export default function SplashScreen({ onFinish }) {
 
         /* Floor shadow under whole lockup */
         .fm-lockup-ground-shadow {
-          width: 240px;
-          height: 12px;
-          margin-top: -12px;
-          margin-bottom: 24px;
+          width: 80%;
+          max-width: 260px;
+          height: 10px;
+          margin-top: -8px;
+          margin-bottom: 28px;
           border-radius: 50%;
-          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.02) 60%, transparent 80%);
+          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.07) 0%, rgba(0, 0, 0, 0.015) 60%, transparent 80%);
           animation: fmLockupShadowIn 0.8s ease-out forwards 0.4s;
           opacity: 0;
           pointer-events: none;
