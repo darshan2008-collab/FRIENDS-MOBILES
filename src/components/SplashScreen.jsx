@@ -9,15 +9,15 @@ export default function SplashScreen({ onFinish }) {
     // Instantly hide native static splash to show animated screen with 0ms delay
     const hideNativeSplash = async () => {
       try {
-        await CapSplashScreen.hide({ fadeOutDuration: 100 });
+        await CapSplashScreen.hide({ fadeOutDuration: 150 });
       } catch (_) {}
     };
     hideNativeSplash();
 
-    // 4.6-second cinematic display + 0.4s exit transition
+    // 5.6-second luxurious cinematic experience + 0.5s smooth exit transition
     const exitTimer = setTimeout(() => {
       triggerAppEnter();
-    }, 4600);
+    }, 5600);
 
     return () => clearTimeout(exitTimer);
   }, []);
@@ -26,7 +26,7 @@ export default function SplashScreen({ onFinish }) {
     setIsExiting(true);
     setTimeout(() => {
       if (onFinish) onFinish();
-    }, 400);
+    }, 500);
   }, [onFinish]);
 
   return (
@@ -44,17 +44,17 @@ export default function SplashScreen({ onFinish }) {
       {/* Main Studio Centerpiece Stage */}
       <div className="fm-studio-stage">
         
-        {/* Unified Brand Identity: Circular Logo acts directly as Initial Letter "F" */}
+        {/* Unified Brand Identity: 3D Logo Badge + Complete "Friends Mobile" with Prominent "F" */}
         <div className="fm-brand-lockup">
           
-          {/* Logo Badge as Initial Letter "F" */}
+          {/* 3D Orange Circular Brand Logo Badge */}
           <div className="fm-logo-badge-anchor">
             <div className="fm-logo-badge-3d">
               <div className="fm-badge-outer-ring">
                 <div className="fm-badge-inner-circle">
                   <img
                     src={logoImg || '/logo.png'}
-                    alt="F"
+                    alt="Friends Mobile Logo"
                     className="fm-badge-icon"
                     onError={(e) => {
                       e.target.src = '/logo.png';
@@ -69,9 +69,11 @@ export default function SplashScreen({ onFinish }) {
             <div className="fm-badge-ground-shadow" />
           </div>
 
-          {/* Typography animates outwards to the right: "riends Mobile" */}
+          {/* Typography animates outwards smoothly: Complete "Friends Mobile" with crystal-clear "F" */}
           <div className="fm-text-reveal-container">
-            <span className="fm-word-riends">riends</span>
+            <span className="fm-word-friends">
+              <span className="fm-letter-f">F</span><span className="fm-word-rest">riends</span>
+            </span>
             <span className="fm-word-space">&nbsp;</span>
             <span className="fm-word-mobile">Mobile</span>
           </div>
@@ -91,7 +93,7 @@ export default function SplashScreen({ onFinish }) {
                 cy="22"
                 r="18"
                 fill="none"
-                strokeWidth="3.2"
+                strokeWidth="3"
               />
               <circle
                 className="fm-loader-sweep-ring"
@@ -99,7 +101,7 @@ export default function SplashScreen({ onFinish }) {
                 cy="22"
                 r="18"
                 fill="none"
-                strokeWidth="3.2"
+                strokeWidth="3"
                 strokeDasharray="113"
                 strokeDashoffset="75"
                 strokeLinecap="round"
@@ -109,7 +111,7 @@ export default function SplashScreen({ onFinish }) {
             <div className="fm-loader-pulse-dot" />
           </div>
 
-          {/* Minimalist Status Text */}
+          {/* Minimalist Status Text with Synchronized Blinking Dots */}
           <div className="fm-loader-label-group">
             <span className="fm-loader-label">PREPARING YOUR STORE</span>
             <span className="fm-loader-dots">
@@ -129,7 +131,7 @@ export default function SplashScreen({ onFinish }) {
           z-index: 9999999;
           background-color: #FFFFFF;
           background-image: 
-            radial-gradient(circle at 50% 40%, #FFFFFF 0%, #FAFAFC 45%, #F0F2F6 100%);
+            radial-gradient(circle at 50% 42%, #FFFFFF 0%, #F9FAFC 45%, #EFF2F7 100%);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -137,36 +139,38 @@ export default function SplashScreen({ onFinish }) {
           cursor: pointer;
           user-select: none;
           -webkit-user-select: none;
-          transition: opacity 0.4s cubic-bezier(0.2, 0.9, 0.3, 1),
-                      transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1),
-                      filter 0.4s ease-out;
+          transition: opacity 0.5s cubic-bezier(0.2, 0.9, 0.3, 1),
+                      transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1),
+                      filter 0.5s ease-out;
           will-change: opacity, transform, filter;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
         }
 
-        /* Seamless smooth exit fade & subtle push into app */
+        /* Seamless smooth exit fade & gentle push into app */
         .fm-splash-exit {
           opacity: 0 !important;
-          transform: scale(1.04) !important;
-          filter: blur(4px);
+          transform: scale3d(1.03, 1.03, 1) !important;
+          filter: blur(5px);
           pointer-events: none;
         }
 
         /* Ambient Studio Light Glow */
         .fm-studio-light-radial {
           position: absolute;
-          width: 500px;
-          height: 500px;
+          width: 540px;
+          height: 540px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(255, 120, 30, 0.08) 0%, rgba(255, 170, 50, 0.03) 45%, transparent 70%);
+          background: radial-gradient(circle, rgba(255, 110, 20, 0.09) 0%, rgba(255, 170, 50, 0.03) 45%, transparent 70%);
           top: 45%;
           left: 50%;
           transform: translate(-50%, -50%);
           pointer-events: none;
-          animation: fmStudioAmbientBreathe 4s ease-in-out infinite alternate;
+          animation: fmStudioAmbientBreathe 5s ease-in-out infinite alternate;
         }
 
         @keyframes fmStudioAmbientBreathe {
-          0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.8; }
+          0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.75; }
           100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
         }
 
@@ -176,7 +180,7 @@ export default function SplashScreen({ onFinish }) {
           left: 0;
           right: 0;
           height: 40%;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, transparent 100%);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, transparent 100%);
           pointer-events: none;
         }
 
@@ -188,51 +192,53 @@ export default function SplashScreen({ onFinish }) {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 24px;
+          padding: 24px 16px;
           width: 100%;
           max-width: 480px;
+          transform: translate3d(0, 0, 0);
         }
 
-        /* Main Brand Lockup: Logo Badge ("F") + "riends Mobile" */
+        /* Main Brand Lockup: Logo Badge + Complete "Friends Mobile" */
         .fm-brand-lockup {
           position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
           min-height: 72px;
-          margin-bottom: 24px;
+          margin-bottom: 22px;
+          transform: translate3d(0, 0, 0);
         }
 
         /* Logo Badge Anchor */
         .fm-logo-badge-anchor {
           position: relative;
-          width: clamp(52px, 14vw, 66px);
-          height: clamp(52px, 14vw, 66px);
+          width: clamp(52px, 14vw, 68px);
+          height: clamp(52px, 14vw, 68px);
           flex-shrink: 0;
           z-index: 2;
         }
 
-        /* 3D Elastic Bounce Entrance */
+        /* 3D Smooth Elastic Bounce Entrance (Paced gently) */
         .fm-logo-badge-3d {
           position: relative;
           width: 100%;
           height: 100%;
           border-radius: 50%;
-          animation: fmElasticLogoIn 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+          animation: fmElasticLogoIn 1.1s cubic-bezier(0.18, 0.89, 0.32, 1.22) forwards;
           will-change: transform, opacity;
         }
 
         @keyframes fmElasticLogoIn {
           0% {
-            transform: scale3d(0.1, 0.1, 1);
+            transform: scale3d(0.15, 0.15, 1);
             opacity: 0;
           }
-          55% {
-            transform: scale3d(1.18, 1.18, 1);
+          60% {
+            transform: scale3d(1.14, 1.14, 1);
             opacity: 1;
           }
-          75% {
-            transform: scale3d(0.94, 0.94, 1);
+          80% {
+            transform: scale3d(0.96, 0.96, 1);
           }
           100% {
             transform: scale3d(1, 1, 1);
@@ -249,9 +255,9 @@ export default function SplashScreen({ onFinish }) {
           padding: 2.5px;
           background: linear-gradient(145deg, #1A1A1A 0%, #000000 100%);
           box-shadow: 
-            0 12px 28px -4px rgba(0, 0, 0, 0.18),
-            0 6px 14px -2px rgba(255, 107, 0, 0.3),
-            inset 0 1px 2px rgba(255, 255, 255, 0.7);
+            0 14px 30px -4px rgba(0, 0, 0, 0.18),
+            0 6px 16px -2px rgba(255, 107, 0, 0.3),
+            inset 0 1px 2px rgba(255, 255, 255, 0.75);
         }
 
         .fm-badge-inner-circle {
@@ -280,8 +286,8 @@ export default function SplashScreen({ onFinish }) {
           inset: 0;
           background: linear-gradient(
             135deg,
-            rgba(255, 255, 255, 0.5) 0%,
-            rgba(255, 255, 255, 0.1) 42%,
+            rgba(255, 255, 255, 0.52) 0%,
+            rgba(255, 255, 255, 0.12) 42%,
             transparent 60%
           );
           pointer-events: none;
@@ -297,8 +303,8 @@ export default function SplashScreen({ onFinish }) {
           width: 80%;
           height: 8px;
           border-radius: 50%;
-          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.04) 55%, transparent 75%);
-          animation: fmShadowScale 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.04) 55%, transparent 75%);
+          animation: fmShadowScale 1.1s cubic-bezier(0.18, 0.89, 0.32, 1.22) forwards;
           pointer-events: none;
         }
 
@@ -307,14 +313,14 @@ export default function SplashScreen({ onFinish }) {
           100% { transform: translateX(-50%) scale(1); opacity: 1; }
         }
 
-        /* Smooth Typography Reveal to the Right: "riends Mobile" */
+        /* Smooth, Luxurious Typography Reveal: Complete "Friends Mobile" with crystal-clear "F" */
         .fm-text-reveal-container {
           display: flex;
           align-items: baseline;
           white-space: nowrap;
           overflow: hidden;
-          margin-left: 4px;
-          animation: fmTextExpand 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.35s;
+          margin-left: clamp(6px, 1.8vw, 10px);
+          animation: fmTextExpand 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.45s;
           opacity: 0;
           max-width: 0;
           will-change: max-width, opacity;
@@ -324,36 +330,51 @@ export default function SplashScreen({ onFinish }) {
           0% {
             max-width: 0;
             opacity: 0;
-            transform: translateX(-15px);
+            transform: translate3d(-18px, 0, 0);
           }
           40% {
             opacity: 0.7;
           }
           100% {
-            max-width: 340px;
+            max-width: 380px;
             opacity: 1;
-            transform: translateX(0);
+            transform: translate3d(0, 0, 0);
           }
         }
 
-        .fm-word-riends {
+        .fm-word-friends {
           font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          font-size: clamp(24px, 7vw, 36px);
+          font-size: clamp(24px, 6.8vw, 36px);
           font-weight: 800;
-          color: #1A1D20;
           letter-spacing: -0.5px;
           line-height: 1;
+          display: inline-flex;
+          align-items: baseline;
+        }
+
+        /* Prominent, bold letter "F" in Friends */
+        .fm-letter-f {
+          color: #FF5500;
+          font-size: 1.06em;
+          font-weight: 900;
+          display: inline-block;
+          margin-right: 1px;
+          text-shadow: 0 2px 10px rgba(255, 85, 0, 0.28);
+        }
+
+        .fm-word-rest {
+          color: #1A1D20;
           display: inline-block;
         }
 
         .fm-word-space {
-          font-size: clamp(24px, 7vw, 36px);
+          font-size: clamp(24px, 6.8vw, 36px);
           line-height: 1;
         }
 
         .fm-word-mobile {
           font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          font-size: clamp(24px, 7vw, 36px);
+          font-size: clamp(24px, 6.8vw, 36px);
           font-weight: 800;
           color: #FF5500;
           letter-spacing: -0.5px;
@@ -364,14 +385,14 @@ export default function SplashScreen({ onFinish }) {
 
         /* Floor shadow under whole lockup */
         .fm-lockup-ground-shadow {
-          width: 80%;
-          max-width: 260px;
+          width: 82%;
+          max-width: 280px;
           height: 10px;
-          margin-top: -8px;
-          margin-bottom: 28px;
+          margin-top: -6px;
+          margin-bottom: 26px;
           border-radius: 50%;
-          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.07) 0%, rgba(0, 0, 0, 0.015) 60%, transparent 80%);
-          animation: fmLockupShadowIn 0.8s ease-out forwards 0.4s;
+          background: radial-gradient(ellipse, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.015) 60%, transparent 80%);
+          animation: fmLockupShadowIn 1s ease-out forwards 0.5s;
           opacity: 0;
           pointer-events: none;
         }
@@ -387,8 +408,9 @@ export default function SplashScreen({ onFinish }) {
           flex-direction: column;
           align-items: center;
           gap: 12px;
-          animation: fmLoaderFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.5s;
+          animation: fmLoaderFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.75s;
           opacity: 0;
+          will-change: transform, opacity;
         }
 
         @keyframes fmLoaderFadeUp {
@@ -415,7 +437,7 @@ export default function SplashScreen({ onFinish }) {
         .fm-loader-svg {
           width: 100%;
           height: 100%;
-          animation: fmSvgSpin 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+          animation: fmSvgSpin 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
         .fm-loader-bg-track {
@@ -425,7 +447,7 @@ export default function SplashScreen({ onFinish }) {
         .fm-loader-sweep-ring {
           stroke: #FF5500;
           filter: drop-shadow(0 0 6px rgba(255, 85, 0, 0.65));
-          animation: fmStrokeSweep 1.6s ease-in-out infinite;
+          animation: fmStrokeSweep 1.8s ease-in-out infinite;
         }
 
         @keyframes fmSvgSpin {
@@ -453,7 +475,7 @@ export default function SplashScreen({ onFinish }) {
           border-radius: 50%;
           background: #FF5500;
           box-shadow: 0 0 10px #FF5500;
-          animation: fmDotPulse 1.2s ease-in-out infinite alternate;
+          animation: fmDotPulse 1.3s ease-in-out infinite alternate;
         }
 
         @keyframes fmDotPulse {
@@ -490,6 +512,7 @@ export default function SplashScreen({ onFinish }) {
     </div>
   );
 }
+
 
 
 

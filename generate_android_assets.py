@@ -45,17 +45,8 @@ def create_foreground_icon(target_size=432):
     return logo_img.resize((target_size, target_size), Image.Resampling.LANCZOS)
 
 def create_splash_screen(width, height):
-    canvas_w = max(width, 1024)
-    canvas_h = max(height, 1024)
-    img = Image.new('RGBA', (canvas_w, canvas_h), '#070A11')
-    
-    emblem_dim = int(min(canvas_w, canvas_h) * 0.38)
-    logo_img = get_logo_image(size=emblem_dim, emblem_scale=1.0)
-    
-    pos_x = (canvas_w - emblem_dim) // 2
-    pos_y = (canvas_h - emblem_dim) // 2
-    img.alpha_composite(logo_img, (pos_x, pos_y))
-    return img.resize((width, height), Image.Resampling.LANCZOS)
+    # Pure clean white canvas to match React white studio splash with 0ms seam
+    return Image.new('RGBA', (width, height), '#FFFFFF')
 
 def main():
     res_base = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'android', 'app', 'src', 'main', 'res')
