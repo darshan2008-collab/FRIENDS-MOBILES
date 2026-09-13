@@ -198,6 +198,12 @@ export default function App() {
   const [onboardingUser, setOnboardingUser] = useState(null);
   const [showSplash, setShowSplash] = useState(() => isNativeApp());
 
+  useEffect(() => {
+    if (!showSplash && isNativeApp()) {
+      setShowSplash(true);
+    }
+  }, []);
+
   const handleOpenServiceModal = (defectType = '') => {
     setServiceInitialDefect(defectType);
     setIsServiceModalOpen(true);
