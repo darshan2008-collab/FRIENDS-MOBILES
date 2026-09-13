@@ -3,37 +3,38 @@
 export const isNativeApp = () => {
   if (typeof window === 'undefined') return false;
 
-  const host = (window.location.hostname || '').toLowerCase();
-  const port = window.location.port || '';
+  // 1. Explicit Capacitor native platform call (strictly returns true inside native Android/iOS app container)
+  try {
+    if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function') {
+      if (window.Capacitor.isNativePlatform()) {
+        return true;
+      }
+    }
+    if (window.Capacitor && typeof window.Capacitor.getPlatform === 'function') {
+      const platform = window.Capacitor.getPlatform();
+      if (platform === 'android' || platform === 'ios') {
+        return true;
+      }
+    }
+  } catch (_) {}
 
-  // 1. If running on any local dev server port (e.g. localhost:3000, 3001, 5173, etc.), it is strictly browser web
-  if ((host === 'localhost' || host === '127.0.0.1') && port !== '') {
-    return false;
-  }
-
-  // 2. If running on live production website or staging domains, it is strictly browser web
-  if (host === 'friendsmobile.co.in' || host.endsWith('.friendsmobile.co.in') || host.includes('vercel.app') || host.includes('netlify.app')) {
-    return false;
-  }
-
-  // 3. Explicit Capacitor native platform check
-  if (window.Capacitor?.isNativePlatform?.() || (window.Capacitor && window.Capacitor.getPlatform() !== 'web')) {
-    return true;
-  }
-
-  // 4. Native app protocols
+  // 2. Custom native protocols used in Capacitor APK
   if (window.location.protocol === 'capacitor:' || window.location.protocol === 'file:') {
     return true;
   }
 
-  // 5. Android WebView User Agent detection (Present in Android APK WebViews)
-  const ua = (navigator.userAgent || '').toLowerCase();
-  const isAndroidWebView = ua.includes('android') && (ua.includes('wv') || ua.includes('version/'));
+  // 3. Android Capacitor native WebView origin check (capacitor://localhost or https://localhost strictly without dev port)
+  const host = (window.location.hostname || '').toLowerCase();
+  const port = window.location.port || '';
+  if (host === 'localhost' && !port && typeof window.Capacitor !== 'undefined') {
+    const ua = (navigator.userAgent || '').toLowerCase();
+    if (ua.includes('android') && (ua.includes('wv') || ua.includes('capacitor'))) {
+      return true;
+    }
+  }
 
-  // 6. Capacitor default native localhost origin without port
-  const isCapacitorLocalhost = host === 'localhost' && !port;
-
-  return Boolean(isAndroidWebView || isCapacitorLocalhost || window.Capacitor);
+  // Any standard browser (Chrome, Safari, Firefox, Edge) or website domain is strictly false
+  return false;
 };
 
 export const getApiBaseUrl = () => {

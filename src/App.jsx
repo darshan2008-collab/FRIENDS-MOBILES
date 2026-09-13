@@ -196,9 +196,18 @@ export default function App() {
   const [openCartAfterLogin, setOpenCartAfterLogin] = useState(false);
   const [isWelcomeOnboardingOpen, setIsWelcomeOnboardingOpen] = useState(false);
   const [onboardingUser, setOnboardingUser] = useState(null);
-  const [showSplash, setShowSplash] = useState(() => isNativeApp());
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('splash') === '1' || params.get('previewSplash') === '1') {
+        return true;
+      }
+    }
+    return isNativeApp();
+  });
 
   useEffect(() => {
+    // Only activate splash screen on native APK
     if (!showSplash && isNativeApp()) {
       setShowSplash(true);
     }
