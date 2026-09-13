@@ -46,6 +46,18 @@ export default function SEOManager({
       return isNaN(num) ? "399.00" : num.toFixed(2);
     };
 
+    const getValidGtin13 = (id) => {
+      const numId = Number(id) || 1;
+      const base = `8907605${String(numId).padStart(5, '0')}`;
+      const digits = base.split('').map(Number);
+      let sum = 0;
+      for (let i = 0; i < 12; i++) {
+        sum += digits[i] * (i % 2 === 0 ? 1 : 3);
+      }
+      const checkDigit = (10 - (sum % 10)) % 10;
+      return base + checkDigit;
+    };
+
     // Default Fallback Metadata
     let title = 'FRIENDS MOBILE | Custom Phone Back Covers, Mobile Accessories & Store India | பிரண்ட்ஸ் மொபைல்';
 
@@ -150,11 +162,7 @@ export default function SEOManager({
         "merchantReturnDays": 7,
         "returnMethod": "https://schema.org/ReturnByMail",
         "returnFees": "https://schema.org/FreeReturn",
-        "returnShippingFeesAmount": {
-          "@type": "MonetaryAmount",
-          "value": "0",
-          "currency": "INR"
-        },
+        "merchantReturnLink": `${baseUrl}/`,
         "refundType": "https://schema.org/FullRefund"
       };
 
@@ -170,8 +178,10 @@ export default function SEOManager({
         "url": canonical,
         "image": [ogImage],
         "description": prodDesc,
+        "category": selectedProduct.category || "Mobile Accessories",
         "sku": `FM-PROD-${selectedProduct.id || Date.now()}`,
         "mpn": `FM-MPN-${selectedProduct.id || Date.now()}`,
+        "gtin13": getValidGtin13(selectedProduct.id),
         "brand": {
           "@type": "Brand",
           "name": selectedProduct.brand || "FRIENDS MOBILE"
@@ -385,11 +395,7 @@ export default function SEOManager({
         "merchantReturnDays": 7,
         "returnMethod": "https://schema.org/ReturnByMail",
         "returnFees": "https://schema.org/FreeReturn",
-        "returnShippingFeesAmount": {
-          "@type": "MonetaryAmount",
-          "value": "0.00",
-          "currency": "INR"
-        },
+        "merchantReturnLink": `${baseUrl}/`,
         "refundType": "https://schema.org/FullRefund"
       };
 
@@ -412,8 +418,10 @@ export default function SEOManager({
             "url": prodUrl,
             "image": [fullImg],
             "description": prod.description || prod.tamilDesc || 'Premium mobile accessory from FRIENDS MOBILE store.',
+            "category": prod.category || "Mobile Accessories",
             "sku": `FM-PROD-${prodId}`,
             "mpn": `FM-MPN-${prodId}`,
+            "gtin13": getValidGtin13(prodId),
             "brand": {
               "@type": "Brand",
               "name": prod.brand || "FRIENDS MOBILE"
