@@ -35,6 +35,14 @@ export default function AIChatbotModal({
   const [inputQuery, setInputQuery] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
+  const [botLang, setBotLang] = useState(() => {
+    try {
+      return localStorage.getItem('fm_bot_lang') || 'ta';
+    } catch {
+      return 'ta';
+    }
+  });
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -49,13 +57,12 @@ export default function AIChatbotModal({
     { id: 'complaint_escalate', label: '⚠️ Report Complaint', desc: 'Direct owner contact & WhatsApp' }
   ];
 
-  const hasInitializedRef = useRef(false);
-
-  // Initialize welcome message & fixed chart menu when opened
+  // Initialize welcome message & fixed chart menu when opened or when language toggles
   useEffect(() => {
-    if (isOpen && !hasInitializedRef.current) {
-      hasInitializedRef.current = true;
-      const welcomeText = `Welcome to FRIENDS MOBILE 24/7 Support Center! 🚀\n\nPlease select an option from our **Fixed Support Chart** below or enter your Order ID / query:`;
+    if (isOpen) {
+      const welcomeText = botLang === 'ta'
+        ? `வணக்கம்! பிரண்ட்ஸ் மொபைல் 24/7 AI உதவி மையத்திற்கு நல்வரவு! 🚀\n\nகீழே உள்ள **பிரதான உதவி வரைபடம்** மூலம் தேர்வு செய்யவும் அல்லது உங்கள் ஆர்டர் ஐடி / கேள்வியை உள்ளிடவும்:`
+        : `Welcome to FRIENDS MOBILE 24/7 Support Center! 🚀\n\nPlease select an option from our **Fixed Support Chart** below or enter your Order ID / query:`;
 
       const welcomeMsg = {
         id: 'welcome-1',
@@ -68,12 +75,14 @@ export default function AIChatbotModal({
           : ['📦 Track My Order', '🔄 Returns & Cancellation', '💳 Payments & Refund', '🎨 Custom Covers', '⚠️ Report Complaint']
       };
 
-      setMessages([welcomeMsg]);
+      setMessages((prev) => {
+        if (!prev || prev.length <= 1) {
+          return [welcomeMsg];
+        }
+        return prev;
+      });
     }
-    if (!isOpen) {
-      hasInitializedRef.current = false;
-    }
-  }, [isOpen]);
+  }, [isOpen, botLang]);
 
   useEffect(() => {
     if (isOpen) {
@@ -89,7 +98,18 @@ export default function AIChatbotModal({
     }
   };
 
-  const speakText = () => {};
+  const speakText = (text, msgId, lang = 'ta') => {
+    if (!('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const cleanText = (text || '').replace(/[*_#•`]/g, '').trim();
+      if (!cleanText) return;
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = lang === 'ta' ? 'ta-IN' : 'en-IN';
+      utterance.rate = 1.0;
+      window.speechSynthesis.speak(utterance);
+    } catch (_) {}
+  };
 
   // Toggle voice recording (Microphone Speech Recognition)
   const toggleSpeechRecognition = () => {
@@ -350,7 +370,61 @@ export default function AIChatbotModal({
             </div>
           </div>
 
-          <div className="ai-chatbot-header-right">
+          <div className="ai-chatbot-header-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Language Switcher */}
+            <button
+              type="button"
+              className="ai-header-btn"
+              onClick={() => {
+                const nextLang = botLang === 'ta' ? 'en' : 'ta';
+                setBotLang(nextLang);
+                try { localStorage.setItem('fm_bot_lang', nextLang); } catch (_) {}
+                if (addToast) addToast(nextLang === 'ta' ? 'தமிழ் மொழிக்கு மாற்றப்பட்டது' : 'Switched to English', 'info');
+              }}
+              title={botLang === 'ta' ? 'Switch to English' : 'தமிழுக்கு மாறவும்'}
+              style={{
+                background: 'rgba(255, 85, 0, 0.12)',
+                border: '1px solid rgba(255, 85, 0, 0.3)',
+                color: '#FF5500',
+                borderRadius: '16px',
+                padding: '4px 10px',
+                fontSize: '0.74rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              🌐 {botLang === 'ta' ? 'English' : 'தமிழ்'}
+            </button>
+
+            {/* Voice Audio Speaker Toggle */}
+            <button
+              type="button"
+              className="ai-header-btn"
+              onClick={() => {
+                const nextVoice = !isVoiceEnabled;
+                setIsVoiceEnabled(nextVoice);
+                if (!nextVoice) stopAllAudio();
+              }}
+              title={isVoiceEnabled ? 'Mute Voice Assistant' : 'Enable Voice Assistant'}
+              style={{
+                background: isVoiceEnabled ? '#FF5500' : 'rgba(255, 85, 0, 0.12)',
+                border: 'none',
+                color: isVoiceEnabled ? '#ffffff' : '#FF5500',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              {isVoiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            </button>
+
             <button 
               className="ai-close-btn" 
               onClick={() => {
