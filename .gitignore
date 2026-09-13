@@ -25,6 +25,14 @@ Thumbs.db
 *.suo
 *.user
 
+# Android & Mobile Build Artifacts
+android/.gradle/
+android/build/
+android/app/build/
+android/.idea/
+android/captures/
+.gradle/
+
 # Logs & Temporary Files
 *.log
 npm-debug.log*

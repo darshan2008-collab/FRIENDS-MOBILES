@@ -3,32 +3,35 @@
 export const isNativeApp = () => {
   if (typeof window === 'undefined') return false;
 
-  // 1. Exclude live production website and browser dev server
   const host = (window.location.hostname || '').toLowerCase();
-  const isWebDevServer = (host === 'localhost' || host === '127.0.0.1') && 
-                         (window.location.port === '5173' || window.location.port === '3000' || window.location.port === '5000');
-  const isLiveWebsite = host === 'friendsmobile.co.in' || host.endsWith('.friendsmobile.co.in');
+  const port = window.location.port || '';
 
-  if (isLiveWebsite || isWebDevServer) {
+  // 1. If running on any local dev server port (e.g. localhost:3000, 3001, 5173, etc.), it is strictly browser web
+  if ((host === 'localhost' || host === '127.0.0.1') && port !== '') {
     return false;
   }
 
-  // 2. Explicit Capacitor object / native platform
+  // 2. If running on live production website or staging domains, it is strictly browser web
+  if (host === 'friendsmobile.co.in' || host.endsWith('.friendsmobile.co.in') || host.includes('vercel.app') || host.includes('netlify.app')) {
+    return false;
+  }
+
+  // 3. Explicit Capacitor native platform check
   if (window.Capacitor?.isNativePlatform?.() || (window.Capacitor && window.Capacitor.getPlatform() !== 'web')) {
     return true;
   }
 
-  // 3. Native app protocols
+  // 4. Native app protocols
   if (window.location.protocol === 'capacitor:' || window.location.protocol === 'file:') {
     return true;
   }
 
-  // 4. Android WebView User Agent detection (Always present in Android APK WebViews!)
+  // 5. Android WebView User Agent detection (Present in Android APK WebViews)
   const ua = (navigator.userAgent || '').toLowerCase();
   const isAndroidWebView = ua.includes('android') && (ua.includes('wv') || ua.includes('version/'));
 
-  // 5. Capacitor default localhost origin without port
-  const isCapacitorLocalhost = host === 'localhost' && !window.location.port;
+  // 6. Capacitor default native localhost origin without port
+  const isCapacitorLocalhost = host === 'localhost' && !port;
 
   return Boolean(isAndroidWebView || isCapacitorLocalhost || window.Capacitor);
 };

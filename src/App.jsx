@@ -349,9 +349,14 @@ export default function App() {
     }).catch(() => {});
   };
 
-  // Set html data-theme attribute whenever theme state changes
+  // Set html & body data-theme attribute whenever theme state changes
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    document.body.setAttribute('data-theme', theme);
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute('content', theme === 'dark' ? '#060708' : '#ffffff');
+    }
   }, [theme]);
 
   // ─── Deep Link & Web-to-APK Google Auth Handler ─────────────────────────────
@@ -1055,7 +1060,7 @@ export default function App() {
 
 
   return (
-    <div className="app">
+    <div className="app" data-theme={theme}>
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
       <SEOManager 
         selectedProduct={selectedProduct}
