@@ -959,7 +959,7 @@ export default function AdminModal({
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
-        if (addToast) addToast('Master Excel Order History downloaded successfully!', '📊');
+        if (addToast) addToast('Master Excel Order History downloaded successfully!', 'success');
         return;
       }
     } catch (_) {}
@@ -1081,7 +1081,7 @@ export default function AdminModal({
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    if (addToast) addToast('Master Excel Order History report downloaded successfully!', '📊');
+    if (addToast) addToast('Master Excel Order History report downloaded successfully!', 'success');
   };
 
   // --- Printable Official Tax Invoice ---
@@ -2990,6 +2990,32 @@ export default function AdminModal({
                     </button>
                   ))}
                 </div>
+
+                {/* Download Master Excel Sheet Button */}
+                <button
+                  type="button"
+                  onClick={handleExportCSV}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: '#10b981',
+                    color: '#ffffff',
+                    fontWeight: '700',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
+                    whiteSpace: 'nowrap',
+                    marginLeft: 'auto'
+                  }}
+                  title="Download Orders Excel Sheet"
+                >
+                  <Download size={15} />
+                  Download Excel Sheet
+                </button>
               </div>
 
               {/* Order Cards List */}

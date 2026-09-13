@@ -76,7 +76,7 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
           size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
           isDoc: isDoc
         });
-        if (addToast) addToast(isDoc ? 'PDF/Document uploaded for frame customization!' : 'Photo uploaded in HD quality!', '🖼️');
+        if (addToast) addToast(isDoc ? 'PDF/Document uploaded for frame customization!' : 'Photo uploaded in HD quality!', 'info');
       };
       reader.readAsDataURL(file);
     }
@@ -120,7 +120,7 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
     };
 
     onAddToCart(customFrameProduct);
-    if (addToast) addToast(`Customized Photo Frame (${displaySize}) added to cart!`, '✓');
+    if (addToast) addToast(`Customized Photo Frame (${displaySize}) added to cart!`, 'success');
     onClose();
   };
 

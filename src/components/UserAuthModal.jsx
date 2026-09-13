@@ -264,7 +264,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
             if (data.token) {
               sessionStorage.setItem('fm_admin_token', data.token);
               sessionStorage.removeItem('fm_admin_pending_2fa');
-              if (addToast) addToast('👑 Executive Admin Portal Authenticated & Unlocked!', 'success');
+              if (addToast) addToast('Executive Admin Portal Authenticated & Unlocked!', 'success');
             } else {
               if (addToast) addToast('Primary credentials verified! Enter your 6-digit Security PIN.', 'info');
             }

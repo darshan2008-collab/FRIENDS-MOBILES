@@ -79,14 +79,22 @@ const placeOrderHandler = async (req, res) => {
     const isFirstOrder = customerPriorOrders.length === 0;
 
     const subtotal = clientSubtotal || items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+
+    const isCod = String(paymentMethod || '').toUpperCase().includes('COD') || String(paymentMethod || '').toUpperCase().includes('CASH');
+    if (isCod && subtotal < 300) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Cash on Delivery is available only on orders above ₹300. Please choose Online UPI Payment.' 
+      });
+    }
     
     let shipping = 0;
     if (clientShipping !== undefined) {
       shipping = clientShipping;
-    } else if (isFirstOrder || subtotal >= 1000) {
+    } else if (subtotal >= 1000) {
       shipping = 0;
     } else {
-      shipping = 70; // Fixed ₹70 shipping charge below ₹1,000 for returning accounts
+      shipping = 49;
     }
 
     const total = clientTotal || (subtotal + (typeof shipping === 'number' ? shipping : 0));

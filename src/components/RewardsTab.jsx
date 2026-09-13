@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Gift, Award, Sparkles, CheckCircle2, Zap } from 'lucide-react';
+import { Gift, Award, Sparkles, CheckCircle2, Zap, Copy } from 'lucide-react';
 import { copyToClipboard } from '../utils/clipboard';
 
 export const REWARD_COUPONS = [
@@ -87,7 +87,7 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
 
   const handleClaimCoupon = async (coupon) => {
     if (currentPoints < coupon.pointsRequired) {
-      if (addToast) addToast(`You need ${coupon.pointsRequired - currentPoints} more points to claim this coupon!`, '⚠️');
+      if (addToast) addToast(`You need ${coupon.pointsRequired - currentPoints} more points to claim this coupon!`, 'warning');
       return;
     }
 
@@ -130,9 +130,9 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
     const ok = await copyToClipboard(code);
     setCopiedCode(code);
     if (ok && addToast) {
-      addToast(`Copied Unique Redeem Code: ${code}`, '📋');
+      addToast(`Copied Unique Redeem Code: ${code}`, 'success');
     } else if (addToast) {
-      addToast(`Redeem Code: ${code}`, '📋');
+      addToast(`Redeem Code: ${code}`, 'info');
     }
     setTimeout(() => setCopiedCode(''), 3000);
   };
@@ -163,12 +163,12 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
 
           <div style={{ background: 'rgba(255, 255, 255, 0.18)', padding: '10px 16px', borderRadius: '12px', backdropFilter: 'blur(8px)', textAlign: 'right' }}>
             <span style={{ fontSize: '0.7rem', display: 'block', opacity: 0.9, fontWeight: '700' }}>EARNING RATE</span>
-            <strong style={{ fontSize: '0.95rem' }}>₹10 Spent = 1 Point 🎁</strong>
+            <strong style={{ fontSize: '0.95rem' }}>₹10 Spent = 1 Point</strong>
           </div>
         </div>
 
         <div style={{ fontSize: '0.82rem', opacity: 0.95, lineHeight: 1.5, background: 'rgba(0, 0, 0, 0.15)', padding: '10px 14px', borderRadius: '10px' }}>
-          ✨ Buy products at Friends Mobile to earn points! Redeem points to generate **unique random discount codes** (10%, 15%, 20%, Flat ₹200, 50% OFF).
+          Buy products at Friends Mobile to earn points! Redeem points to generate **unique random discount codes** (10%, 15%, 20%, Flat ₹200, 50% OFF).
         </div>
       </div>
 
@@ -228,7 +228,7 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
                     boxShadow: '0 4px 12px rgba(255,85,0,0.2)'
                   }}
                 >
-                  {copiedCode === c.code ? '✓ COPIED TO CLIPBOARD' : '📋 COPY CODE'}
+                  {copiedCode === c.code ? <><CheckCircle2 size={14} /> COPIED</> : <><Copy size={14} /> COPY CODE</>}
                 </button>
               </div>
             ))}
@@ -301,7 +301,7 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
                       gap: '6px'
                     }}
                   >
-                    <CheckCircle2 size={14} /> {copiedCode === latestClaimed.code ? '✓ Copied to Clipboard!' : `📋 Copy Redeem Code: ${latestClaimed.code}`}
+                    <CheckCircle2 size={14} /> {copiedCode === latestClaimed.code ? 'Copied to Clipboard!' : `Copy Redeem Code: ${latestClaimed.code}`}
                   </button>
                 ) : (
                   <button

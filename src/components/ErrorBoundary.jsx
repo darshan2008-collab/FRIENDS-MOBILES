@@ -59,7 +59,7 @@ export default class ErrorBoundary extends React.Component {
                   boxShadow: '0 4px 14px rgba(255, 85, 0, 0.35)'
                 }}
               >
-                🔄 Continue / Retry UI
+                Continue / Retry UI
               </button>
               <button
                 onClick={() => window.location.reload()}

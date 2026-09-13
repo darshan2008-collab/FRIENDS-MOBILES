@@ -181,7 +181,7 @@ export default function ProductDetailModal({
 
   const shareUrl = getProductShareUrl();
   const shareTitle = product?.title || 'FRIENDS MOBILE Product';
-  const shareText = `🔥 Check out "${shareTitle}" on FRIENDS MOBILE for just ₹${product?.price?.toLocaleString('en-IN') || ''}${product?.discount ? ` (${product.discount} OFF)` : ''}!\n\nBuy now: ${shareUrl}`;
+  const shareText = `Check out "${shareTitle}" on FRIENDS MOBILE for just ₹${product?.price?.toLocaleString('en-IN') || ''}${product?.discount ? ` (${product.discount} OFF)` : ''}!\n\nBuy now: ${shareUrl}`;
 
   const handleCopyLink = () => {
     try {

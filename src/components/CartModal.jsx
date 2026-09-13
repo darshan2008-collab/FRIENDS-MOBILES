@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, CheckCircle2, CreditCard, Sparkles, Copy, Check, Lock, Phone } from 'lucide-react';
+import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, CheckCircle2, CreditCard, Sparkles, Copy, Check, Lock, Phone, Gift, Zap, FileText, Smartphone, Radio } from 'lucide-react';
 import { getProductTitle } from '../data/translations';
 import { getApiBaseUrl } from '../data/apiConfig';
 import { copyToClipboard } from '../utils/clipboard';
@@ -79,11 +79,11 @@ export default function CartModal({
 
     const statusBadge = isUPI ? `
       <div style="display: inline-block; border: 2px solid #166534; background: #dcfce7; color: #166534; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">
-        ✓ PAID (ONLINE UPI VERIFIED)
+        PAID (ONLINE UPI VERIFIED)
       </div>
     ` : `
       <div style="display: inline-block; border: 2px solid #ea580c; background: #fff7ed; color: #ea580c; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">
-        📦 CASH ON DELIVERY ORDER
+        CASH ON DELIVERY ORDER
       </div>
     `;
 
@@ -150,17 +150,17 @@ export default function CartModal({
         <div class="invoice-wrapper">
           <div class="action-bar no-print">
             <a href="https://friendsmobile.co.in/" class="btn-return">
-              🏠 Return to Main Website
+              Return to Main Website
             </a>
             <button onclick="window.print()" class="btn-print">
-              🖨️ Print / Save as PDF
+              Print / Save as PDF
             </button>
           </div>
 
           <div class="invoice-card">
             <div class="header">
               <div>
-                <h1 class="logo-title">📱 FRIENDS MOBILE</h1>
+                <h1 class="logo-title">FRIENDS MOBILE</h1>
                 <div class="sub-title">South Gandhigramam, Karur / Madurai, Tamil Nadu - 639004</div>
                 <div class="sub-title">Customer Care: +91 74485 78507 | noreplyfriendsmobiles@gmail.com</div>
               </div>
@@ -174,15 +174,15 @@ export default function CartModal({
               <div class="meta-box">
                 <div class="meta-label">Customer Billed Details</div>
                 <div class="meta-val">${order.customer?.name || 'Valued Customer'}</div>
-                <div class="meta-sub">📞 Phone: ${order.customer?.phone || 'N/A'}</div>
-                <div class="meta-sub">📍 Address: ${order.customer?.address || 'Tamil Nadu, India'}</div>
+                <div class="meta-sub">Phone: ${order.customer?.phone || 'N/A'}</div>
+                <div class="meta-sub">Address: ${order.customer?.address || 'Tamil Nadu, India'}</div>
               </div>
               <div class="meta-box">
                 <div class="meta-label">Payment & Order Info</div>
                 <div class="meta-val">Order ID: #${order.orderId || order.id}</div>
-                <div class="meta-sub">📅 Order Date: ${new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
-                <div class="meta-sub">💳 Payment Mode: <strong>${order.paymentMethod || 'UPI QR Code Scan'}</strong></div>
-                <div class="meta-sub" style="color: #166534; font-weight: 700;">Status: ${isUPI ? '✓ PAID & CONFIRMED' : 'ORDER PLACED (COD)'}</div>
+                <div class="meta-sub">Order Date: ${new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                <div class="meta-sub">Payment Mode: <strong>${order.paymentMethod || 'UPI QR Code Scan'}</strong></div>
+                <div class="meta-sub" style="color: #166534; font-weight: 700;">Status: ${isUPI ? 'PAID & CONFIRMED' : 'ORDER PLACED (COD)'}</div>
               </div>
             </div>
 
@@ -349,7 +349,74 @@ export default function CartModal({
       return;
     }
 
-    // 2. Pattern Match for dynamic generated prefixes (e.g. FM-10OFF-XXXX, FM-50OFF-XXXX)
+    // 2. Standard Promotion & Reward Codes
+    if (code === 'WELCOME100') {
+      if (currentSubtotal < 499) {
+        if (addToast) addToast('Coupon WELCOME100 requires minimum order of ₹499.', 'warning');
+        return;
+      }
+      setAppliedCoupon({ code: 'WELCOME100', flatDiscount: 100, title: '₹100 OFF Welcome Coupon' });
+      if (addToast) addToast('Applied WELCOME100 - ₹100 OFF!', 'success');
+      return;
+    }
+
+    if (code === 'FRIENDS10') {
+      if (currentSubtotal < 299) {
+        if (addToast) addToast('Coupon FRIENDS10 requires minimum order of ₹299.', 'warning');
+        return;
+      }
+      setAppliedCoupon({ code: 'FRIENDS10', discountPct: 10, title: '10% OFF First Purchase' });
+      if (addToast) addToast('Applied FRIENDS10 - 10% OFF!', 'success');
+      return;
+    }
+
+    if (code === 'FRIENDS15') {
+      if (currentSubtotal < 499) {
+        if (addToast) addToast('Coupon FRIENDS15 requires minimum order of ₹499.', 'warning');
+        return;
+      }
+      setAppliedCoupon({ code: 'FRIENDS15', discountPct: 15, title: '15% OFF Special' });
+      if (addToast) addToast('Applied FRIENDS15 - 15% OFF!', 'success');
+      return;
+    }
+
+    if (code === 'FRIENDS20') {
+      if (currentSubtotal < 799) {
+        if (addToast) addToast('Coupon FRIENDS20 requires minimum order of ₹799.', 'warning');
+        return;
+      }
+      setAppliedCoupon({ code: 'FRIENDS20', discountPct: 20, title: '20% OFF Super' });
+      if (addToast) addToast('Applied FRIENDS20 - 20% OFF!', 'success');
+      return;
+    }
+
+    if (code === 'SUPER200') {
+      if (currentSubtotal < 999) {
+        if (addToast) addToast('Coupon SUPER200 requires minimum order of ₹999.', 'warning');
+        return;
+      }
+      setAppliedCoupon({ code: 'SUPER200', flatDiscount: 200, title: '₹200 Flat Discount' });
+      if (addToast) addToast('Applied SUPER200 - ₹200 Flat Discount!', 'success');
+      return;
+    }
+
+    if (code === 'MEGA50') {
+      if (currentSubtotal < 1499) {
+        if (addToast) addToast('Coupon MEGA50 requires minimum order of ₹1499.', 'warning');
+        return;
+      }
+      setAppliedCoupon({ code: 'MEGA50', discountPct: 50, title: '50% OFF Mega Discount' });
+      if (addToast) addToast('Applied MEGA50 - 50% Mega Discount!', 'success');
+      return;
+    }
+
+    if (code === 'FREESHIP') {
+      setAppliedCoupon({ code: 'FREESHIP', isFreeShip: true, title: 'FREE Express Delivery' });
+      if (addToast) addToast('Applied FREESHIP - FREE Shipping Unlocked!', 'success');
+      return;
+    }
+
+    // 3. Pattern Match for dynamic generated prefixes (e.g. FM-10OFF-XXXX, FM-50OFF-XXXX)
     if (code.startsWith('FM-10OFF-')) {
       if (currentSubtotal < 299) {
         if (addToast) addToast('Coupon FM-10OFF requires minimum order of ₹299.', 'warning');
@@ -359,36 +426,73 @@ export default function CartModal({
       if (addToast) addToast('Applied 10% OFF Welcome Coupon!', 'success');
       return;
     }
-    if (code.startsWith('FM-50OFF-')) {
+
+    if (code.startsWith('FM-15OFF-')) {
       if (currentSubtotal < 499) {
+        if (addToast) addToast('Coupon FM-15OFF requires minimum order of ₹499.', 'warning');
+        return;
+      }
+      setAppliedCoupon({ code, discountPct: 15, title: '15% OFF Special' });
+      if (addToast) addToast('Applied 15% OFF Coupon!', 'success');
+      return;
+    }
+
+    if (code.startsWith('FM-20OFF-')) {
+      if (currentSubtotal < 799) {
+        if (addToast) addToast('Coupon FM-20OFF requires minimum order of ₹799.', 'warning');
+        return;
+      }
+      setAppliedCoupon({ code, discountPct: 20, title: '20% OFF Super' });
+      if (addToast) addToast('Applied 20% OFF Coupon!', 'success');
+      return;
+    }
+
+    if (code.startsWith('FM-50OFF-')) {
+      if (currentSubtotal >= 1499) {
+        setAppliedCoupon({ code, discountPct: 50, title: '50% OFF Mega Discount' });
+        if (addToast) addToast('Applied 50% OFF Mega Discount!', 'success');
+      } else if (currentSubtotal >= 499) {
+        setAppliedCoupon({ code, flatDiscount: 50, title: '₹50 OFF Flat Discount' });
+        if (addToast) addToast('Applied ₹50 Flat Discount Coupon!', 'success');
+      } else {
         if (addToast) addToast('Coupon FM-50OFF requires minimum order of ₹499.', 'warning');
+      }
+      return;
+    }
+
+    if (code.startsWith('FM-SAVE50-')) {
+      if (currentSubtotal < 499) {
+        if (addToast) addToast('Coupon requires minimum order of ₹499.', 'warning');
         return;
       }
       setAppliedCoupon({ code, flatDiscount: 50, title: '₹50 OFF Flat Discount' });
       if (addToast) addToast('Applied ₹50 Flat Discount Coupon!', 'success');
       return;
     }
-    if (code.startsWith('FM-100OFF-')) {
+
+    if (code.startsWith('FM-100OFF-') || code.startsWith('FM-SAVE100-')) {
       if (currentSubtotal < 799) {
-        if (addToast) addToast('Coupon FM-100OFF requires minimum order of ₹799.', 'warning');
+        if (addToast) addToast('Coupon requires minimum order of ₹799.', 'warning');
         return;
       }
       setAppliedCoupon({ code, flatDiscount: 100, title: '₹100 OFF Special Coupon' });
       if (addToast) addToast('Applied ₹100 Flat Discount Coupon!', 'success');
       return;
     }
-    if (code.startsWith('FM-200OFF-')) {
+
+    if (code.startsWith('FM-200OFF-') || code.startsWith('FM-SAVE200-')) {
       if (currentSubtotal < 999) {
-        if (addToast) addToast('Coupon FM-200OFF requires minimum order of ₹999.', 'warning');
+        if (addToast) addToast('Coupon requires minimum order of ₹999.', 'warning');
         return;
       }
       setAppliedCoupon({ code, flatDiscount: 200, title: '₹200 OFF Mega Coupon' });
       if (addToast) addToast('Applied ₹200 Flat Discount Coupon!', 'success');
       return;
     }
-    if (code.startsWith('FM-300OFF-')) {
+
+    if (code.startsWith('FM-300OFF-') || code.startsWith('FM-SAVE300-')) {
       if (currentSubtotal < 1499) {
-        if (addToast) addToast('Coupon FM-300OFF requires minimum order of ₹1499.', 'warning');
+        if (addToast) addToast('Coupon requires minimum order of ₹1499.', 'warning');
         return;
       }
       setAppliedCoupon({ code, flatDiscount: 300, title: '₹300 OFF Festival Coupon' });
@@ -396,21 +500,13 @@ export default function CartModal({
       return;
     }
 
-    if (code === 'FRIENDS10') {
-      setAppliedCoupon({ code: 'FRIENDS10', discountPct: 10, title: '10% OFF First Purchase' });
-      if (addToast) addToast('Applied FRIENDS10 - 10% OFF!', 'success');
-    } else if (code === 'FREESHIP') {
-      setAppliedCoupon({ code: 'FREESHIP', isFreeShip: true, title: 'FREE Express Delivery' });
-      if (addToast) addToast('Applied FREESHIP - FREE Shipping Unlocked!', 'success');
-    } else {
-      if (addToast) addToast(`Invalid Coupon Code "${code}". Please check your code.`, 'error');
-    }
+    if (addToast) addToast(`Invalid Coupon Code "${code}". Please check your code.`, 'error');
   }
 
   function handleRemoveCoupon() {
     setAppliedCoupon(null);
     setCouponInput('');
-    if (addToast) addToast('Coupon removed.', 'ℹ️');
+    if (addToast) addToast('Coupon removed.', 'info');
   }
 
   const subtotal = (cart || []).reduce((acc, item) => acc + ((item.price || 0) * (item.quantity || 1)), 0);
@@ -426,32 +522,23 @@ export default function CartModal({
 
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
 
-  // Detect First Order for User by checking order history by phone/email/userOrders list
-  const userPhone = currentUser?.phone ? String(currentUser.phone).replace(/\D/g, '') : '';
-  const userEmail = currentUser?.email ? String(currentUser.email).toLowerCase().trim() : '';
-
-  const matchedPreviousOrders = (Array.isArray(userOrders) ? userOrders : []).filter(o => {
-    if (!o) return false;
-    const oPhone = o.customer?.phone ? String(o.customer.phone).replace(/\D/g, '') : '';
-    const oEmail = o.customer?.email ? String(o.customer.email).toLowerCase().trim() : '';
-    const isPhoneMatch = userPhone && oPhone && (userPhone === oPhone || oPhone.endsWith(userPhone) || userPhone.endsWith(userPhone));
-    const isEmailMatch = userEmail && oEmail && (userEmail === oEmail);
-    return isPhoneMatch || isEmailMatch;
-  });
-
-  const profileOrdersCount = Array.isArray(currentUser?.orders) ? currentUser.orders.length : 0;
-  const previousOrdersCount = Math.max(matchedPreviousOrders.length, profileOrdersCount);
-
-  // 1st Order offer applies ONLY when previous order count is 0
-  const isFirstOrder = currentUser ? (previousOrdersCount === 0) : false;
-
-  const freeThreshold = shippingSettings?.freeShippingThreshold || 1000;
+  // Free shipping ONLY on orders above ₹1,000 or with explicit free shipping coupon
+  const freeThreshold = 1000;
   const standardFee = shippingSettings?.standardShippingFee || 49;
-  const isFreeShipping = isFirstOrder || (appliedCoupon && appliedCoupon.isFreeShip) || discountedSubtotal >= freeThreshold;
+  const isFreeShipping = (appliedCoupon && appliedCoupon.isFreeShip) || (discountedSubtotal >= freeThreshold);
   const shippingFeeVal = isFreeShipping ? 0 : standardFee;
   const grandTotal = discountedSubtotal + shippingFeeVal;
   const amountToFreeShipping = Math.max(0, freeThreshold - discountedSubtotal);
-  const progressPercent = isFirstOrder ? 100 : Math.min(100, Math.round((discountedSubtotal / freeThreshold) * 100));
+  const progressPercent = Math.min(100, Math.round((discountedSubtotal / freeThreshold) * 100));
+
+  // Cash on Delivery (COD) Rule: Available ONLY above ₹300
+  const isCodAvailable = discountedSubtotal >= 300;
+
+  useEffect(() => {
+    if (!isCodAvailable && paymentMethod === 'COD') {
+      setPaymentMethod('UPI');
+    }
+  }, [isCodAvailable, paymentMethod]);
 
   function handleStartCheckout() {
     if (!currentUser) {
@@ -538,7 +625,7 @@ export default function CartModal({
         if (onOrderPlaced) onOrderPlaced(finalOrder);
         if (onClearCart) onClearCart();
         setCheckoutStep('success');
-        if (addToast) addToast(`Order #${finalOrder.orderId} Auto-Verified & Confirmed!`, '✓');
+        if (addToast) addToast(`Order #${finalOrder.orderId} Auto-Verified & Confirmed!`, 'success');
 
         // Automatically trigger printable E-Bill Tax Receipt window popup
         setTimeout(() => {
@@ -554,6 +641,12 @@ export default function CartModal({
 
   async function handlePlaceOrderSubmit(e) {
     e.preventDefault();
+
+    if (paymentMethod === 'COD' && !isCodAvailable) {
+      if (addToast) addToast('Cash on Delivery is available only on orders above ₹300. Please select Online UPI payment.', 'warning');
+      setPaymentMethod('UPI');
+      return;
+    }
     
     // Strict input security validation
     const phoneRegex = /^[0-9]{10}$/;
@@ -635,7 +728,7 @@ export default function CartModal({
 
     const cleanUtr = utrNumber.replace(/\D/g, '').trim();
     if (!cleanUtr || cleanUtr.length < 10) {
-      if (addToast) addToast('Please scan the QR code and enter a valid 12-digit UPI Transaction UTR / Ref No.', '⚠️');
+      if (addToast) addToast('Please scan the QR code and enter a valid 12-digit UPI Transaction UTR / Ref No.', 'warning');
       return;
     }
 
@@ -659,7 +752,7 @@ export default function CartModal({
     if (onOrderPlaced) onOrderPlaced(order);
     if (onClearCart) onClearCart();
     setCheckoutStep('success');
-    if (addToast) addToast(`Order #${order.orderId} Placed Successfully!`, '✓');
+    if (addToast) addToast(`Order #${order.orderId} Placed Successfully!`, 'success');
   }
 
   if (!isOpen || typeof document === 'undefined') return null;
@@ -772,11 +865,9 @@ export default function CartModal({
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '6px' }}>
                       <span style={{ fontWeight: '700' }}>
-                        {isFirstOrder 
-                          ? '1st Order Special Offer: FREE Shipping Unlocked!' 
-                          : (isFreeShipping 
-                              ? 'Congratulations! You unlocked FREE Shipping' 
-                              : `Add ₹${amountToFreeShipping} more for FREE Express Delivery (Free Shipping Above ₹${freeThreshold})`)}
+                        {isFreeShipping 
+                          ? 'Congratulations! You unlocked FREE Delivery (Orders Above ₹1,000)' 
+                          : `Add ₹${amountToFreeShipping} more for FREE Express Delivery (Free Delivery Above ₹1,000)`}
                       </span>
                       <span style={{ color: '#FF5500', fontWeight: '800' }}>{progressPercent}%</span>
                     </div>
@@ -885,8 +976,8 @@ export default function CartModal({
                     {/* Rewards Coupon Input Box */}
                     <div style={{ background: 'var(--bg-input)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '10px 12px', margin: '6px 0' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#FF5500', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          🎁 APPLY REWARDS COUPON
+                        <span style={{ fontSize: '0.74rem', fontWeight: '800', color: '#FF5500', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Gift size={15} color="#FF5500" /> APPLY REWARDS COUPON
                         </span>
                         {currentUser?.claimedCoupons && currentUser.claimedCoupons.length > 0 && (
                           <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
@@ -911,10 +1002,13 @@ export default function CartModal({
                                 fontSize: '0.72rem',
                                 fontWeight: '800',
                                 cursor: 'pointer',
-                                whiteSpace: 'nowrap'
+                                whiteSpace: 'nowrap',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
                               }}
                             >
-                              ⚡ Apply {c.code} ({c.discountPct ? `${c.discountPct}% OFF` : `₹${c.flatDiscount} OFF`})
+                              <Zap size={13} /> Apply {c.code} ({c.discountPct ? `${c.discountPct}% OFF` : `₹${c.flatDiscount} OFF`})
                             </button>
                           ))}
                         </div>
@@ -922,8 +1016,8 @@ export default function CartModal({
 
                       {appliedCoupon ? (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid #22c55e', padding: '6px 10px', borderRadius: '8px' }}>
-                          <span style={{ fontSize: '0.78rem', fontWeight: '800', color: '#22c55e' }}>
-                            ✓ {appliedCoupon.code} ({appliedCoupon.title})
+                          <span style={{ fontSize: '0.78rem', fontWeight: '800', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <CheckCircle2 size={14} /> {appliedCoupon.code} ({appliedCoupon.title})
                           </span>
                           <button
                             type="button"
@@ -963,9 +1057,7 @@ export default function CartModal({
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
                       <span>Delivery Charge:</span>
                       <strong style={{ color: isFreeShipping ? '#22c55e' : 'var(--text-primary)' }}>
-                        {isFreeShipping 
-                          ? (isFirstOrder ? 'FREE (1st Order Offer!)' : 'FREE (Above ₹1,000)') 
-                          : `₹${shippingFeeVal}`}
+                        {isFreeShipping ? 'FREE (Above ₹1,000)' : `₹${shippingFeeVal}`}
                       </strong>
                     </div>
 
@@ -1076,15 +1168,39 @@ export default function CartModal({
                   <label style={{
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'space-between',
                     gap: '10px',
                     padding: '10px 14px',
                     borderRadius: '10px',
                     border: '1px solid var(--border-color)',
-                    background: paymentMethod === 'COD' ? 'var(--orange-light)' : 'var(--bg-input)',
-                    cursor: 'pointer'
+                    background: !isCodAvailable ? 'var(--bg-input)' : (paymentMethod === 'COD' ? 'var(--orange-light)' : 'var(--bg-input)'),
+                    opacity: !isCodAvailable ? 0.6 : 1,
+                    cursor: !isCodAvailable ? 'not-allowed' : 'pointer'
                   }}>
-                    <input type="radio" name="payment" checked={paymentMethod === 'COD'} onChange={() => setPaymentMethod('COD')} />
-                    <span style={{ fontWeight: '700', fontSize: '0.85rem' }}>Cash on Delivery (COD)</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <input 
+                        type="radio" 
+                        name="payment" 
+                        disabled={!isCodAvailable} 
+                        checked={paymentMethod === 'COD'} 
+                        onChange={() => {
+                          if (isCodAvailable) setPaymentMethod('COD');
+                        }} 
+                      />
+                      <div>
+                        <span style={{ fontWeight: '700', fontSize: '0.85rem', display: 'block' }}>Cash on Delivery (COD)</span>
+                        {!isCodAvailable && (
+                          <span style={{ fontSize: '0.74rem', color: '#ef4444', fontWeight: '600' }}>
+                            Available only on orders above ₹300 (Please pay online via UPI)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {!isCodAvailable && (
+                      <span style={{ fontSize: '0.7rem', background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', padding: '3px 8px', borderRadius: '6px', fontWeight: '800' }}>
+                        Min ₹300 Required
+                      </span>
+                    )}
                   </label>
                 </div>
               </div>
@@ -1161,8 +1277,8 @@ export default function CartModal({
                         borderRadius: '12px', padding: '12px', textAlign: 'center'
                       }}>
                         <div style={{ fontSize: '0.8rem', fontWeight: '800', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', animation: 'pulse 1.5s infinite' }}></span>
-                          ⚡ Live Bank Webhook Listener Active...
+                          <Radio size={14} color="#15803d" />
+                          Live Bank Webhook Listener Active...
                         </div>
                         <span style={{ fontSize: '0.72rem', color: '#166534', display: 'block', marginTop: '2px' }}>
                           Scanning &amp; paying automatically completes your order instantly.
@@ -1189,7 +1305,7 @@ export default function CartModal({
                             type="button"
                             onClick={async () => {
                               const ok = await copyToClipboard(storeUpi);
-                              if (ok && addToast) addToast('Copied UPI ID!', '📋');
+                              if (ok && addToast) addToast('Copied UPI ID!', 'success');
                             }}
                             style={{ padding: '4px 10px', fontSize: '0.72rem', borderRadius: '6px', background: '#FF5500', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
                           >
@@ -1203,9 +1319,9 @@ export default function CartModal({
                         <a 
                           href={upiUri} 
                           className="btn btn-sm"
-                          style={{ background: '#4285F4', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '0.78rem', padding: '8px 12px', textDecoration: 'none', fontWeight: 'bold' }}
+                          style={{ background: '#4285F4', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '0.78rem', padding: '8px 12px', textDecoration: 'none', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                         >
-                          📲 Open UPI App Directly
+                          <Smartphone size={15} /> Open UPI App Directly
                         </a>
                       </div>
                     </div>
@@ -1241,7 +1357,7 @@ export default function CartModal({
                 <button 
                   onClick={async () => {
                     const ok = await copyToClipboard(placedOrderDetails.orderId);
-                    if (ok && addToast) addToast(`Copied Order Number: ${placedOrderDetails.orderId}`, '📋');
+                    if (ok && addToast) addToast(`Copied Order Number: ${placedOrderDetails.orderId}`, 'success');
                   }}
                   style={{ background: '#FF5500', color: '#fff', border: 'none', borderRadius: '6px', padding: '4px 10px', fontSize: '0.72rem', fontWeight: '800', cursor: 'pointer' }}
                 >
@@ -1289,7 +1405,7 @@ export default function CartModal({
                   boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)'
                 }}
               >
-                📄 Download Official E-Bill / Tax Invoice
+                <FileText size={16} /> Download Official E-Bill / Tax Invoice
               </button>
 
               <a 

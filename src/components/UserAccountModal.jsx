@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { 
   X, ShoppingBag, User, LogOut, PackageCheck, Clock, MapPin, Phone, Mail, 
   CheckCircle2, ShieldCheck, Tag, CreditCard, Star, ArrowRight, Heart, 
-  Sparkles, MessageCircle, HelpCircle, Copy, Truck, Lock, Wrench
+  Sparkles, MessageCircle, HelpCircle, Copy, Truck, Lock, Wrench, Gift, FileText
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 import RewardsTab from './RewardsTab';
@@ -47,9 +47,9 @@ export default function UserAccountModal({
     const ok = await copyToClipboard(code);
     setCopiedCoupon(code);
     if (ok && addToast) {
-      addToast(`Copied Coupon Code: ${code}`, '📋');
+      addToast(`Copied Coupon Code: ${code}`, 'success');
     } else if (addToast) {
-      addToast(`Coupon Code: ${code}`, '📋');
+      addToast(`Coupon Code: ${code}`, 'info');
     }
     setTimeout(() => setCopiedCoupon(''), 3000);
   };
@@ -74,14 +74,14 @@ export default function UserAccountModal({
       });
       const data = await res.json();
       if (data.success) {
-        if (addToast) addToast(`Order #${cancelTargetOrder.orderId} cancelled successfully!`, '🔴');
+        if (addToast) addToast(`Order #${cancelTargetOrder.orderId} cancelled successfully!`, 'info');
         setUserOrders(prev => prev.map(o => o.orderId === cancelTargetOrder.orderId ? { ...o, status: 'Cancelled', cancellationReason: finalReason } : o));
         setCancelTargetOrder(null);
       } else {
-        if (addToast) addToast(data.message || 'Failed to cancel order', '⚠️');
+        if (addToast) addToast(data.message || 'Failed to cancel order', 'warning');
       }
     } catch (err) {
-      if (addToast) addToast('Network error while cancelling order', '⚠️');
+      if (addToast) addToast('Network error while cancelling order', 'warning');
     } finally {
       setIsCancellingOrder(false);
     }
@@ -93,129 +93,6 @@ export default function UserAccountModal({
   const [returnActionType, setReturnType] = useState('Replacement');
   const [returnNotesText, setReturnNotesText] = useState('');
   const [isSubmittingReturn, setIsSubmittingReturn] = useState(false);
-
-  // Client-side Styled Excel (.xls) Exporter for Customer Order History
-  const handleExportUserOrdersExcel = () => {
-    if (!userOrders || userOrders.length === 0) {
-      if (addToast) addToast('No order history available to export!', '⚠️');
-      return;
-    }
-
-    const escapeXml = (str) => {
-      if (str === undefined || str === null) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
-    };
-
-    const rowsXml = userOrders.map((o, idx) => {
-      const custName = o.customer?.name || user?.name || 'Customer';
-      const custPhone = (o.customer?.phone || user?.phone) ? String(o.customer?.phone || user?.phone) : '';
-      const custAddr = o.customer?.address || '';
-      const itemsFormatted = (o.items || []).map(i => `${i.title || 'Product'} (x${i.quantity || 1}) - Rs.${i.price || 0}`).join('; ');
-      const subtotal = parseFloat(o.subtotal || o.total || 0);
-      const shipping = (o.shipping === 0 || o.shipping === '0' || o.shipping === 'FREE' || subtotal >= 1000) ? 0 : (typeof o.shipping === 'number' ? o.shipping : 60);
-      const total = parseFloat(o.total || (subtotal + shipping));
-      const payMethod = o.paymentMethod || 'COD';
-      const payStatus = o.paymentStatus || (payMethod === 'COD' ? 'Pending' : 'Paid');
-      const orderStatus = o.status || 'Order Placed';
-      const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
-      const reasonNote = o.cancellationReason || (o.returnDetails ? `${o.returnDetails.reason} (${o.returnDetails.returnType})` : '');
-      const bg = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
-
-      let statusBg = '#e2e8f0';
-      let statusColor = '#334155';
-      const statusLower = orderStatus.toLowerCase();
-      if (statusLower.includes('delivered')) {
-        statusBg = '#dcfce7'; statusColor = '#15803d';
-      } else if (statusLower.includes('cancell')) {
-        statusBg = '#fee2e2'; statusColor = '#b91c1c';
-      } else if (statusLower.includes('return')) {
-        statusBg = '#f3e8ff'; statusColor = '#6b21a8';
-      } else if (statusLower.includes('process') || statusLower.includes('ship')) {
-        statusBg = '#dbeafe'; statusColor = '#1e40af';
-      }
-
-      return `
-        <tr style="height: 32px;">
-          <td style="border: 1px solid #fed7aa; padding: 8px 12px; text-align: center; font-weight: bold; background-color: #fff3ed; color: #ea580c; mso-number-format:'\\@';">${escapeXml(o.orderId)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; background-color: #f8fafc; color: #334155;">${escapeXml(dateStr)}</td>
-          <td style="border: 1px solid #e9d5ff; padding: 8px 12px; font-weight: bold; background-color: #f3e8ff; color: #7e22ce;">${escapeXml(custName)}</td>
-          <td style="border: 1px solid #a5f3fc; padding: 8px 12px; text-align: center; font-weight: 600; background-color: #ecfeff; color: #0e7490; mso-number-format:'\\@';">${escapeXml(custPhone)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; background-color: #ffffff; color: #1e293b;">${escapeXml(custAddr)}</td>
-          <td style="border: 1px solid #fef08a; padding: 8px 12px; background-color: #fefce8; color: #854d0e; font-weight: 500;">${escapeXml(itemsFormatted)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: right; font-weight: 600; background-color: #f1f5f9; color: #0f172a;">Rs. ${subtotal.toLocaleString('en-IN')}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: bold; background-color: ${shipping === 0 ? '#dcfce7' : '#fee2e2'}; color: ${shipping === 0 ? '#15803d' : '#991b1b'};">${shipping === 0 ? 'FREE' : `Rs. ${shipping}`}</td>
-          <td style="border: 1px solid #fdba74; padding: 8px 12px; text-align: right; font-weight: bold; font-size: 13px; background-color: #ffedd5; color: #c2410c;">Rs. ${total.toLocaleString('en-IN')}</td>
-          <td style="border: 1px solid #bae6fd; padding: 8px 12px; text-align: center; font-weight: bold; background-color: #e0f2fe; color: #0369a1;">${escapeXml(payMethod)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: bold; background-color: ${payStatus === 'Paid' ? '#d1fae5' : '#fef3c7'}; color: ${payStatus === 'Paid' ? '#047857' : '#b45309'};">${escapeXml(payStatus)}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 8px 12px; text-align: center; font-weight: bold; background-color: ${statusBg}; color: ${statusColor};">${escapeXml(orderStatus)}</td>
-          <td style="border: 1px solid #fecdd3; padding: 8px 12px; background-color: #fff1f2; color: #be123c;">${escapeXml(reasonNote)}</td>
-        </tr>
-      `;
-    }).join('');
-
-    const excelTemplate = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<!--[if gte mso 9]>
-<xml>
-  <x:ExcelWorkbook>
-    <x:ExcelWorksheets>
-      <x:ExcelWorksheet>
-        <x:Name>My Order History</x:Name>
-        <x:WorksheetOptions>
-          <x:DisplayGridlines/>
-        </x:WorksheetOptions>
-      </x:ExcelWorksheet>
-    </x:ExcelWorksheets>
-  </x:ExcelWorkbook>
-</xml>
-<![endif]-->
-<style>
-  table { border-collapse: collapse; width: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; }
-  th { background-color: #FF5500; color: #ffffff; font-weight: bold; padding: 12px 10px; border: 1px solid #ea580c; text-align: center; font-size: 13px; vertical-align: middle; }
-  td { vertical-align: middle; }
-</style>
-</head>
-<body>
-<table>
-  <thead>
-    <tr style="height: 38px;">
-      <th style="width: 150px; background-color: #FF5500; color: #ffffff;">Order ID</th>
-      <th style="width: 170px; background-color: #FF5500; color: #ffffff;">Order Date &amp; Time</th>
-      <th style="width: 180px; background-color: #FF5500; color: #ffffff;">Customer Name</th>
-      <th style="width: 150px; background-color: #FF5500; color: #ffffff;">Phone Number</th>
-      <th style="width: 320px; background-color: #FF5500; color: #ffffff;">Delivery Address</th>
-      <th style="width: 380px; background-color: #FF5500; color: #ffffff;">Purchased Products</th>
-      <th style="width: 130px; background-color: #FF5500; color: #ffffff;">Subtotal (INR)</th>
-      <th style="width: 120px; background-color: #FF5500; color: #ffffff;">Shipping Fee</th>
-      <th style="width: 140px; background-color: #FF5500; color: #ffffff;">Grand Total (INR)</th>
-      <th style="width: 130px; background-color: #FF5500; color: #ffffff;">Payment Method</th>
-      <th style="width: 130px; background-color: #FF5500; color: #ffffff;">Payment Status</th>
-      <th style="width: 150px; background-color: #FF5500; color: #ffffff;">Order Status</th>
-      <th style="width: 250px; background-color: #FF5500; color: #ffffff;">Cancellation / Return Reason</th>
-    </tr>
-  </thead>
-  <tbody>
-    ${rowsXml}
-  </tbody>
-</table>
-</body>
-</html>`;
-
-    const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `FRIENDS_MOBILE_My_Orders_${new Date().toISOString().slice(0, 10)}.xls`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    if (addToast) addToast('Excel Order Report downloaded successfully!', '📊');
-  };
 
   const handleConfirmReturnOrder = async () => {
     if (!returnTargetOrder) return;
@@ -232,7 +109,7 @@ export default function UserAccountModal({
       });
       const data = await res.json();
       if (data.success) {
-        if (addToast) addToast(`Return request for Order #${returnTargetOrder.orderId} submitted!`, '🔄');
+        if (addToast) addToast(`Return request for Order #${returnTargetOrder.orderId} submitted!`, 'success');
         setUserOrders(prev => prev.map(o => o.orderId === returnTargetOrder.orderId ? {
           ...o,
           status: 'Return Requested',
@@ -245,10 +122,10 @@ export default function UserAccountModal({
         } : o));
         setReturnTargetOrder(null);
       } else {
-        if (addToast) addToast(data.message || 'Failed to submit return request', '⚠️');
+        if (addToast) addToast(data.message || 'Failed to submit return request', 'warning');
       }
     } catch (err) {
-      if (addToast) addToast('Network error while requesting return', '⚠️');
+      if (addToast) addToast('Network error while requesting return', 'warning');
     } finally {
       setIsSubmittingReturn(false);
     }
@@ -292,11 +169,11 @@ export default function UserAccountModal({
 
     const statusBadge = isUPI ? `
       <div style="display: inline-block; border: 2px solid #166534; background: #dcfce7; color: #166534; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">
-        ✓ PAID (ONLINE UPI VERIFIED)
+        PAID (ONLINE UPI VERIFIED)
       </div>
     ` : `
       <div style="display: inline-block; border: 2px solid #ea580c; background: #fff7ed; color: #ea580c; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;">
-        📦 CASH ON DELIVERY ORDER
+        CASH ON DELIVERY ORDER
       </div>
     `;
 
@@ -363,17 +240,17 @@ export default function UserAccountModal({
         <div class="invoice-wrapper">
           <div class="action-bar no-print">
             <a href="https://friendsmobile.co.in/" class="btn-return">
-              🏠 Return to Main Website
+              Return to Main Website
             </a>
             <button onclick="window.print()" class="btn-print">
-              🖨️ Print / Save as PDF
+              Print / Save as PDF
             </button>
           </div>
 
           <div class="invoice-card">
             <div class="header">
               <div>
-                <h1 class="logo-title">📱 FRIENDS MOBILE</h1>
+                <h1 class="logo-title">FRIENDS MOBILE</h1>
                 <div class="sub-title">South Gandhigramam, Karur / Madurai, Tamil Nadu - 639004</div>
                 <div class="sub-title">Customer Care: +91 74485 78507 | noreplyfriendsmobiles@gmail.com</div>
               </div>
@@ -387,15 +264,15 @@ export default function UserAccountModal({
               <div class="meta-box">
                 <div class="meta-label">Customer Billed Details</div>
                 <div class="meta-val">${order.customer?.name || user?.name || 'Valued Customer'}</div>
-                <div class="meta-sub">📞 Phone: ${order.customer?.phone || user?.phone || 'N/A'}</div>
-                <div class="meta-sub">📍 Address: ${order.shippingAddress || order.address || user?.address || 'Tamil Nadu, India'}</div>
+                <div class="meta-sub">Phone: ${order.customer?.phone || user?.phone || 'N/A'}</div>
+                <div class="meta-sub">Address: ${order.shippingAddress || order.address || user?.address || 'Tamil Nadu, India'}</div>
               </div>
               <div class="meta-box">
                 <div class="meta-label">Payment & Order Info</div>
                 <div class="meta-val">Order ID: #${order.orderId || order.id}</div>
-                <div class="meta-sub">📅 Order Date: ${new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
-                <div class="meta-sub">💳 Payment Mode: <strong>${order.paymentMethod || 'UPI QR Code Scan'}</strong></div>
-                <div class="meta-sub" style="color: #166534; font-weight: 700;">Status: ${isUPI ? '✓ PAID & CONFIRMED' : 'ORDER PLACED (COD)'}</div>
+                <div class="meta-sub">Order Date: ${new Date(order.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                <div class="meta-sub">Payment Mode: <strong>${order.paymentMethod || 'UPI QR Code Scan'}</strong></div>
+                <div class="meta-sub" style="color: #166534; font-weight: 700;">Status: ${isUPI ? 'PAID & CONFIRMED' : 'ORDER PLACED (COD)'}</div>
               </div>
             </div>
 
@@ -556,7 +433,7 @@ export default function UserAccountModal({
     setAddresses([...addresses, newAddr]);
     setNewAddressText('');
     setIsAddingAddress(false);
-    if (addToast) addToast('New shipping address saved!', '📍');
+    if (addToast) addToast('New shipping address saved!', 'map');
   };
 
   const activeOrdersCount = userOrders.filter(o => !o.status?.toLowerCase().includes('delivered')).length;
@@ -755,7 +632,7 @@ export default function UserAccountModal({
                 className={`dash-nav-item ${activeTab === 'rewards' ? 'active' : ''}`}
                 style={{ color: activeTab === 'rewards' ? '#ffffff' : '#FF5500', fontWeight: '800' }}
               >
-                <Sparkles size={18} color={activeTab === 'rewards' ? '#ffffff' : '#FF5500'} /> {isTamil ? '🎁 பிரண்ட்ஸ் ரிவார்டுகள் (' : '🎁 Friends Rewards ('}{user?.rewardPoints || 150} {isTamil ? 'புள்ளிகள்)' : 'PTS)'}
+                <Sparkles size={18} color={activeTab === 'rewards' ? '#ffffff' : '#FF5500'} /> {isTamil ? 'பிரண்ட்ஸ் ரிவார்டுகள் (' : 'Friends Rewards ('}{user?.rewardPoints || 150} {isTamil ? 'புள்ளிகள்)' : 'PTS)'}
               </button>
 
               <button 
@@ -799,29 +676,6 @@ export default function UserAccountModal({
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      {userOrders.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={handleExportUserOrdersExcel}
-                          style={{
-                            padding: '6px 14px',
-                            borderRadius: '20px',
-                            border: 'none',
-                            background: '#10b981',
-                            color: '#ffffff',
-                            fontWeight: '700',
-                            fontSize: '0.8rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.15)'
-                          }}
-                        >
-                          {isTamil ? 'எக்செல் பதிவிறக்கம்' : 'Download Excel Sheet'}
-                        </button>
-                      )}
-
                       <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#FF5500', background: 'var(--orange-light)', padding: '6px 14px', borderRadius: '20px' }}>
                         {userOrders.length} {isTamil ? 'ஆர்டர்கள் செய்யப்பட்டுள்ளன' : 'Orders Placed'}
                       </span>
@@ -986,7 +840,7 @@ export default function UserAccountModal({
                                   boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'
                                 }}
                               >
-                                📄 {isTamil ? 'பில் பதிவிறக்கம் (Tax Invoice)' : 'Download E-Bill (Tax Invoice)'}
+                                <FileText size={15} /> {isTamil ? 'பில் பதிவிறக்கம் (Tax Invoice)' : 'Download E-Bill (Tax Invoice)'}
                               </button>
                             </div>
 
@@ -1091,7 +945,7 @@ export default function UserAccountModal({
                                 <button
                                   onClick={() => {
                                     copyToClipboard(req.requestId);
-                                    if (addToast) addToast(`Copied ${req.requestId}`, '📋');
+                                    if (addToast) addToast(`Copied ${req.requestId}`, 'success');
                                   }}
                                   style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0 }}
                                 >
@@ -1242,7 +1096,7 @@ export default function UserAccountModal({
                         <ShieldCheck size={22} color="#10b981" />
                         <div>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Security Verification</span>
-                          <strong style={{ fontSize: '1.05rem', color: '#10b981' }}>Verified Customer ✓</strong>
+                          <strong style={{ fontSize: '1.05rem', color: '#10b981' }}>Verified Customer</strong>
                         </div>
                       </div>
                     </div>
@@ -1666,10 +1520,11 @@ export default function UserAccountModal({
                     border: returnActionType === 'Refund' ? '2px solid #a855f7' : '1px solid var(--border-color)',
                     background: returnActionType === 'Refund' ? 'rgba(168,85,247,0.1)' : 'var(--bg-input)',
                     color: returnActionType === 'Refund' ? '#a855f7' : 'var(--text-primary)',
-                    fontWeight: '800', fontSize: '0.8rem', cursor: 'pointer'
+                    fontWeight: '800', fontSize: '0.8rem', cursor: 'pointer',
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
                   }}
                 >
-                  💳 {isTamil ? 'பணத்தை திரும்பப் பெறுக' : 'Full Refund'}
+                  <CreditCard size={15} /> {isTamil ? 'பணத்தை திரும்பப் பெறுக' : 'Full Refund'}
                 </button>
               </div>
             </div>

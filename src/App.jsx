@@ -239,7 +239,7 @@ export default function App() {
     setToasts((prev) => (Array.isArray(prev) ? prev.filter(t => t.id !== id) : []));
   };
 
-  const addToast = (message, icon = '✨') => {
+  const addToast = (message, icon = 'info') => {
     if (!message) return;
     const id = Date.now() + '-' + Math.random().toString(36).substr(2, 6);
     setToasts((prev) => [...(Array.isArray(prev) ? prev : []), { id, message, icon }]);
@@ -652,7 +652,7 @@ export default function App() {
         setIsCustomCoverOpen(true);
         if (selectedProduct) setSelectedProduct(null);
         if (isShopOpen) setIsShopOpen(false);
-        addToast('Redirected to Back Cover Customization Studio! Select model & design.', '✨');
+        addToast('Redirected to Back Cover Customization Studio! Select model & design.', 'info');
         return;
       }
 
@@ -660,7 +660,7 @@ export default function App() {
         setIsCustomFrameOpen(true);
         if (selectedProduct) setSelectedProduct(null);
         if (isShopOpen) setIsShopOpen(false);
-        addToast('Redirected to Photo Frame Customization Studio!', '✨');
+        addToast('Redirected to Photo Frame Customization Studio!', 'info');
         return;
       }
     }
@@ -674,7 +674,7 @@ export default function App() {
       return [...safePrev, { ...product, id: product.id || product._id || safeId, quantity: 1 }];
     });
 
-    addToast(`Added "${String(safeTitle).slice(0, 18)}..." to Cart!`, '🛍️');
+    addToast(`Added "${String(safeTitle).slice(0, 18)}..." to Cart!`, 'cart');
     setIsCartOpen(true);
   };
 
@@ -688,7 +688,7 @@ export default function App() {
 
   const handleRemoveFromCart = (productId) => {
     setCart(prev => (Array.isArray(prev) ? prev : []).filter(p => p && p.id !== productId));
-    addToast('Item removed from cart', '🗑️');
+    addToast('Item removed from cart', 'trash');
   };
 
   const handleClearCart = () => {
@@ -751,15 +751,15 @@ export default function App() {
     const safeTitle = product.title || product.name || 'Product';
     if (safeWishlist.includes(product.id)) {
       setWishlist(prev => (Array.isArray(prev) ? prev : []).filter(id => id !== product.id));
-      addToast(`Removed "${String(safeTitle).slice(0, 15)}..." from Wishlist`, '🤍');
+      addToast(`Removed "${String(safeTitle).slice(0, 15)}..." from Wishlist`, 'wishlist-empty');
     } else {
       setWishlist(prev => [...(Array.isArray(prev) ? prev : []), product.id]);
-      addToast(`Added "${String(safeTitle).slice(0, 15)}..." to Wishlist`, '❤️');
+      addToast(`Added "${String(safeTitle).slice(0, 15)}..." to Wishlist`, 'wishlist-full');
     }
   };
 
   const handleSubscribe = (email) => {
-    if (email) addToast(`Subscribed ${email} to Newsletter!`, '📩');
+    if (email) addToast(`Subscribed ${email} to Newsletter!`, 'email');
   };
 
   const handleLoginSuccess = (user) => {
@@ -821,7 +821,7 @@ export default function App() {
         }
         return [...safePrev, { ...itemToCart, id: itemToCart.id || itemToCart._id || safeId, quantity: 1 }];
       });
-      addToast(`Signed in & added "${String(safeTitle).slice(0, 18)}..." to Cart!`, '🛍️');
+      addToast(`Signed in & added "${String(safeTitle).slice(0, 18)}..." to Cart!`, 'cart');
       setIsCartOpen(true);
     } else if (openCartAfterLogin) {
       setIsCartOpen(true);
@@ -854,7 +854,7 @@ export default function App() {
     } catch {}
     setIsAccountOpen(false);
     setIsCartOpen(false);
-    addToast('Logged out successfully', '👋');
+    addToast('Logged out successfully', 'info');
   };
 
   const handleOpenCartClick = () => {
@@ -1056,7 +1056,7 @@ export default function App() {
             }
             return o;
           }));
-          addToast(`Order ${orderId} shipping updated to ₹${cost}`, '🚚');
+          addToast(`Order ${orderId} shipping updated to ₹${cost}`, 'truck');
         } else {
           addToast(data.message || 'Failed to update shipping cost.', 'error');
         }

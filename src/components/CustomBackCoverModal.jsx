@@ -73,7 +73,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
           size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
           isDoc: isDoc
         });
-        if (addToast) addToast(isDoc ? 'PDF/Document uploaded successfully!' : 'Photo uploaded in HD quality!', '📄');
+        if (addToast) addToast(isDoc ? 'PDF/Document uploaded successfully!' : 'Photo uploaded in HD quality!', 'info');
       };
       reader.readAsDataURL(file);
     }
@@ -83,7 +83,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
     e.preventDefault();
     const finalModel = phoneModel === 'Other / Unlisted Model' ? customModelInput : phoneModel;
     if (!finalModel) {
-      if (addToast) addToast('Please select or enter your phone model', '⚠️');
+      if (addToast) addToast('Please select or enter your phone model', 'warning');
       return;
     }
 

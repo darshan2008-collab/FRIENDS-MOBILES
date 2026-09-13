@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Heart, ShoppingBag, ArrowRight, Share2 } from 'lucide-react';
+import { Heart, ShoppingBag, ArrowRight, Share2, Star } from 'lucide-react';
 import { getProductTitle } from '../data/translations';
 
 const defaultUnsplashMap = {
@@ -111,10 +111,15 @@ export default function TrendingProducts({ products, wishlist, onToggleWishlist,
                   </h3>
                   
                   <div className="rating">
-                    <span className="stars">
+                    <span className="stars" style={{ display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
                       {Array.from({ length: 5 }, (_, idx) => (
-                        idx < Math.round(prod.rating || 5) ? '★' : '☆'
-                      )).join('')}
+                        <Star 
+                          key={idx} 
+                          size={13} 
+                          fill={idx < Math.round(prod.rating || 5) ? '#eab308' : 'transparent'} 
+                          color={idx < Math.round(prod.rating || 5) ? '#eab308' : '#cbd5e1'} 
+                        />
+                      ))}
                     </span>
                     <span className="rating-count">({prod.reviews && prod.reviews > 0 ? prod.reviews : (prod.rating ? prod.rating.toFixed(1) : '5.0')})</span>
                   </div>
