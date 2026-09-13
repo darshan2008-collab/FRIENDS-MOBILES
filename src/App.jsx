@@ -1050,7 +1050,7 @@ export default function App() {
 
   return (
     <div className="app">
-      {showSplash && isNativeApp() && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
       <SEOManager 
         selectedProduct={selectedProduct}
         shopCategory={shopCategory}
