@@ -194,11 +194,6 @@ export default function SEOManager({
         },
         "aggregateRating": {
           "@type": "AggregateRating",
-          "itemReviewed": {
-            "@type": "Product",
-            "name": prodName,
-            "image": ogImage
-          },
           "ratingValue": Number(ratingNum.toFixed(1)),
           "reviewCount": Number(reviewNum),
           "ratingCount": Number(reviewNum),
@@ -208,11 +203,6 @@ export default function SEOManager({
         "review": [
           {
             "@type": "Review",
-            "itemReviewed": {
-              "@type": "Product",
-              "name": prodName,
-              "image": ogImage
-            },
             "author": {
               "@type": "Person",
               "name": "Verified Customer"
@@ -430,11 +420,6 @@ export default function SEOManager({
             },
             "aggregateRating": {
               "@type": "AggregateRating",
-              "itemReviewed": {
-                "@type": "Product",
-                "name": prodTitle,
-                "image": fullImg
-              },
               "ratingValue": Number(ratingNum.toFixed(1)),
               "reviewCount": Number(reviewNum),
               "ratingCount": Number(reviewNum),
@@ -444,11 +429,6 @@ export default function SEOManager({
             "review": [
               {
                 "@type": "Review",
-                "itemReviewed": {
-                  "@type": "Product",
-                  "name": prodTitle,
-                  "image": fullImg
-                },
                 "author": {
                   "@type": "Person",
                   "name": "Verified Customer"
