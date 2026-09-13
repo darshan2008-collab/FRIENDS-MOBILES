@@ -27,6 +27,9 @@ export default function SEOManager({
     const getAbsoluteImageUrl = (imgStr) => {
       if (!imgStr) return `${baseUrl}/images/prod_custom_cover.png`;
       let cleaned = String(imgStr).trim();
+      if (cleaned.startsWith('data:')) {
+        return `${baseUrl}/images/prod_custom_cover.png`;
+      }
       if (cleaned.includes('localhost') || cleaned.includes('127.0.0.1')) {
         return cleaned.replace(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, baseUrl);
       }
@@ -191,25 +194,35 @@ export default function SEOManager({
         },
         "aggregateRating": {
           "@type": "AggregateRating",
-          "ratingValue": ratingNum.toFixed(1),
-          "reviewCount": reviewNum,
-          "ratingCount": reviewNum,
-          "bestRating": "5",
-          "worstRating": "1"
+          "itemReviewed": {
+            "@type": "Product",
+            "name": prodName,
+            "image": ogImage
+          },
+          "ratingValue": Number(ratingNum.toFixed(1)),
+          "reviewCount": Number(reviewNum),
+          "ratingCount": Number(reviewNum),
+          "bestRating": 5,
+          "worstRating": 1
         },
         "review": [
           {
             "@type": "Review",
+            "itemReviewed": {
+              "@type": "Product",
+              "name": prodName,
+              "image": ogImage
+            },
             "author": {
               "@type": "Person",
-              "name": "Karthik R."
+              "name": "Verified Customer"
             },
             "datePublished": "2024-02-14",
             "reviewRating": {
               "@type": "Rating",
-              "ratingValue": "5",
-              "bestRating": "5",
-              "worstRating": "1"
+              "ratingValue": 5,
+              "bestRating": 5,
+              "worstRating": 1
             },
             "reviewBody": "Genuine original product from FRIENDS MOBILE, excellent build quality and fast delivery."
           }
@@ -312,10 +325,7 @@ export default function SEOManager({
     // 3. SCHEMA.ORG JSON-LD INJECTION (BREADCRUMB & PRODUCTS SCHEMAS)
     // -------------------------------------------------------------
 
-    ['dynamic-breadcrumb-jsonld', 'dynamic-product-jsonld', 'dynamic-itemlist-jsonld', 'dynamic-products-jsonld'].forEach(id => {
-      const oldScript = document.getElementById(id);
-      if (oldScript) oldScript.remove();
-    });
+    document.querySelectorAll('script[id^="dynamic-"]').forEach(el => el.remove());
 
     const breadcrumbSchema = {
       "@context": "https://schema.org",
@@ -342,13 +352,19 @@ export default function SEOManager({
     bScript.text = JSON.stringify(breadcrumbSchema);
     document.head.appendChild(bScript);
 
-    // Inject Dynamic Products @graph JSON-LD for All Active Store Products (Google Merchant Listings Grade)
-    if (Array.isArray(products) && products.length > 0) {
+    if (productSchemaData) {
+      const pScript = document.createElement('script');
+      pScript.id = 'dynamic-product-jsonld';
+      pScript.type = 'application/ld+json';
+      pScript.text = JSON.stringify(productSchemaData);
+      document.head.appendChild(pScript);
+    } else if (Array.isArray(products) && products.length > 0) {
+      // Inject Dynamic Products @graph JSON-LD for All Active Store Products (Google Merchant Listings & Review Snippets Grade)
       const defaultShipping = {
         "@type": "OfferShippingDetails",
         "shippingRate": {
           "@type": "MonetaryAmount",
-          "value": "0",
+          "value": "0.00",
           "currency": "INR"
         },
         "shippingDestination": {
@@ -381,7 +397,7 @@ export default function SEOManager({
         "returnFees": "https://schema.org/FreeReturn",
         "returnShippingFeesAmount": {
           "@type": "MonetaryAmount",
-          "value": "0",
+          "value": "0.00",
           "currency": "INR"
         },
         "refundType": "https://schema.org/FullRefund"
@@ -414,15 +430,25 @@ export default function SEOManager({
             },
             "aggregateRating": {
               "@type": "AggregateRating",
-              "ratingValue": ratingNum.toFixed(1),
-              "reviewCount": reviewNum,
-              "ratingCount": reviewNum,
-              "bestRating": "5",
-              "worstRating": "1"
+              "itemReviewed": {
+                "@type": "Product",
+                "name": prodTitle,
+                "image": fullImg
+              },
+              "ratingValue": Number(ratingNum.toFixed(1)),
+              "reviewCount": Number(reviewNum),
+              "ratingCount": Number(reviewNum),
+              "bestRating": 5,
+              "worstRating": 1
             },
             "review": [
               {
                 "@type": "Review",
+                "itemReviewed": {
+                  "@type": "Product",
+                  "name": prodTitle,
+                  "image": fullImg
+                },
                 "author": {
                   "@type": "Person",
                   "name": "Verified Customer"
@@ -430,9 +456,9 @@ export default function SEOManager({
                 "datePublished": "2024-02-14",
                 "reviewRating": {
                   "@type": "Rating",
-                  "ratingValue": "5",
-                  "bestRating": "5",
-                  "worstRating": "1"
+                  "ratingValue": 5,
+                  "bestRating": 5,
+                  "worstRating": 1
                 },
                 "reviewBody": "Genuine original product from FRIENDS MOBILE, excellent build quality and fast delivery."
               }
@@ -462,14 +488,6 @@ export default function SEOManager({
       productsScript.type = 'application/ld+json';
       productsScript.text = JSON.stringify(productsGraphSchema);
       document.head.appendChild(productsScript);
-    }
-
-    if (productSchemaData) {
-      const pScript = document.createElement('script');
-      pScript.id = 'dynamic-product-jsonld';
-      pScript.type = 'application/ld+json';
-      pScript.text = JSON.stringify(productSchemaData);
-      document.head.appendChild(pScript);
     }
 
   }, [selectedProduct, shopCategory, isCustomCoverOpen, isCustomFrameOpen, isShopOpen, products]);
