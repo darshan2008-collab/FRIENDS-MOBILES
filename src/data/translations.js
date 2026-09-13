@@ -34,6 +34,8 @@ export const translations = {
     navChargers: 'Chargers & Accessories',
     navPhotoFrames: 'Photo Frames',
     navCustomCovers: 'Customized Back Covers',
+    navRepair: 'Repair and Service',
+    navSellPhone: 'Sell Your Mobile',
     navShopAll: 'Shop All Store',
     navServices: 'Services',
     navOffers: 'Offers',

@@ -205,7 +205,7 @@ export default function Header({
                 className="nav-link"
                 style={{ color: '#FF5500', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
-                <Wrench size={14} /> {t('navRepair') || 'Mobile Repair'}
+                <Wrench size={14} /> {t('navRepair') || 'Repair and Service'}
               </a>
             </li>
             <li>
@@ -215,7 +215,7 @@ export default function Header({
                 className="nav-link"
                 style={{ color: '#16a34a', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
-                <Smartphone size={14} /> {t('navSellPhone') || 'Sell Old Phone'}
+                <Smartphone size={14} /> {t('navSellPhone') || 'Sell Your Mobile'}
               </a>
             </li>
             <li>

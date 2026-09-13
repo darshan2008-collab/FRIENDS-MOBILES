@@ -131,7 +131,7 @@ export default function MobileDrawer({
               onClick={(e) => { e.preventDefault(); onClose(); if (onOpenServiceModal) onOpenServiceModal(); }}
               style={{ color: '#FF5500', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              <Wrench size={18} /> {t('navRepair') || 'Mobile Repair & Doorstep Pickup'}
+              <Wrench size={18} /> {t('navRepair') || 'Repair and Service'}
             </a>
           </li>
           <li>
@@ -141,7 +141,7 @@ export default function MobileDrawer({
               onClick={(e) => { e.preventDefault(); onClose(); if (onOpenSellPhoneModal) onOpenSellPhoneModal(); }}
               style={{ color: '#16a34a', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              <Smartphone size={18} /> {t('navSellPhone') || 'Sell Old Phone & Instant Cash'}
+              <Smartphone size={18} /> {t('navSellPhone') || 'Sell Your Mobile'}
             </a>
           </li>
           <li><a href="#products" className="drawer-link" onClick={onClose}>{t('navPhones') || 'Mobile Phones'}</a></li>
