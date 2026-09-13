@@ -78,6 +78,9 @@ CREATE TABLE IF NOT EXISTS users (
   google_id VARCHAR(255) DEFAULT '',
   picture TEXT DEFAULT '',
   auth_provider VARCHAR(50) DEFAULT 'local',
+  cart JSONB DEFAULT '[]'::jsonb,
+  wishlist JSONB DEFAULT '[]'::jsonb,
+  reward_points INTEGER DEFAULT 150,
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -204,6 +207,13 @@ const connectDB = async () => {
     const client = await pool.connect();
     try {
       await client.query(initTablesSQL);
+      try {
+        await client.query(`
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS cart JSONB DEFAULT '[]'::jsonb;
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS wishlist JSONB DEFAULT '[]'::jsonb;
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS reward_points INTEGER DEFAULT 150;
+        `);
+      } catch (_) {}
       isInitialized = true;
       console.log(`[PostgreSQL] Connected & Database Schema Verified.`);
       return true;

@@ -2,6 +2,15 @@ const { query } = require('../config/db');
 
 const formatUser = (row) => {
   if (!row) return null;
+  let parsedCart = [];
+  try {
+    parsedCart = typeof row.cart === 'string' ? JSON.parse(row.cart) : (Array.isArray(row.cart) ? row.cart : []);
+  } catch (_) {}
+  let parsedWishlist = [];
+  try {
+    parsedWishlist = typeof row.wishlist === 'string' ? JSON.parse(row.wishlist) : (Array.isArray(row.wishlist) ? row.wishlist : []);
+  } catch (_) {}
+
   return {
     id: parseInt(row.id),
     name: row.name,
@@ -14,6 +23,9 @@ const formatUser = (row) => {
     googleId: row.google_id || '',
     picture: row.picture || '',
     authProvider: row.auth_provider || 'local',
+    cart: parsedCart,
+    wishlist: parsedWishlist,
+    rewardPoints: row.reward_points !== undefined ? parseInt(row.reward_points) : (row.rewardPoints || 150),
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -94,8 +106,8 @@ const User = {
 
   create: async (data) => {
     const res = await query(`
-      INSERT INTO users (name, email, phone, password, address, pincode, role, google_id, picture, auth_provider)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO users (name, email, phone, password, address, pincode, role, google_id, picture, auth_provider, cart, wishlist, reward_points)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *;
     `, [
       data.name,
@@ -107,7 +119,10 @@ const User = {
       data.role || 'customer',
       data.googleId || '',
       data.picture || '',
-      data.authProvider || 'local'
+      data.authProvider || 'local',
+      JSON.stringify(Array.isArray(data.cart) ? data.cart : []),
+      JSON.stringify(Array.isArray(data.wishlist) ? data.wishlist : []),
+      data.rewardPoints !== undefined ? parseInt(data.rewardPoints) : 150
     ]);
     return formatUser(res.rows[0]);
   },
@@ -140,13 +155,16 @@ const User = {
     const googleId = data.googleId !== undefined ? data.googleId : existing.googleId;
     const picture = data.picture !== undefined ? data.picture : existing.picture;
     const authProvider = data.authProvider !== undefined ? data.authProvider : existing.authProvider;
+    const cart = data.cart !== undefined ? JSON.stringify(data.cart) : JSON.stringify(existing.cart || []);
+    const wishlist = data.wishlist !== undefined ? JSON.stringify(data.wishlist) : JSON.stringify(existing.wishlist || []);
+    const rewardPoints = data.rewardPoints !== undefined ? parseInt(data.rewardPoints) : (existing.rewardPoints || 150);
 
     const res = await query(`
       UPDATE users SET
-        name = $1, email = $2, phone = $3, password = $4, address = $5, pincode = $6, role = $7, google_id = $8, picture = $9, auth_provider = $10, updated_at = NOW()
-      WHERE id = $11
+        name = $1, email = $2, phone = $3, password = $4, address = $5, pincode = $6, role = $7, google_id = $8, picture = $9, auth_provider = $10, cart = $11, wishlist = $12, reward_points = $13, updated_at = NOW()
+      WHERE id = $14
       RETURNING *;
-    `, [name, email, phone, password, address, pincode, role, googleId, picture, authProvider, existing.id]);
+    `, [name, email, phone, password, address, pincode, role, googleId, picture, authProvider, cart, wishlist, rewardPoints, existing.id]);
 
     return { matchedCount: 1, modifiedCount: 1, user: formatUser(res.rows[0]) };
   }

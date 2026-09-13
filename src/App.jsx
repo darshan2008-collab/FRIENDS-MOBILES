@@ -163,7 +163,22 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const cartCount = (Array.isArray(cart) ? cart : []).reduce((acc, item) => acc + (parseInt(item?.quantity) || 1), 0);
 
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlist, setWishlist] = useState(() => {
+    try {
+      const saved = localStorage.getItem('fm_wishlist');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (_) {}
+    return [];
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('fm_wishlist', JSON.stringify(wishlist));
+    } catch (_) {}
+  }, [wishlist]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -498,6 +513,26 @@ export default function App() {
     }
   }, [currentUser]);
 
+  // Synchronize Cart and Wishlist with Database for Logged-In User
+  useEffect(() => {
+    if (!currentUser || (!currentUser.id && !currentUser.email && !currentUser.phone)) return;
+    const syncTimer = setTimeout(() => {
+      fetch(`${API_BASE}/auth/sync-cart-wishlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          email: currentUser.email,
+          phone: currentUser.phone,
+          cart: Array.isArray(cart) ? cart : [],
+          wishlist: Array.isArray(wishlist) ? wishlist : []
+        })
+      }).catch(() => {});
+    }, 1000);
+
+    return () => clearTimeout(syncTimer);
+  }, [cart, wishlist, currentUser]);
+
   // Fetch backend data if available
   useEffect(() => {
     fetch(`${API_BASE}/products`)
@@ -650,6 +685,21 @@ export default function App() {
       localStorage.removeItem('fm_cart');
     } catch (_) {}
 
+    // Immediately clear cart from database so it never shows up on future logins
+    if (currentUser && (currentUser.id || currentUser.email || currentUser.phone)) {
+      fetch(`${API_BASE}/auth/sync-cart-wishlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          email: currentUser.email,
+          phone: currentUser.phone,
+          cart: [],
+          wishlist: Array.isArray(wishlist) ? wishlist : []
+        })
+      }).catch(() => {});
+    }
+
     setOrders(prev => {
       const safePrev = Array.isArray(prev) ? prev : [];
       const updated = [newOrder, ...safePrev.filter(o => o.orderId !== newOrder.orderId)];
@@ -665,7 +715,8 @@ export default function App() {
       const updatedUserOrders = [newOrder, ...existingUserOrders.filter(o => o.orderId !== newOrder.orderId)];
       const updatedUser = {
         ...prevUser,
-        orders: updatedUserOrders
+        orders: updatedUserOrders,
+        cart: []
       };
       try {
         localStorage.setItem('fm_user', JSON.stringify(updatedUser));
@@ -698,6 +749,31 @@ export default function App() {
       localStorage.setItem('fm_user', JSON.stringify(user));
     } catch {}
     setIsAuthOpen(false);
+
+    // Merge database cart with current local cart
+    if (Array.isArray(user.cart) && user.cart.length > 0) {
+      setCart(prev => {
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const merged = [...safePrev];
+        user.cart.forEach(item => {
+          const idStr = String(item.id || item._id);
+          const idx = merged.findIndex(p => String(p.id || p._id) === idStr);
+          if (idx === -1) {
+            merged.push(item);
+          }
+        });
+        return merged;
+      });
+    }
+
+    // Merge database wishlist with current local wishlist
+    if (Array.isArray(user.wishlist) && user.wishlist.length > 0) {
+      setWishlist(prev => {
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const merged = Array.from(new Set([...safePrev, ...user.wishlist]));
+        return merged;
+      });
+    }
 
     // Trigger Flipkart/Amazon style Welcome Onboarding Guide for first-time login / signup
     const userKey = user.id || user.email || user.phone || 'user';

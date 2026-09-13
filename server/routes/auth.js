@@ -91,6 +91,13 @@ function verifyPassword(password, storedValue) {
   return hash1k === originalHash;
 }
 
+// Strict email structure regex: requiring valid chars, domain, and TLD with at least 2 chars
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+function isValidEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  return EMAIL_REGEX.test(email.trim());
+}
+
 // POST /api/auth/signup
 router.post('/signup', signupLimiter, async (req, res) => {
   try {
@@ -101,8 +108,8 @@ router.post('/signup', signupLimiter, async (req, res) => {
     }
 
     const cleanEmail = sanitizeInput(email).toLowerCase().trim();
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      return res.status(400).json({ success: false, message: 'Please enter a valid email address (e.g. user@gmail.com)' });
+    if (!isValidEmail(cleanEmail)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address with correct format (e.g. user@gmail.com)' });
     }
 
     const cleanPhone = normalizePhone(phone);
@@ -136,6 +143,8 @@ router.post('/signup', signupLimiter, async (req, res) => {
       phone: cleanPhone,
       password: hashPassword(password),
       address: cleanAddress,
+      cart: [],
+      wishlist: [],
       rewardPoints: 150,
       claimedCoupons: [],
       pointHistory: [
@@ -148,7 +157,18 @@ router.post('/signup', signupLimiter, async (req, res) => {
     await saveUserAsync(newUser);
     BackupService.triggerRealTimeBackup(`user_signup_${cleanEmail}`);
 
-    const userProfile = { id: newUser.id, name: newUser.name, email: newUser.email, phone: newUser.phone, address: newUser.address, rewardPoints: newUser.rewardPoints, claimedCoupons: newUser.claimedCoupons, pointHistory: newUser.pointHistory };
+    const userProfile = { 
+      id: newUser.id, 
+      name: newUser.name, 
+      email: newUser.email, 
+      phone: newUser.phone, 
+      address: newUser.address, 
+      cart: [],
+      wishlist: [],
+      rewardPoints: newUser.rewardPoints, 
+      claimedCoupons: newUser.claimedCoupons, 
+      pointHistory: newUser.pointHistory 
+    };
 
     res.status(201).json({
       success: true,
@@ -327,7 +347,16 @@ router.post('/login', loginLimiter, async (req, res) => {
       }
     }
 
-    const userProfile = { id: user.id, name: user.name, email: user.email, phone: user.phone, address: user.address };
+    const userProfile = { 
+      id: user.id, 
+      name: user.name, 
+      email: user.email, 
+      phone: user.phone, 
+      address: user.address,
+      rewardPoints: user.rewardPoints !== undefined ? user.rewardPoints : 150,
+      cart: Array.isArray(user.cart) ? user.cart : [],
+      wishlist: Array.isArray(user.wishlist) ? user.wishlist : []
+    };
 
     res.json({
       success: true,
@@ -401,13 +430,17 @@ router.post('/verify-phone', resetLimiter, async (req, res) => {
 // PUT /api/auth/update-profile
 router.put('/update-profile', async (req, res) => {
   try {
-    const { phone, name, address, email, pincode } = req.body;
+    const { phone, name, address, email, pincode, cart, wishlist } = req.body;
 
     const cleanEmail = email ? sanitizeInput(email).toLowerCase().trim() : '';
     const cleanPhone = phone ? normalizePhone(phone) : '';
 
     if (!cleanEmail && !cleanPhone) {
       return res.status(400).json({ success: false, message: 'Email address or phone number is required to identify user' });
+    }
+
+    if (cleanEmail && !isValidEmail(cleanEmail)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address with correct format (e.g. user@gmail.com)' });
     }
 
     const users = await getUsersAsync();
@@ -425,12 +458,23 @@ router.put('/update-profile', async (req, res) => {
       email: cleanEmail || (user?.email || ''),
       phone: cleanPhone || (user?.phone || ''),
       pincode: pincode || (user?.pincode || ''),
+      cart: cart !== undefined ? cart : (user?.cart || []),
+      wishlist: wishlist !== undefined ? wishlist : (user?.wishlist || []),
       updatedAt: new Date().toISOString()
     };
 
     await saveUserAsync(updatedUser);
 
-    const userProfile = { id: updatedUser.id || Date.now(), name: updatedUser.name, email: updatedUser.email, phone: updatedUser.phone, address: updatedUser.address };
+    const userProfile = { 
+      id: updatedUser.id || Date.now(), 
+      name: updatedUser.name, 
+      email: updatedUser.email, 
+      phone: updatedUser.phone, 
+      address: updatedUser.address,
+      rewardPoints: updatedUser.rewardPoints !== undefined ? updatedUser.rewardPoints : 150,
+      cart: updatedUser.cart || [],
+      wishlist: updatedUser.wishlist || []
+    };
 
     res.json({
       success: true,
@@ -439,6 +483,47 @@ router.put('/update-profile', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Profile update failed', error: err.message });
+  }
+});
+
+// POST /api/auth/sync-cart-wishlist (Persists User Cart & Wishlist in Database)
+router.post('/sync-cart-wishlist', async (req, res) => {
+  try {
+    const { userId, email, phone, cart, wishlist } = req.body;
+    const cleanEmail = email ? email.toLowerCase().trim() : '';
+    const cleanPhone = phone ? normalizePhone(phone) : '';
+
+    if (!userId && !cleanEmail && !cleanPhone) {
+      return res.status(400).json({ success: false, message: 'User identification required' });
+    }
+
+    const users = await getUsersAsync();
+    const user = users.find(u =>
+      (userId && parseInt(u.id) === parseInt(userId)) ||
+      (cleanEmail && u.email && u.email.toLowerCase().trim() === cleanEmail) ||
+      (cleanPhone && cleanPhone.length >= 10 && normalizePhone(u.phone) === cleanPhone)
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const updatedUser = {
+      ...user,
+      cart: Array.isArray(cart) ? cart : (user.cart || []),
+      wishlist: Array.isArray(wishlist) ? wishlist : (user.wishlist || []),
+      updatedAt: new Date().toISOString()
+    };
+
+    await saveUserAsync(updatedUser);
+
+    res.json({
+      success: true,
+      cart: updatedUser.cart,
+      wishlist: updatedUser.wishlist
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Cart & wishlist sync failed', error: err.message });
   }
 });
 

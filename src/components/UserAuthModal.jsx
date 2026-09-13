@@ -310,8 +310,15 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       return;
     }
 
-    if (!signupForm.email.includes('@')) {
-      if (addToast) addToast('Please enter a valid email address for account creation', 'warning');
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(signupForm.email.trim())) {
+      if (addToast) addToast('Please enter a valid email address with correct format (e.g. user@gmail.com)', 'warning');
+      return;
+    }
+
+    const cleanDigits = signupForm.phone.replace(/\D/g, '');
+    if (cleanDigits.length < 10) {
+      if (addToast) addToast('Please enter a valid 10-digit mobile phone number', 'warning');
       return;
     }
 
@@ -343,7 +350,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     if (e) e.preventDefault();
     setEmailCheckError('');
     const targetVal = forgotPhone ? forgotPhone.trim().toLowerCase() : '';
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     if (!targetVal || !emailRegex.test(targetVal)) {
       const invalidMsg = 'Please enter a valid Gmail / Email address (e.g. user@gmail.com)';
