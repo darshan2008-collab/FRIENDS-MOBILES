@@ -390,26 +390,6 @@ export default function CartModal({
       return;
     }
 
-    if (code === 'SUPER200') {
-      if (currentSubtotal < 999) {
-        if (addToast) addToast('Coupon SUPER200 requires minimum order of ₹999.', 'warning');
-        return;
-      }
-      setAppliedCoupon({ code: 'SUPER200', flatDiscount: 200, title: '₹200 Flat Discount' });
-      if (addToast) addToast('Applied SUPER200 - ₹200 Flat Discount!', 'success');
-      return;
-    }
-
-    if (code === 'MEGA50') {
-      if (currentSubtotal < 1499) {
-        if (addToast) addToast('Coupon MEGA50 requires minimum order of ₹1499.', 'warning');
-        return;
-      }
-      setAppliedCoupon({ code: 'MEGA50', discountPct: 50, title: '50% OFF Mega Discount' });
-      if (addToast) addToast('Applied MEGA50 - 50% Mega Discount!', 'success');
-      return;
-    }
-
     if (code === 'FREESHIP') {
       setAppliedCoupon({ code: 'FREESHIP', isFreeShip: true, title: 'FREE Express Delivery' });
       if (addToast) addToast('Applied FREESHIP - FREE Shipping Unlocked!', 'success');
@@ -447,20 +427,7 @@ export default function CartModal({
       return;
     }
 
-    if (code.startsWith('FM-50OFF-')) {
-      if (currentSubtotal >= 1499) {
-        setAppliedCoupon({ code, discountPct: 50, title: '50% OFF Mega Discount' });
-        if (addToast) addToast('Applied 50% OFF Mega Discount!', 'success');
-      } else if (currentSubtotal >= 499) {
-        setAppliedCoupon({ code, flatDiscount: 50, title: '₹50 OFF Flat Discount' });
-        if (addToast) addToast('Applied ₹50 Flat Discount Coupon!', 'success');
-      } else {
-        if (addToast) addToast('Coupon FM-50OFF requires minimum order of ₹499.', 'warning');
-      }
-      return;
-    }
-
-    if (code.startsWith('FM-SAVE50-')) {
+    if (code.startsWith('FM-50OFF-') || code.startsWith('FM-SAVE50-')) {
       if (currentSubtotal < 499) {
         if (addToast) addToast('Coupon requires minimum order of ₹499.', 'warning');
         return;
@@ -477,26 +444,6 @@ export default function CartModal({
       }
       setAppliedCoupon({ code, flatDiscount: 100, title: '₹100 OFF Special Coupon' });
       if (addToast) addToast('Applied ₹100 Flat Discount Coupon!', 'success');
-      return;
-    }
-
-    if (code.startsWith('FM-200OFF-') || code.startsWith('FM-SAVE200-')) {
-      if (currentSubtotal < 999) {
-        if (addToast) addToast('Coupon requires minimum order of ₹999.', 'warning');
-        return;
-      }
-      setAppliedCoupon({ code, flatDiscount: 200, title: '₹200 OFF Mega Coupon' });
-      if (addToast) addToast('Applied ₹200 Flat Discount Coupon!', 'success');
-      return;
-    }
-
-    if (code.startsWith('FM-300OFF-') || code.startsWith('FM-SAVE300-')) {
-      if (currentSubtotal < 1499) {
-        if (addToast) addToast('Coupon requires minimum order of ₹1499.', 'warning');
-        return;
-      }
-      setAppliedCoupon({ code, flatDiscount: 300, title: '₹300 OFF Festival Coupon' });
-      if (addToast) addToast('Applied ₹300 Flat Discount Coupon!', 'success');
       return;
     }
 

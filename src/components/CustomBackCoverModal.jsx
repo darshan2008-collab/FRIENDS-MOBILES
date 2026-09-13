@@ -1223,38 +1223,75 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
                 </div>
               )}
             </div>
-               {/* Collapsible Smartphone Company Selector */}
+            {/* Smartphone Company / Brand Selector with Manual Input */}
             <div>
-              <div 
-                onClick={() => setIsBrandListOpen(!isBrandListOpen)}
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'space-between', 
-                  padding: '12px 14px',
-                  background: 'var(--bg-input)',
-                  border: '1.5px solid var(--border-color)',
-                  borderRadius: isBrandListOpen ? '14px 14px 0 0' : '14px',
-                  cursor: 'pointer',
-                  userSelect: 'none',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', minWidth: 0 }}>
-                  <Smartphone size={16} color="#FF5500" style={{ flexShrink: 0 }} />
-                  <span style={{ fontSize: '0.88rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Company:</span>
-                  <span style={{ fontSize: '0.84rem', fontWeight: '800', color: '#FF5500', background: 'var(--orange-light)', padding: '3px 10px', borderRadius: '8px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {renderBrandLogo(selectedBrand)}
-                    </div>
-                    {selectedBrand}
+              <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                <label className="option-section-title" style={{ margin: 0 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Smartphone size={15} color="#FF5500" /> Phone Company / Brand
                   </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FF5500', fontWeight: 'bold', fontSize: '0.78rem', flexShrink: 0 }}>
-                  <span>{isBrandListOpen ? 'Close ▴' : 'Change Company ▾'}</span>
-                </div>
+                </label>
+                <button 
+                  type="button"
+                  onClick={() => setIsBrandListOpen(!isBrandListOpen)}
+                  style={{
+                    background: 'var(--orange-light)',
+                    border: '1px solid rgba(255, 85, 0, 0.3)',
+                    color: '#FF5500',
+                    fontSize: '0.78rem',
+                    fontWeight: '800',
+                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {isBrandListOpen ? 'Close Brand List ▴' : 'Choose from Popular Brands ▾'}
+                </button>
               </div>
 
+              {/* Manual Text Input Field for Phone Brand */}
+              <div style={{ position: 'relative' }}>
+                <div style={{ 
+                  position: 'absolute', 
+                  left: '12px', 
+                  top: '50%', 
+                  transform: 'translateY(-50%)', 
+                  width: '24px', 
+                  height: '24px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  pointerEvents: 'none'
+                }}>
+                  {renderBrandLogo(selectedBrand)}
+                </div>
+                <input
+                  type="text"
+                  required
+                  placeholder="Enter company brand manually (e.g. Apple, Samsung, Vivo, OnePlus...)"
+                  value={selectedBrand}
+                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '13px 14px 13px 44px',
+                    borderRadius: isBrandListOpen ? '12px 12px 0 0' : '12px',
+                    border: '1.5px solid var(--border-color)',
+                    borderBottom: isBrandListOpen ? 'none' : '1.5px solid var(--border-color)',
+                    background: 'var(--bg-input)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.92rem',
+                    fontWeight: 'bold',
+                    boxSizing: 'border-box',
+                    transition: 'all 0.2s ease'
+                  }}
+                />
+              </div>
+
+              {/* Dropdown for selecting popular brands */}
               {isBrandListOpen && (
                 <div style={{
                   display: 'flex',
@@ -1264,13 +1301,16 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
                   overflowY: 'auto',
                   padding: '10px',
                   background: 'var(--bg-input)',
-                  borderRadius: '0 0 14px 14px',
+                  borderRadius: '0 0 12px 12px',
                   border: '1.5px solid var(--border-color)',
-                  borderTop: 'none',
                   boxSizing: 'border-box'
                 }}>
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '700', padding: '2px 4px 4px 4px' }}>
+                    Click to auto-fill a popular company or type above:
+                  </div>
                   {PHONE_BRANDS.map(bObj => {
-                    const isSelected = selectedBrand === bObj.name || selectedBrand === bObj.id;
+                    const cleanCurrent = (selectedBrand || '').trim().toLowerCase();
+                    const isSelected = cleanCurrent === bObj.name.toLowerCase() || cleanCurrent === bObj.id.toLowerCase();
                     return (
                       <button
                         key={bObj.id}
@@ -1281,23 +1321,23 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
                         }}
                         style={{
                           width: '100%',
-                          padding: '10px 14px',
-                          borderRadius: '10px',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
                           border: isSelected ? '2px solid #FF5500' : '1px solid var(--border-color)',
                           background: isSelected ? 'var(--orange-light)' : 'var(--bg-card)',
                           color: isSelected ? '#FF5500' : 'var(--text-primary)',
                           fontWeight: isSelected ? 'bold' : '600',
-                          fontSize: '0.88rem',
+                          fontSize: '0.86rem',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          boxShadow: isSelected ? '0 4px 12px rgba(255,85,0,0.2)' : '0 1px 3px rgba(0,0,0,0.05)',
+                          boxShadow: isSelected ? '0 4px 12px rgba(255,85,0,0.18)' : '0 1px 3px rgba(0,0,0,0.04)',
                           transition: 'all 0.15s ease'
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div style={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {renderBrandLogo(bObj.name)}
                           </div>
                           <span>{bObj.name}</span>

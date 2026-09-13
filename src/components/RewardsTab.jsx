@@ -38,30 +38,6 @@ export const REWARD_COUPONS = [
     desc: 'Get 20% OFF on orders above ₹799.',
     badgeColor: '#eab308',
     bgGradient: 'linear-gradient(135deg, rgba(234, 179, 8, 0.18), rgba(234, 179, 8, 0.05))'
-  },
-  {
-    id: 'c4',
-    code: 'SUPER200',
-    title: 'FLAT ₹200 OFF',
-    discountPct: 0,
-    flatDiscount: 200,
-    pointsRequired: 500,
-    minOrderValue: 999,
-    desc: 'Get Flat ₹200 OFF on orders above ₹999.',
-    badgeColor: '#FF5500',
-    bgGradient: 'linear-gradient(135deg, rgba(255, 85, 0, 0.18), rgba(255, 85, 0, 0.05))'
-  },
-  {
-    id: 'c5',
-    code: 'MEGA50',
-    title: '50% OFF Mega Discount',
-    discountPct: 50,
-    flatDiscount: 0,
-    pointsRequired: 750,
-    minOrderValue: 1499,
-    desc: 'Get 50% OFF on all orders above ₹1,499.',
-    badgeColor: '#a855f7',
-    bgGradient: 'linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(168, 85, 247, 0.05))'
   }
 ];
 
@@ -168,7 +144,7 @@ export default function RewardsTab({ currentUser, onUpdateUserProfile, addToast 
         </div>
 
         <div style={{ fontSize: '0.82rem', opacity: 0.95, lineHeight: 1.5, background: 'rgba(0, 0, 0, 0.15)', padding: '10px 14px', borderRadius: '10px' }}>
-          Buy products at Friends Mobile to earn points! Redeem points to generate **unique random discount codes** (10%, 15%, 20%, Flat ₹200, 50% OFF).
+          Buy products at Friends Mobile to earn points! Redeem points to generate **unique random discount codes** (10%, 15%, 20% OFF).
         </div>
       </div>
 

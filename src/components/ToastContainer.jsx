@@ -98,7 +98,7 @@ export default function ToastContainer({ toasts = [], onRemoveToast }) {
     >
       {safeToasts.map(t => {
         const msgStr = typeof t.message === 'string' ? t.message : '';
-        const detectedCode = t.codePayload || (msgStr.match(/FM-[A-Z0-9-]+/) || msgStr.match(/\b(WELCOME100|FRIENDS10|FRIENDS15|FRIENDS20|SUPER200|MEGA50|FREESHIP)\b/))?.[0];
+        const detectedCode = t.codePayload || (msgStr.match(/FM-[A-Z0-9-]+/) || msgStr.match(/\b(WELCOME100|FRIENDS10|FRIENDS15|FRIENDS20|FREESHIP)\b/))?.[0];
         const isCopied = copiedId === t.id;
 
         return (
