@@ -26,8 +26,8 @@ export default function MobileDrawer({
           <div className="logo">
             <CompanyLogo size={32} />
             <div className="logo-text">
-              <span className="logo-brand">FRIENDS</span>
-              <span className="logo-sub">MOBILE</span>
+              <span className="logo-brand">Friends</span>
+              <span className="logo-sub">Mobile</span>
             </div>
           </div>
           <button className="drawer-close-btn" onClick={onClose} aria-label="Close menu">

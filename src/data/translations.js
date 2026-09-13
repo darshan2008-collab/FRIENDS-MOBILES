@@ -23,7 +23,7 @@ export const getProductDesc = (product) => {
 export const translations = {
   en: {
     // Brand & Store Info
-    brandName: 'FRIENDS MOBILE',
+    brandName: 'Friends Mobile',
     storeTagline: 'Karur Flagship Store • 100% Genuine Products',
     maduraiLocation: 'South Gandhigramam, Karur, Tamil Nadu',
 

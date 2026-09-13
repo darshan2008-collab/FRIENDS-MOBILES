@@ -134,13 +134,17 @@ export default function App() {
 
   // SEO Document Title & Description Setup
   useEffect(() => {
-    document.title = 'FRIENDS MOBILE - Customized Back Covers, Phone Cases & Mobile Accessories Store India';
+    document.title = 'Friends Mobile | Mobile Phones & Accessories';
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
-      metaDesc.setAttribute('content', 'Shop 3D Customized Phone Back Covers, iPhone Cases, boAt Bluetooth Earbuds, Fast Chargers, Power Banks & Custom Photo Frames at FRIENDS MOBILE. Best Prices, Premium Quality & Express Cash on Delivery Across India.');
+      metaDesc.setAttribute('content', 'Friends Mobile – Explore mobile phones, accessories and more.');
     }
     const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', 'FRIENDS MOBILE - Custom Phone Cases & Accessories Store India');
+    if (ogTitle) ogTitle.setAttribute('content', 'Friends Mobile | Mobile Phones & Accessories');
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.setAttribute('content', 'Friends Mobile – Explore mobile phones, accessories and more.');
+    const ogSiteName = document.querySelector('meta[property="og:site_name"]');
+    if (ogSiteName) ogSiteName.setAttribute('content', 'Friends Mobile');
     document.documentElement.lang = 'en-IN';
   }, []);
 

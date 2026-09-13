@@ -101,7 +101,7 @@ export default function Hero({ theme, slides, t = (k) => k }) {
             </span>
           </div>
 
-          <h1 className="hero-title" style={{ 
+          <h2 className="hero-title" style={{ 
             marginBottom: '14px',
             fontSize: 'clamp(1.25rem, 4.2vw, 2.3rem)',
             lineHeight: '1.2'
@@ -113,7 +113,7 @@ export default function Hero({ theme, slides, t = (k) => k }) {
             <span className="hero-heading-gradient" style={{ fontWeight: '900', fontSize: 'inherit' }}>
               {activeSlide.titleGradient || "Mobile Destination"}
             </span>
-          </h1>
+          </h2>
 
           <p className="hero-desc" style={{ 
             fontWeight: '500', 

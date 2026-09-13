@@ -59,11 +59,11 @@ export default function SEOManager({
     };
 
     // Default Fallback Metadata
-    let title = 'FRIENDS MOBILE | Custom Phone Back Covers, Mobile Accessories & Store India | பிரண்ட்ஸ் மொபைல்';
+    let title = 'Friends Mobile | Mobile Phones & Accessories';
 
-    let description = 'Official FRIENDS MOBILE Online Store & Shop India. Buy 3D Customized Phone Back Covers, iPhone Cases, boAt Earbuds, Fast Chargers, Power Banks & Custom Photo Frames at FRIENDS MOBILE.';
+    let description = 'Friends Mobile – Explore mobile phones, accessories and more.';
 
-    let keywords = 'FRIENDS MOBILE, Friends, friends mobile, friends mobile store, friends mobile shop, friends mobile online, customized back cover, phone cases India, custom phone cover online, iPhone 15 pro custom case, Samsung back covers, boAt air dopes, fast charger, power bank 20000mAh, photo frames Karur, mobile accessories Madurai, Tamil Nadu mobile store, பிரண்ட்ஸ் மொபைல்';
+    let keywords = 'Friends Mobile, friends mobile, FRIENDS MOBILE, Friends Mobile Store, Friends Mobile Shop, mobile phones, mobile accessories, customized back cover, phone cases India, custom phone cover online, iPhone 15 pro custom case, Samsung back covers, boAt air dopes, fast charger, power bank 20000mAh, photo frames Karur, mobile accessories Madurai, Tamil Nadu mobile store';
 
     let canonical = `${baseUrl}/`;
     let ogType = 'website';
@@ -184,7 +184,7 @@ export default function SEOManager({
         "gtin13": getValidGtin13(selectedProduct.id),
         "brand": {
           "@type": "Brand",
-          "name": selectedProduct.brand || "FRIENDS MOBILE"
+          "name": selectedProduct.brand || "Friends Mobile"
         },
         "offers": {
           "@type": "Offer",
@@ -196,7 +196,7 @@ export default function SEOManager({
           "availability": selectedProduct.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
           "seller": {
             "@type": "Organization",
-            "name": "FRIENDS MOBILE",
+            "name": "Friends Mobile",
             "url": baseUrl
           },
           "shippingDetails": defaultShippingDetails,
@@ -279,6 +279,7 @@ export default function SEOManager({
       'og:url': canonical,
       'og:type': ogType,
       'og:image': ogImage,
+      'og:site_name': 'Friends Mobile',
       'og:locale': isTamil ? 'ta_IN' : 'en_IN'
     };
 
@@ -424,7 +425,7 @@ export default function SEOManager({
             "gtin13": getValidGtin13(prodId),
             "brand": {
               "@type": "Brand",
-              "name": prod.brand || "FRIENDS MOBILE"
+              "name": prod.brand || "Friends Mobile"
             },
             "aggregateRating": {
               "@type": "AggregateRating",
@@ -448,7 +449,7 @@ export default function SEOManager({
                   "bestRating": 5,
                   "worstRating": 1
                 },
-                "reviewBody": "Genuine original product from FRIENDS MOBILE, excellent build quality and fast delivery."
+                "reviewBody": "Genuine original product from Friends Mobile, excellent build quality and fast delivery."
               }
             ],
             "offers": {
@@ -461,7 +462,7 @@ export default function SEOManager({
               "availability": prod.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
               "seller": {
                 "@type": "Organization",
-                "name": "FRIENDS MOBILE",
+                "name": "Friends Mobile",
                 "url": baseUrl
               },
               "shippingDetails": defaultShipping,

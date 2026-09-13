@@ -35,11 +35,11 @@ export default function Header({
                 <Menu size={22} />
               </button>
 
-              <a href="/" className="logo" title="FRIENDS MOBILE - Custom Phone Cases & Mobile Accessories Store" aria-label="FRIENDS MOBILE Home Page">
+              <a href="/" className="logo" title="Friends Mobile | Mobile Phones &amp; Accessories" aria-label="Friends Mobile Home Page">
                 <CompanyLogo size={34} />
                 <h1 className="logo-text" style={{ fontSize: 'inherit', fontWeight: 'inherit', margin: 0, padding: 0, display: 'flex', alignItems: 'center', gap: '2px' }}>
-                  <span className="logo-brand">FRIENDS</span>
-                  <span className="logo-sub">MOBILE</span>
+                  <span className="logo-brand">Friends</span>
+                  <span className="logo-sub">Mobile</span>
                 </h1>
               </a>
             </div>
