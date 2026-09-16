@@ -158,6 +158,7 @@ export default function SEOManager({
       const defaultReturnPolicy = {
         "@type": "MerchantReturnPolicy",
         "applicableCountry": "IN",
+        "returnPolicyCountry": "IN",
         "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
         "merchantReturnDays": 7,
         "returnMethod": "https://schema.org/ReturnByMail",
@@ -392,6 +393,7 @@ export default function SEOManager({
       const defaultReturn = {
         "@type": "MerchantReturnPolicy",
         "applicableCountry": "IN",
+        "returnPolicyCountry": "IN",
         "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
         "merchantReturnDays": 7,
         "returnMethod": "https://schema.org/ReturnByMail",
