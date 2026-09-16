@@ -126,11 +126,17 @@ const initialProducts = [
 export default function App() {
   const [theme, setTheme] = useState(() => {
     try {
-      return localStorage.getItem('fm_theme') || 'dark';
+      return localStorage.getItem('fm_theme') || 'light';
     } catch {
-      return 'dark';
+      return 'light';
     }
   });
+
+  useEffect(() => {
+    try {
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (_) {}
+  }, [theme]);
 
   // SEO Document Title & Description Setup
   useEffect(() => {
