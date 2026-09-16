@@ -5712,7 +5712,7 @@ img {
   /* Container Proportions for Laptops & Desktops */
   .container {
     max-width: 1280px !important;
-    padding: 0 28px !important;
+    padding: 0 24px !important;
   }
 
   /* Header & Search Alignment on Laptops */
@@ -5722,210 +5722,281 @@ img {
   }
 
   .desktop-search-box {
-    max-width: 580px !important;
+    max-width: 540px !important;
     height: 42px !important;
   }
 
   .desktop-search-box input {
-    font-size: 0.88rem !important;
+    font-size: 0.86rem !important;
     padding: 0 16px !important;
   }
 
-  /* Hero Section Side-by-Side Laptop Grid */
-  .hero-section {
-    padding: 44px 0 56px 0 !important;
-  }
-
-  .hero-container {
-    display: grid !important;
-    grid-template-columns: 1.15fr 1fr !important;
-    align-items: center !important;
-    gap: 44px !important;
-  }
-
-  .hero-title {
-    font-size: 3.2rem !important;
-    line-height: 1.1 !important;
-  }
-
-  .hero-subtitle {
-    font-size: 1.35rem !important;
-  }
-
-  .hero-desc {
-    font-size: 1.02rem !important;
-    max-width: 520px !important;
-  }
-
-  .hero-device-img {
-    max-height: 380px !important;
-    object-fit: contain !important;
-  }
-
-  /* Category & Product Grids on Laptop View */
-  .category-grid {
-    grid-template-columns: repeat(10, 1fr) !important;
-    gap: 14px !important;
-  }
-
-  .products-grid {
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 24px !important;
-  }
-
-  .guarantees-grid {
-    grid-template-columns: repeat(5, 1fr) !important;
-    gap: 18px !important;
-  }
-
-  .promo-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 24px !important;
-  }
-
-  /* Footer 4-Column Layout on Laptop View */
-  .footer-grid {
-    grid-template-columns: 1.4fr 1fr 1fr 1.2fr !important;
-    gap: 40px !important;
-  }
-}
-
-/* =========================================================
-   DESKTOP & LARGE SCREEN MULTI-TIER PROPORTIONAL SCALING
-   ========================================================= */
-
-/* Tier 1: Standard Laptops (1280px - 1439px) - Preserves User's Laptop Exactly */
-@media (min-width: 1280px) {
-  .container {
-    max-width: 1320px !important;
-    padding: 0 32px !important;
-  }
-
-  .header-top-row {
-    gap: 32px !important;
-  }
-
-  .desktop-search-box {
-    max-width: 640px !important;
-  }
-
-  .products-grid {
-    grid-template-columns: repeat(5, 1fr) !important;
-    gap: 22px !important;
-  }
-
-  .hero-title {
-    font-size: 3.4rem !important;
-  }
-
-  .hero-device-img {
-    max-width: 380px !important;
-    max-height: 420px !important;
-  }
-
+  /* Nav Links Spacing - Ensures All Links Fit Without Cut-off */
   .nav-links {
-    gap: 16px !important;
+    gap: 8px !important;
+    padding: 6px 0 !important;
+    justify-content: flex-start !important;
   }
 
   .nav-link,
   button.nav-link,
   a.nav-link {
-    font-size: 0.84rem !important;
-    padding: 8px 16px !important;
+    font-size: 0.79rem !important;
+    padding: 5px 10px !important;
+    letter-spacing: 0.1px !important;
+  }
+
+  /* Hero Section Compact Proportions */
+  .hero-section {
+    padding: 24px 0 32px 0 !important;
+  }
+
+  .hero-container {
+    display: grid !important;
+    grid-template-columns: 1.2fr 0.9fr !important;
+    align-items: center !important;
+    gap: 36px !important;
+  }
+
+  .hero-title {
+    font-size: 2.6rem !important;
+    line-height: 1.15 !important;
+    margin-bottom: 10px !important;
+  }
+
+  .hero-desc {
+    font-size: 0.92rem !important;
+    line-height: 1.45 !important;
+    max-width: 500px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .hero-buttons {
+    margin-bottom: 20px !important;
+    gap: 12px !important;
+  }
+
+  .hero-buttons .btn {
+    height: 40px !important;
+    padding: 0 16px !important;
+    font-size: 0.82rem !important;
+  }
+
+  .hero-image-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    max-width: 360px !important;
+    margin: 0 auto !important;
+  }
+
+  .hero-device-img {
+    max-width: 320px !important;
+    max-height: 320px !important;
+    object-fit: contain !important;
+  }
+
+  /* Categories Section Compact */
+  .categories-section {
+    padding: 16px 0 !important;
+  }
+
+  .category-carousel-track {
+    gap: 10px !important;
+  }
+
+  .category-slide-card {
+    min-width: 120px !important;
+    max-width: 140px !important;
+    padding: 12px 8px !important;
+    border-radius: 14px !important;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 18px !important;
+  }
+
+  .prod-img-wrap {
+    height: 155px !important;
+  }
+
+  .guarantees-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  .promo-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1.4fr 1fr 1fr 1.2fr !important;
+    gap: 36px !important;
+  }
+}
+
+/* Tier 1: Standard Laptops (1280px - 1439px) - Preserves Perfect Proportions */
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1300px !important;
+    padding: 0 28px !important;
+  }
+
+  .header-top-row {
+    gap: 24px !important;
+  }
+
+  .desktop-search-box {
+    max-width: 580px !important;
+  }
+
+  .nav-links {
+    gap: 8px !important;
+  }
+
+  .nav-link,
+  button.nav-link,
+  a.nav-link {
+    font-size: 0.8rem !important;
+    padding: 6px 11px !important;
+  }
+
+  .hero-section {
+    padding: 28px 0 36px 0 !important;
+  }
+
+  .hero-container {
+    grid-template-columns: 1.2fr 0.9fr !important;
+    gap: 40px !important;
+  }
+
+  .hero-title {
+    font-size: 2.8rem !important;
+  }
+
+  .hero-device-img {
+    max-width: 340px !important;
+    max-height: 340px !important;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  .prod-img-wrap {
+    height: 165px !important;
   }
 }
 
 /* Tier 2: Large Laptops & Mid-Sized Monitors (1440px - 1679px) */
 @media (min-width: 1440px) {
   .container {
-    max-width: 1420px !important;
-    padding: 0 36px !important;
+    max-width: 1400px !important;
+    padding: 0 32px !important;
   }
 
   .desktop-search-box {
-    max-width: 660px !important;
+    max-width: 620px !important;
+  }
+
+  .nav-links {
+    gap: 10px !important;
+  }
+
+  .nav-link,
+  button.nav-link,
+  a.nav-link {
+    font-size: 0.82rem !important;
+    padding: 6px 13px !important;
+  }
+
+  .hero-section {
+    padding: 32px 0 40px 0 !important;
   }
 
   .hero-container {
-    grid-template-columns: 1.15fr 1fr !important;
+    grid-template-columns: 1.2fr 0.9fr !important;
     gap: 48px !important;
   }
 
   .hero-title {
-    font-size: 3.5rem !important;
+    font-size: 3rem !important;
   }
 
   .hero-device-img {
-    max-width: 430px !important;
-    max-height: 450px !important;
+    max-width: 370px !important;
+    max-height: 370px !important;
   }
 
   .products-grid {
     grid-template-columns: repeat(5, 1fr) !important;
-    gap: 24px !important;
+    gap: 22px !important;
   }
 
   .prod-img-wrap {
-    height: 180px !important;
+    height: 175px !important;
   }
 
   .promo-card {
-    min-height: 220px !important;
+    min-height: 205px !important;
   }
 
   .service-sell-card {
-    min-height: 225px !important;
+    min-height: 215px !important;
   }
 }
 
 /* Tier 3: Full HD 1080p Desktop Monitors (1680px - 1919px) */
 @media (min-width: 1680px) {
   .container {
-    max-width: 1580px !important;
-    padding: 0 42px !important;
+    max-width: 1540px !important;
+    padding: 0 36px !important;
   }
 
   .desktop-search-box {
-    max-width: 720px !important;
+    max-width: 680px !important;
     height: 44px !important;
   }
 
   .header-top-row {
-    gap: 36px !important;
+    gap: 32px !important;
   }
 
   .nav-links {
-    gap: 18px !important;
+    gap: 14px !important;
   }
 
   .nav-link,
   button.nav-link,
   a.nav-link {
-    font-size: 0.88rem !important;
-    padding: 9px 18px !important;
+    font-size: 0.85rem !important;
+    padding: 7px 15px !important;
   }
 
   .hero-section {
-    padding: 52px 0 64px 0 !important;
+    padding: 38px 0 48px 0 !important;
   }
 
   .hero-container {
-    grid-template-columns: 1.1fr 1fr !important;
+    grid-template-columns: 1.15fr 0.95fr !important;
     gap: 56px !important;
   }
 
   .hero-title {
-    font-size: 3.7rem !important;
+    font-size: 3.3rem !important;
   }
 
   .hero-desc {
-    font-size: 1.08rem !important;
+    font-size: 1rem !important;
     max-width: 560px !important;
   }
 
   .hero-device-img {
-    max-width: 480px !important;
-    max-height: 490px !important;
+    max-width: 410px !important;
+    max-height: 410px !important;
   }
 
   .products-grid {
@@ -5934,101 +6005,102 @@ img {
   }
 
   .prod-img-wrap {
-    height: 190px !important;
+    height: 185px !important;
   }
 
-  .category-grid {
-    grid-template-columns: repeat(10, 1fr) !important;
-    gap: 16px !important;
+  .category-slide-card {
+    min-width: 130px !important;
+    max-width: 150px !important;
+    padding: 14px 10px !important;
   }
 
   .promo-card {
-    min-height: 235px !important;
-    padding: 30px 26px !important;
+    min-height: 220px !important;
+    padding: 26px 22px !important;
   }
 
   .promo-info h3 {
-    font-size: 1.4rem !important;
+    font-size: 1.35rem !important;
   }
 
   .service-sell-card {
-    min-height: 235px !important;
-    padding: 30px 26px !important;
+    min-height: 225px !important;
+    padding: 26px 22px !important;
   }
 
   .service-sell-card .service-sell-img-box {
-    width: 195px !important;
-    height: 195px !important;
+    width: 185px !important;
+    height: 185px !important;
   }
 }
 
 /* Tier 4: Ultra-Wide, 2K & 4K Displays (1920px and above) */
 @media (min-width: 1920px) {
   .container {
-    max-width: 1720px !important;
-    padding: 0 48px !important;
+    max-width: 1680px !important;
+    padding: 0 44px !important;
     margin: 0 auto !important;
   }
 
   .desktop-search-box {
-    max-width: 760px !important;
+    max-width: 720px !important;
     height: 46px !important;
   }
 
   .hero-section {
-    padding: 60px 0 72px 0 !important;
+    padding: 44px 0 54px 0 !important;
   }
 
   .hero-container {
-    grid-template-columns: 1.1fr 1fr !important;
-    gap: 68px !important;
+    grid-template-columns: 1.15fr 0.95fr !important;
+    gap: 64px !important;
   }
 
   .hero-title {
-    font-size: 3.9rem !important;
-    line-height: 1.12 !important;
+    font-size: 3.5rem !important;
+    line-height: 1.14 !important;
   }
 
   .hero-desc {
-    font-size: 1.12rem !important;
-    max-width: 620px !important;
+    font-size: 1.05rem !important;
+    max-width: 600px !important;
   }
 
   .hero-device-img {
-    max-width: 520px !important;
-    max-height: 520px !important;
+    max-width: 440px !important;
+    max-height: 440px !important;
   }
 
   .products-grid {
     grid-template-columns: repeat(6, 1fr) !important;
-    gap: 26px !important;
+    gap: 24px !important;
   }
 
   .prod-img-wrap {
-    height: 205px !important;
+    height: 195px !important;
   }
 
   .promo-grid {
-    gap: 26px !important;
+    gap: 24px !important;
   }
 
   .promo-card {
-    min-height: 250px !important;
-    padding: 34px 30px !important;
+    min-height: 235px !important;
+    padding: 28px 24px !important;
   }
 
   .service-sell-grid {
-    gap: 26px !important;
+    gap: 24px !important;
   }
 
   .service-sell-card {
-    min-height: 250px !important;
-    padding: 34px 30px !important;
+    min-height: 235px !important;
+    padding: 28px 24px !important;
   }
 
   .service-sell-card .service-sell-img-box {
-    width: 215px !important;
-    height: 215px !important;
+    width: 200px !important;
+    height: 200px !important;
   }
 }
 

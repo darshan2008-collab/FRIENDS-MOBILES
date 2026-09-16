@@ -165,9 +165,11 @@ export default function Hero({ theme, slides, t = (k) => k }) {
             alt={activeSlide.titleGradient} 
             className="hero-device-img" 
             style={{ 
-              width: '100%',
+              width: 'auto',
+              maxWidth: 'min(100%, 350px)',
+              maxHeight: '350px',
               objectFit: 'contain',
-              borderRadius: '24px',
+              borderRadius: '20px',
               animation: 'fadeIn 0.2s ease-out'
             }}
           />
