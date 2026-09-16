@@ -5790,6 +5790,11 @@ img {
   }
 }
 
+/* =========================================================
+   DESKTOP & LARGE SCREEN MULTI-TIER PROPORTIONAL SCALING
+   ========================================================= */
+
+/* Tier 1: Standard Laptops (1280px - 1439px) - Preserves User's Laptop Exactly */
 @media (min-width: 1280px) {
   .container {
     max-width: 1320px !important;
@@ -5813,6 +5818,11 @@ img {
     font-size: 3.4rem !important;
   }
 
+  .hero-device-img {
+    max-width: 380px !important;
+    max-height: 420px !important;
+  }
+
   .nav-links {
     gap: 16px !important;
   }
@@ -5822,6 +5832,203 @@ img {
   a.nav-link {
     font-size: 0.84rem !important;
     padding: 8px 16px !important;
+  }
+}
+
+/* Tier 2: Large Laptops & Mid-Sized Monitors (1440px - 1679px) */
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1420px !important;
+    padding: 0 36px !important;
+  }
+
+  .desktop-search-box {
+    max-width: 660px !important;
+  }
+
+  .hero-container {
+    grid-template-columns: 1.15fr 1fr !important;
+    gap: 48px !important;
+  }
+
+  .hero-title {
+    font-size: 3.5rem !important;
+  }
+
+  .hero-device-img {
+    max-width: 430px !important;
+    max-height: 450px !important;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 24px !important;
+  }
+
+  .prod-img-wrap {
+    height: 180px !important;
+  }
+
+  .promo-card {
+    min-height: 220px !important;
+  }
+
+  .service-sell-card {
+    min-height: 225px !important;
+  }
+}
+
+/* Tier 3: Full HD 1080p Desktop Monitors (1680px - 1919px) */
+@media (min-width: 1680px) {
+  .container {
+    max-width: 1580px !important;
+    padding: 0 42px !important;
+  }
+
+  .desktop-search-box {
+    max-width: 720px !important;
+    height: 44px !important;
+  }
+
+  .header-top-row {
+    gap: 36px !important;
+  }
+
+  .nav-links {
+    gap: 18px !important;
+  }
+
+  .nav-link,
+  button.nav-link,
+  a.nav-link {
+    font-size: 0.88rem !important;
+    padding: 9px 18px !important;
+  }
+
+  .hero-section {
+    padding: 52px 0 64px 0 !important;
+  }
+
+  .hero-container {
+    grid-template-columns: 1.1fr 1fr !important;
+    gap: 56px !important;
+  }
+
+  .hero-title {
+    font-size: 3.7rem !important;
+  }
+
+  .hero-desc {
+    font-size: 1.08rem !important;
+    max-width: 560px !important;
+  }
+
+  .hero-device-img {
+    max-width: 480px !important;
+    max-height: 490px !important;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 22px !important;
+  }
+
+  .prod-img-wrap {
+    height: 190px !important;
+  }
+
+  .category-grid {
+    grid-template-columns: repeat(10, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  .promo-card {
+    min-height: 235px !important;
+    padding: 30px 26px !important;
+  }
+
+  .promo-info h3 {
+    font-size: 1.4rem !important;
+  }
+
+  .service-sell-card {
+    min-height: 235px !important;
+    padding: 30px 26px !important;
+  }
+
+  .service-sell-card .service-sell-img-box {
+    width: 195px !important;
+    height: 195px !important;
+  }
+}
+
+/* Tier 4: Ultra-Wide, 2K & 4K Displays (1920px and above) */
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1720px !important;
+    padding: 0 48px !important;
+    margin: 0 auto !important;
+  }
+
+  .desktop-search-box {
+    max-width: 760px !important;
+    height: 46px !important;
+  }
+
+  .hero-section {
+    padding: 60px 0 72px 0 !important;
+  }
+
+  .hero-container {
+    grid-template-columns: 1.1fr 1fr !important;
+    gap: 68px !important;
+  }
+
+  .hero-title {
+    font-size: 3.9rem !important;
+    line-height: 1.12 !important;
+  }
+
+  .hero-desc {
+    font-size: 1.12rem !important;
+    max-width: 620px !important;
+  }
+
+  .hero-device-img {
+    max-width: 520px !important;
+    max-height: 520px !important;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 26px !important;
+  }
+
+  .prod-img-wrap {
+    height: 205px !important;
+  }
+
+  .promo-grid {
+    gap: 26px !important;
+  }
+
+  .promo-card {
+    min-height: 250px !important;
+    padding: 34px 30px !important;
+  }
+
+  .service-sell-grid {
+    gap: 26px !important;
+  }
+
+  .service-sell-card {
+    min-height: 250px !important;
+    padding: 34px 30px !important;
+  }
+
+  .service-sell-card .service-sell-img-box {
+    width: 215px !important;
+    height: 215px !important;
   }
 }
 

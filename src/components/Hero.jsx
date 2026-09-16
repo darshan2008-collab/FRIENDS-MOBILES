@@ -166,8 +166,6 @@ export default function Hero({ theme, slides, t = (k) => k }) {
             className="hero-device-img" 
             style={{ 
               width: '100%',
-              maxWidth: '380px', 
-              maxHeight: '420px', 
               objectFit: 'contain',
               borderRadius: '24px',
               animation: 'fadeIn 0.2s ease-out'
