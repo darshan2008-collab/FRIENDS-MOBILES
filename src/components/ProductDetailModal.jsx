@@ -216,19 +216,6 @@ export default function ProductDetailModal({
     window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`, '_blank');
   };
 
-  const handleNativeShare = async () => {
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl,
-        });
-        return;
-      } catch (_) {}
-    }
-    setIsShareModalOpen(true);
-  };
 
   if (!product || typeof document === 'undefined') return null;
   const portalContainer = document.body || document.getElementById('root') || document.documentElement;
@@ -258,32 +245,9 @@ export default function ProductDetailModal({
               {product.category.toUpperCase()} PRODUCT DETAILS
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button 
-              type="button"
-              onClick={handleNativeShare}
-              style={{
-                background: 'rgba(255, 85, 0, 0.12)',
-                color: '#FF5500',
-                border: '1px solid rgba(255, 85, 0, 0.3)',
-                borderRadius: '20px',
-                padding: '6px 14px',
-                fontSize: '0.8rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'all 0.2s ease'
-              }}
-              title="Share Product Link"
-            >
-              <Share2 size={15} color="#FF5500" /> Share Product
-            </button>
-            <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', padding: '4px' }}>
-              <X size={22} />
-            </button>
-          </div>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', padding: '4px' }}>
+            <X size={22} />
+          </button>
         </header>
 
         {/* Scrollable Details Body */}
@@ -350,38 +314,6 @@ export default function ProductDetailModal({
                 onClick={() => setIsLightboxOpen(true)}
               >
                 <span className="discount-badge" style={{ top: '16px', left: '16px', zIndex: 3 }}>{product.discount}</span>
-                
-                {/* Floating Product Image Share Badge (Top Right of Image) */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsShareModalOpen(true);
-                  }}
-                  style={{
-                    position: 'absolute',
-                    top: '16px',
-                    right: '16px',
-                    zIndex: 5,
-                    background: 'linear-gradient(135deg, #FF5500, #E03E00)',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '24px',
-                    padding: '7px 14px',
-                    fontSize: '0.78rem',
-                    fontWeight: '800',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(255, 85, 0, 0.45)',
-                    backdropFilter: 'blur(4px)',
-                    transition: 'all 0.2s ease'
-                  }}
-                  title="Share Product Link"
-                >
-                  <Share2 size={15} color="#ffffff" /> Share
-                </button>
                 
                 {/* Hover to Zoom Helper Badge */}
                 <span style={{
@@ -462,102 +394,6 @@ export default function ProductDetailModal({
                 </span>
               </div>
 
-              {/* Direct Social Share Pills */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginBottom: '16px',
-                flexWrap: 'wrap',
-                background: 'rgba(255, 85, 0, 0.05)',
-                padding: '8px 12px',
-                borderRadius: '12px',
-                border: '1px dashed rgba(255, 85, 0, 0.3)'
-              }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#FF5500', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <Share2 size={14} color="#FF5500" /> Share:
-                </span>
-                <button
-                  type="button"
-                  onClick={handleShareWhatsApp}
-                  style={{
-                    padding: '5px 12px',
-                    borderRadius: '8px',
-                    background: '#25D366',
-                    color: '#ffffff',
-                    border: 'none',
-                    fontSize: '0.74rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)'
-                  }}
-                  title="Share product on WhatsApp"
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.764.459 3.487 1.332 5.003l-1.417 5.176 5.302-1.39a9.943 9.943 0 0 0 4.77 1.215h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.668-1.037-5.176-2.924-7.062a9.923 9.923 0 0 0-7.066-2.945zm.004 18.155h-.003a8.27 8.27 0 0 1-4.218-1.157l-.302-.18-3.136.822.836-3.056-.197-.314a8.27 8.27 0 0 1-1.272-4.436c0-4.568 3.717-8.283 8.286-8.283 2.213 0 4.293.862 5.858 2.428a8.243 8.243 0 0 1 2.427 5.856c0 4.569-3.718 8.284-8.281 8.284z"/></svg>
-                  WhatsApp
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  style={{
-                    padding: '5px 12px',
-                    borderRadius: '8px',
-                    background: copiedLink ? '#22c55e' : 'var(--bg-card)',
-                    color: copiedLink ? '#ffffff' : 'var(--text-primary)',
-                    border: '1px solid var(--border-color)',
-                    fontSize: '0.74rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px'
-                  }}
-                  title="Copy direct product link"
-                >
-                  {copiedLink ? <CheckCircle2 size={13} color="#ffffff" /> : <Copy size={13} />}
-                  {copiedLink ? 'Copied!' : 'Copy Link'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleShareFacebook}
-                  style={{
-                    padding: '5px 12px',
-                    borderRadius: '8px',
-                    background: '#1877F2',
-                    color: '#ffffff',
-                    border: 'none',
-                    fontSize: '0.74rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px'
-                  }}
-                  title="Share product on Facebook"
-                >
-                  Facebook
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsShareModalOpen(true)}
-                  style={{
-                    padding: '5px 10px',
-                    borderRadius: '8px',
-                    background: 'var(--bg-card)',
-                    color: '#FF5500',
-                    border: '1px solid #FF5500',
-                    fontSize: '0.74rem',
-                    fontWeight: 800,
-                    cursor: 'pointer'
-                  }}
-                  title="More social sharing options"
-                >
-                  More...
-                </button>
-              </div>
 
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.86rem', lineHeight: 1.5, marginBottom: '20px' }}>
                 {product.description || "Premium mobile electronics & customized studio accessories from FRIENDS MOBILE. High durability with standard local brand warranty."}
@@ -626,7 +462,7 @@ export default function ProductDetailModal({
                 </button>
                 <button 
                   type="button"
-                  onClick={handleNativeShare}
+                  onClick={() => setIsShareModalOpen(true)}
                   style={{ 
                     height: '48px', 
                     padding: '0 18px',
@@ -643,87 +479,10 @@ export default function ProductDetailModal({
                     transition: 'all 0.2s ease',
                     flexShrink: 0
                   }}
-                  title="Share Product Link"
+                  title="Share Product on Social Media"
                 >
                   <Share2 size={18} color="#FF5500" /> SHARE
                 </button>
-              </div>
-
-              {/* Instant Social Share Bar */}
-              <div style={{
-                marginTop: '14px',
-                padding: '12px 14px',
-                background: 'var(--bg-input)',
-                borderRadius: '14px',
-                border: '1px solid var(--border-color)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '10px',
-                flexWrap: 'wrap'
-              }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Share2 size={14} color="#FF5500" /> Quick Share:
-                </span>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={handleShareWhatsApp}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      background: '#25D366',
-                      color: '#ffffff',
-                      border: 'none',
-                      fontSize: '0.76rem',
-                      fontWeight: '800',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      boxShadow: '0 2px 8px rgba(37, 211, 102, 0.3)'
-                    }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.764.459 3.487 1.332 5.003l-1.417 5.176 5.302-1.39a9.943 9.943 0 0 0 4.77 1.215h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.668-1.037-5.176-2.924-7.062a9.923 9.923 0 0 0-7.066-2.945zm.004 18.155h-.003a8.27 8.27 0 0 1-4.218-1.157l-.302-.18-3.136.822.836-3.056-.197-.314a8.27 8.27 0 0 1-1.272-4.436c0-4.568 3.717-8.283 8.286-8.283 2.213 0 4.293.862 5.858 2.428a8.243 8.243 0 0 1 2.427 5.856c0 4.569-3.718 8.284-8.281 8.284z"/></svg>
-                    WhatsApp
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCopyLink}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      background: copiedLink ? '#22c55e' : 'var(--bg-card)',
-                      color: copiedLink ? '#ffffff' : 'var(--text-primary)',
-                      border: '1px solid var(--border-color)',
-                      fontSize: '0.76rem',
-                      fontWeight: '800',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px'
-                    }}
-                  >
-                    {copiedLink ? <CheckCircle2 size={14} /> : <Copy size={14} />}
-                    {copiedLink ? 'Copied!' : 'Copy Link'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsShareModalOpen(true)}
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: '8px',
-                      background: 'var(--bg-card)',
-                      color: 'var(--text-primary)',
-                      border: '1px solid var(--border-color)',
-                      fontSize: '0.76rem',
-                      fontWeight: '800',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    More...
-                  </button>
-                </div>
               </div>
             </div>
           </div>
