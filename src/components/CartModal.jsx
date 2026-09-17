@@ -1409,10 +1409,16 @@ export default function CartModal({
 
             <button 
               onClick={handleStartCheckout}
-              className="btn btn-primary"
-              style={{ padding: '12px 24px', fontSize: '0.88rem' }}
+              className="checkout-proceed-btn"
+              type="button"
             >
-              Proceed to Checkout <ArrowRight size={16} />
+              <div className="checkout-btn-decor" />
+              <div className="checkout-btn-content">
+                <div className="checkout-btn__icon">
+                  <ArrowRight size={18} />
+                </div>
+                <span className="checkout-btn__text">Proceed to Checkout</span>
+              </div>
             </button>
           </footer>
         )}
