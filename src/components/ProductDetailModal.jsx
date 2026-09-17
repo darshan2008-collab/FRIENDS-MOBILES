@@ -655,8 +655,15 @@ export default function ProductDetailModal({
                   </div>
                 </div>
 
-                <button type="submit" className="btn btn-primary btn-sm" style={{ width: '100%', gap: '6px' }}>
-                  <Send size={14} /> Submit Feedback
+                <button type="submit" className="feedback-submit-btn">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span>
+                    <Send size={14} /> Submit Feedback
+                  </span>
                 </button>
               </form>
 
