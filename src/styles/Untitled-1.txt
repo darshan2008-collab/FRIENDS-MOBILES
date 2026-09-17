@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en-IN" prefix="og: https://ogp.me/ns#">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <!-- Google Search Console Ownership Verification -->
+    <meta name="google-site-verification" content="y40JwSTfOs02uDWD0m1sqNTxDrOcieINghQNhXYSfR4" />
+
+    <!-- Primary Search Engine Optimization (SEO) Meta Tags (GOD MODE LEVEL: English & Tamil) -->
+    <title>FRIENDS MOBILE | Custom Phone Back Covers, Mobile Accessories &amp; Store India | பிரண்ட்ஸ் மொபைல்</title>
+    <meta name="description" content="Official FRIENDS MOBILE Online Store &amp; Shop India. Buy 3D Customized Phone Back Covers, iPhone Cases, boAt Earbuds, Fast Chargers, Power Banks &amp; Custom Photo Frames. பிரண்ட்ஸ் மொபைல் - 100% Original Products with Cash on Delivery Across India." />
+    <meta name="keywords" content="FRIENDS MOBILE, Friends, friends mobile, friends mobile store, friends mobile shop, friends mobile online, customized back cover, phone cases India, custom phone cover online, iPhone 15 pro custom case, Samsung back covers, boAt air dopes, fast charger, power bank 20000mAh, photo frames Karur, mobile accessories Madurai, Tamil Nadu mobile store, பிரண்ட்ஸ் மொபைல், மொபைல் கவர், சார்ஜர், இயர்பட்ஸ், மதுரை, கரூர்" />
+    <meta name="author" content="FRIENDS MOBILE Electronics &amp; Accessories" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="theme-color" content="#FF5500" />
+    <meta name="rating" content="general" />
+    <meta name="revisit-after" content="1 days" />
+    <link rel="canonical" href="https://friendsmobile.co.in/" />
+
+    <!-- Bilingual Hreflang Multi-Region Links (God Mode SEO) -->
+    <link rel="alternate" hreflang="en-in" href="https://friendsmobile.co.in/?lang=en" />
+    <link rel="alternate" hreflang="ta-in" href="https://friendsmobile.co.in/?lang=ta" />
+    <link rel="alternate" hreflang="x-default" href="https://friendsmobile.co.in/" />
+
+    <!-- Open Graph / Facebook / WhatsApp Rich Social Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FRIENDS MOBILE" />
+    <meta property="og:title" content="FRIENDS MOBILE - Official Custom Phone Cases &amp; Accessories Store" />
+    <meta property="og:description" content="Design 3D Customized Mobile Back Covers, buy Earbuds, Chargers, Power Banks &amp; Custom Photo Frames at FRIENDS MOBILE. Express Delivery &amp; COD available across India." />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=1200&auto=format&fit=crop" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="FRIENDS MOBILE Customized Back Cover Studio" />
+    <meta property="og:url" content="https://friendsmobile.co.in/" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@FriendsMobileIN" />
+    <meta name="twitter:title" content="FRIENDS MOBILE - Customized Back Covers &amp; Mobile Accessories" />
+    <meta name="twitter:description" content="Design 3D Custom Back Covers for all Smartphone Models. Order Online with Cash on Delivery across India." />
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=1200&auto=format&fit=crop" />
+
+    <!-- Local Business Geo-Targeting Tags (Tamil Nadu, India) -->
+    <meta name="geo.region" content="IN-TN" />
+    <meta name="geo.placename" content="Karur, Madurai, Tamil Nadu" />
+    <meta name="geo.position" content="10.9601;78.0766" />
+    <meta name="ICBM" content="10.9601, 78.0766" />
+
+    <!-- Google Fonts & External Libraries -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Monoton&family=Bungee+Inline&family=Orbitron:wght@800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Schema.org JSON-LD 1: Store & Organization (Google Search & Knowledge Graph Grade) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["MobilePhoneStore", "Organization"],
+          "@id": "https://friendsmobile.co.in/#organization",
+          "name": "FRIENDS MOBILE",
+          "alternateName": [
+            "Friends",
+            "Friends Mobile",
+            "Friends Mobile Store",
+            "Friends Mobile Shop",
+            "Friends Mobile Online",
+            "Friends Mobile Accessories",
+            "பிரண்ட்ஸ் மொபைல்"
+          ],
+          "image": "https://friendsmobile.co.in/images/prod_custom_cover.png",
+          "logo": "https://friendsmobile.co.in/logo.png",
+          "url": "https://friendsmobile.co.in/",
+          "telephone": "+917448578507",
+          "priceRange": "₹199 - ₹15000",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "South Gandhigramam",
+            "addressLocality": "Karur / Madurai",
+            "addressRegion": "Tamil Nadu",
+            "postalCode": "639004",
+            "addressCountry": "IN"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 10.9601,
+            "longitude": 78.0766
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "opens": "09:00",
+            "closes": "21:30"
+          },
+          "sameAs": [
+            "https://facebook.com/friendsmobile",
+            "https://instagram.com/friendsmobile"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://friendsmobile.co.in/#website",
+          "name": "FRIENDS MOBILE",
+          "alternateName": [
+            "Friends",
+            "Friends Mobile",
+            "Friends Mobile Store",
+            "Friends Mobile Shop",
+            "Friends Mobile Online",
+            "பிரண்ட்ஸ் மொபைல்"
+          ],
+          "url": "https://friendsmobile.co.in/",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://friendsmobile.co.in/?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://friendsmobile.co.in/?product=1",
+          "name": "boAt Airdopes 141 Bluetooth Earbuds",
+          "url": "https://friendsmobile.co.in/?product=1",
+          "image": ["https://friendsmobile.co.in/images/prod_airdopes.png"],
+          "description": "True Wireless Earbuds with up to 42H Playtime, Beast Mode for Low Latency Gaming, and ENx Technology.",
+          "sku": "FM-PROD-1",
+          "mpn": "FM-MPN-AIRDOPES-141",
+          "gtin13": "8907605141014",
+          "brand": {
+            "@type": "Brand",
+            "name": "boAt"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": 342,
+            "ratingCount": 342,
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "review": [
+            {
+              "@type": "Review",
+              "author": {
+                "@type": "Person",
+                "name": "Senthil Kumar"
+              },
+              "datePublished": "2024-02-18",
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5",
+                "worstRating": "1"
+              },
+              "reviewBody": "Original boAt earbuds with awesome sound quality, punchy bass and quick delivery."
+            }
+          ],
+          "offers": {
+            "@type": "Offer",
+            "url": "https://friendsmobile.co.in/?product=1",
+            "priceCurrency": "INR",
+
+"price": "1199.00",
+            "priceValidUntil": "2028-12-31",
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+              "@type": "Organization",
+              "name": "FRIENDS MOBILE",
+              "url": "https://friendsmobile.co.in/"
+            },
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "INR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "IN"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 0,
+                  "maxValue": 1,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 2,
+                  "maxValue": 5,
+                  "unitCode": "DAY"
+                }
+              }
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "IN",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": 7,
+              "returnMethod": "https://schema.org/ReturnByMail",
+              "returnFees": "https://schema.org/FreeReturn",
+              "returnShippingFeesAmount": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "INR"
+              },
+              "refundType": "https://schema.org/FullRefund"
+            }
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://friendsmobile.co.in/?product=2",
+          "name": "Mi 20000mAh Power Bank 3i",
+          "url": "https://friendsmobile.co.in/?product=2",
+          "image": ["https://friendsmobile.co.in/images/prod_powerbank.png"],
+          "description": "High capacity 20000mAh lithium polymer battery with 18W fast charging and triple port output.",
+          "sku": "FM-PROD-2",
+          "mpn": "FM-MPN-MI-PB-3I",
+          "brand": {
+            "@type": "Brand",
+            "name": "Xiaomi"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.7",
+            "reviewCount": 218,
+            "ratingCount": 218,
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "review": [
+            {
+              "@type": "Review",
+              "author": {
+                "@type": "Person",
+                "name": "Anand R."
+              },
+              "datePublished": "2024-02-22",
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5",
+                "worstRating": "1"
+              },
+              "reviewBody": "Genuine Mi Power Bank, charges mobile phones quickly. Highly recommended."
+            }
+          ],
+          "offers": {
+            "@type": "Offer",
+            "url": "https://friendsmobile.co.in/?product=2",
+            "priceCurrency": "INR",
+            "price": "1699.00",
+            "priceValidUntil": "2028-12-31",
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+              "@type": "Organization",
+              "name": "FRIENDS MOBILE",
+              "url": "https://friendsmobile.co.in/"
+            },
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "INR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "IN"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 0,
+                  "maxValue": 1,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+
+"@type": "QuantitativeValue",
+                  "minValue": 2,
+                  "maxValue": 5,
+                  "unitCode": "DAY"
+                }
+              }
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "IN",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": 7,
+              "returnMethod": "https://schema.org/ReturnByMail",
+              "returnFees": "https://schema.org/FreeReturn",
+              "returnShippingFeesAmount": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "INR"
+              },
+              "refundType": "https://schema.org/FullRefund"
+            }
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://friendsmobile.co.in/?product=3",
+          "name": "Portronics 20W Fast Charger",
+          "url": "https://friendsmobile.co.in/?product=3",
+          "image": ["https://friendsmobile.co.in/images/prod_charger.png"],
+          "description": "Ultra fast 20W Type-C Power Delivery wall charger compatible with iPhone, Samsung, and Android devices.",
+          "sku": "FM-PROD-3",
+          "mpn": "FM-MPN-PORTRONICS-20W",
+          "brand": {
+            "@type": "Brand",
+            "name": "Portronics"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.6",
+            "reviewCount": 154,
+            "ratingCount": 154,
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "review": [
+            {
+              "@type": "Review",
+              "author": {
+                "@type": "Person",
+                "name": "Muthu Kumar"
+              },
+              "datePublished": "2024-03-02",
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5",
+                "worstRating": "1"
+              },
+              "reviewBody": "Super fast charging for my phone, compact design and doesn't overheat."
+            }
+          ],
+          "offers": {
+            "@type": "Offer",
+            "url": "https://friendsmobile.co.in/?product=3",
+            "priceCurrency": "INR",
+            "price": "599.00",
+            "priceValidUntil": "2028-12-31",
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+              "@type": "Organization",
+              "name": "FRIENDS MOBILE",
+              "url": "https://friendsmobile.co.in/"
+            },
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "INR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "IN"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 0,
+                  "maxValue": 1,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 2,
+                  "maxValue": 5,
+                  "unitCode": "DAY"
+                }
+              }
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "IN",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": 7,
+              "returnMethod": "https://schema.org/ReturnByMail",
+              "returnFees": "https://schema.org/FreeReturn",
+              "returnShippingFeesAmount": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "INR"
+              },
+              "refundType": "https://schema.org/FullRefund"
+            }
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://friendsmobile.co.in/?product=4",
+          "name": "Realme Wireless 2S Neckband",
+          "url": "https://friendsmobile.co.in/?product=4",
+
+"image": ["https://friendsmobile.co.in/images/prod_neckband.png"],
+          "description": "Flexible neckband earphones with 11.2mm dynamic bass boost drivers, magnetic instant connect, and fast charging.",
+          "sku": "FM-PROD-4",
+          "mpn": "FM-MPN-REALME-2S",
+          "brand": {
+            "@type": "Brand",
+            "name": "Realme"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.7",
+            "reviewCount": 189,
+            "ratingCount": 189,
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "review": [
+            {
+              "@type": "Review",
+              "author": {
+                "@type": "Person",
+                "name": "Deepak V."
+              },
+              "datePublished": "2024-03-05",
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5",
+                "worstRating": "1"
+              },
+              "reviewBody": "Comfortable neckband with great battery backup and clear voice calling."
+            }
+          ],
+          "offers": {
+            "@type": "Offer",
+            "url": "https://friendsmobile.co.in/?product=4",
+            "priceCurrency": "INR",
+            "price": "1349.00",
+            "priceValidUntil": "2028-12-31",
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+              "@type": "Organization",
+              "name": "FRIENDS MOBILE",
+              "url": "https://friendsmobile.co.in/"
+            },
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "INR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "IN"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 0,
+                  "maxValue": 1,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 2,
+                  "maxValue": 5,
+                  "unitCode": "DAY"
+                }
+              }
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "IN",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": 7,
+              "returnMethod": "https://schema.org/ReturnByMail",
+              "returnFees": "https://schema.org/FreeReturn",
+              "returnShippingFeesAmount": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "INR"
+              },
+              "refundType": "https://schema.org/FullRefund"
+            }
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://friendsmobile.co.in/?product=5",
+          "name": "Customized Back Cover",
+          "url": "https://friendsmobile.co.in/?product=5",
+          "image": ["https://friendsmobile.co.in/images/prod_custom_cover.png"],
+          "description": "3D Customized Printed Mobile Back Cover for Apple, Samsung, Vivo, Oppo, OnePlus, Realme & Poco.",
+          "sku": "FM-PROD-5",
+          "mpn": "FM-MPN-CUSTOM-COVER",
+          "brand": {
+            "@type": "Brand",
+            "name": "FRIENDS MOBILE"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": 520,
+            "ratingCount": 520,
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "review": [
+            {
+              "@type": "Review",
+              "author": {
+                "@type": "Person",
+                "name": "Praveen S."
+              },
+              "datePublished": "2024-03-08",
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5",
+                "worstRating": "1"
+              },
+
+"reviewBody": "Awesome 3D custom cover print, picture quality is super sharp and fits my phone perfectly."
+            }
+          ],
+          "offers": {
+            "@type": "Offer",
+            "url": "https://friendsmobile.co.in/?product=5",
+            "priceCurrency": "INR",
+            "price": "399.00",
+            "priceValidUntil": "2028-12-31",
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+              "@type": "Organization",
+              "name": "FRIENDS MOBILE",
+              "url": "https://friendsmobile.co.in/"
+            },
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "INR"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "IN"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 0,
+                  "maxValue": 1,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 2,
+                  "maxValue": 5,
+                  "unitCode": "DAY"
+                }
+              }
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "IN",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": 7,
+              "returnMethod": "https://schema.org/ReturnByMail",
+              "returnFees": "https://schema.org/FreeReturn",
+              "returnShippingFeesAmount": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "INR"
+              },
+              "refundType": "https://schema.org/FullRefund"
+            }
+          }
+        }
+      ]
+    }
+    </script>
+    <!-- Global White Screen Shield & Unhandled Error Recovery -->
+    <script>
+      (function() {
+        function showFallbackUI(msg) {
+          const rootEl = document.getElementById('root');
+          if (rootEl && rootEl.children.length === 0) {
+            rootEl.innerHTML = `
+              <div style="min-height:100vh;background:#090d16;color:#ffffff;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;padding:20px;text-align:center;">
+                <div style="background:rgba(255,85,0,0.1);border:1.5px solid #FF5500;border-radius:16px;padding:32px;max-width:480px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+                  <h2 style="color:#FF5500;margin:0 0 12px 0;">FRIENDS MOBILE</h2>
+                  <p style="color:#94a3b8;font-size:0.9rem;margin-bottom:20px;">The application encountered a loading error. Click below to refresh.</p>
+                  <button onclick="window.location.reload()" style="background:linear-gradient(135deg, #FF5500, #E03E00);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:bold;cursor:pointer;box-shadow:0 4px 14px rgba(255,85,0,0.35);">
+                    🔄 Reload Page
+                  </button>
+                  ${msg ? `<div style="margin-top:16px;font-size:0.75rem;color:#ef4444;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:6px;text-align:left;">${msg}</div>` : ''}
+                </div>
+              </div>
+            `;
+          }
+        }
+        window.addEventListener('error', function(event) {
+          console.error('Unhandled script error captured:', event.error || event.message);
+          showFallbackUI(event.message || 'Script execution failed');
+        }, true);
+        window.addEventListener('unhandledrejection', function(event) {
+          console.error('Unhandled promise rejection captured:', event.reason);
+          showFallbackUI(event.reason ? (event.reason.message || String(event.reason)) : 'Promise rejected');
+        });
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-DU1JIJgi.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-BU_8WXOj.js">
+
+<link rel="stylesheet" crossorigin href="/assets/index-Bfs34Ye2.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"74e9bc8a0da7483584ca6ca37f30754c","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

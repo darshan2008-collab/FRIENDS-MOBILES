@@ -285,7 +285,7 @@ app.use('/banners', bannersRouter);
 app.use('/api/otp', otpRouter);
 app.use('/otp', otpRouter);
 
-// ─── Health Check ──────────────────────────────────────────────────────────────
+// ─── Health Check ────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   const settings = (() => {
     try { return require('./data/settings.json'); } catch { return {}; }
@@ -301,7 +301,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ─── Store Info API ────────────────────────────────────────────────────────────
+// ─── Store Info API ────────────────------------------------───────────────────────────
 app.get('/api/store-info', (req, res) => {
   try {
     const settings = require('./data/settings.json');
