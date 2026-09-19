@@ -53,11 +53,28 @@ export default function Header({
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <button 
+                type="button"
                 className="search-btn" 
                 aria-label="Search"
                 onClick={() => onOpenShop && onOpenShop('All')}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  minWidth: '36px',
+                  minHeight: '36px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #FF6A00 0%, #FF4500 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 0,
+                  flexShrink: 0
+                }}
               >
-                <Search size={18} />
+                <Search size={18} color="#ffffff" strokeWidth={2.4} style={{ display: 'block', minWidth: '18px', minHeight: '18px' }} />
               </button>
             </div>
 
@@ -157,16 +174,33 @@ export default function Header({
           <div className="search-box mobile-search-box">
             <input 
               type="text" 
-              placeholder="Search for products, brands and more..." 
+              placeholder={t('searchPlaceholder') || "Search products, brands and accessories..."} 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button 
+              type="button"
               className="search-btn" 
               aria-label="Search"
               onClick={() => onOpenShop && onOpenShop('All')}
+              style={{
+                width: '36px',
+                height: '36px',
+                minWidth: '36px',
+                minHeight: '36px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #FF6A00 0%, #FF4500 100%)',
+                color: '#ffffff',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 0,
+                flexShrink: 0
+              }}
             >
-              <Search size={18} />
+              <Search size={18} color="#ffffff" strokeWidth={2.4} style={{ display: 'block', minWidth: '18px', minHeight: '18px' }} />
             </button>
           </div>
 

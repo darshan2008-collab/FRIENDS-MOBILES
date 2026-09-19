@@ -269,15 +269,29 @@ img {
 }
 
 .search-btn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 50%;
   background-color: var(--primary-orange);
   color: #fff;
   border: none;
-  padding: 11px 16px;
+  padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   transition: background-color var(--transition-fast);
+}
+
+.search-btn svg {
+  width: 18px;
+  height: 18px;
+  color: #ffffff;
+  stroke: #ffffff;
+  display: block;
 }
 
 .search-btn:hover {

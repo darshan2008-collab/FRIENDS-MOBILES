@@ -1585,15 +1585,24 @@ export default function AdminModal({
   const totalRevenue = displayOrders ? displayOrders.reduce((sum, o) => sum + (o.total || 0), 0) : 0;
   const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
+  const cleanCategory = (cat) => {
+    if (!cat) return 'Accessories';
+    const s = String(cat).trim();
+    if (/^Accesso.*ries$/i.test(s) || s.toLowerCase().includes('accesso')) return 'Accessories';
+    return s;
+  };
+
   // Build product sales map from orders with 100% precision
   const productSalesMap = {};
   if (displayOrders && displayOrders.length > 0) {
     displayOrders.forEach(order => {
+      if (order.status === 'Cancelled') return;
       if (order.items && Array.isArray(order.items)) {
         order.items.forEach(item => {
           const pId = item.id || item.productId || item.title;
-          const qty = item.quantity || 1;
-          const rev = (item.price || 0) * qty;
+          const qty = parseInt(item.quantity) || 1;
+          const price = parseFloat(item.price) || 0;
+          const rev = price * qty;
           if (!productSalesMap[pId]) {
             productSalesMap[pId] = { unitsSold: 0, revenue: 0, title: item.title };
           }
@@ -1611,14 +1620,24 @@ export default function AdminModal({
     const sales = salesById || salesByTitle || { unitsSold: 0, revenue: 0 };
     return {
       ...p,
+      category: cleanCategory(p.category),
       unitsSold: sales.unitsSold,
       salesRevenue: sales.revenue
     };
   });
 
-  // Sorted arrays for Top High Sellers vs Low Sellers
-  const highSellingProducts = [...enrichedProducts].sort((a, b) => b.unitsSold - a.unitsSold);
-  const lowSellingProducts = [...enrichedProducts].sort((a, b) => a.unitsSold - b.unitsSold);
+  // Top High Sellers (items that have actually made sales, highest sold first)
+  const highSellingProducts = enrichedProducts
+    .filter(p => p.unitsSold > 0)
+    .sort((a, b) => b.unitsSold - a.unitsSold || b.salesRevenue - a.salesRevenue);
+
+  // Set of top 4 seller IDs so they never duplicate into Lowest Selling
+  const topSellerIds = new Set(highSellingProducts.slice(0, 4).map(p => String(p.id)));
+
+  // Lowest Selling Products (exclude top sellers, prioritizing 0 sold)
+  const lowSellingProducts = enrichedProducts
+    .filter(p => !topSellerIds.has(String(p.id)))
+    .sort((a, b) => a.unitsSold - b.unitsSold || a.salesRevenue - b.salesRevenue);
 
   // Filtered orders list for Admin Orders tab
   const filteredOrders = (displayOrders || []).filter(order => {
@@ -2183,36 +2202,42 @@ export default function AdminModal({
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {highSellingProducts.slice(0, 4).map((prod, idx) => (
-                      <div 
-                        key={prod.id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          background: 'var(--bg-input)',
-                          border: '1px solid var(--border-color)',
-                          borderRadius: '10px',
-                          padding: '7px 10px'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
-                          <span style={{ fontWeight: '900', color: '#22c55e', fontSize: '0.78rem', width: '16px', flexShrink: 0 }}>#{idx + 1}</span>
-                          <img src={prod.img} alt={prod.title} style={{ width: '30px', height: '30px', objectFit: 'contain', borderRadius: '5px', background: '#ffffff', padding: '2px', flexShrink: 0 }} />
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <h5 style={{ margin: '0 0 1px 0', fontSize: '0.76rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {prod.title}
-                            </h5>
-                            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{prod.category}</span>
+                    {highSellingProducts.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '16px', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                        No product sales recorded yet. Products will appear here as orders are placed.
+                      </div>
+                    ) : (
+                      highSellingProducts.slice(0, 4).map((prod, idx) => (
+                        <div 
+                          key={prod.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            background: 'var(--bg-input)',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '10px',
+                            padding: '7px 10px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                            <span style={{ fontWeight: '900', color: '#22c55e', fontSize: '0.78rem', width: '16px', flexShrink: 0 }}>#{idx + 1}</span>
+                            <img src={prod.img} alt={prod.title} style={{ width: '30px', height: '30px', objectFit: 'contain', borderRadius: '5px', background: '#ffffff', padding: '2px', flexShrink: 0 }} />
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <h5 style={{ margin: '0 0 1px 0', fontSize: '0.76rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {prod.title}
+                              </h5>
+                              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{cleanCategory(prod.category)}</span>
+                            </div>
+                          </div>
+
+                          <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: '8px' }}>
+                            <div style={{ fontSize: '0.78rem', fontWeight: '900', color: '#22c55e' }}>{prod.unitsSold} Sold</div>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>₹{prod.salesRevenue.toLocaleString('en-IN')}</span>
                           </div>
                         </div>
-
-                        <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: '8px' }}>
-                          <div style={{ fontSize: '0.78rem', fontWeight: '900', color: '#22c55e' }}>{prod.unitsSold} Sold</div>
-                          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>₹{prod.salesRevenue.toLocaleString('en-IN')}</span>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
 
@@ -2237,52 +2262,58 @@ export default function AdminModal({
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {lowSellingProducts.slice(0, 4).map((prod) => (
-                      <div 
-                        key={prod.id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          background: 'var(--bg-input)',
-                          border: '1px solid var(--border-color)',
-                          borderRadius: '10px',
-                          padding: '7px 10px'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
-                          <img src={prod.img} alt={prod.title} style={{ width: '30px', height: '30px', objectFit: 'contain', borderRadius: '5px', background: '#ffffff', padding: '2px', flexShrink: 0 }} />
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <h5 style={{ margin: '0 0 1px 0', fontSize: '0.76rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {prod.title}
-                            </h5>
-                            <span style={{ fontSize: '0.68rem', color: '#ef4444', fontWeight: '700' }}>Only {prod.unitsSold} Sold</span>
-                          </div>
-                        </div>
-
-                        <button 
-                          onClick={() => handleQuickApplyDiscount(prod, 15)}
+                    {lowSellingProducts.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '16px', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                        All active products currently have high demand!
+                      </div>
+                    ) : (
+                      lowSellingProducts.slice(0, 4).map((prod) => (
+                        <div 
+                          key={prod.id}
                           style={{
-                            padding: '4px 8px',
-                            borderRadius: '6px',
-                            border: '1px solid #FF5500',
-                            background: 'var(--orange-light)',
-                            color: '#FF5500',
-                            fontWeight: '800',
-                            fontSize: '0.65rem',
-                            cursor: 'pointer',
-                            flexShrink: 0,
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '3px',
-                            whiteSpace: 'nowrap'
+                            justifyContent: 'space-between',
+                            background: 'var(--bg-input)',
+                            border: '1px solid var(--border-color)',
+                            borderRadius: '10px',
+                            padding: '7px 10px'
                           }}
-                          title="Apply 15% discount to boost sales"
                         >
-                          <Tag size={10} /> 15% OFF
-                        </button>
-                      </div>
-                    ))}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                            <img src={prod.img} alt={prod.title} style={{ width: '30px', height: '30px', objectFit: 'contain', borderRadius: '5px', background: '#ffffff', padding: '2px', flexShrink: 0 }} />
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <h5 style={{ margin: '0 0 1px 0', fontSize: '0.76rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {prod.title}
+                              </h5>
+                              <span style={{ fontSize: '0.68rem', color: '#ef4444', fontWeight: '700' }}>Only {prod.unitsSold} Sold</span>
+                            </div>
+                          </div>
+
+                          <button 
+                            onClick={() => handleQuickApplyDiscount(prod, 15)}
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              border: '1px solid #FF5500',
+                              background: 'var(--orange-light)',
+                              color: '#FF5500',
+                              fontWeight: '800',
+                              fontSize: '0.65rem',
+                              cursor: 'pointer',
+                              flexShrink: 0,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              whiteSpace: 'nowrap'
+                            }}
+                            title="Apply 15% discount to boost sales"
+                          >
+                            <Tag size={11} /> 15% OFF
+                          </button>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
 
