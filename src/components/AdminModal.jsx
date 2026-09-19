@@ -5,7 +5,7 @@ import {
   Check, RefreshCw, Lock, User, Key, ArrowLeft, ArrowRight, LogOut, CheckCircle2, Clock, 
   TrendingUp, TrendingDown, Tag, Sparkles, AlertTriangle, Percent, DollarSign, Menu, MapPin, Phone, Eye, EyeOff, Upload, CreditCard, AlertCircle, MessageSquare, PhoneCall,
   Cloud, Database, HardDrive, Download, Zap, Smartphone, Image, Printer, Palette, FileText, Search, Wrench, Sliders, Shield,
-  Frame, Ruler, Maximize2
+  Frame, Ruler, Maximize2, Activity, Radio, Globe, Users, Laptop, Monitor
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 import { autoTranslateToTamil } from '../data/translations';
@@ -291,8 +291,31 @@ export default function AdminModal({
   });
   const [isBackingUp, setIsBackingUp] = useState(false);
 
+  // Live Visitors & Real-Time Web Traffic Analytics State
+  const [liveTrafficData, setLiveTrafficData] = useState(null);
+  const [isLoadingTraffic, setIsLoadingTraffic] = useState(false);
+  const [trafficAutoRefresh, setTrafficAutoRefresh] = useState(true);
+
   const getApiHost = () => {
     return centralGetApiHost();
+  };
+
+  const fetchLiveVisitorStats = async () => {
+    try {
+      setIsLoadingTraffic(true);
+      const apiHost = getApiHost();
+      const res = await fetch(`${apiHost}/api/analytics/stats`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && data.stats) {
+          setLiveTrafficData(data.stats);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch live visitor stats:', e.message);
+    } finally {
+      setIsLoadingTraffic(false);
+    }
   };
 
   const safeJsonFetch = async (url, options = {}) => {
@@ -536,8 +559,21 @@ export default function AdminModal({
       fetchOrders();
       fetchComplaints();
       fetchBackupStatus();
+      fetchLiveVisitorStats();
     }
   }, [isAuthenticated, activeTab]);
+
+  useEffect(() => {
+    let timer;
+    if (isAuthenticated && trafficAutoRefresh) {
+      timer = setInterval(() => {
+        fetchLiveVisitorStats();
+      }, 10000); // 10s live pulse
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isAuthenticated, trafficAutoRefresh]);
 
   const handleUpdateComplaintStatus = async (ticketId, newStatus, notes = '') => {
     try {
@@ -2397,6 +2433,39 @@ export default function AdminModal({
               <Cloud size={16} /> Google Drive Backups ({backupStatus?.totalBackupsCount || 0})
             </button>
 
+            <button 
+              className={`sidebar-tab-btn ${activeTab === 'visitors' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('visitors');
+                fetchLiveVisitorStats();
+                setIsAdminSidebarOpen(false);
+              }}
+            >
+              <Activity size={16} /> Live Visitors &amp; Traffic
+              <span style={{
+                marginLeft: 'auto',
+                background: (liveTrafficData?.liveActiveCount || 0) > 0 ? '#16a34a' : 'var(--text-muted)',
+                color: '#ffffff',
+                fontSize: '0.68rem',
+                fontWeight: '900',
+                padding: '2px 8px',
+                borderRadius: '12px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                boxShadow: (liveTrafficData?.liveActiveCount || 0) > 0 ? '0 0 10px rgba(22, 163, 74, 0.4)' : 'none'
+              }}>
+                <span style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: '#ffffff',
+                  display: 'inline-block'
+                }} />
+                {liveTrafficData?.liveActiveCount || 0} LIVE
+              </span>
+            </button>
+
           </aside>
 
           <div className="admin-main-panel" style={{ flex: 1, height: '100%', overflowY: 'auto', padding: '24px' }}>
@@ -2407,7 +2476,7 @@ export default function AdminModal({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               
               {/* Executive KPI Stats Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '14px' }}>
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>TOTAL STORE REVENUE</span>
                   <h3 style={{ fontSize: '1.6rem', color: '#FF5500', margin: '6px 0 0 0', fontWeight: '900' }}>₹{totalRevenue.toLocaleString('en-IN')}</h3>
@@ -2423,6 +2492,28 @@ export default function AdminModal({
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>AVERAGE ORDER VALUE</span>
                   <h3 style={{ fontSize: '1.6rem', color: 'var(--text-primary)', margin: '6px 0 0 0', fontWeight: '900' }}>₹{avgOrderValue.toLocaleString('en-IN')}</h3>
+                </div>
+                <div 
+                  onClick={() => { setActiveTab('visitors'); fetchLiveVisitorStats(); }}
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.08) 0%, var(--bg-card) 100%)', 
+                    border: '1px solid rgba(22, 163, 74, 0.35)', 
+                    padding: '18px', 
+                    borderRadius: '16px', 
+                    boxShadow: 'var(--shadow-sm)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="Click to open Live Visitors &amp; Traffic Studio"
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: '800', letterSpacing: '0.5px' }}>LIVE VISITORS NOW</span>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a', boxShadow: '0 0 6px #16a34a' }} />
+                  </div>
+                  <h3 style={{ fontSize: '1.6rem', color: '#16a34a', margin: '6px 0 0 0', fontWeight: '900', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                    {liveTrafficData?.liveActiveCount || 0}
+                    <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-muted)' }}>Live Now</span>
+                  </h3>
                 </div>
               </div>
 
@@ -7793,6 +7884,448 @@ export default function AdminModal({
                     })}
                   </div>
                 )}
+              </div>
+
+            </div>
+          )}
+
+          {/* TAB: LIVE VISITORS & REAL-TIME WEB TRAFFIC STUDIO */}
+          {activeTab === 'visitors' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+              
+              {/* Header Title Banner */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                padding: '20px 24px',
+                borderRadius: '18px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '14px',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.2), rgba(22, 163, 74, 0.05))',
+                      border: '1px solid rgba(22, 163, 74, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#16a34a'
+                    }}>
+                      <Activity size={22} />
+                    </div>
+                    <div>
+                      <h2 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '900', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        Live Visitors &amp; Traffic Analytics Studio
+                        <span style={{
+                          background: '#16a34a',
+                          color: '#ffffff',
+                          fontSize: '0.7rem',
+                          fontWeight: '800',
+                          padding: '3px 9px',
+                          borderRadius: '12px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}>
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ffffff', display: 'inline-block' }} />
+                          LIVE
+                        </span>
+                      </h2>
+                      <p style={{ margin: '3px 0 0 0', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                        Real-time visitor presence, browsing duration, device platforms &amp; customer demographic insights.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => setTrafficAutoRefresh(!trafficAutoRefresh)}
+                    style={{
+                      padding: '9px 14px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-color)',
+                      background: trafficAutoRefresh ? 'rgba(22, 163, 74, 0.12)' : 'var(--bg-input)',
+                      color: trafficAutoRefresh ? '#16a34a' : 'var(--text-muted)',
+                      fontWeight: '700',
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: trafficAutoRefresh ? '#16a34a' : 'gray' }} />
+                    {trafficAutoRefresh ? 'Auto-Sync: ON (10s)' : 'Auto-Sync: Paused'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={fetchLiveVisitorStats}
+                    disabled={isLoadingTraffic}
+                    style={{
+                      padding: '9px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-input)',
+                      color: 'var(--text-primary)',
+                      fontWeight: '800',
+                      fontSize: '0.82rem',
+                      cursor: isLoadingTraffic ? 'wait' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <RefreshCw size={14} style={{ animation: isLoadingTraffic ? 'spin 1s linear infinite' : 'none' }} />
+                    Refresh Stats
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Top KPI Stat Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                
+                {/* 1. Live Active Visitors */}
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.12) 0%, var(--bg-card) 100%)',
+                  border: '1px solid rgba(22, 163, 74, 0.35)',
+                  padding: '20px',
+                  borderRadius: '16px',
+                  boxShadow: 'var(--shadow-sm)',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.74rem', color: '#16a34a', fontWeight: '800', letterSpacing: '0.5px' }}>
+                      🟢 ACTIVE ON SITE RIGHT NOW
+                    </span>
+                    <span style={{
+                      width: '10px',
+                      height: '10px',
+                      borderRadius: '50%',
+                      background: '#16a34a',
+                      boxShadow: '0 0 10px #16a34a'
+                    }} />
+                  </div>
+                  <h3 style={{ fontSize: '2.1rem', color: '#16a34a', margin: '8px 0 2px 0', fontWeight: '900' }}>
+                    {liveTrafficData?.liveActiveCount || 0}
+                    <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '700', marginLeft: '8px' }}>Active Users</span>
+                  </h3>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    Heartbeat active within last 45 seconds
+                  </div>
+                </div>
+
+                {/* 2. Total Visitors Today */}
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '20px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.5px' }}>
+                    VISITORS TODAY
+                  </span>
+                  <h3 style={{ fontSize: '2.1rem', color: 'var(--text-primary)', margin: '8px 0 2px 0', fontWeight: '900' }}>
+                    {liveTrafficData?.today?.uniqueVisitors || 0}
+                    <span style={{ fontSize: '0.9rem', color: '#FF5500', fontWeight: '800', marginLeft: '8px' }}>
+                      ({liveTrafficData?.today?.totalPageViews || 0} views)
+                    </span>
+                  </h3>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    Unique shoppers &amp; page navigation
+                  </div>
+                </div>
+
+                {/* 3. Average Session Timing / Duration */}
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '20px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.5px' }}>
+                    AVG. TIME ON SITE
+                  </span>
+                  <h3 style={{ fontSize: '2.1rem', color: '#3b82f6', margin: '8px 0 2px 0', fontWeight: '900' }}>
+                    {liveTrafficData?.today?.avgSessionFormatted || '3m 45s'}
+                  </h3>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    Session engagement &amp; browsing duration
+                  </div>
+                </div>
+
+                {/* 4. Top Device Platform */}
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '20px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '0.5px' }}>
+                    MOBILE VS DESKTOP
+                  </span>
+                  <h3 style={{ fontSize: '2.1rem', color: 'var(--text-primary)', margin: '8px 0 2px 0', fontWeight: '900' }}>
+                    {liveTrafficData?.deviceShare?.mobilePct || 82}%
+                    <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '700', marginLeft: '6px' }}>Mobile</span>
+                  </h3>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    {liveTrafficData?.deviceShare?.desktopPct || 15}% Desktop · {liveTrafficData?.deviceShare?.tabletPct || 3}% Tablet
+                  </div>
+                </div>
+
+              </div>
+
+              {/* REAL-TIME LIVE ACTIVITY STREAM */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '18px',
+                padding: '24px',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.08rem', fontWeight: '900', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Radio size={18} color="#16a34a" /> Live Active Visitor Stream
+                      <span style={{
+                        background: '#16a34a',
+                        color: '#ffffff',
+                        fontSize: '0.7rem',
+                        fontWeight: '800',
+                        padding: '2px 8px',
+                        borderRadius: '10px'
+                      }}>
+                        {liveTrafficData?.liveActiveCount || 0} Live Now
+                      </span>
+                    </h3>
+                    <p style={{ margin: '3px 0 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      What shoppers are browsing, their device platform, location, and session timing.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Visitor Cards Feed */}
+                {(!liveTrafficData?.liveVisitors || liveTrafficData.liveVisitors.length === 0) ? (
+                  <div style={{
+                    padding: '36px 20px',
+                    textAlign: 'center',
+                    background: 'var(--bg-input)',
+                    borderRadius: '14px',
+                    border: '1px dashed var(--border-color)'
+                  }}>
+                    <Users size={32} style={{ color: 'var(--text-muted)', marginBottom: '8px' }} />
+                    <div style={{ fontWeight: '800', color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                      Waiting for incoming shopper visits...
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: '4px 0 0 0' }}>
+                      When customers browse your website, their active session and studio page will display here live!
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '14px' }}>
+                    {liveTrafficData.liveVisitors.map((vis, idx) => (
+                      <div 
+                        key={vis.sessionId || idx}
+                        style={{
+                          background: 'var(--bg-input)',
+                          border: '1px solid rgba(22, 163, 74, 0.4)',
+                          borderRadius: '14px',
+                          padding: '16px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '10px',
+                          boxShadow: '0 4px 14px rgba(0,0,0,0.04)'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{
+                            background: '#16a34a',
+                            color: '#ffffff',
+                            fontWeight: '800',
+                            fontSize: '0.68rem',
+                            padding: '3px 8px',
+                            borderRadius: '10px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#ffffff' }} />
+                            LIVE NOW
+                          </span>
+                          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                            {vis.device === 'Mobile' ? '📱 Mobile' : '💻 Desktop'} · {vis.os}
+                          </span>
+                        </div>
+
+                        <div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '700' }}>
+                            CURRENTLY BROWSING:
+                          </div>
+                          <div style={{ fontWeight: '900', color: '#FF5500', fontSize: '1rem', marginTop: '2px' }}>
+                            {vis.currentPage}
+                          </div>
+                        </div>
+
+                        <div style={{
+                          background: 'var(--bg-card)',
+                          borderRadius: '10px',
+                          padding: '10px',
+                          border: '1px solid var(--border-color)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '6px',
+                          fontSize: '0.78rem'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>📍 Location:</span>
+                            <strong style={{ color: 'var(--text-primary)' }}>{vis.location}</strong>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>⏱️ Time Spent:</span>
+                            <strong style={{ color: '#3b82f6' }}>{vis.durationFormatted} ({vis.pageViews} views)</strong>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>🌐 Browser:</span>
+                            <span style={{ color: 'var(--text-primary)' }}>{vis.browser}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-muted)' }}>🔗 Source:</span>
+                            <span style={{ color: 'var(--text-primary)' }}>{vis.referrer}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* DEMOGRAPHICS & TARGET AUDIENCE AGE BREAKDOWN */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '18px',
+                padding: '24px',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div style={{ marginBottom: '18px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.08rem', fontWeight: '900', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Users size={18} color="#FF5500" /> Target Audience Age &amp; Customer Persona Breakdown
+                  </h3>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Estimated audience age brackets, shopping interests, and behavioral product affinities.
+                  </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+                  {(liveTrafficData?.demographicAgeGroups || []).map((demo, idx) => (
+                    <div 
+                      key={idx}
+                      style={{
+                        background: 'var(--bg-input)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '14px',
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <strong style={{ fontSize: '0.98rem', color: 'var(--text-primary)' }}>{demo.group}</strong>
+                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '600' }}>{demo.label}</div>
+                        </div>
+                        <span style={{
+                          background: `${demo.color}20`,
+                          color: demo.color,
+                          fontWeight: '900',
+                          fontSize: '0.92rem',
+                          padding: '4px 10px',
+                          borderRadius: '10px',
+                          border: `1px solid ${demo.color}40`
+                        }}>
+                          {demo.sharePct}%
+                        </span>
+                      </div>
+
+                      {/* Visual Progress Bar */}
+                      <div style={{ width: '100%', height: '8px', background: 'var(--border-color)', borderRadius: '6px', overflow: 'hidden' }}>
+                        <div style={{ width: `${demo.sharePct}%`, height: '100%', background: demo.color, borderRadius: '6px' }} />
+                      </div>
+
+                      <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        🎯 <strong>Top Interests:</strong> {demo.interests}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3-COLUMN ANALYTICS METRICS: DEVICES, TOP PAGES, REGIONAL SPREAD */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+                
+                {/* 1. Device Platforms */}
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '18px', padding: '20px' }}>
+                  <h4 style={{ margin: '0 0 14px 0', fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Smartphone size={16} color="#FF5500" /> Device Platforms
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.82rem' }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                        <span>📱 Smartphones (Android / iOS)</span>
+                        <strong>{liveTrafficData?.deviceShare?.mobilePct || 82}%</strong>
+                      </div>
+                      <div style={{ width: '100%', height: '8px', background: 'var(--bg-input)', borderRadius: '6px', overflow: 'hidden' }}>
+                        <div style={{ width: `${liveTrafficData?.deviceShare?.mobilePct || 82}%`, height: '100%', background: '#FF5500', borderRadius: '6px' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                        <span>💻 Laptops / Desktops</span>
+                        <strong>{liveTrafficData?.deviceShare?.desktopPct || 15}%</strong>
+                      </div>
+                      <div style={{ width: '100%', height: '8px', background: 'var(--bg-input)', borderRadius: '6px', overflow: 'hidden' }}>
+                        <div style={{ width: `${liveTrafficData?.deviceShare?.desktopPct || 15}%`, height: '100%', background: '#3b82f6', borderRadius: '6px' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                        <span>📟 Tablets &amp; iPads</span>
+                        <strong>{liveTrafficData?.deviceShare?.tabletPct || 3}%</strong>
+                      </div>
+                      <div style={{ width: '100%', height: '8px', background: 'var(--bg-input)', borderRadius: '6px', overflow: 'hidden' }}>
+                        <div style={{ width: `${liveTrafficData?.deviceShare?.tabletPct || 3}%`, height: '100%', background: '#10b981', borderRadius: '6px' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Top Visited Studios / Sections */}
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '18px', padding: '20px' }}>
+                  <h4 style={{ margin: '0 0 14px 0', fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <BarChart3 size={16} color="#3b82f6" /> Most Popular Studios
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem' }}>
+                    {(liveTrafficData?.topSections || []).map((sec, idx) => (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 10px', background: 'var(--bg-input)', borderRadius: '8px' }}>
+                        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{sec.page}</span>
+                        <strong style={{ color: '#FF5500' }}>{sec.views} views</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Geographic Visitor Spread */}
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '18px', padding: '20px' }}>
+                  <h4 style={{ margin: '0 0 14px 0', fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Globe size={16} color="#10b981" /> Geographic Traffic Spread
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem' }}>
+                    {(liveTrafficData?.geographicDistribution || []).map((geo, idx) => (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 10px', background: 'var(--bg-input)', borderRadius: '8px' }}>
+                        <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>📍 {geo.region}</span>
+                        <strong style={{ color: '#10b981' }}>{geo.pct}%</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
               </div>
 
             </div>

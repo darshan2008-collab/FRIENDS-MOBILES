@@ -33,6 +33,7 @@ import { getApiBaseUrl, isNativeApp } from './data/apiConfig';
 import { DEFAULT_PROMO_CARDS } from './data/promoCards';
 import { DEFAULT_CUSTOM_PRICING } from './data/customPricing';
 import { DEFAULT_FRAME_CONFIG } from './data/framePricing';
+import { initVisitorTracking, trackPageView } from './services/analyticsTracker';
 
 import './styles/theme.css';
 
@@ -751,7 +752,31 @@ export default function App() {
         }
       })
       .catch(() => {});
+
+    // Initialize Real-Time Live Visitor Tracking
+    try {
+      initVisitorTracking();
+    } catch (_) {}
   }, []);
+
+  // Track user navigation across custom studios and modals
+  useEffect(() => {
+    try {
+      if (isCustomFrameOpen) {
+        trackPageView('Personalized Photo Frame Studio');
+      } else if (isCustomCoverOpen) {
+        trackPageView('Custom Back Cover Studio');
+      } else if (isCartOpen) {
+        trackPageView('Shopping Cart & Checkout');
+      } else if (isServiceModalOpen) {
+        trackPageView('Mobile Repairs & Service Booking');
+      } else if (isSellModalOpen) {
+        trackPageView('Old Phone Buyback Studio');
+      } else {
+        trackPageView('Home Catalog');
+      }
+    } catch (_) {}
+  }, [isCustomFrameOpen, isCustomCoverOpen, isCartOpen, isServiceModalOpen, isSellModalOpen]);
 
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';

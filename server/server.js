@@ -168,6 +168,7 @@ const bannersRouter = require('./routes/banners');
 const otpRouter = require('./routes/otp');
 const serviceRequestsRouter = require('./routes/serviceRequests');
 const sellRequestsRouter = require('./routes/sellRequests');
+const analyticsRouter = require('./routes/analytics');
 
 // ─── App Initialization ────────────────────────────────────────────────────────
 const app = express();
@@ -267,6 +268,9 @@ app.use('/service-requests', serviceRequestsRouter);
 
 app.use('/api/sell-requests', sellRequestsRouter);
 app.use('/sell-requests', sellRequestsRouter);
+
+app.use('/api/analytics', analyticsRouter);
+app.use('/analytics', analyticsRouter);
 
 // Direct Google OAuth Redirect Handlers for maximum compatibility
 const directGoogleRedirect = (req, res) => {
