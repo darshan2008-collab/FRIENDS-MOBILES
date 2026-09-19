@@ -2053,9 +2053,8 @@ export default function AdminModal({
                 setActiveTab('customizations');
                 setIsAdminSidebarOpen(false);
               }}
-              style={{ color: '#FF5500', fontWeight: '800' }}
             >
-              <Smartphone size={16} color="#FF5500" /> Cover Customizations ({displayCustomizations.length})
+              <Smartphone size={16} /> Cover Customizations ({displayCustomizations.length})
             </button>
 
             <button 
@@ -2065,9 +2064,8 @@ export default function AdminModal({
                 fetchAdminServiceRequests();
                 setIsAdminSidebarOpen(false);
               }}
-              style={{ color: '#FF5500', fontWeight: '800' }}
             >
-              <Wrench size={16} color="#FF5500" /> Mobile Repairs ({adminServiceRequests.length})
+              <Wrench size={16} /> Mobile Repairs ({adminServiceRequests.length})
             </button>
 
             <button 
@@ -2077,9 +2075,8 @@ export default function AdminModal({
                 fetchAdminSellRequests();
                 setIsAdminSidebarOpen(false);
               }}
-              style={{ color: '#16a34a', fontWeight: '800' }}
             >
-              <DollarSign size={16} color="#16a34a" /> Old Phone Buyback ({adminSellRequests.length})
+              <DollarSign size={16} /> Old Phone Buyback ({adminSellRequests.length})
             </button>
 
             <button 
@@ -2088,9 +2085,8 @@ export default function AdminModal({
                 setActiveTab('complaints');
                 setIsAdminSidebarOpen(false);
               }}
-              style={{ color: complaints && complaints.some(c => c.status === 'Open') ? '#ef4444' : 'inherit' }}
             >
-              <AlertCircle size={16} color={complaints && complaints.some(c => c.status === 'Open') ? '#ef4444' : 'currentColor'} /> Complaints &amp; Tickets ({complaints ? complaints.length : 0})
+              <AlertCircle size={16} /> Complaints &amp; Tickets ({complaints ? complaints.length : 0})
             </button>
 
             <button 
@@ -2119,9 +2115,8 @@ export default function AdminModal({
                 setActiveTab('promoCards');
                 setIsAdminSidebarOpen(false);
               }}
-              style={{ fontWeight: '800' }}
             >
-              <Tag size={16} color="#FF5500" /> Promo &amp; Service Cards ({effectivePromoCards.length})
+              <Tag size={16} /> Promo &amp; Service Cards ({effectivePromoCards.length})
             </button>
 
             <button 
@@ -2131,9 +2126,8 @@ export default function AdminModal({
                 fetchBackupStatus();
                 setIsAdminSidebarOpen(false);
               }}
-              style={{ color: '#3b82f6', fontWeight: '800' }}
             >
-              <Cloud size={16} color="#3b82f6" /> ☁️ Google Drive Backups ({backupStatus?.totalBackupsCount || 0})
+              <Cloud size={16} /> Google Drive Backups ({backupStatus?.totalBackupsCount || 0})
             </button>
 
           </aside>
