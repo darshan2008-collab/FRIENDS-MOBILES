@@ -31,6 +31,7 @@ import SplashScreen from './components/SplashScreen';
 import { translations, autoTranslateToTamil } from './data/translations';
 import { getApiBaseUrl, isNativeApp } from './data/apiConfig';
 import { DEFAULT_PROMO_CARDS } from './data/promoCards';
+import { DEFAULT_CUSTOM_PRICING } from './data/customPricing';
 
 import './styles/theme.css';
 
@@ -410,6 +411,45 @@ export default function App() {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cards: cardsToSave })
+    }).catch(() => {});
+  };
+
+  // Custom Studio (Covers & Skins) Pricing State
+  const [customPricing, setCustomPricing] = useState(() => {
+    try {
+      const saved = localStorage.getItem('fm_custom_pricing');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch (_) {}
+    return DEFAULT_CUSTOM_PRICING;
+  });
+
+  useEffect(() => {
+    fetch(`${API_BASE}/custom-cover/pricing`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.pricing) {
+          setCustomPricing(data.pricing);
+          try {
+            localStorage.setItem('fm_custom_pricing', JSON.stringify(data.pricing));
+          } catch (_) {}
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleUpdateCustomPricing = (newPricing) => {
+    const pricingToSave = newPricing || DEFAULT_CUSTOM_PRICING;
+    setCustomPricing(pricingToSave);
+    try {
+      localStorage.setItem('fm_custom_pricing', JSON.stringify(pricingToSave));
+    } catch (_) {}
+    fetch(`${API_BASE}/custom-cover/pricing`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pricing: pricingToSave })
     }).catch(() => {});
   };
 
@@ -1262,6 +1302,8 @@ export default function App() {
           onUpdateSlides={handleUpdateSlides}
           promoCards={promoCards}
           onUpdatePromoCards={handleUpdatePromoCards}
+          customPricing={customPricing}
+          onUpdateCustomPricing={handleUpdateCustomPricing}
           onUpdateOrders={setOrders}
         />
       )}
@@ -1309,6 +1351,7 @@ export default function App() {
           onClose={() => setIsCustomCoverOpen(false)}
           onAddToCart={handleAddToCart}
           addToast={addToast}
+          customPricing={customPricing}
           t={t}
         />
       )}

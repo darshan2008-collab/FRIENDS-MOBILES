@@ -11,6 +11,7 @@ import { autoTranslateToTamil } from '../data/translations';
 import { getApiHost as centralGetApiHost } from '../data/apiConfig';
 import { copyToClipboard } from '../utils/clipboard';
 import { DEFAULT_PROMO_CARDS } from '../data/promoCards';
+import { DEFAULT_CUSTOM_PRICING } from '../data/customPricing';
 
 export default function AdminModal({ 
   isOpen, 
@@ -29,6 +30,8 @@ export default function AdminModal({
   onUpdateSlides,
   promoCards,
   onUpdatePromoCards,
+  customPricing = DEFAULT_CUSTOM_PRICING,
+  onUpdateCustomPricing,
   onUpdateOrders
 }) {
   const [adminToken, setAdminToken] = useState(() => {
@@ -800,6 +803,35 @@ export default function AdminModal({
         }));
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // ─── Custom Studio (Covers & Skins) Pricing State & Handlers ───
+  const [pricingForm, setPricingForm] = useState(() => {
+    return customPricing || DEFAULT_CUSTOM_PRICING;
+  });
+
+  useEffect(() => {
+    if (customPricing) {
+      setPricingForm(customPricing);
+    }
+  }, [customPricing]);
+
+  const handleSaveCustomPricing = (e) => {
+    if (e) e.preventDefault();
+    if (onUpdateCustomPricing) {
+      onUpdateCustomPricing(pricingForm);
+    }
+    if (addToast) addToast('Custom covers & mobile skins pricing saved successfully!', '✅');
+  };
+
+  const handleResetCustomPricing = () => {
+    if (window.confirm('Reset all custom cover and skin prices back to factory defaults?')) {
+      setPricingForm(DEFAULT_CUSTOM_PRICING);
+      if (onUpdateCustomPricing) {
+        onUpdateCustomPricing(DEFAULT_CUSTOM_PRICING);
+      }
+      if (addToast) addToast('Default studio pricing restored!', '🔄');
     }
   };
 
@@ -4743,8 +4775,203 @@ export default function AdminModal({
                 </div>
               </div>
 
+              {/* STUDIO PRICING CONFIGURATION CARD */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1.5px solid var(--border-color)',
+                borderRadius: '18px',
+                padding: '22px 24px',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '18px' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '8px', color: '#FF5500' }}>
+                      <Sliders size={18} /> Custom Covers &amp; Mobile Skins Pricing Studio
+                    </h4>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      Fix selling prices and MRP discounts for Full 3D Cases, Glass/Glossy Cases, Soft TPU, and Mobile Skin Wraps.
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={handleResetCustomPricing}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-input)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.78rem',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <RefreshCw size={13} /> Reset Defaults
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveCustomPricing}
+                      style={{
+                        padding: '8px 18px',
+                        borderRadius: '10px',
+                        border: 'none',
+                        background: 'linear-gradient(135deg, #FF5500, #ff7733)',
+                        color: '#ffffff',
+                        fontSize: '0.82rem',
+                        fontWeight: '800',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        boxShadow: '0 4px 12px rgba(255, 85, 0, 0.3)'
+                      }}
+                    >
+                      <Check size={15} /> Save Pricing Rates
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                  {/* 1. Full 3D Hard Case */}
+                  <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ fontWeight: '800', fontSize: '0.86rem', color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Shield size={14} color="#FF5500" /> Full 3D Hard Case
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700', display: 'block', marginBottom: '3px' }}>Rate (₹)</label>
+                        <input
+                          type="number"
+                          value={pricingForm.hardCase3D?.price ?? 399}
+                          onChange={(e) => setPricingForm({
+                            ...pricingForm,
+                            hardCase3D: { ...pricingForm.hardCase3D, price: Number(e.target.value) }
+                          })}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontWeight: '800', outline: 'none' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700', display: 'block', marginBottom: '3px' }}>MRP (₹)</label>
+                        <input
+                          type="number"
+                          value={pricingForm.hardCase3D?.originalPrice ?? 499}
+                          onChange={(e) => setPricingForm({
+                            ...pricingForm,
+                            hardCase3D: { ...pricingForm.hardCase3D, originalPrice: Number(e.target.value) }
+                          })}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-muted)', outline: 'none' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 2. Glossy / Glass Finish Case */}
+                  <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ fontWeight: '800', fontSize: '0.86rem', color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Sparkles size={14} color="#3b82f6" /> Glossy / Glass Case
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700', display: 'block', marginBottom: '3px' }}>Rate (₹)</label>
+                        <input
+                          type="number"
+                          value={pricingForm.glossyFinish?.price ?? 449}
+                          onChange={(e) => setPricingForm({
+                            ...pricingForm,
+                            glossyFinish: { ...pricingForm.glossyFinish, price: Number(e.target.value) }
+                          })}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontWeight: '800', outline: 'none' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700', display: 'block', marginBottom: '3px' }}>MRP (₹)</label>
+                        <input
+                          type="number"
+                          value={pricingForm.glossyFinish?.originalPrice ?? 549}
+                          onChange={(e) => setPricingForm({
+                            ...pricingForm,
+                            glossyFinish: { ...pricingForm.glossyFinish, originalPrice: Number(e.target.value) }
+                          })}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-muted)', outline: 'none' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. Soft Silicone TPU */}
+                  <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ fontWeight: '800', fontSize: '0.86rem', color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Smartphone size={14} color="#10b981" /> Soft Silicone TPU
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700', display: 'block', marginBottom: '3px' }}>Rate (₹)</label>
+                        <input
+                          type="number"
+                          value={pricingForm.softSilicone?.price ?? 349}
+                          onChange={(e) => setPricingForm({
+                            ...pricingForm,
+                            softSilicone: { ...pricingForm.softSilicone, price: Number(e.target.value) }
+                          })}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontWeight: '800', outline: 'none' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700', display: 'block', marginBottom: '3px' }}>MRP (₹)</label>
+                        <input
+                          type="number"
+                          value={pricingForm.softSilicone?.originalPrice ?? 449}
+                          onChange={(e) => setPricingForm({
+                            ...pricingForm,
+                            softSilicone: { ...pricingForm.softSilicone, originalPrice: Number(e.target.value) }
+                          })}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-muted)', outline: 'none' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4. Mobile Skin (Wrap) */}
+                  <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid #FF5500' }}>
+                    <div style={{ fontWeight: '800', fontSize: '0.86rem', color: '#FF5500', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Zap size={14} color="#FF5500" /> Mobile Skin (Vinyl Wrap)
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700', display: 'block', marginBottom: '3px' }}>Rate (₹)</label>
+                        <input
+                          type="number"
+                          value={pricingForm.mobileSkin?.price ?? 299}
+                          onChange={(e) => setPricingForm({
+                            ...pricingForm,
+                            mobileSkin: { ...pricingForm.mobileSkin, price: Number(e.target.value) }
+                          })}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: '#FF5500', fontWeight: '900', outline: 'none' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '700', display: 'block', marginBottom: '3px' }}>MRP (₹)</label>
+                        <input
+                          type="number"
+                          value={pricingForm.mobileSkin?.originalPrice ?? 399}
+                          onChange={(e) => setPricingForm({
+                            ...pricingForm,
+                            mobileSkin: { ...pricingForm.mobileSkin, originalPrice: Number(e.target.value) }
+                          })}
+                          style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-muted)', outline: 'none' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* KPI Summary Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>TOTAL CUSTOM ORDERS</span>
                   <h3 style={{ fontSize: '1.6rem', color: '#FF5500', margin: '6px 0 0 0', fontWeight: '900' }}>{displayCustomizations.length}</h3>
@@ -4752,7 +4979,13 @@ export default function AdminModal({
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>3D MOBILE COVERS</span>
                   <h3 style={{ fontSize: '1.6rem', color: 'var(--text-primary)', margin: '6px 0 0 0', fontWeight: '900' }}>
-                    {displayCustomizations.filter(c => c.category?.includes('Cover') || c.customizationDetails?.brand).length}
+                    {displayCustomizations.filter(c => (c.category?.includes('Cover') || c.customizationDetails?.brand) && !c.category?.includes('Skin') && c.customizationDetails?.productType !== 'Mobile Skin').length}
+                  </h3>
+                </div>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>✨ MOBILE SKINS</span>
+                  <h3 style={{ fontSize: '1.6rem', color: '#FF5500', margin: '6px 0 0 0', fontWeight: '900' }}>
+                    {displayCustomizations.filter(c => c.category?.includes('Skin') || c.customizationDetails?.productType === 'Mobile Skin').length}
                   </h3>
                 </div>
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
@@ -4762,7 +4995,7 @@ export default function AdminModal({
                   </h3>
                 </div>
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>READY FOR 3D PRINTING</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>READY FOR PRODUCTION</span>
                   <h3 style={{ fontSize: '1.6rem', color: '#22c55e', margin: '6px 0 0 0', fontWeight: '900' }}>
                     {displayCustomizations.length}
                   </h3>
@@ -4890,8 +5123,8 @@ export default function AdminModal({
                                 <strong style={{ color: 'var(--text-primary)' }}>{details.brand || 'Apple'} • {details.model || 'iPhone 15 Pro'}</strong>
                               </div>
                               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span style={{ color: 'var(--text-muted)' }}>Case Material &amp; Finish:</span>
-                                <strong style={{ color: '#FF5500' }}>{details.caseType || '3D Hard Case'} ({details.finish || 'Glossy'})</strong>
+                                <span style={{ color: 'var(--text-muted)' }}>{details.productType === 'Mobile Skin' || item.category?.includes('Skin') ? 'Skin Type & Finish:' : 'Case Material & Finish:'}</span>
+                                <strong style={{ color: '#FF5500' }}>{details.caseType || (details.productType === 'Mobile Skin' ? 'Vinyl Skin Wrap' : '3D Hard Case')} ({details.finish || 'Matte'})</strong>
                               </div>
                               {details.customText && (
                                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '4px', borderTop: '1px dashed var(--border-color)' }}>

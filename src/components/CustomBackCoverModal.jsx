@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Smartphone, Upload, Plus, AlertCircle, ShoppingCart, Camera, Image, Search, Shield, Sparkles, Type, MessageSquare, ShoppingBag, RefreshCw, CheckCircle2, Crown, Zap, Edit3, ChevronDown, ChevronUp, Move, ZoomIn, RotateCw, Sliders, Phone, Heart, Share2, Copy, Check } from 'lucide-react';
 import { PHONE_BRANDS, PHONE_MODELS_REGISTRY, findModelSpecs } from '../data/phoneCameraRegistry';
+import { DEFAULT_CUSTOM_PRICING, getCustomPrice } from '../data/customPricing';
 
-export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, addToast, t = (k) => k }) {
+export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, addToast, customPricing = DEFAULT_CUSTOM_PRICING, t = (k) => k }) {
   useEffect(() => {
     if (isOpen && typeof document !== 'undefined') {
       document.body.style.overflow = 'hidden';
@@ -17,8 +18,11 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
   const [selectedBrand, setSelectedBrand] = useState('Apple');
   const [isBrandListOpen, setIsBrandListOpen] = useState(false);
   const [phoneModel, setPhoneModel] = useState('');
-  const [caseType, setCaseType] = useState('Full 3D Hard Case (Sides + Back Print)'); // 'Full 3D Hard Case' | 'Soft Silicone TPU' | 'Glass Finish'
+  const [productType, setProductType] = useState('cover'); // 'cover' | 'skin'
+  const [caseType, setCaseType] = useState('Full 3D Hard Case (Sides + Back Print)'); // 'Full 3D Hard Case' | 'Glass / Glossy Finish Case' | 'Soft Silicone TPU'
   const [caseFinish, setCaseFinish] = useState('Matte Finish'); // 'Matte Finish' | 'Glossy Finish'
+  const [skinCoverage, setSkinCoverage] = useState('Full Back + Camera Island Wrap'); // 'Full Back + Camera Island Wrap' | 'Back Panel Only'
+  const [skinFinish, setSkinFinish] = useState('Ultra-Matte Skin'); // 'Ultra-Matte Skin' | 'Glossy Cyber Shine' | 'Carbon Fiber Texture' | 'Honeycomb Wrap'
   const [customText, setCustomText] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [uploadedPhoto, setUploadedPhoto] = useState(null);
@@ -87,32 +91,36 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
       return;
     }
 
-    const customCoverProduct = {
-      id: `custom-cover-${Date.now()}`,
-      title: `Custom ${selectedBrand} ${finalModel} Back Cover`,
-      price: 399,
-      originalPrice: 499,
-      category: 'Customized Back Covers',
-      img: uploadedPhoto && !uploadedFileInfo?.isDoc ? uploadedPhoto : 'images/prod_custom_cover.png',
-      discount: '-20%',
+    const isSkin = productType === 'skin';
+    const calculated = getCustomPrice(customPricing, productType, caseType, caseFinish);
+
+    const customProduct = {
+      id: `custom-${isSkin ? 'skin' : 'cover'}-${Date.now()}`,
+      title: `Custom ${selectedBrand} ${finalModel} ${isSkin ? 'Mobile Skin Wrap' : 'Back Cover'}`,
+      price: calculated.price,
+      originalPrice: calculated.originalPrice,
+      category: isSkin ? 'Customized Mobile Skins' : 'Customized Back Covers',
+      img: uploadedPhoto && !uploadedFileInfo?.isDoc ? uploadedPhoto : (isSkin ? 'images/banner_backcover.png' : 'images/prod_custom_cover.png'),
+      discount: `-${calculated.discount}%`,
       customizationDetails: {
+        productType: isSkin ? 'Mobile Skin' : 'Mobile Back Cover',
         whatsappNumber: whatsappNumber || 'Not specified',
         brand: selectedBrand,
         model: finalModel,
-        caseType,
-        finish: caseFinish,
+        caseType: isSkin ? skinCoverage : caseType,
+        finish: isSkin ? skinFinish : caseFinish,
         customText,
         userPhoto: uploadedPhoto ? (uploadedFileInfo?.isDoc ? `Document (${uploadedFileInfo.name})` : 'Custom Photo Included') : 'Default Design',
         uploadedFile: uploadedPhoto,
-        fileName: uploadedFileInfo ? uploadedFileInfo.name : `custom_cover_${selectedBrand}_${finalModel}.png`,
+        fileName: uploadedFileInfo ? uploadedFileInfo.name : `custom_${isSkin ? 'skin' : 'cover'}_${selectedBrand}_${finalModel}.png`,
         fileType: uploadedFileInfo ? uploadedFileInfo.type : 'image/png',
         fileSize: uploadedFileInfo ? uploadedFileInfo.size : '',
         isDocument: uploadedFileInfo ? uploadedFileInfo.isDoc : false
       }
     };
 
-    onAddToCart(customCoverProduct);
-    if (addToast) addToast(`Customized Back Cover for ${selectedBrand} ${finalModel} added to cart!`, 'cart');
+    onAddToCart(customProduct);
+    if (addToast) addToast(`Customized ${isSkin ? 'Mobile Skin' : 'Back Cover'} for ${selectedBrand} ${finalModel} added to cart!`, 'cart');
     onClose();
   };
 
@@ -1035,7 +1043,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
                 overflow: 'hidden',
                 textOverflow: 'ellipsis'
               }}>
-                CUSTOM MOBILE BACK COVER STUDIO
+                CUSTOM PHONE COVERS &amp; MOBILE SKINS STUDIO
               </h2>
               <span className="modal-header-subtitle" style={{ 
                 fontSize: '0.74rem', 
@@ -1045,7 +1053,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
                 overflow: 'hidden',
                 textOverflow: 'ellipsis'
               }}>
-                Design your personalized phone case
+                Personalized 3D Cases &amp; 3M Vinyl Wraps for {selectedBrand}
               </span>
             </div>
           </div>
@@ -1094,10 +1102,104 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
           overflow: 'hidden'
         }}>
           <h3 style={{ margin: '0 0 20px 0', fontSize: '1.3rem', fontWeight: '800' }}>
-            1. Upload Photo &amp; Select Specifications
+            1. Select Product &amp; Specifications
           </h3>
 
           <form onSubmit={handleAddToCartSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            
+            {/* Step 1: Product Type Toggle (Back Cover vs Mobile Skin) */}
+            <div>
+              <label className="option-section-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Crown size={15} color="#FF5500" /> Choose Product Type
+                </span>
+                <span style={{ fontSize: '0.74rem', color: '#FF5500', fontWeight: '800' }}>
+                  {productType === 'skin' ? '✨ Mobile Skin Wrap' : '📱 Mobile Back Cover'}
+                </span>
+              </label>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => setProductType('cover')}
+                  style={{
+                    padding: '14px 16px',
+                    borderRadius: '14px',
+                    border: productType === 'cover' ? '2px solid #FF5500' : '1.5px solid var(--border-color)',
+                    background: productType === 'cover' ? 'var(--orange-light)' : 'var(--bg-input)',
+                    color: productType === 'cover' ? '#FF5500' : 'var(--text-primary)',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    boxShadow: productType === 'cover' ? '0 4px 16px rgba(255, 85, 0, 0.2)' : 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    background: productType === 'cover' ? '#FF5500' : 'var(--bg-card)',
+                    color: productType === 'cover' ? '#ffffff' : 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Smartphone size={20} />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: '900', fontSize: '0.92rem', lineHeight: 1.2 }}>Mobile Back Cover</div>
+                    <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginTop: '2px' }}>Full 3D, Glossy &amp; TPU Cases</div>
+                    <div style={{ fontSize: '0.74rem', fontWeight: '800', color: '#FF5500', marginTop: '2px' }}>
+                      From ₹{customPricing?.hardCase3D?.price || 399}
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setProductType('skin')}
+                  style={{
+                    padding: '14px 16px',
+                    borderRadius: '14px',
+                    border: productType === 'skin' ? '2px solid #FF5500' : '1.5px solid var(--border-color)',
+                    background: productType === 'skin' ? 'var(--orange-light)' : 'var(--bg-input)',
+                    color: productType === 'skin' ? '#FF5500' : 'var(--text-primary)',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    boxShadow: productType === 'skin' ? '0 4px 16px rgba(255, 85, 0, 0.2)' : 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    background: productType === 'skin' ? '#FF5500' : 'var(--bg-card)',
+                    color: productType === 'skin' ? '#ffffff' : 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Zap size={20} />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: '900', fontSize: '0.92rem', lineHeight: 1.2 }}>Mobile Skin (Wrap)</div>
+                    <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginTop: '2px' }}>Ultra-Thin 3M Vinyl Wraps</div>
+                    <div style={{ fontSize: '0.74rem', fontWeight: '800', color: '#FF5500', marginTop: '2px' }}>
+                      From ₹{customPricing?.mobileSkin?.price || 299}
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
             
             {/* High-End Photo Upload Dropzone */}
             <div>
@@ -1382,62 +1484,171 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
               </div>
             </div>
 
-            {/* Case Type: Full 3D or Soft Back */}
-            <div>
-              <label className="option-section-title">
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Shield size={15} color="#FF5500" /> Case Coverage &amp; Type</span>
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <button 
-                  type="button"
-                  onClick={() => setCaseType('Full 3D Hard Case (Sides + Back Print)')}
-                  style={{
-                    padding: '12px',
-                    borderRadius: '10px',
-                    border: caseType.includes('Full 3D') ? '2px solid #FF5500' : '1px solid var(--border-color)',
-                    background: caseType.includes('Full 3D') ? 'var(--orange-light)' : 'var(--bg-input)',
-                    color: caseType.includes('Full 3D') ? '#FF5500' : 'var(--text-primary)',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    fontSize: '0.82rem'
-                  }}
-                >
-                  Full 3D Print (Sides &amp; Back)
-                </button>
+            {/* Dynamic Options based on Product Type */}
+            {productType === 'cover' ? (
+              <>
+                {/* Case Type: Full 3D, Glossy Finish, or Soft TPU */}
+                <div>
+                  <label className="option-section-title">
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Shield size={15} color="#FF5500" /> Case Coverage &amp; Material</span>
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+                    <button 
+                      type="button"
+                      onClick={() => setCaseType('Full 3D Hard Case (Sides + Back Print)')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: caseType.includes('Full 3D') ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                        background: caseType.includes('Full 3D') ? 'var(--orange-light)' : 'var(--bg-input)',
+                        color: caseType.includes('Full 3D') ? '#FF5500' : 'var(--text-primary)',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: '0.82rem',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ fontWeight: '800' }}>Full 3D Print</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Sides + Back Print</div>
+                      <div style={{ fontSize: '0.74rem', fontWeight: '800', color: '#FF5500', marginTop: '2px' }}>₹{customPricing?.hardCase3D?.price || 399}</div>
+                    </button>
 
-                <button 
-                  type="button"
-                  onClick={() => setCaseType('Soft Silicone TPU Transparent Back')}
-                  style={{
-                    padding: '12px',
-                    borderRadius: '10px',
-                    border: caseType.includes('Silicone') ? '2px solid #FF5500' : '1px solid var(--border-color)',
-                    background: caseType.includes('Silicone') ? 'var(--orange-light)' : 'var(--bg-input)',
-                    color: caseType.includes('Silicone') ? '#FF5500' : 'var(--text-primary)',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    fontSize: '0.82rem'
-                  }}
-                >
-                  Back Print Only (Clear TPU)
-                </button>
-              </div>
-            </div>
+                    <button 
+                      type="button"
+                      onClick={() => setCaseType('Glossy / Glass Finish Case')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: caseType.includes('Glossy') || caseType.includes('Glass') ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                        background: caseType.includes('Glossy') || caseType.includes('Glass') ? 'var(--orange-light)' : 'var(--bg-input)',
+                        color: caseType.includes('Glossy') || caseType.includes('Glass') ? '#FF5500' : 'var(--text-primary)',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: '0.82rem',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ fontWeight: '800' }}>Glossy / Glass Finish</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Tempered Mirror Shine</div>
+                      <div style={{ fontSize: '0.74rem', fontWeight: '800', color: '#FF5500', marginTop: '2px' }}>₹{customPricing?.glossyFinish?.price || 449}</div>
+                    </button>
 
-            {/* Case Finish */}
-            <div>
-              <label className="option-section-title">
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Sparkles size={15} color="#FF5500" /> Surface Finish</span>
-              </label>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem' }}>
-                  <input type="radio" name="finish" checked={caseFinish === 'Matte Finish'} onChange={() => setCaseFinish('Matte Finish')} /> Matte Finish (Anti-Fingerprint)
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem' }}>
-                  <input type="radio" name="finish" checked={caseFinish === 'Glossy Finish'} onChange={() => setCaseFinish('Glossy Finish')} /> Glossy Finish (Vibrant Shine)
-                </label>
-              </div>
-            </div>
+                    <button 
+                      type="button"
+                      onClick={() => setCaseType('Soft Silicone TPU Transparent Back')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: caseType.includes('Silicone') ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                        background: caseType.includes('Silicone') ? 'var(--orange-light)' : 'var(--bg-input)',
+                        color: caseType.includes('Silicone') ? '#FF5500' : 'var(--text-primary)',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: '0.82rem',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ fontWeight: '800' }}>Soft Silicone TPU</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Clear TPU Edge Shockproof</div>
+                      <div style={{ fontSize: '0.74rem', fontWeight: '800', color: '#FF5500', marginTop: '2px' }}>₹{customPricing?.softSilicone?.price || 349}</div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Case Finish */}
+                <div>
+                  <label className="option-section-title">
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Sparkles size={15} color="#FF5500" /> Surface Finish</span>
+                  </label>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                      <input type="radio" name="finish" checked={caseFinish === 'Matte Finish'} onChange={() => setCaseFinish('Matte Finish')} /> Matte Finish (Anti-Fingerprint)
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                      <input type="radio" name="finish" checked={caseFinish === 'Glossy Finish'} onChange={() => setCaseFinish('Glossy Finish')} /> Glossy Finish (Vibrant Shine)
+                    </label>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Skin Texture & Style */}
+                <div>
+                  <label className="option-section-title">
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Sparkles size={15} color="#FF5500" /> Skin Texture &amp; Style</span>
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+                    {[
+                      { id: 'Ultra-Matte Skin', title: 'Ultra-Matte Vinyl', desc: 'Smooth Anti-Fingerprint Texture' },
+                      { id: 'Glossy Cyber Shine', title: 'Glossy Cyber Shine', desc: 'High-Vibrancy Reflective Mirror' },
+                      { id: 'Carbon Fiber Texture', title: '3D Carbon Fiber', desc: 'Tactile Textured Woven Pattern' },
+                      { id: 'Honeycomb Wrap', title: 'Cyber Honeycomb', desc: 'Hexagonal Grip Grid Finish' }
+                    ].map(skinItem => (
+                      <button
+                        key={skinItem.id}
+                        type="button"
+                        onClick={() => setSkinFinish(skinItem.id)}
+                        style={{
+                          padding: '12px',
+                          borderRadius: '10px',
+                          border: skinFinish === skinItem.id ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                          background: skinFinish === skinItem.id ? 'var(--orange-light)' : 'var(--bg-input)',
+                          color: skinFinish === skinItem.id ? '#FF5500' : 'var(--text-primary)',
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          fontSize: '0.82rem',
+                          textAlign: 'left'
+                        }}
+                      >
+                        <div style={{ fontWeight: '800' }}>{skinItem.title}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{skinItem.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Skin Wrap Coverage */}
+                <div>
+                  <label className="option-section-title">
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Shield size={15} color="#FF5500" /> Skin Coverage Area</span>
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setSkinCoverage('Full Back + Camera Island Wrap')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: skinCoverage === 'Full Back + Camera Island Wrap' ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                        background: skinCoverage === 'Full Back + Camera Island Wrap' ? 'var(--orange-light)' : 'var(--bg-input)',
+                        color: skinCoverage === 'Full Back + Camera Island Wrap' ? '#FF5500' : 'var(--text-primary)',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: '0.82rem'
+                      }}
+                    >
+                      Full Back + Camera Wrap
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSkinCoverage('Back Panel Only')}
+                      style={{
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: skinCoverage === 'Back Panel Only' ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                        background: skinCoverage === 'Back Panel Only' ? 'var(--orange-light)' : 'var(--bg-input)',
+                        color: skinCoverage === 'Back Panel Only' ? '#FF5500' : 'var(--text-primary)',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: '0.82rem'
+                      }}
+                    >
+                      Back Panel Only
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Remarks / Special Instructions */}
             <div>
@@ -1488,34 +1699,58 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
                 />
               </div>
               <small style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
-                Our 3D printing studio will send a high-definition preview to this WhatsApp number before printing.
+                Our custom studio will send a high-definition preview proof to this WhatsApp number before production.
               </small>
             </div>
 
-            {/* Submit Button */}
-            <div style={{ paddingTop: '10px', borderTop: '1px solid var(--border-color)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>
-                  Custom Cover Price:
-                </span>
-                <span style={{ fontSize: '1.4rem', fontWeight: '900', color: '#FF5500' }}>₹399 <s style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>₹499</s></span>
-              </div>
+            {/* Submit Button & Price Display */}
+            {(() => {
+              const activePrice = getCustomPrice(customPricing, productType, caseType, caseFinish);
+              return (
+                <div style={{ paddingTop: '10px', borderTop: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                    <div>
+                      <span style={{ fontSize: '1rem', fontWeight: 'bold', display: 'block' }}>
+                        {productType === 'skin' ? 'Custom Mobile Skin Price:' : 'Custom Back Cover Price:'}
+                      </span>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                        {productType === 'skin' ? 'Includes 3M Precision Vinyl Skin Wrap' : `Includes ${caseType}`}
+                      </span>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '1.4rem', fontWeight: '900', color: '#FF5500' }}>
+                        ₹{activePrice.price}
+                      </span>
+                      <s style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginLeft: '8px' }}>
+                        ₹{activePrice.originalPrice}
+                      </s>
+                      <span style={{ display: 'block', fontSize: '0.74rem', color: '#22c55e', fontWeight: '800' }}>
+                        SAVE {activePrice.discount}% OFF
+                      </span>
+                    </div>
+                  </div>
 
-              <button 
-                type="submit" 
-                className="btn btn-orange"
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '12px',
-                  fontWeight: 'bold',
-                  fontSize: '1rem',
-                  justifyContent: 'center'
-                }}
-              >
-                <ShoppingBag size={18} /> ADD CUSTOM BACK COVER TO CART (₹399)
-              </button>
-            </div>
+                  <button 
+                    type="submit" 
+                    className="btn btn-orange"
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      fontWeight: 'bold',
+                      fontSize: '1rem',
+                      justifyContent: 'center',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 16px rgba(255, 85, 0, 0.35)'
+                    }}
+                  >
+                    <ShoppingBag size={18} /> ADD {productType === 'skin' ? 'CUSTOM MOBILE SKIN' : 'CUSTOM BACK COVER'} TO CART (₹{activePrice.price})
+                  </button>
+                </div>
+              );
+            })()}
 
           </form>
         </div>
