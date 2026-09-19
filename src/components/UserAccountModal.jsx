@@ -8,7 +8,7 @@ import {
 import CompanyLogo from './CompanyLogo';
 import RewardsTab from './RewardsTab';
 import { getProductTitle } from '../data/translations';
-import { getApiBaseUrl } from '../data/apiConfig';
+import { getApiBaseUrl, getApiHost } from '../data/apiConfig';
 import { copyToClipboard } from '../utils/clipboard';
 
 const API_BASE = getApiBaseUrl();
