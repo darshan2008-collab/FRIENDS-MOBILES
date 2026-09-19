@@ -32,6 +32,7 @@ import { translations, autoTranslateToTamil } from './data/translations';
 import { getApiBaseUrl, isNativeApp } from './data/apiConfig';
 import { DEFAULT_PROMO_CARDS } from './data/promoCards';
 import { DEFAULT_CUSTOM_PRICING } from './data/customPricing';
+import { DEFAULT_FRAME_CONFIG } from './data/framePricing';
 
 import './styles/theme.css';
 
@@ -476,6 +477,49 @@ export default function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pricing: pricingToSave })
     }).catch(() => {});
+  };
+
+  // Photo Frame Studio (Sizes & Pricing) Configuration State
+  const [frameConfig, setFrameConfig] = useState(() => {
+    try {
+      const saved = localStorage.getItem('fm_frame_config');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && Array.isArray(parsed.sizes) && parsed.sizes.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (_) {}
+    return DEFAULT_FRAME_CONFIG;
+  });
+
+  useEffect(() => {
+    fetch(`${API_BASE}/custom-frame/pricing`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.framePricing && Array.isArray(data.framePricing.sizes) && data.framePricing.sizes.length > 0) {
+          setFrameConfig(data.framePricing);
+          try {
+            localStorage.setItem('fm_frame_config', JSON.stringify(data.framePricing));
+          } catch (_) {}
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleUpdateFrameConfig = (newConfig) => {
+    const configToSave = newConfig && Array.isArray(newConfig.sizes) && newConfig.sizes.length > 0
+      ? newConfig
+      : DEFAULT_FRAME_CONFIG;
+    setFrameConfig(configToSave);
+    try {
+      localStorage.setItem('fm_frame_config', JSON.stringify(configToSave));
+    } catch (_) {}
+    fetch(`${API_BASE}/custom-frame/pricing`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ framePricing: configToSave })
+    }).catch(err => console.error('[FramePricing Sync Error]', err));
   };
 
   // Set html & body data-theme attribute whenever theme state changes
@@ -1329,6 +1373,8 @@ export default function App() {
           onUpdatePromoCards={handleUpdatePromoCards}
           customPricing={customPricing}
           onUpdateCustomPricing={handleUpdateCustomPricing}
+          frameConfig={frameConfig}
+          onUpdateFrameConfig={handleUpdateFrameConfig}
           onUpdateOrders={setOrders}
         />
       )}
@@ -1387,6 +1433,7 @@ export default function App() {
           onClose={() => setIsCustomFrameOpen(false)}
           onAddToCart={handleAddToCart}
           addToast={addToast}
+          frameConfig={frameConfig}
           t={t}
         />
       )}

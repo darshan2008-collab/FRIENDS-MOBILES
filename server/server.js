@@ -121,6 +121,22 @@ const defaultFiles = {
       order: 5
     }
   ],
+  'data/frame_pricing.json': {
+    sizes: [
+      { id: 'frame_4x6', label: '4 x 6 inches (Table Desk Frame)', dimensions: '4 x 6 inches', price: 299, originalPrice: 399, active: true, order: 1 },
+      { id: 'frame_6x8', label: '6 x 8 inches (Standard Desk / Wall)', dimensions: '6 x 8 inches', price: 449, originalPrice: 599, active: true, order: 2 },
+      { id: 'frame_8x10', label: '8 x 10 inches (Wall Frame)', dimensions: '8 x 10 inches', price: 649, originalPrice: 849, active: true, order: 3 },
+      { id: 'frame_12x18', label: '12 x 18 inches (Gallery Wall Frame)', dimensions: '12 x 18 inches', price: 999, originalPrice: 1299, active: true, order: 4 },
+      { id: 'frame_18x24', label: '18 x 24 inches (Masterpiece Wall Frame)', dimensions: '18 x 24 inches', price: 1499, originalPrice: 1999, active: true, order: 5 }
+    ],
+    formula: {
+      basePrice: 150,
+      pricePerSqInch: 3.1,
+      minPrice: 299,
+      maxPrice: 9999,
+      allowCustomDimensions: true
+    }
+  },
   'data/settings.json': {
     freeShippingThreshold: 499,
     standardShippingFee: 49,
@@ -144,6 +160,7 @@ Object.entries(defaultFiles).forEach(([relPath, defaultContent]) => {
 const productsRouter = require('./routes/products');
 const ordersRouter = require('./routes/orders');
 const customCoverRouter = require('./routes/customCover');
+const customFrameRouter = require('./routes/customFrame');
 const adminRouter = require('./routes/admin');
 const authRouter = require('./routes/auth');
 const paymentsRouter = require('./routes/payments');
@@ -235,6 +252,9 @@ app.use('/orders', ordersRouter);
 
 app.use('/api/custom-cover', customCoverRouter);
 app.use('/custom-cover', customCoverRouter);
+
+app.use('/api/custom-frame', customFrameRouter);
+app.use('/custom-frame', customFrameRouter);
 
 app.use('/api/admin', adminRouter);
 app.use('/admin', adminRouter);

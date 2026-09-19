@@ -4,7 +4,8 @@ import {
   X, ShieldCheck, Package, Truck, ShoppingBag, BarChart3, Plus, Trash2, Edit3, 
   Check, RefreshCw, Lock, User, Key, ArrowLeft, ArrowRight, LogOut, CheckCircle2, Clock, 
   TrendingUp, TrendingDown, Tag, Sparkles, AlertTriangle, Percent, DollarSign, Menu, MapPin, Phone, Eye, EyeOff, Upload, CreditCard, AlertCircle, MessageSquare, PhoneCall,
-  Cloud, Database, HardDrive, Download, Zap, Smartphone, Image, Printer, Palette, FileText, Search, Wrench, Sliders, Shield
+  Cloud, Database, HardDrive, Download, Zap, Smartphone, Image, Printer, Palette, FileText, Search, Wrench, Sliders, Shield,
+  Frame, Ruler, Maximize2
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 import { autoTranslateToTamil } from '../data/translations';
@@ -12,6 +13,7 @@ import { getApiHost as centralGetApiHost } from '../data/apiConfig';
 import { copyToClipboard } from '../utils/clipboard';
 import { DEFAULT_PROMO_CARDS } from '../data/promoCards';
 import { DEFAULT_CUSTOM_PRICING } from '../data/customPricing';
+import { DEFAULT_FRAME_CONFIG, calculateCustomFramePrice, calculateDiscountPct } from '../data/framePricing';
 
 export default function AdminModal({ 
   isOpen, 
@@ -32,6 +34,8 @@ export default function AdminModal({
   onUpdatePromoCards,
   customPricing = DEFAULT_CUSTOM_PRICING,
   onUpdateCustomPricing,
+  frameConfig = DEFAULT_FRAME_CONFIG,
+  onUpdateFrameConfig,
   onUpdateOrders
 }) {
   const [adminToken, setAdminToken] = useState(() => {
@@ -904,6 +908,131 @@ export default function AdminModal({
       }
       if (addToast) addToast('Default studio pricing restored!', '🔄');
     }
+  };
+
+  // ─── Photo Frame Studio (Sizes & Pricing) State & Handlers ───
+  const [frameConfigForm, setFrameConfigForm] = useState(() => {
+    return frameConfig || DEFAULT_FRAME_CONFIG;
+  });
+
+  useEffect(() => {
+    if (frameConfig) {
+      setFrameConfigForm(frameConfig);
+    }
+  }, [frameConfig]);
+
+  const [isAddingFrameSize, setIsAddingFrameSize] = useState(false);
+  const [newFrameSizeForm, setNewFrameSizeForm] = useState({
+    label: '',
+    dimensions: '',
+    price: 399,
+    originalPrice: 499,
+    active: true
+  });
+
+  const [testCalcWidth, setTestCalcWidth] = useState(10);
+  const [testCalcHeight, setTestCalcHeight] = useState(12);
+  const [testCalcUnit, setTestCalcUnit] = useState('inches');
+
+  const handleSaveFrameConfig = (e) => {
+    if (e) e.preventDefault();
+    if (onUpdateFrameConfig) {
+      onUpdateFrameConfig(frameConfigForm);
+    }
+    if (addToast) addToast('Photo frame sizes & pricing rates saved successfully!', '🖼️');
+  };
+
+  const handleResetFrameConfig = () => {
+    if (window.confirm('Reset all photo frame sizes and pricing rates back to factory defaults?')) {
+      setFrameConfigForm(DEFAULT_FRAME_CONFIG);
+      if (onUpdateFrameConfig) {
+        onUpdateFrameConfig(DEFAULT_FRAME_CONFIG);
+      }
+      if (addToast) addToast('Default photo frame pricing & sizes restored!', '🔄');
+    }
+  };
+
+  const handleUpdateFrameSizeField = (id, field, value) => {
+    setFrameConfigForm(prev => {
+      const updatedSizes = (prev.sizes || []).map(s => {
+        if (s.id === id) {
+          const numFields = ['price', 'originalPrice'];
+          const finalVal = numFields.includes(field) ? Math.max(0, Number(value) || 0) : value;
+          return { ...s, [field]: finalVal };
+        }
+        return s;
+      });
+      return { ...prev, sizes: updatedSizes };
+    });
+  };
+
+  const handleToggleFrameSizeActive = (id) => {
+    setFrameConfigForm(prev => {
+      const updatedSizes = (prev.sizes || []).map(s => {
+        if (s.id === id) {
+          const nextActive = s.active === false;
+          return { ...s, active: nextActive };
+        }
+        return s;
+      });
+      return { ...prev, sizes: updatedSizes };
+    });
+  };
+
+  const handleDeleteFrameSize = (id, label) => {
+    if (window.confirm(`Are you sure you want to delete frame size "${label || id}"?`)) {
+      setFrameConfigForm(prev => {
+        const filtered = (prev.sizes || []).filter(s => s.id !== id);
+        return { ...prev, sizes: filtered };
+      });
+      if (addToast) addToast('Frame size deleted.', '🗑️');
+    }
+  };
+
+  const handleAddNewFrameSize = (e) => {
+    e.preventDefault();
+    if (!newFrameSizeForm.label.trim()) {
+      if (addToast) addToast('Please enter a size name / label!', '⚠️');
+      return;
+    }
+    const priceNum = Math.max(0, Number(newFrameSizeForm.price) || 299);
+    const origPriceNum = Math.max(priceNum, Number(newFrameSizeForm.originalPrice) || Math.round(priceNum * 1.3));
+    const newSizeItem = {
+      id: 'frame_' + Date.now(),
+      label: newFrameSizeForm.label.trim(),
+      dimensions: newFrameSizeForm.dimensions.trim() || newFrameSizeForm.label.trim(),
+      price: priceNum,
+      originalPrice: origPriceNum,
+      active: true,
+      order: (frameConfigForm.sizes?.length || 0) + 1
+    };
+    const updated = {
+      ...frameConfigForm,
+      sizes: [...(frameConfigForm.sizes || []), newSizeItem]
+    };
+    setFrameConfigForm(updated);
+    if (onUpdateFrameConfig) {
+      onUpdateFrameConfig(updated);
+    }
+    setIsAddingFrameSize(false);
+    setNewFrameSizeForm({
+      label: '',
+      dimensions: '',
+      price: 399,
+      originalPrice: 499,
+      active: true
+    });
+    if (addToast) addToast(`Added new frame size "${newSizeItem.label}"!`, '✨');
+  };
+
+  const handleUpdateFrameFormulaField = (field, value) => {
+    setFrameConfigForm(prev => ({
+      ...prev,
+      formula: {
+        ...(prev.formula || DEFAULT_FRAME_CONFIG.formula),
+        [field]: field === 'allowCustomDimensions' ? Boolean(value) : Number(value) || 0
+      }
+    }));
   };
 
   // New Product Form State (with Auto Discount Calculator & Tamil Live Translator)
@@ -2207,6 +2336,16 @@ export default function AdminModal({
               }}
             >
               <Tag size={16} /> Promo &amp; Service Cards ({effectivePromoCards.length})
+            </button>
+
+            <button 
+              className={`sidebar-tab-btn ${activeTab === 'frameStudio' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('frameStudio');
+                setIsAdminSidebarOpen(false);
+              }}
+            >
+              <Frame size={16} /> Photo Frame Studio ({frameConfigForm?.sizes?.length || 0} Sizes)
             </button>
 
             <button 
@@ -5297,6 +5436,729 @@ export default function AdminModal({
                   );
                 })}
               </div>
+              )}
+
+            </div>
+          )}
+
+          {/* TAB: PHOTO FRAME STUDIO (SIZES, PRICING & FORMULA) */}
+          {activeTab === 'frameStudio' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+
+              {/* Header Title Banner */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '20px',
+                padding: '24px 28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '16px',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                    <span style={{ background: 'rgba(255, 85, 0, 0.12)', border: '1px solid rgba(255, 85, 0, 0.3)', color: '#FF5500', padding: '3px 12px', borderRadius: '20px', fontSize: '0.76rem', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Frame size={14} /> PHOTO FRAME STUDIO
+                    </span>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '600' }}>Real-time Pricing &amp; Size Manager</span>
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: '1.45rem', fontWeight: '900', color: 'var(--text-primary)' }}>
+                    Photo Frame Sizes, Costs &amp; Pricing Formula
+                  </h3>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                    Edit selling prices, MRP, discounts, add new frame sizes, toggle visibility, and configure custom dimension formulas. All edits update live in the user Photo Frame modal.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={handleResetFrameConfig}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '12px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-input)',
+                      color: 'var(--text-primary)',
+                      fontWeight: '700',
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <RefreshCw size={14} /> Reset Defaults
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingFrameSize(true)}
+                    style={{
+                      padding: '10px 18px',
+                      borderRadius: '12px',
+                      border: '1.5px solid #FF5500',
+                      background: 'var(--orange-light)',
+                      color: '#FF5500',
+                      fontWeight: '800',
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <Plus size={16} /> Add New Frame Size
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSaveFrameConfig}
+                    style={{
+                      padding: '10px 22px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #FF5500, #ff7733)',
+                      color: '#ffffff',
+                      fontWeight: '800',
+                      fontSize: '0.84rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(255, 85, 0, 0.35)'
+                    }}
+                  >
+                    <Check size={16} /> Save Frame Rates &amp; Sizes
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Summary Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Frame size={20} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Total Frame Sizes</span>
+                    <h4 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: 'var(--text-primary)' }}>{frameConfigForm?.sizes?.length || 0}</h4>
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(34, 197, 94, 0.12)', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Eye size={20} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Active on Store</span>
+                    <h4 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: '#16a34a' }}>
+                      {(frameConfigForm?.sizes || []).filter(s => s.active !== false).length}
+                    </h4>
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(255, 85, 0, 0.12)', color: '#FF5500', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Sliders size={20} />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Custom Dimension Calc</span>
+                    <h4 style={{ margin: 0, fontSize: '1.4rem', fontWeight: '900', color: '#FF5500' }}>Active</h4>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 1: Standard Frame Sizes Management Grid */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '20px',
+                padding: '24px',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '18px' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '900', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Ruler size={18} color="#FF5500" /> Frame Sizes &amp; Pricing Catalog
+                    </h4>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      Adjust selling prices and MRP directly below. Changes reflect instantly in customer size selectors.
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingFrameSize(true)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-input)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.8rem',
+                      fontWeight: '800',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <Plus size={14} color="#FF5500" /> Add Custom Size
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '18px' }}>
+                  {(frameConfigForm?.sizes || []).map((sizeItem) => {
+                    const discount = calculateDiscountPct(sizeItem.price, sizeItem.originalPrice);
+                    const isActive = sizeItem.active !== false;
+
+                    return (
+                      <div
+                        key={sizeItem.id}
+                        style={{
+                          background: 'var(--bg-input)',
+                          border: `1.5px solid ${isActive ? 'var(--border-color)' : 'rgba(239, 68, 68, 0.4)'}`,
+                          borderRadius: '16px',
+                          padding: '18px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '14px',
+                          opacity: isActive ? 1 : 0.65,
+                          transition: 'all 0.2s ease',
+                          position: 'relative'
+                        }}
+                      >
+                        {/* Top Badges */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{
+                            fontSize: '0.72rem',
+                            fontWeight: '800',
+                            padding: '3px 10px',
+                            borderRadius: '8px',
+                            background: 'rgba(255, 85, 0, 0.12)',
+                            color: '#FF5500',
+                            border: '1px solid rgba(255, 85, 0, 0.25)'
+                          }}>
+                            {sizeItem.dimensions || sizeItem.label.split('(')[0].trim()}
+                          </span>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{
+                              fontSize: '0.72rem',
+                              fontWeight: '800',
+                              color: isActive ? '#16a34a' : '#ef4444',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}>
+                              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: isActive ? '#16a34a' : '#ef4444' }} />
+                              {isActive ? 'Active' : 'Hidden'}
+                            </span>
+
+                            <span style={{
+                              fontSize: '0.72rem',
+                              fontWeight: '800',
+                              padding: '2px 8px',
+                              borderRadius: '6px',
+                              background: '#16a34a',
+                              color: '#ffffff'
+                            }}>
+                              {discount}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Title & Dimension Inputs */}
+                        <div>
+                          <label style={{ fontSize: '0.74rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                            Size Display Name / Label
+                          </label>
+                          <input
+                            type="text"
+                            value={sizeItem.label}
+                            onChange={(e) => handleUpdateFrameSizeField(sizeItem.id, 'label', e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '9px 12px',
+                              borderRadius: '10px',
+                              border: '1px solid var(--border-color)',
+                              background: 'var(--bg-card)',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.84rem',
+                              fontWeight: '700',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '0.74rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                            Dimensions (e.g. 6 x 8 inches)
+                          </label>
+                          <input
+                            type="text"
+                            value={sizeItem.dimensions || ''}
+                            onChange={(e) => handleUpdateFrameSizeField(sizeItem.id, 'dimensions', e.target.value)}
+                            placeholder="e.g. 6 x 8 inches"
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              borderRadius: '10px',
+                              border: '1px solid var(--border-color)',
+                              background: 'var(--bg-card)',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+
+                        {/* Price & MRP Inputs */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                          <div>
+                            <label style={{ fontSize: '0.74rem', fontWeight: '800', color: '#FF5500', display: 'block', marginBottom: '4px' }}>
+                              Selling Price (₹) *
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={sizeItem.price}
+                              onChange={(e) => handleUpdateFrameSizeField(sizeItem.id, 'price', e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '9px 12px',
+                                borderRadius: '10px',
+                                border: '1.5px solid #FF5500',
+                                background: 'var(--bg-card)',
+                                color: '#FF5500',
+                                fontSize: '0.96rem',
+                                fontWeight: '900',
+                                outline: 'none'
+                              }}
+                            />
+                          </div>
+
+                          <div>
+                            <label style={{ fontSize: '0.74rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>
+                              Original MRP (₹)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={sizeItem.originalPrice || Math.round(sizeItem.price * 1.3)}
+                              onChange={(e) => handleUpdateFrameSizeField(sizeItem.id, 'originalPrice', e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '9px 12px',
+                                borderRadius: '10px',
+                                border: '1px solid var(--border-color)',
+                                background: 'var(--bg-card)',
+                                color: 'var(--text-muted)',
+                                fontSize: '0.96rem',
+                                fontWeight: '700',
+                                outline: 'none'
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border-color)', paddingTop: '12px', marginTop: '2px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleFrameSizeActive(sizeItem.id)}
+                            style={{
+                              flex: 1,
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: '1px solid var(--border-color)',
+                              background: isActive ? 'var(--bg-card)' : 'rgba(34, 197, 94, 0.12)',
+                              color: isActive ? 'var(--text-secondary)' : '#16a34a',
+                              fontSize: '0.78rem',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            {isActive ? <EyeOff size={14} /> : <Eye size={14} />}
+                            {isActive ? 'Hide on Store' : 'Show on Store'}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteFrameSize(sizeItem.id, sizeItem.label)}
+                            style={{
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              border: 'none',
+                              background: 'rgba(239, 68, 68, 0.12)',
+                              color: '#ef4444',
+                              fontSize: '0.78rem',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px'
+                            }}
+                            title="Delete this frame size"
+                          >
+                            <Trash2 size={14} /> Delete
+                          </button>
+                        </div>
+
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Section 2: Custom / Manual Dimension Pricing Formula */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '20px',
+                padding: '24px',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div style={{ marginBottom: '18px' }}>
+                  <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '900', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Maximize2 size={18} color="#FF5500" /> Custom Manual Dimension Pricing Formula
+                  </h4>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Formula: <code style={{ color: '#FF5500', fontWeight: '800' }}>Price = Base Price + (Width × Height in sq. inches × Rate per sq. inch)</code>
+                  </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+                  <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <label style={{ fontSize: '0.76rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                      Base Starting Price (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={frameConfigForm?.formula?.basePrice ?? 150}
+                      onChange={(e) => handleUpdateFrameFormulaField('basePrice', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-card)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.96rem',
+                        fontWeight: '800',
+                        outline: 'none'
+                      }}
+                    />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>Initial setup / baseline fee</span>
+                  </div>
+
+                  <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <label style={{ fontSize: '0.76rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                      Price per Sq. Inch (₹)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={frameConfigForm?.formula?.pricePerSqInch ?? 3.1}
+                      onChange={(e) => handleUpdateFrameFormulaField('pricePerSqInch', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-card)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.96rem',
+                        fontWeight: '800',
+                        outline: 'none'
+                      }}
+                    />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>Area scaling multiplier</span>
+                  </div>
+
+                  <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <label style={{ fontSize: '0.76rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                      Minimum Price Guarantee (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={frameConfigForm?.formula?.minPrice ?? 299}
+                      onChange={(e) => handleUpdateFrameFormulaField('minPrice', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-card)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.96rem',
+                        fontWeight: '800',
+                        outline: 'none'
+                      }}
+                    />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>Lowest allowable price</span>
+                  </div>
+
+                  <div style={{ background: 'var(--bg-input)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <label style={{ fontSize: '0.76rem', fontWeight: '800', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+                      Maximum Price Cap (₹)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={frameConfigForm?.formula?.maxPrice ?? 9999}
+                      onChange={(e) => handleUpdateFrameFormulaField('maxPrice', e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-card)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.96rem',
+                        fontWeight: '800',
+                        outline: 'none'
+                      }}
+                    />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>Ceiling price for giant frames</span>
+                  </div>
+                </div>
+
+                {/* Live Formula Calculator Simulator */}
+                <div style={{
+                  background: 'var(--bg-input)',
+                  borderRadius: '14px',
+                  padding: '18px 20px',
+                  border: '1.5px dashed #FF5500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '16px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.84rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                      Live Formula Tester:
+                    </span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={testCalcWidth}
+                      onChange={(e) => setTestCalcWidth(e.target.value)}
+                      placeholder="Width"
+                      style={{ width: '80px', padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontWeight: '700', fontSize: '0.82rem' }}
+                    />
+                    <span style={{ fontWeight: '800', color: 'var(--text-muted)' }}>×</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={testCalcHeight}
+                      onChange={(e) => setTestCalcHeight(e.target.value)}
+                      placeholder="Height"
+                      style={{ width: '80px', padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontWeight: '700', fontSize: '0.82rem' }}
+                    />
+                    <select
+                      value={testCalcUnit}
+                      onChange={(e) => setTestCalcUnit(e.target.value)}
+                      style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontWeight: '700', fontSize: '0.82rem' }}
+                    >
+                      <option value="inches">Inches</option>
+                      <option value="cm">Centimeters</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: '700' }}>Calculated Price:</span>
+                    <span style={{ fontSize: '1.25rem', fontWeight: '900', color: '#FF5500' }}>
+                      ₹{calculateCustomFramePrice(testCalcWidth, testCalcHeight, testCalcUnit, frameConfigForm?.formula)}
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Bottom Sticky Action Bar */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '16px',
+                padding: '16px 24px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                boxShadow: 'var(--shadow-md)',
+                flexWrap: 'wrap',
+                gap: '12px'
+              }}>
+                <span style={{ fontSize: '0.84rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                  Remember to click <strong>Save Frame Rates</strong> to persist changes to the store database.
+                </span>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={handleResetFrameConfig}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-input)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.82rem',
+                      fontWeight: '700',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Reset Defaults
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSaveFrameConfig}
+                    style={{
+                      padding: '10px 24px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #FF5500, #ff7733)',
+                      color: '#ffffff',
+                      fontSize: '0.84rem',
+                      fontWeight: '800',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(255, 85, 0, 0.35)'
+                    }}
+                  >
+                    <Check size={16} /> Save Frame Rates &amp; Sizes
+                  </button>
+                </div>
+              </div>
+
+              {/* Add New Frame Size Modal */}
+              {isAddingFrameSize && (
+                <div style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'rgba(0, 0, 0, 0.75)',
+                  backdropFilter: 'blur(6px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 999999,
+                  padding: '20px'
+                }}>
+                  <div style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '20px',
+                    width: '100%',
+                    maxWidth: '480px',
+                    padding: '24px',
+                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '16px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                      <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '900', color: '#FF5500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Plus size={18} /> Add New Photo Frame Size
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingFrameSize(false)}
+                        style={{ border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer' }}
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+
+                    <form onSubmit={handleAddNewFrameSize} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Size Display Name / Label *</label>
+                        <input
+                          type="text"
+                          required
+                          value={newFrameSizeForm.label}
+                          onChange={(e) => setNewFrameSizeForm({ ...newFrameSizeForm, label: e.target.value })}
+                          placeholder="e.g. 5 x 7 inches (Classic Tabletop Frame)"
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Dimensions *</label>
+                        <input
+                          type="text"
+                          required
+                          value={newFrameSizeForm.dimensions}
+                          onChange={(e) => setNewFrameSizeForm({ ...newFrameSizeForm, dimensions: e.target.value })}
+                          placeholder="e.g. 5 x 7 inches"
+                          style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
+                        />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Selling Price (₹) *</label>
+                          <input
+                            type="number"
+                            required
+                            min="0"
+                            value={newFrameSizeForm.price}
+                            onChange={(e) => setNewFrameSizeForm({ ...newFrameSizeForm, price: e.target.value })}
+                            placeholder="349"
+                            style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1.5px solid #FF5500', background: 'var(--bg-input)', color: '#FF5500', fontWeight: '900', outline: 'none' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Original MRP (₹)</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={newFrameSizeForm.originalPrice}
+                            onChange={(e) => setNewFrameSizeForm({ ...newFrameSizeForm, originalPrice: e.target.value })}
+                            placeholder="499"
+                            style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-muted)', fontWeight: '700', outline: 'none' }}
+                          />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingFrameSize(false)}
+                          style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-secondary)', fontWeight: '700', cursor: 'pointer' }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          style={{ flex: 1, padding: '12px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #FF5500, #ff7733)', color: '#ffffff', fontWeight: '800', cursor: 'pointer', boxShadow: '0 4px 12px rgba(255, 85, 0, 0.3)' }}
+                        >
+                          Add Frame Size
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
               )}
 
             </div>

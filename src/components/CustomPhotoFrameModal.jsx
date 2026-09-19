@@ -1,8 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Upload, Image as ImageIcon, Sparkles, ShoppingBag, Frame, Palette, RotateCw, Shield, Ruler, Maximize2, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
+import { DEFAULT_FRAME_CONFIG, calculateCustomFramePrice, calculateDiscountPct } from '../data/framePricing';
 
-export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, addToast, t = (k) => k }) {
+export default function CustomPhotoFrameModal({ 
+  isOpen, 
+  onClose, 
+  onAddToCart, 
+  addToast, 
+  frameConfig = DEFAULT_FRAME_CONFIG,
+  t = (k) => k 
+}) {
   useEffect(() => {
     if (isOpen && typeof document !== 'undefined') {
       document.body.style.overflow = 'hidden';
@@ -13,7 +21,40 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
   }, [isOpen]);
 
   const fileInputRef = useRef(null);
-  const [frameSize, setFrameSize] = useState('6 x 8 inches (Standard Desk / Wall)'); // 4x6 | 6x8 | 8x10 | 12x18 | 18x24 | Custom / Manual
+
+  const activeSizes = (frameConfig?.sizes || DEFAULT_FRAME_CONFIG.sizes)
+    .filter(s => s.active !== false)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  const allowCustom = frameConfig?.formula?.allowCustomDimensions !== false;
+
+  const frameSizes = [
+    ...activeSizes.map(s => ({
+      id: s.id,
+      label: s.label,
+      dimensions: s.dimensions,
+      price: Number(s.price) || 299,
+      originalPrice: Number(s.originalPrice) || Math.round((Number(s.price) || 299) * 1.3)
+    })),
+    ...(allowCustom ? [{
+      id: 'custom_manual',
+      label: 'Custom / Manual Dimension (Enter Custom Size)',
+      dimensions: 'Custom',
+      price: null,
+      originalPrice: null
+    }] : [])
+  ];
+
+  const [frameSize, setFrameSize] = useState(() => {
+    return activeSizes[0]?.label || '6 x 8 inches (Standard Desk / Wall)';
+  });
+
+  useEffect(() => {
+    if (frameSizes.length > 0 && !frameSizes.some(s => s.label === frameSize)) {
+      setFrameSize(frameSizes[0].label);
+    }
+  }, [frameConfig]);
+
   const [isSizeMenuOpen, setIsSizeMenuOpen] = useState(false); // Open/Close toggle for frame sizes guide
   const [customWidth, setCustomWidth] = useState(10);
   const [customHeight, setCustomHeight] = useState(12);
@@ -24,28 +65,8 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
   const [uploadedPhoto, setUploadedPhoto] = useState(null);
   const [uploadedFileInfo, setUploadedFileInfo] = useState(null);
 
-  if (!isOpen || typeof document === 'undefined') return null;
-
-  const frameSizes = [
-    { label: '4 x 6 inches (Table Desk Frame)', price: 299 },
-    { label: '6 x 8 inches (Standard Desk / Wall)', price: 449 },
-    { label: '8 x 10 inches (Wall Frame)', price: 649 },
-    { label: '12 x 18 inches (Gallery Wall Frame)', price: 999 },
-    { label: '18 x 24 inches (Masterpiece Wall Frame)', price: 1499 },
-    { label: 'Custom / Manual Dimension (Enter Custom Size)', price: null }
-  ];
-
   const getCustomPrice = () => {
-    let w = parseFloat(customWidth) || 0;
-    let h = parseFloat(customHeight) || 0;
-    if (customUnit === 'cm') {
-      w = w / 2.54;
-      h = h / 2.54;
-    }
-    const sqInches = w * h;
-    if (sqInches <= 0) return 299;
-    const calculated = Math.round(150 + sqInches * 3.1);
-    return Math.max(299, Math.min(9999, calculated));
+    return calculateCustomFramePrice(customWidth, customHeight, customUnit, frameConfig?.formula);
   };
 
   const getSelectedPrice = () => {
@@ -53,8 +74,18 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
       return getCustomPrice();
     }
     const found = frameSizes.find(s => s.label === frameSize);
-    return found ? found.price : 449;
+    return found ? found.price : (activeSizes[0]?.price || 449);
   };
+
+  const getSelectedOriginalPrice = () => {
+    if (frameSize.startsWith('Custom')) {
+      return Math.round(getCustomPrice() * 1.3);
+    }
+    const found = frameSizes.find(s => s.label === frameSize);
+    return found ? (found.originalPrice || Math.round(found.price * 1.3)) : Math.round(getSelectedPrice() * 1.3);
+  };
+
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -85,6 +116,8 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
   const handleAddToCartSubmit = (e) => {
     e.preventDefault();
     const finalPrice = getSelectedPrice();
+    const finalOriginalPrice = getSelectedOriginalPrice();
+    const discountStr = calculateDiscountPct(finalPrice, finalOriginalPrice);
     const isCustom = frameSize.startsWith('Custom');
     const displaySize = isCustom 
       ? `${customWidth} x ${customHeight} ${customUnit} (Custom Manual)`
@@ -98,10 +131,10 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
       id: `custom-frame-${Date.now()}`,
       title: `Custom Photo Frame (${sizeTitlePart})`,
       price: finalPrice,
-      originalPrice: Math.round(finalPrice * 1.3),
+      originalPrice: finalOriginalPrice,
       category: 'Photo Frames',
       img: uploadedPhoto && !uploadedFileInfo?.isDoc ? uploadedPhoto : 'images/banner_photoframe.png',
-      discount: '-25%',
+      discount: discountStr,
       customizationDetails: {
         size: displaySize,
         customWidth: isCustom ? customWidth : null,
@@ -469,7 +502,16 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
                           {isCustomOption && <Ruler size={16} />}
                           {sizeObj.label}
                         </span>
-                        <span>{isCustomOption ? `From ₹${getCustomPrice()}` : `₹${sizeObj.price}`}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {!isCustomOption && sizeObj.originalPrice > sizeObj.price && (
+                            <span style={{ fontSize: '0.78rem', textDecoration: 'line-through', color: 'var(--text-muted)' }}>
+                              ₹{sizeObj.originalPrice}
+                            </span>
+                          )}
+                          <span style={{ fontWeight: '900', color: isSelected ? '#FF5500' : 'var(--text-primary)' }}>
+                            {isCustomOption ? `From ₹${getCustomPrice()}` : `₹${sizeObj.price}`}
+                          </span>
+                        </div>
                       </button>
 
                       {/* Manual Dimension Input Drawer if Custom Option is selected */}
@@ -687,7 +729,14 @@ export default function CustomPhotoFrameModal({ isOpen, onClose, onAddToCart, ad
                 <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>
                   Custom Frame Price:
                 </span>
-                <span style={{ fontSize: '1.4rem', fontWeight: '900', color: '#FF5500' }}>₹{getSelectedPrice()}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {getSelectedOriginalPrice() > getSelectedPrice() && (
+                    <span style={{ fontSize: '0.95rem', textDecoration: 'line-through', color: 'var(--text-muted)' }}>
+                      ₹{getSelectedOriginalPrice()}
+                    </span>
+                  )}
+                  <span style={{ fontSize: '1.4rem', fontWeight: '900', color: '#FF5500' }}>₹{getSelectedPrice()}</span>
+                </div>
               </div>
 
               <button 
