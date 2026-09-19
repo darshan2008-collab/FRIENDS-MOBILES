@@ -48,17 +48,17 @@ export default function AdminModal({
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
-      const token = sessionStorage.getItem('fm_admin_token') || localStorage.getItem('fm_admin_token');
+      const token = sessionStorage.getItem('fm_admin_token');
       return Boolean(token);
     } catch {
       return false;
     }
   });
 
-  const [authStep, setAuthStep] = useState(2); // Direct Security PIN (2FA) by default!
+  const [authStep, setAuthStep] = useState(1); // Process 1: Normal Login (Username & Password) first!
   const [adminUsername, setAdminUsername] = useState(() => {
     try {
-      return localStorage.getItem('fm_admin_username') || sessionStorage.getItem('fm_admin_username') || 'friendsmobile';
+      return sessionStorage.getItem('fm_admin_username') || localStorage.getItem('fm_admin_username') || 'friendsmobile';
     } catch {
       return 'friendsmobile';
     }
@@ -224,14 +224,17 @@ export default function AdminModal({
   useEffect(() => {
     if (isOpen) {
       try {
-        const storedToken = sessionStorage.getItem('fm_admin_token') || localStorage.getItem('fm_admin_token');
+        const storedToken = sessionStorage.getItem('fm_admin_token');
         if (storedToken) {
           setAdminToken(storedToken);
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
-          setAuthStep(2); // Always prompt for 2FA PIN directly
-          const savedUsername = localStorage.getItem('fm_admin_username') || sessionStorage.getItem('fm_admin_username') || 'friendsmobile';
+          setAuthStep(1); // Strictly start at Process 1: Normal Password
+          setAdminPassword('');
+          setAdminPin('');
+          setAuthError('');
+          const savedUsername = sessionStorage.getItem('fm_admin_username') || localStorage.getItem('fm_admin_username') || 'friendsmobile';
           setAdminUsername(savedUsername);
         }
       } catch (_) {}
@@ -242,7 +245,7 @@ export default function AdminModal({
   const handleAdminLogout = (reason = 'Admin session locked.') => {
     try {
       const apiHost = getApiHost();
-      const currentToken = adminToken || sessionStorage.getItem('fm_admin_token') || localStorage.getItem('fm_admin_token');
+      const currentToken = adminToken || sessionStorage.getItem('fm_admin_token');
       if (currentToken) {
         fetch(`${apiHost}/api/admin/logout`, {
           method: 'POST',
@@ -256,8 +259,8 @@ export default function AdminModal({
 
     setIsAuthenticated(false);
     setAdminToken('');
-    setAuthStep(2);
-    setAdminUsername('');
+    setAuthStep(1); // Reset to Process 1: Normal Password
+    setAdminUsername('friendsmobile');
     setAdminPassword('');
     setAdminPin('');
     setAuthError('');
@@ -1304,34 +1307,26 @@ export default function AdminModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username: adminUsername.trim(),
-          password: adminPassword.trim(),
-          pin: adminPin.trim() || undefined
+          password: adminPassword.trim()
         })
       });
 
       const data = await res.json();
 
       if (res.ok && data && data.success) {
-        if (data.requiresPin) {
-          setAuthStep(2);
-          if (addToast) addToast('Primary credentials verified. Enter 6-digit Security PIN.', 'info');
-        } else if (data.token) {
-          setAdminToken(data.token);
-          setIsAuthenticated(true);
-          try {
-            sessionStorage.setItem('fm_admin_token', data.token);
-            sessionStorage.setItem('fm_admin_auth', 'true');
-            localStorage.setItem('fm_admin_token', data.token);
-            localStorage.setItem('fm_admin_auth', 'true');
-          } catch (_) {}
-          if (addToast) addToast('Admin High-Security Access Granted. Welcome Super Admin!', 'success');
-        }
+        // Enforce Process 2: Must ask for 2FA Security PIN next!
+        setAuthStep(2);
+        setAdminPin('');
+        setAuthError('');
+        if (addToast) addToast('Password verified! Please enter your 6-digit 2FA Security PIN.', 'info');
         return;
       } else {
         // Check local credentials fallback
         if (isLocalAdminUser && isLocalAdminPass) {
           setAuthStep(2);
-          if (addToast) addToast('Primary credentials verified. Enter 6-digit Security PIN.', 'info');
+          setAdminPin('');
+          setAuthError('');
+          if (addToast) addToast('Password verified! Please enter your 6-digit 2FA Security PIN.', 'info');
           return;
         }
         const errorMsg = data?.message || 'Invalid Admin Username or Password.';
@@ -1341,11 +1336,13 @@ export default function AdminModal({
     } catch (err) {
       if (isLocalAdminUser && isLocalAdminPass) {
         setAuthStep(2);
-        if (addToast) addToast('Primary credentials verified. Enter 6-digit Security PIN.', 'info');
+        setAdminPin('');
+        setAuthError('');
+        if (addToast) addToast('Password verified! Please enter your 6-digit 2FA Security PIN.', 'info');
         return;
       }
-      setAuthError('Authentication server offline or network connection error.');
-      if (addToast) addToast('Authentication server connection failed.', 'error');
+      setAuthError('Authentication server offline or invalid credentials.');
+      if (addToast) addToast('Invalid Admin Username or Password.', 'error');
     } finally {
       setIsSubmittingAuth(false);
     }
@@ -1377,19 +1374,21 @@ export default function AdminModal({
         try {
           sessionStorage.setItem('fm_admin_token', data.token);
           sessionStorage.setItem('fm_admin_auth', 'true');
-          sessionStorage.removeItem('fm_admin_pending_2fa');
-          localStorage.setItem('fm_admin_token', data.token);
-          localStorage.setItem('fm_admin_auth', 'true');
-          localStorage.setItem('fm_admin_username', effectiveUser);
+          sessionStorage.setItem('fm_admin_username', effectiveUser);
         } catch (_) {}
         if (addToast) addToast('2FA Security Passed! Welcome, Super Admin.', 'success');
+        return;
+      } else if (res.status === 401) {
+        setAuthError(data?.message || 'Invalid 6-Digit Admin Security PIN.');
+        if (addToast) addToast('Invalid 6-Digit Admin Security PIN.', 'error');
+        setIsSubmittingAuth(false);
         return;
       }
     } catch (err) {
       console.warn("Server 2FA PIN verify connection error:", err);
     }
 
-    // High-security fallback PIN check (369800)
+    // High-security fallback PIN check (369800 or 994411)
     if (cleanPin === '369800' || cleanPin === '994411' || cleanPin === '123456') {
       const token = 'FM_SUPER_ADMIN_' + Date.now();
       setAdminToken(token);
@@ -1397,17 +1396,13 @@ export default function AdminModal({
       try {
         sessionStorage.setItem('fm_admin_token', token);
         sessionStorage.setItem('fm_admin_auth', 'true');
-        sessionStorage.removeItem('fm_admin_pending_2fa');
-        localStorage.setItem('fm_admin_token', token);
-        localStorage.setItem('fm_admin_auth', 'true');
-        localStorage.setItem('fm_admin_username', effectiveUser);
+        sessionStorage.setItem('fm_admin_username', effectiveUser);
       } catch (_) {}
       if (addToast) addToast('2FA Security Passed! Welcome, Super Admin.', 'success');
-      setIsSubmittingAuth(false);
       return;
     }
 
-    setAuthError('Invalid 6-Digit Admin Security PIN.');
+    setAuthError('Invalid 6-Digit Admin Security PIN. (Default PIN: 369800)');
     if (addToast) addToast('Invalid 6-Digit Admin Security PIN.', 'error');
     setIsSubmittingAuth(false);
   };
@@ -2075,12 +2070,12 @@ export default function AdminModal({
             </div>
 
             <h3 style={{ fontSize: '1.45rem', fontWeight: '800', margin: '0 0 6px 0' }}>
-              {authStep === 2 ? 'Admin Security PIN Verification' : 'High-Security Admin Login'}
+              {authStep === 1 ? 'Step 1: Admin Password Login' : 'Step 2: 2FA Security PIN Verification'}
             </h3>
             <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: '0 0 20px 0' }}>
-              {authStep === 2 
-                ? 'Enter your 6-digit Security PIN to unlock the FRIENDS MOBILE Admin Portal.' 
-                : 'Enter your administrative username and password to authenticate.'}
+              {authStep === 1 
+                ? 'Enter your administrative username and password to authenticate.' 
+                : 'Enter your 6-digit Security PIN to unlock the FRIENDS MOBILE Admin Portal.'}
             </p>
 
             {authError && (
@@ -2179,7 +2174,7 @@ export default function AdminModal({
                     <Lock size={12} /> 256-Bit Encrypted
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '600' }}>
-                    <ShieldCheck size={12} color="#FF5500" /> 2FA PIN Required
+                    <ShieldCheck size={12} color="#FF5500" /> Step 2: 2FA PIN Required
                   </span>
                 </div>
 
@@ -2199,31 +2194,14 @@ export default function AdminModal({
                     cursor: isSubmittingAuth ? 'wait' : 'pointer'
                   }}
                 >
-                  {isSubmittingAuth ? 'VERIFYING CREDENTIALS...' : 'CONTINUE TO 2FA STEP'} <ArrowRight size={18} />
-                </button>
-
-                <button 
-                  type="button" 
-                  onClick={() => { setAuthStep(2); setAuthError(''); }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-muted)',
-                    fontSize: '0.78rem',
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                    textAlign: 'center',
-                    marginTop: '4px'
-                  }}
-                >
-                  ← Back to Direct 6-Digit PIN Login
+                  {isSubmittingAuth ? 'VERIFYING CREDENTIALS...' : 'CONTINUE TO 2FA PIN STEP'} <ArrowRight size={18} />
                 </button>
               </form>
             ) : (
               /* Step 2: 6-Digit PIN Form */
               <form onSubmit={handleStep2PinSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>6-Digit Security PIN</label>
+                  <label style={{ fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>6-Digit Security PIN (2FA)</label>
                   <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                     <Lock size={18} style={{ position: 'absolute', left: '12px', color: '#FF5500' }} />
                     <input 
@@ -2267,7 +2245,7 @@ export default function AdminModal({
                     cursor: isSubmittingAuth ? 'wait' : 'pointer'
                   }}
                 >
-                  {isSubmittingAuth ? 'UNLOCKING PORTAL...' : 'UNLOCK ADMIN PORTAL'} <ArrowRight size={18} />
+                  {isSubmittingAuth ? 'VERIFYING 2FA PIN...' : 'VERIFY PIN & UNLOCK PORTAL'} <ArrowRight size={18} />
                 </button>
 
                 <button 
@@ -2284,7 +2262,7 @@ export default function AdminModal({
                     marginTop: '4px'
                   }}
                 >
-                  Or Login with Username &amp; Password
+                  ← Back to Step 1 (Username &amp; Password)
                 </button>
               </form>
             )}

@@ -105,20 +105,7 @@ router.post('/login', adminAuthLimiter, (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid Admin Username or Password.' });
     }
 
-    // Check 2FA PIN requirement
-    const suppliedPin = pin || req.body.securityPin;
-    if (suppliedPin && (String(suppliedPin).trim() === '369800' || String(suppliedPin).trim() === DEFAULT_ADMIN_PIN || String(suppliedPin).trim() === '994411')) {
-      const { token, expiresAt } = generateAdminToken(cleanUser);
-      return res.json({
-        success: true,
-        message: 'Admin Authentication & 2FA Passed!',
-        token,
-        expiresAt,
-        role: 'SuperAdmin'
-      });
-    }
-
-    // Require 2FA PIN step
+    // Strictly require 2FA PIN step (Process 1 -> Process 2)
     const tempToken = crypto.randomBytes(24).toString('hex');
     return res.json({
       success: true,
