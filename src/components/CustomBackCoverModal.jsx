@@ -22,7 +22,7 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
   const [caseType, setCaseType] = useState('Full 3D Hard Case (Sides + Back Print)'); // 'Full 3D Hard Case' | 'Glass / Glossy Finish Case' | 'Soft Silicone TPU'
   const [caseFinish, setCaseFinish] = useState('Matte Finish'); // 'Matte Finish' | 'Glossy Finish'
   const [skinCoverage, setSkinCoverage] = useState('Full Back + Camera Island Wrap'); // 'Full Back + Camera Island Wrap' | 'Back Panel Only'
-  const [skinFinish, setSkinFinish] = useState('Ultra-Matte Skin'); // 'Ultra-Matte Skin' | 'Glossy Cyber Shine' | 'Carbon Fiber Texture' | 'Honeycomb Wrap'
+  const [skinFinish, setSkinFinish] = useState('Precision 3M Vinyl');
   const [customText, setCustomText] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [uploadedPhoto, setUploadedPhoto] = useState(null);
@@ -1572,41 +1572,6 @@ export default function CustomBackCoverModal({ isOpen, onClose, onAddToCart, add
               </>
             ) : (
               <>
-                {/* Skin Texture & Style */}
-                <div>
-                  <label className="option-section-title">
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Sparkles size={15} color="#FF5500" /> Skin Texture &amp; Style</span>
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
-                    {[
-                      { id: 'Ultra-Matte Skin', title: 'Ultra-Matte Vinyl', desc: 'Smooth Anti-Fingerprint Texture' },
-                      { id: 'Glossy Cyber Shine', title: 'Glossy Cyber Shine', desc: 'High-Vibrancy Reflective Mirror' },
-                      { id: 'Carbon Fiber Texture', title: '3D Carbon Fiber', desc: 'Tactile Textured Woven Pattern' },
-                      { id: 'Honeycomb Wrap', title: 'Cyber Honeycomb', desc: 'Hexagonal Grip Grid Finish' }
-                    ].map(skinItem => (
-                      <button
-                        key={skinItem.id}
-                        type="button"
-                        onClick={() => setSkinFinish(skinItem.id)}
-                        style={{
-                          padding: '12px',
-                          borderRadius: '10px',
-                          border: skinFinish === skinItem.id ? '2px solid #FF5500' : '1px solid var(--border-color)',
-                          background: skinFinish === skinItem.id ? 'var(--orange-light)' : 'var(--bg-input)',
-                          color: skinFinish === skinItem.id ? '#FF5500' : 'var(--text-primary)',
-                          fontWeight: 'bold',
-                          cursor: 'pointer',
-                          fontSize: '0.82rem',
-                          textAlign: 'left'
-                        }}
-                      >
-                        <div style={{ fontWeight: '800' }}>{skinItem.title}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{skinItem.desc}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Skin Wrap Coverage */}
                 <div>
                   <label className="option-section-title">
