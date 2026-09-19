@@ -381,7 +381,16 @@ export default function App() {
       const saved = localStorage.getItem('fm_promo_cards');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // If stored cards are missing any default card, merge missing ones so cards never vanish
+          const existingIds = new Set(parsed.map(c => String(c.id)));
+          const missingDefaults = DEFAULT_PROMO_CARDS.filter(d => !existingIds.has(String(d.id)));
+          if (missingDefaults.length > 0) {
+            const merged = [...parsed, ...missingDefaults].sort((a, b) => (a.order || 0) - (b.order || 0));
+            return merged;
+          }
+          return parsed;
+        }
       }
     } catch (_) {}
     return DEFAULT_PROMO_CARDS;
@@ -392,9 +401,14 @@ export default function App() {
       .then(res => res.json())
       .then(data => {
         if (data.success && Array.isArray(data.cards) && data.cards.length > 0) {
-          setPromoCards(data.cards);
+          const existingIds = new Set(data.cards.map(c => String(c.id)));
+          const missingDefaults = DEFAULT_PROMO_CARDS.filter(d => !existingIds.has(String(d.id)));
+          const finalCards = missingDefaults.length > 0 
+            ? [...data.cards, ...missingDefaults].sort((a, b) => (a.order || 0) - (b.order || 0))
+            : data.cards;
+          setPromoCards(finalCards);
           try {
-            localStorage.setItem('fm_promo_cards', JSON.stringify(data.cards));
+            localStorage.setItem('fm_promo_cards', JSON.stringify(finalCards));
           } catch (_) {}
         }
       })
@@ -402,16 +416,27 @@ export default function App() {
   }, []);
 
   const handleUpdatePromoCards = (newCards) => {
-    const cardsToSave = newCards && newCards.length > 0 ? newCards : DEFAULT_PROMO_CARDS;
-    setPromoCards(cardsToSave);
+    const cardsToSave = Array.isArray(newCards) && newCards.length > 0 ? newCards : DEFAULT_PROMO_CARDS;
+    setPromoCards([...cardsToSave]);
     try {
       localStorage.setItem('fm_promo_cards', JSON.stringify(cardsToSave));
-    } catch (_) {}
+    } catch (e) {
+      console.warn('[PromoCards] LocalStorage quota fallback', e);
+      try {
+        const lightCards = cardsToSave.map(c => ({
+          ...c,
+          imgSrc: (c.imgSrc && c.imgSrc.startsWith('data:image/') && c.imgSrc.length > 40000)
+            ? (c.fallbackImg || 'images/banner_accessories.png')
+            : c.imgSrc
+        }));
+        localStorage.setItem('fm_promo_cards', JSON.stringify(lightCards));
+      } catch (_) {}
+    }
     fetch(`${API_BASE}/banners/promo-cards`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cards: cardsToSave })
-    }).catch(() => {});
+    }).catch(err => console.error('[PromoCards Sync Error]', err));
   };
 
   // Custom Studio (Covers & Skins) Pricing State
@@ -617,7 +642,7 @@ export default function App() {
     animElements.forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
-  }, [products]);
+  }, [products, promoCards]);
 
   // Save current user to localStorage
   useEffect(() => {

@@ -68,51 +68,78 @@ export default function PromoBanners({
     return <p className="sub-text">{text}</p>;
   };
 
+  const cardCount = activeCards.length;
+  const dynamicGridStyle = {
+    display: 'grid',
+    gap: '24px',
+    width: '100%',
+    gridTemplateColumns:
+      cardCount === 1 ? 'minmax(280px, 640px)' :
+      cardCount === 2 ? 'repeat(2, 1fr)' :
+      cardCount === 3 ? 'repeat(3, 1fr)' :
+      cardCount === 4 ? 'repeat(2, 1fr)' :
+      'repeat(auto-fit, minmax(320px, 1fr))',
+    justifyContent: cardCount === 1 ? 'center' : 'stretch'
+  };
+
   return (
     <section className="promo-banners">
-      <div className="container promo-grid">
-        {activeCards.map((card) => (
-          <div 
-            key={card.id || card.title} 
-            className="promo-card"
-            id={card.id}
-          >
-            <div className="promo-info">
-              {card.tag && (
-                <span className="promo-tag">
-                  {card.tag}
-                </span>
-              )}
-              <h3>
-                {card.title}
-              </h3>
-              {renderSubtitle(card)}
-              <button 
-                type="button"
-                onClick={(e) => handleCardAction(card, e)}
-                className="btn btn-sm btn-orange"
-                style={{ cursor: 'pointer', border: 'none' }}
-              >
-                {card.btnText || 'EXPLORE'}
-              </button>
-            </div>
+      <div 
+        className="container promo-grid" 
+        data-count={cardCount}
+        style={dynamicGridStyle}
+      >
+        {activeCards.map((card) => {
+          const fallbackImage = card.fallbackImg || 'images/banner_accessories.png';
+          return (
             <div 
-              className="promo-img-box" 
-              onClick={(e) => handleCardAction(card, e)} 
-              style={{ cursor: 'pointer' }}
+              key={card.id || card.title} 
+              className="promo-card heading-in-view"
+              id={card.id}
+              style={{
+                opacity: 1,
+                visibility: 'visible',
+                transform: 'none'
+              }}
             >
-              <img 
-                src={card.imgSrc} 
-                onError={(e) => {
-                  if (card.fallbackImg && e.target.src !== card.fallbackImg) {
-                    e.target.src = card.fallbackImg;
-                  }
-                }} 
-                alt={card.title} 
-              />
+              <div className="promo-info">
+                {card.tag && (
+                  <span className="promo-tag">
+                    {card.tag}
+                  </span>
+                )}
+                <h3>
+                  {card.title}
+                </h3>
+                {renderSubtitle(card)}
+                <button 
+                  type="button"
+                  onClick={(e) => handleCardAction(card, e)}
+                  className="btn btn-sm btn-orange"
+                  style={{ cursor: 'pointer', border: 'none' }}
+                >
+                  {card.btnText || 'EXPLORE'}
+                </button>
+              </div>
+              <div 
+                className="promo-img-box" 
+                onClick={(e) => handleCardAction(card, e)} 
+                style={{ cursor: 'pointer' }}
+              >
+                <img 
+                  src={card.imgSrc || fallbackImage} 
+                  onError={(e) => {
+                    if (e.target.src !== fallbackImage) {
+                      e.target.src = fallbackImage;
+                    }
+                  }} 
+                  alt={card.title} 
+                  loading="lazy"
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

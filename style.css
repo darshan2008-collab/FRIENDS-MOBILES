@@ -649,8 +649,33 @@ a.nav-link.active {
 
 .promo-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
+  width: 100%;
+}
+
+.promo-grid[data-count="1"] {
+  grid-template-columns: minmax(280px, 640px);
+  justify-content: center;
+}
+
+.promo-grid[data-count="2"] {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.promo-grid[data-count="3"] {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.promo-grid[data-count="4"] {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.promo-grid[data-count="5"],
+.promo-grid[data-count="6"],
+.promo-grid[data-count="7"],
+.promo-grid[data-count="8"] {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .promo-card {

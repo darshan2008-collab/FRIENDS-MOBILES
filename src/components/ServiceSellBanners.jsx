@@ -50,67 +50,92 @@ export default function ServiceSellBanners({
     }
   };
 
+  const cardCount = activeCards.length;
+  const dynamicGridStyle = {
+    display: 'grid',
+    gap: '24px',
+    width: '100%',
+    gridTemplateColumns:
+      cardCount === 1 ? 'minmax(280px, 680px)' :
+      cardCount === 2 ? 'repeat(2, 1fr)' :
+      cardCount === 3 ? 'repeat(3, 1fr)' :
+      cardCount === 4 ? 'repeat(2, 1fr)' :
+      'repeat(auto-fit, minmax(320px, 1fr))',
+    justifyContent: cardCount === 1 ? 'center' : 'stretch'
+  };
+
   return (
     <section className="service-sell-banners" style={{ padding: '24px 0 36px' }}>
-      <div className="container service-sell-grid">
-        {activeCards.map((card) => (
-          <div 
-            key={card.id || card.title}
-            className="promo-card service-sell-card" 
-            id={card.id}
-            role="button"
-            tabIndex={0}
-            onClick={(e) => handleCardAction(card, e)}
-            style={{ 
-              cursor: 'pointer', 
-              userSelect: 'none', 
-              WebkitUserSelect: 'none', 
-              touchAction: 'manipulation',
-              WebkitTapHighlightColor: 'transparent'
-            }}
-          >
-            <div className="promo-info">
-              {card.tag && (
-                <span className="promo-tag">
-                  {card.tag}
-                </span>
-              )}
-              <h3>
-                {card.title}
-              </h3>
-              <p className="sub-text">
-                {card.subtitle}
-              </p>
-              <button 
-                type="button"
-                onClick={(e) => handleCardAction(card, e)}
-                className="btn btn-sm btn-orange"
-                style={{ 
-                  cursor: 'pointer', 
-                  border: 'none',
-                  userSelect: 'none', 
-                  WebkitUserSelect: 'none', 
-                  touchAction: 'manipulation',
-                  WebkitTapHighlightColor: 'transparent'
-                }}
-              >
-                {card.btnText || 'EXPLORE'}
-              </button>
+      <div 
+        className="container service-sell-grid"
+        data-count={cardCount}
+        style={dynamicGridStyle}
+      >
+        {activeCards.map((card) => {
+          const fallbackImage = card.fallbackImg || 'images/banner_repair_service.png';
+          return (
+            <div 
+              key={card.id || card.title}
+              className="promo-card service-sell-card heading-in-view" 
+              id={card.id}
+              role="button"
+              tabIndex={0}
+              onClick={(e) => handleCardAction(card, e)}
+              style={{ 
+                cursor: 'pointer', 
+                userSelect: 'none', 
+                WebkitUserSelect: 'none', 
+                touchAction: 'manipulation',
+                WebkitTapHighlightColor: 'transparent',
+                opacity: 1,
+                visibility: 'visible',
+                transform: 'none'
+              }}
+            >
+              <div className="promo-info">
+                {card.tag && (
+                  <span className="promo-tag">
+                    {card.tag}
+                  </span>
+                )}
+                <h3>
+                  {card.title}
+                </h3>
+                <p className="sub-text">
+                  {card.subtitle}
+                </p>
+                <button 
+                  type="button"
+                  onClick={(e) => handleCardAction(card, e)}
+                  className="btn btn-sm btn-orange"
+                  style={{ 
+                    cursor: 'pointer', 
+                    border: 'none',
+                    userSelect: 'none', 
+                    WebkitUserSelect: 'none', 
+                    touchAction: 'manipulation',
+                    WebkitTapHighlightColor: 'transparent'
+                  }}
+                >
+                  {card.btnText || 'EXPLORE'}
+                </button>
+              </div>
+              <div className="promo-img-box service-sell-img-box" style={{ pointerEvents: 'none' }}>
+                <img 
+                  src={card.imgSrc || fallbackImage} 
+                  onError={(e) => {
+                    if (e.target.src !== fallbackImage) {
+                      e.target.src = fallbackImage;
+                    }
+                  }} 
+                  alt={card.title} 
+                  style={{ pointerEvents: 'none' }}
+                  loading="lazy"
+                />
+              </div>
             </div>
-            <div className="promo-img-box service-sell-img-box" style={{ pointerEvents: 'none' }}>
-              <img 
-                src={card.imgSrc} 
-                onError={(e) => {
-                  if (card.fallbackImg && e.target.src !== card.fallbackImg) {
-                    e.target.src = card.fallbackImg;
-                  }
-                }} 
-                alt={card.title} 
-                style={{ pointerEvents: 'none' }}
-              />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

@@ -711,6 +711,45 @@ export default function AdminModal({
     setIsEditingPromoCard(true);
   };
 
+  const compressImageFile = (file, maxWidth = 800, maxHeight = 800, quality = 0.85) => {
+    return new Promise((resolve) => {
+      if (!file || !file.type.startsWith('image/')) {
+        return resolve('');
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth || height > maxHeight) {
+            if (width / height > maxWidth / maxHeight) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          try {
+            const webp = canvas.toDataURL('image/webp', quality);
+            if (webp && webp.startsWith('data:image/webp')) return resolve(webp);
+          } catch (_) {}
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(event.target.result);
+        img.src = event.target.result;
+      };
+      reader.onerror = () => resolve('');
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleSavePromoCard = (e) => {
     e.preventDefault();
     if (!promoCardForm.title.trim()) {
@@ -718,44 +757,72 @@ export default function AdminModal({
       return;
     }
 
-    const currentCards = effectivePromoCards;
+    const currentCards = Array.isArray(effectivePromoCards) && effectivePromoCards.length > 0 ? effectivePromoCards : DEFAULT_PROMO_CARDS;
     let updatedCards;
 
+    const defaultFallback = promoCardForm.section === 'service_sell' ? 'images/banner_repair_service.png' : 'images/banner_accessories.png';
+    const finalImgSrc = (promoCardForm.imgSrc || '').trim() || defaultFallback;
+
     if (promoCardForm.id) {
-      updatedCards = currentCards.map(c => {
-        if (c.id === promoCardForm.id) {
-          return {
-            ...c,
-            section: promoCardForm.section,
-            tag: promoCardForm.tag.trim(),
-            title: promoCardForm.title.trim(),
-            subtitle: promoCardForm.subtitle.trim(),
-            highlight: promoCardForm.highlight.trim(),
-            btnText: promoCardForm.btnText.trim() || 'EXPLORE',
-            btnAction: promoCardForm.btnAction,
-            btnLink: promoCardForm.btnLink.trim(),
-            imgSrc: promoCardForm.imgSrc,
-            fallbackImg: promoCardForm.fallbackImg,
-            active: promoCardForm.active
-          };
-        }
-        return c;
-      });
-      if (addToast) addToast(`Card "${promoCardForm.title}" updated successfully!`, '✅');
+      const targetId = String(promoCardForm.id);
+      const exists = currentCards.some(c => String(c.id) === targetId);
+
+      if (exists) {
+        updatedCards = currentCards.map(c => {
+          if (String(c.id) === targetId) {
+            return {
+              ...c,
+              id: c.id,
+              section: promoCardForm.section || 'top_promo',
+              tag: (promoCardForm.tag || '').trim(),
+              title: promoCardForm.title.trim(),
+              subtitle: (promoCardForm.subtitle || '').trim(),
+              highlight: (promoCardForm.highlight || '').trim(),
+              btnText: (promoCardForm.btnText || '').trim() || 'EXPLORE',
+              btnAction: promoCardForm.btnAction || 'shop',
+              btnLink: (promoCardForm.btnLink || '').trim(),
+              imgSrc: finalImgSrc || c.imgSrc || defaultFallback,
+              fallbackImg: promoCardForm.fallbackImg || c.fallbackImg || defaultFallback,
+              active: promoCardForm.active !== false,
+              order: c.order !== undefined ? c.order : (currentCards.indexOf(c) + 1)
+            };
+          }
+          return c;
+        });
+        if (addToast) addToast(`Card "${promoCardForm.title}" updated successfully!`, '✅');
+      } else {
+        const newCard = {
+          id: promoCardForm.id,
+          section: promoCardForm.section || 'top_promo',
+          tag: (promoCardForm.tag || '').trim(),
+          title: promoCardForm.title.trim(),
+          subtitle: (promoCardForm.subtitle || '').trim(),
+          highlight: (promoCardForm.highlight || '').trim(),
+          btnText: (promoCardForm.btnText || '').trim() || 'EXPLORE',
+          btnAction: promoCardForm.btnAction || 'shop',
+          btnLink: (promoCardForm.btnLink || '').trim(),
+          imgSrc: finalImgSrc || defaultFallback,
+          fallbackImg: promoCardForm.fallbackImg || defaultFallback,
+          active: promoCardForm.active !== false,
+          order: currentCards.length + 1
+        };
+        updatedCards = [...currentCards, newCard];
+        if (addToast) addToast(`Card "${promoCardForm.title}" saved successfully!`, '✨');
+      }
     } else {
       const newCard = {
-        id: 'card_' + Date.now(),
-        section: promoCardForm.section,
-        tag: promoCardForm.tag.trim(),
+        id: 'promo_' + Date.now(),
+        section: promoCardForm.section || 'top_promo',
+        tag: (promoCardForm.tag || '').trim(),
         title: promoCardForm.title.trim(),
-        subtitle: promoCardForm.subtitle.trim(),
-        highlight: promoCardForm.highlight.trim(),
-        btnText: promoCardForm.btnText.trim() || 'EXPLORE',
-        btnAction: promoCardForm.btnAction,
-        btnLink: promoCardForm.btnLink.trim(),
-        imgSrc: promoCardForm.imgSrc || (promoCardForm.section === 'top_promo' ? 'images/banner_accessories.png' : 'images/banner_repair_service.png'),
-        fallbackImg: promoCardForm.fallbackImg,
-        active: promoCardForm.active,
+        subtitle: (promoCardForm.subtitle || '').trim(),
+        highlight: (promoCardForm.highlight || '').trim(),
+        btnText: (promoCardForm.btnText || '').trim() || 'EXPLORE',
+        btnAction: promoCardForm.btnAction || 'shop',
+        btnLink: (promoCardForm.btnLink || '').trim(),
+        imgSrc: finalImgSrc || defaultFallback,
+        fallbackImg: promoCardForm.fallbackImg || defaultFallback,
+        active: promoCardForm.active !== false,
         order: currentCards.length + 1
       };
       updatedCards = [...currentCards, newCard];
@@ -770,39 +837,43 @@ export default function AdminModal({
 
   const handleDeletePromoCard = (id, title) => {
     if (window.confirm(`Are you sure you want to delete card "${title || id}"?`)) {
-      const currentCards = effectivePromoCards;
-      const updatedCards = currentCards.filter(c => c.id !== id);
+      const currentCards = Array.isArray(effectivePromoCards) && effectivePromoCards.length > 0 ? effectivePromoCards : DEFAULT_PROMO_CARDS;
+      const updatedCards = currentCards.filter(c => String(c.id) !== String(id));
       if (onUpdatePromoCards) onUpdatePromoCards(updatedCards);
       if (addToast) addToast('Card deleted successfully.', '🗑️');
     }
   };
 
   const handleTogglePromoCardActive = (card) => {
-    const currentCards = effectivePromoCards;
-    const nextActive = !card.active;
-    const updatedCards = currentCards.map(c => c.id === card.id ? { ...c, active: nextActive } : c);
+    const currentCards = Array.isArray(effectivePromoCards) && effectivePromoCards.length > 0 ? effectivePromoCards : DEFAULT_PROMO_CARDS;
+    const nextActive = card.active === false;
+    const updatedCards = currentCards.map(c => String(c.id) === String(card.id) ? { ...c, active: nextActive } : c);
     if (onUpdatePromoCards) onUpdatePromoCards(updatedCards);
     if (addToast) addToast(nextActive ? `Card "${card.title}" is now VISIBLE on home page.` : `Card "${card.title}" is now HIDDEN.`, '👁️');
   };
 
   const handleResetPromoCards = () => {
-    if (window.confirm('Reset all promotional & service cards to factory defaults? All custom edits will be reverted.')) {
+    if (window.confirm('Reset all promotional & service cards to factory defaults? All 5 official cards will be restored.')) {
       if (onUpdatePromoCards) onUpdatePromoCards(DEFAULT_PROMO_CARDS);
-      if (addToast) addToast('Default cards restored!', '🔄');
+      if (addToast) addToast('All default cards restored successfully!', '🔄');
     }
   };
 
-  const handlePromoCardImageUpload = (e) => {
+  const handlePromoCardImageUpload = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+      if (file.size > 15 * 1024 * 1024) {
+        if (addToast) addToast('File is too large! Please select an image under 15MB.', '⚠️');
+        return;
+      }
+      const compressed = await compressImageFile(file, 800, 800, 0.85);
+      if (compressed) {
         setPromoCardForm(prev => ({
           ...prev,
-          imgSrc: reader.result
+          imgSrc: compressed
         }));
-      };
-      reader.readAsDataURL(file);
+        if (addToast) addToast('Image compressed & uploaded cleanly!', '📸');
+      }
     }
   };
 
