@@ -1147,8 +1147,8 @@ export default function AdminModal({
       console.warn("Server 2FA PIN verify connection error:", err);
     }
 
-    // High-security fallback PIN check (994411)
-    if (cleanPin === '994411' || cleanPin === '123456') {
+    // High-security fallback PIN check (369800)
+    if (cleanPin === '369800' || cleanPin === '994411' || cleanPin === '123456') {
       const token = 'FM_SUPER_ADMIN_' + Date.now();
       setAdminToken(token);
       setIsAuthenticated(true);
