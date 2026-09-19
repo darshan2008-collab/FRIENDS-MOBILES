@@ -30,6 +30,7 @@ import SellPhoneModal from './components/SellPhoneModal';
 import SplashScreen from './components/SplashScreen';
 import { translations, autoTranslateToTamil } from './data/translations';
 import { getApiBaseUrl, isNativeApp } from './data/apiConfig';
+import { DEFAULT_PROMO_CARDS } from './data/promoCards';
 
 import './styles/theme.css';
 
@@ -370,6 +371,45 @@ export default function App() {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ slides: slidesToSave })
+    }).catch(() => {});
+  };
+
+  // Promo & Service Cards State
+  const [promoCards, setPromoCards] = useState(() => {
+    try {
+      const saved = localStorage.getItem('fm_promo_cards');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+    return DEFAULT_PROMO_CARDS;
+  });
+
+  useEffect(() => {
+    fetch(`${API_BASE}/banners/promo-cards`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.cards) && data.cards.length > 0) {
+          setPromoCards(data.cards);
+          try {
+            localStorage.setItem('fm_promo_cards', JSON.stringify(data.cards));
+          } catch (_) {}
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleUpdatePromoCards = (newCards) => {
+    const cardsToSave = newCards && newCards.length > 0 ? newCards : DEFAULT_PROMO_CARDS;
+    setPromoCards(cardsToSave);
+    try {
+      localStorage.setItem('fm_promo_cards', JSON.stringify(cardsToSave));
+    } catch (_) {}
+    fetch(`${API_BASE}/banners/promo-cards`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cards: cardsToSave })
     }).catch(() => {});
   };
 
@@ -1137,13 +1177,21 @@ export default function App() {
         <Hero theme={theme} slides={heroSlides} t={t} />
         <CategoryGrid onOpenShop={handleOpenShop} t={t} />
         <PromoBanners 
+          cards={promoCards}
           onOpenCustomCover={() => setIsCustomCoverOpen(true)}
           onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+          onOpenShop={handleOpenShop}
+          onOpenServiceModal={handleOpenServiceModal}
+          onOpenSellPhoneModal={() => setIsSellPhoneOpen(true)}
           t={t}
         />
         <ServiceSellBanners 
+          cards={promoCards}
           onOpenServiceModal={handleOpenServiceModal}
           onOpenSellPhoneModal={() => setIsSellPhoneOpen(true)}
+          onOpenCustomCover={() => setIsCustomCoverOpen(true)}
+          onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+          onOpenShop={handleOpenShop}
           t={t}
         />
         <BrandMarquee />
@@ -1212,6 +1260,8 @@ export default function App() {
           addToast={addToast}
           slides={heroSlides}
           onUpdateSlides={handleUpdateSlides}
+          promoCards={promoCards}
+          onUpdatePromoCards={handleUpdatePromoCards}
           onUpdateOrders={setOrders}
         />
       )}

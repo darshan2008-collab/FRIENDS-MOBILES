@@ -1,125 +1,116 @@
 import React from 'react';
+import { DEFAULT_PROMO_CARDS } from '../data/promoCards';
 
-export default function ServiceSellBanners({ onOpenServiceModal, onOpenSellPhoneModal, t = (k) => k }) {
-  const fallbackRepair = 'https://images.unsplash.com/photo-1597740985671-2a8a3b80532e?q=80&w=600&auto=format&fit=crop';
-  const fallbackSell = 'https://images.unsplash.com/photo-1556742049-0a67e557224f?q=80&w=600&auto=format&fit=crop';
+export default function ServiceSellBanners({ 
+  cards = DEFAULT_PROMO_CARDS,
+  onOpenServiceModal, 
+  onOpenSellPhoneModal, 
+  onOpenCustomCover,
+  onOpenCustomFrame,
+  onOpenShop,
+  t = (k) => k 
+}) {
+  const activeCards = (cards && cards.length > 0 ? cards : DEFAULT_PROMO_CARDS)
+    .filter(c => c.section === 'service_sell' && c.active !== false)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-  const handleImgError = (e, fallback) => {
-    e.target.src = fallback;
+  if (!activeCards || activeCards.length === 0) {
+    return null;
+  }
+
+  const handleCardAction = (card, e) => {
+    if (e) e.stopPropagation();
+
+    const action = card.btnAction || 'repair_service';
+    if (action === 'repair_service') {
+      if (onOpenServiceModal) onOpenServiceModal();
+    } else if (action === 'sell_phone') {
+      if (onOpenSellPhoneModal) onOpenSellPhoneModal();
+    } else if (action === 'custom_cover') {
+      if (onOpenCustomCover) onOpenCustomCover();
+    } else if (action === 'custom_frame') {
+      if (onOpenCustomFrame) onOpenCustomFrame();
+    } else if (action === 'shop') {
+      if (onOpenShop) {
+        onOpenShop();
+      } else {
+        const el = document.getElementById('products');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        else window.location.hash = '#products';
+      }
+    } else if (card.btnLink) {
+      if (card.btnLink.startsWith('#')) {
+        const targetId = card.btnLink.substring(1);
+        const el = document.getElementById(targetId);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        else window.location.hash = card.btnLink;
+      } else {
+        window.open(card.btnLink, '_blank', 'noopener,noreferrer');
+      }
+    }
   };
 
   return (
     <section className="service-sell-banners" style={{ padding: '24px 0 36px' }}>
       <div className="container service-sell-grid">
-        
-        {/* CARD 1: MOBILE REPAIR & DOORSTEP SERVICE */}
-        <div 
-          className="promo-card service-sell-card" 
-          id="doorstep-repair"
-          role="button"
-          tabIndex={0}
-          onClick={() => onOpenServiceModal && onOpenServiceModal()}
-          style={{ 
-            cursor: 'pointer', 
-            userSelect: 'none', 
-            WebkitUserSelect: 'none', 
-            touchAction: 'manipulation',
-            WebkitTapHighlightColor: 'transparent'
-          }}
-        >
-          <div className="promo-info">
-            <span className="promo-tag">
-              Doorstep Service
-            </span>
-            <h3>
-              Mobile Repair & Service
-            </h3>
-            <p className="sub-text">
-              Cracked screen, battery drain, or dead phone? Certified doorstep pickup & 24h delivery.
-            </p>
-            <button 
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onOpenServiceModal) onOpenServiceModal();
-              }}
-              className="btn btn-sm btn-orange"
-              style={{ 
-                cursor: 'pointer', 
-                border: 'none',
-                userSelect: 'none',
-                WebkitUserSelect: 'none',
-                touchAction: 'manipulation',
-                WebkitTapHighlightColor: 'transparent'
-              }}
-            >
-              BOOK SERVICE
-            </button>
+        {activeCards.map((card) => (
+          <div 
+            key={card.id || card.title}
+            className="promo-card service-sell-card" 
+            id={card.id}
+            role="button"
+            tabIndex={0}
+            onClick={(e) => handleCardAction(card, e)}
+            style={{ 
+              cursor: 'pointer', 
+              userSelect: 'none', 
+              WebkitUserSelect: 'none', 
+              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'transparent'
+            }}
+          >
+            <div className="promo-info">
+              {card.tag && (
+                <span className="promo-tag">
+                  {card.tag}
+                </span>
+              )}
+              <h3>
+                {card.title}
+              </h3>
+              <p className="sub-text">
+                {card.subtitle}
+              </p>
+              <button 
+                type="button"
+                onClick={(e) => handleCardAction(card, e)}
+                className="btn btn-sm btn-orange"
+                style={{ 
+                  cursor: 'pointer', 
+                  border: 'none',
+                  userSelect: 'none', 
+                  WebkitUserSelect: 'none', 
+                  touchAction: 'manipulation',
+                  WebkitTapHighlightColor: 'transparent'
+                }}
+              >
+                {card.btnText || 'EXPLORE'}
+              </button>
+            </div>
+            <div className="promo-img-box service-sell-img-box" style={{ pointerEvents: 'none' }}>
+              <img 
+                src={card.imgSrc} 
+                onError={(e) => {
+                  if (card.fallbackImg && e.target.src !== card.fallbackImg) {
+                    e.target.src = card.fallbackImg;
+                  }
+                }} 
+                alt={card.title} 
+                style={{ pointerEvents: 'none' }}
+              />
+            </div>
           </div>
-          <div className="promo-img-box service-sell-img-box" style={{ pointerEvents: 'none' }}>
-            <img 
-              src="images/banner_repair_service.png" 
-              onError={(e) => handleImgError(e, fallbackRepair)} 
-              alt="Mobile Repair & Doorstep Service" 
-              style={{ pointerEvents: 'none' }}
-            />
-          </div>
-        </div>
-
-        {/* CARD 2: SELL YOUR OLD PHONE / INSTANT CASH */}
-        <div 
-          className="promo-card service-sell-card" 
-          id="sell-old-phone"
-          role="button"
-          tabIndex={0}
-          onClick={() => onOpenSellPhoneModal && onOpenSellPhoneModal()}
-          style={{ 
-            cursor: 'pointer', 
-            userSelect: 'none', 
-            WebkitUserSelect: 'none', 
-            touchAction: 'manipulation',
-            WebkitTapHighlightColor: 'transparent'
-          }}
-        >
-          <div className="promo-info">
-            <span className="promo-tag">
-              Instant Cash
-            </span>
-            <h3>
-              Sell Your Old Phone
-            </h3>
-            <p className="sub-text">
-              Get the best guaranteed cash offer for your used mobile with free doorstep inspection.
-            </p>
-            <button 
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onOpenSellPhoneModal) onOpenSellPhoneModal();
-              }}
-              className="btn btn-sm btn-orange"
-              style={{ 
-                cursor: 'pointer', 
-                border: 'none',
-                userSelect: 'none',
-                WebkitUserSelect: 'none',
-                touchAction: 'manipulation',
-                WebkitTapHighlightColor: 'transparent'
-              }}
-            >
-              SELL NOW
-            </button>
-          </div>
-          <div className="promo-img-box service-sell-img-box" style={{ pointerEvents: 'none' }}>
-            <img 
-              src="images/banner_sell_phone.png" 
-              onError={(e) => handleImgError(e, fallbackSell)} 
-              alt="Sell Your Old Phone" 
-              style={{ pointerEvents: 'none' }}
-            />
-          </div>
-        </div>
-
+        ))}
       </div>
     </section>
   );

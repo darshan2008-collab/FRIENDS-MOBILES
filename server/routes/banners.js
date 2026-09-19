@@ -106,4 +106,108 @@ router.put('/', async (req, res) => {
   }
 });
 
+const promoCardsFilePath = path.join(__dirname, '../data/promo_cards.json');
+
+const DEFAULT_PROMO_CARDS = [
+  {
+    id: 'promo_accessories',
+    section: 'top_promo',
+    tag: 'TRENDING GEAR',
+    title: 'PREMIUM ACCESSORIES',
+    subtitle: 'Up to 40% OFF on chargers, cases, and tech utilities.',
+    highlight: '40% OFF',
+    btnText: 'SHOP NOW',
+    btnAction: 'shop',
+    btnLink: '#products',
+    imgSrc: 'images/banner_accessories.png',
+    fallbackImg: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=600&auto=format&fit=crop',
+    active: true,
+    order: 1
+  },
+  {
+    id: 'promo_custom_covers',
+    section: 'top_promo',
+    tag: '3D PRINTING',
+    title: 'Customized Back Covers',
+    subtitle: 'Design your custom case with custom images, text, and styles.',
+    highlight: '',
+    btnText: 'CUSTOMIZE',
+    btnAction: 'custom_cover',
+    btnLink: '#customized-covers',
+    imgSrc: 'images/banner_backcover.png',
+    fallbackImg: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=600&auto=format&fit=crop',
+    active: true,
+    order: 2
+  },
+  {
+    id: 'promo_photo_frames',
+    section: 'top_promo',
+    tag: 'MEMORIES PRESERVED',
+    title: 'Photo Frames',
+    subtitle: 'Create high-quality custom glass and wood frames for your special moments.',
+    highlight: '',
+    btnText: 'ORDER NOW',
+    btnAction: 'custom_frame',
+    btnLink: '#photo-frames',
+    imgSrc: 'images/banner_photoframe.png',
+    fallbackImg: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=600&auto=format&fit=crop',
+    active: true,
+    order: 3
+  },
+  {
+    id: 'service_repair',
+    section: 'service_sell',
+    tag: 'DOORSTEP SERVICE',
+    title: 'Mobile Repair & Service',
+    subtitle: 'Cracked screen, battery drain, or dead phone? Certified doorstep pickup & 24h delivery.',
+    highlight: '',
+    btnText: 'BOOK SERVICE',
+    btnAction: 'repair_service',
+    btnLink: '#doorstep-repair',
+    imgSrc: 'images/banner_repair_service.png',
+    fallbackImg: 'https://images.unsplash.com/photo-1597740985671-2a8a3b80532e?q=80&w=600&auto=format&fit=crop',
+    active: true,
+    order: 4
+  },
+  {
+    id: 'service_sell',
+    section: 'service_sell',
+    tag: 'INSTANT CASH',
+    title: 'Sell Your Old Phone',
+    subtitle: 'Get the best guaranteed cash offer for your used mobile with free doorstep inspection.',
+    highlight: '',
+    btnText: 'SELL NOW',
+    btnAction: 'sell_phone',
+    btnLink: '#sell-old-phone',
+    imgSrc: 'images/banner_sell_phone.png',
+    fallbackImg: 'https://images.unsplash.com/photo-1556742049-0a67e557224f?q=80&w=600&auto=format&fit=crop',
+    active: true,
+    order: 5
+  }
+];
+
+// GET /api/banners/promo-cards — Fetch all promotional & service cards
+router.get('/promo-cards', async (req, res) => {
+  try {
+    const cards = readData(promoCardsFilePath, DEFAULT_PROMO_CARDS);
+    return res.json({ success: true, cards });
+  } catch (err) {
+    console.error('[PromoCards GET Error]', err.message);
+    return res.json({ success: true, cards: DEFAULT_PROMO_CARDS });
+  }
+});
+
+// PUT /api/banners/promo-cards — Save/Update promotional & service cards
+router.put('/promo-cards', async (req, res) => {
+  try {
+    const { cards } = req.body;
+    const cardsToSave = Array.isArray(cards) && cards.length > 0 ? cards : DEFAULT_PROMO_CARDS;
+    writeData(promoCardsFilePath, cardsToSave);
+    res.json({ success: true, message: 'Promo cards saved successfully', cards: cardsToSave });
+  } catch (err) {
+    console.error('[PromoCards PUT Error]', err.message);
+    res.status(500).json({ success: false, message: 'Failed to save promo cards' });
+  }
+});
+
 module.exports = router;

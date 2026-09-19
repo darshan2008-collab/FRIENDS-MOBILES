@@ -281,6 +281,14 @@ app.use('/payments', paymentsRouter);
 
 app.use('/api/banners', bannersRouter);
 app.use('/banners', bannersRouter);
+app.use('/api/promo-cards', (req, res, next) => {
+  req.url = '/promo-cards' + (req.url === '/' ? '' : req.url);
+  bannersRouter(req, res, next);
+});
+app.use('/promo-cards', (req, res, next) => {
+  req.url = '/promo-cards' + (req.url === '/' ? '' : req.url);
+  bannersRouter(req, res, next);
+});
 
 app.use('/api/otp', otpRouter);
 app.use('/otp', otpRouter);

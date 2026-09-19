@@ -10,6 +10,7 @@ import CompanyLogo from './CompanyLogo';
 import { autoTranslateToTamil } from '../data/translations';
 import { getApiHost as centralGetApiHost } from '../data/apiConfig';
 import { copyToClipboard } from '../utils/clipboard';
+import { DEFAULT_PROMO_CARDS } from '../data/promoCards';
 
 export default function AdminModal({ 
   isOpen, 
@@ -26,6 +27,8 @@ export default function AdminModal({
   addToast,
   slides,
   onUpdateSlides,
+  promoCards,
+  onUpdatePromoCards,
   onUpdateOrders
 }) {
   const [adminToken, setAdminToken] = useState(() => {
@@ -647,6 +650,157 @@ export default function AdminModal({
     const updated = (slides || []).filter(s => s.id !== slideId);
     if (onUpdateSlides) onUpdateSlides(updated);
     if (addToast) addToast('Banner slide deleted successfully.', '🗑️');
+  };
+
+  // ─── Promo & Service Cards Management State & Handlers ───
+  const [promoFilter, setPromoFilter] = useState('all'); // 'all' | 'top_promo' | 'service_sell'
+  const [isEditingPromoCard, setIsEditingPromoCard] = useState(false);
+  const [promoCardForm, setPromoCardForm] = useState({
+    id: '',
+    section: 'top_promo',
+    tag: '',
+    title: '',
+    subtitle: '',
+    highlight: '',
+    btnText: 'SHOP NOW',
+    btnAction: 'shop',
+    btnLink: '#products',
+    imgSrc: 'images/banner_accessories.png',
+    fallbackImg: '',
+    active: true
+  });
+
+  const effectivePromoCards = Array.isArray(promoCards) && promoCards.length > 0 ? promoCards : DEFAULT_PROMO_CARDS;
+
+  const handleOpenAddPromoCard = (defaultSection = 'top_promo') => {
+    setPromoCardForm({
+      id: '',
+      section: defaultSection,
+      tag: defaultSection === 'top_promo' ? 'TRENDING GEAR' : 'DOORSTEP SERVICE',
+      title: '',
+      subtitle: '',
+      highlight: '',
+      btnText: defaultSection === 'top_promo' ? 'SHOP NOW' : 'BOOK SERVICE',
+      btnAction: defaultSection === 'top_promo' ? 'shop' : 'repair_service',
+      btnLink: defaultSection === 'top_promo' ? '#products' : '#doorstep-repair',
+      imgSrc: defaultSection === 'top_promo' ? 'images/banner_accessories.png' : 'images/banner_repair_service.png',
+      fallbackImg: '',
+      active: true
+    });
+    setIsEditingPromoCard(true);
+  };
+
+  const handleOpenEditPromoCard = (card) => {
+    setPromoCardForm({
+      id: card.id || '',
+      section: card.section || 'top_promo',
+      tag: card.tag || '',
+      title: card.title || '',
+      subtitle: card.subtitle || '',
+      highlight: card.highlight || '',
+      btnText: card.btnText || 'EXPLORE',
+      btnAction: card.btnAction || 'shop',
+      btnLink: card.btnLink || '',
+      imgSrc: card.imgSrc || '',
+      fallbackImg: card.fallbackImg || '',
+      active: card.active !== false
+    });
+    setIsEditingPromoCard(true);
+  };
+
+  const handleSavePromoCard = (e) => {
+    e.preventDefault();
+    if (!promoCardForm.title.trim()) {
+      if (addToast) addToast('Please enter a Card Title!', '⚠️');
+      return;
+    }
+
+    const currentCards = effectivePromoCards;
+    let updatedCards;
+
+    if (promoCardForm.id) {
+      updatedCards = currentCards.map(c => {
+        if (c.id === promoCardForm.id) {
+          return {
+            ...c,
+            section: promoCardForm.section,
+            tag: promoCardForm.tag.trim(),
+            title: promoCardForm.title.trim(),
+            subtitle: promoCardForm.subtitle.trim(),
+            highlight: promoCardForm.highlight.trim(),
+            btnText: promoCardForm.btnText.trim() || 'EXPLORE',
+            btnAction: promoCardForm.btnAction,
+            btnLink: promoCardForm.btnLink.trim(),
+            imgSrc: promoCardForm.imgSrc,
+            fallbackImg: promoCardForm.fallbackImg,
+            active: promoCardForm.active
+          };
+        }
+        return c;
+      });
+      if (addToast) addToast(`Card "${promoCardForm.title}" updated successfully!`, '✅');
+    } else {
+      const newCard = {
+        id: 'card_' + Date.now(),
+        section: promoCardForm.section,
+        tag: promoCardForm.tag.trim(),
+        title: promoCardForm.title.trim(),
+        subtitle: promoCardForm.subtitle.trim(),
+        highlight: promoCardForm.highlight.trim(),
+        btnText: promoCardForm.btnText.trim() || 'EXPLORE',
+        btnAction: promoCardForm.btnAction,
+        btnLink: promoCardForm.btnLink.trim(),
+        imgSrc: promoCardForm.imgSrc || (promoCardForm.section === 'top_promo' ? 'images/banner_accessories.png' : 'images/banner_repair_service.png'),
+        fallbackImg: promoCardForm.fallbackImg,
+        active: promoCardForm.active,
+        order: currentCards.length + 1
+      };
+      updatedCards = [...currentCards, newCard];
+      if (addToast) addToast(`New Card "${promoCardForm.title}" created successfully!`, '✨');
+    }
+
+    if (onUpdatePromoCards) {
+      onUpdatePromoCards(updatedCards);
+    }
+    setIsEditingPromoCard(false);
+  };
+
+  const handleDeletePromoCard = (id, title) => {
+    if (window.confirm(`Are you sure you want to delete card "${title || id}"?`)) {
+      const currentCards = effectivePromoCards;
+      const updatedCards = currentCards.filter(c => c.id !== id);
+      if (onUpdatePromoCards) onUpdatePromoCards(updatedCards);
+      if (addToast) addToast('Card deleted successfully.', '🗑️');
+    }
+  };
+
+  const handleTogglePromoCardActive = (card) => {
+    const currentCards = effectivePromoCards;
+    const nextActive = !card.active;
+    const updatedCards = currentCards.map(c => c.id === card.id ? { ...c, active: nextActive } : c);
+    if (onUpdatePromoCards) onUpdatePromoCards(updatedCards);
+    if (addToast) addToast(nextActive ? `Card "${card.title}" is now VISIBLE on home page.` : `Card "${card.title}" is now HIDDEN.`, '👁️');
+  };
+
+  const handleResetPromoCards = () => {
+    if (window.confirm('Reset all promotional & service cards to factory defaults? All custom edits will be reverted.')) {
+      if (onUpdatePromoCards) onUpdatePromoCards(DEFAULT_PROMO_CARDS);
+      if (addToast) addToast('Default cards restored!', '🔄');
+    }
+  };
+
+  const handlePromoCardImageUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPromoCardForm(prev => ({
+          ...prev,
+          imgSrc: reader.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // New Product Form State (with Auto Discount Calculator & Tamil Live Translator)
@@ -1925,6 +2079,17 @@ export default function AdminModal({
               }}
             >
               <Sparkles size={16} /> Banner Carousel
+            </button>
+
+            <button 
+              className={`sidebar-tab-btn ${activeTab === 'promoCards' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('promoCards');
+                setIsAdminSidebarOpen(false);
+              }}
+              style={{ fontWeight: '800' }}
+            >
+              <Tag size={16} color="#FF5500" /> Promo &amp; Service Cards ({effectivePromoCards.length})
             </button>
 
             <button 
@@ -3818,6 +3983,699 @@ export default function AdminModal({
                   </button>
                 </form>
               </div>
+            </div>
+          )}
+
+          {/* TAB: PROMOTIONAL & SERVICE CARDS MANAGEMENT */}
+          {activeTab === 'promoCards' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {/* Header Banner */}
+              <div style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '20px',
+                padding: '24px 28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '16px',
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                    <span style={{ 
+                      background: 'rgba(255, 85, 0, 0.12)', 
+                      border: '1px solid rgba(255, 85, 0, 0.3)', 
+                      color: '#FF5500', 
+                      padding: '4px 12px', 
+                      borderRadius: '20px', 
+                      fontSize: '0.76rem', 
+                      fontWeight: '800', 
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      gap: '6px' 
+                    }}>
+                      <Tag size={14} /> HOME PAGE MARKETING CARDS
+                    </span>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                      {effectivePromoCards.filter(c => c.active !== false).length} Active Cards
+                    </span>
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: '1.45rem', fontWeight: '900', color: 'var(--text-primary)' }}>
+                    Promotional &amp; Service Cards Studio
+                  </h3>
+                  <p style={{ margin: '6px 0 0 0', fontSize: '0.84rem', color: 'var(--text-muted)', maxWidth: '650px' }}>
+                    Manage the promotional cards displayed on your home page (Top 3-column banner grid &amp; Bottom 2-column service grid). Create custom cards, edit texts, discounts, images, or change button click actions.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenAddPromoCard('top_promo')}
+                    style={{
+                      padding: '10px 18px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #FF5500, #ff7733)',
+                      color: '#ffffff',
+                      fontWeight: '800',
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(255, 85, 0, 0.35)'
+                    }}
+                  >
+                    <Plus size={16} /> Add New Card
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResetPromoCards}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '12px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-input)',
+                      color: 'var(--text-primary)',
+                      fontWeight: '700',
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                    title="Restore default 5 cards shown on home page"
+                  >
+                    <RefreshCw size={14} /> Reset Defaults
+                  </button>
+                </div>
+              </div>
+
+              {/* Section Filters */}
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => setPromoFilter('all')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: promoFilter === 'all' ? '1px solid #FF5500' : '1px solid var(--border-color)',
+                    background: promoFilter === 'all' ? 'var(--orange-light)' : 'var(--bg-card)',
+                    color: promoFilter === 'all' ? '#FF5500' : 'var(--text-primary)',
+                    fontWeight: '800',
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  All Cards ({effectivePromoCards.length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPromoFilter('top_promo')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: promoFilter === 'top_promo' ? '1px solid #FF5500' : '1px solid var(--border-color)',
+                    background: promoFilter === 'top_promo' ? 'var(--orange-light)' : 'var(--bg-card)',
+                    color: promoFilter === 'top_promo' ? '#FF5500' : 'var(--text-primary)',
+                    fontWeight: '800',
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  Top Promo Row ({effectivePromoCards.filter(c => c.section === 'top_promo' || !c.section).length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPromoFilter('service_sell')}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: promoFilter === 'service_sell' ? '1px solid #FF5500' : '1px solid var(--border-color)',
+                    background: promoFilter === 'service_sell' ? 'var(--orange-light)' : 'var(--bg-card)',
+                    color: promoFilter === 'service_sell' ? '#FF5500' : 'var(--text-primary)',
+                    fontWeight: '800',
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  Bottom Service Row ({effectivePromoCards.filter(c => c.section === 'service_sell').length})
+                </button>
+              </div>
+
+              {/* Cards Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '18px' }}>
+                {effectivePromoCards
+                  .filter(c => {
+                    if (promoFilter === 'top_promo') return c.section === 'top_promo' || !c.section;
+                    if (promoFilter === 'service_sell') return c.section === 'service_sell';
+                    return true;
+                  })
+                  .map((card, idx) => {
+                    const isTopPromo = card.section === 'top_promo' || !card.section;
+                    return (
+                      <div
+                        key={card.id || idx}
+                        style={{
+                          background: 'var(--bg-card)',
+                          border: `1px solid ${card.active !== false ? 'var(--border-color)' : 'rgba(239, 68, 68, 0.4)'}`,
+                          borderRadius: '16px',
+                          padding: '20px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          gap: '16px',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          opacity: card.active !== false ? 1 : 0.65,
+                          boxShadow: 'var(--shadow-sm)',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {/* Top Badges */}
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <span style={{
+                              fontSize: '0.7rem',
+                              fontWeight: '800',
+                              padding: '3px 10px',
+                              borderRadius: '8px',
+                              background: isTopPromo ? 'rgba(59, 130, 246, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+                              color: isTopPromo ? '#3b82f6' : '#10b981',
+                              border: `1px solid ${isTopPromo ? 'rgba(59, 130, 246, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
+                              textTransform: 'uppercase'
+                            }}>
+                              {isTopPromo ? 'Top Promo Row' : 'Bottom Service Row'}
+                            </span>
+
+                            <span style={{
+                              fontSize: '0.72rem',
+                              fontWeight: '800',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              color: card.active !== false ? '#10b981' : '#ef4444'
+                            }}>
+                              <span style={{
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                background: card.active !== false ? '#10b981' : '#ef4444',
+                                display: 'inline-block'
+                              }} />
+                              {card.active !== false ? 'Active on Store' : 'Hidden'}
+                            </span>
+                          </div>
+
+                          {/* Card Content & Thumbnail */}
+                          <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              {card.tag && (
+                                <span style={{
+                                  fontSize: '0.65rem',
+                                  fontWeight: '800',
+                                  color: '#FF5500',
+                                  letterSpacing: '1px',
+                                  textTransform: 'uppercase',
+                                  display: 'block',
+                                  marginBottom: '4px'
+                                }}>
+                                  {card.tag}
+                                </span>
+                              )}
+                              <h4 style={{ margin: '0 0 6px 0', fontSize: '1.05rem', fontWeight: '900', color: 'var(--text-primary)', lineHeight: 1.25 }}>
+                                {card.title}
+                              </h4>
+                              <p style={{ margin: '0 0 10px 0', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                                {card.subtitle}
+                              </p>
+                            </div>
+
+                            <div style={{
+                              width: '74px',
+                              height: '74px',
+                              borderRadius: '12px',
+                              background: 'var(--bg-input)',
+                              border: '1px solid var(--border-color)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                              overflow: 'hidden',
+                              padding: '4px'
+                            }}>
+                              <img
+                                src={card.imgSrc}
+                                alt={card.title}
+                                onError={(e) => {
+                                  if (card.fallbackImg) e.target.src = card.fallbackImg;
+                                }}
+                                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Action Details */}
+                          <div style={{ 
+                            display: 'flex', 
+                            flexWrap: 'wrap', 
+                            gap: '6px', 
+                            marginTop: '10px', 
+                            padding: '8px 12px', 
+                            borderRadius: '10px', 
+                            background: 'var(--bg-input)',
+                            border: '1px solid var(--border-color)',
+                            fontSize: '0.74rem'
+                          }}>
+                            <span style={{ fontWeight: '800', color: 'var(--text-muted)' }}>Button:</span>
+                            <span style={{ fontWeight: '800', color: '#FF5500' }}>{card.btnText || 'EXPLORE'}</span>
+                            <span style={{ color: 'var(--border-color)' }}>|</span>
+                            <span style={{ fontWeight: '800', color: 'var(--text-muted)' }}>Action:</span>
+                            <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>
+                              {card.btnAction === 'custom_cover' && '⚡ 3D Back Cover Designer'}
+                              {card.btnAction === 'custom_frame' && '🖼️ Photo Frame Studio'}
+                              {card.btnAction === 'repair_service' && '🔧 Doorstep Repair Modal'}
+                              {card.btnAction === 'sell_phone' && '💵 Sell Old Phone Modal'}
+                              {card.btnAction === 'shop' && '🛒 Shop Products'}
+                              {card.btnAction === 'link' && `🔗 Link: ${card.btnLink || '#'}`}
+                              {!['custom_cover', 'custom_frame', 'repair_service', 'sell_phone', 'shop', 'link'].includes(card.btnAction) && (card.btnAction || 'Default')}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Bottom Action Buttons */}
+                        <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePromoCardActive(card)}
+                            style={{
+                              flex: 1,
+                              padding: '7px 10px',
+                              borderRadius: '8px',
+                              border: '1px solid var(--border-color)',
+                              background: card.active !== false ? 'var(--bg-input)' : 'rgba(16, 185, 129, 0.1)',
+                              color: card.active !== false ? 'var(--text-secondary)' : '#10b981',
+                              fontSize: '0.76rem',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px'
+                            }}
+                            title={card.active !== false ? 'Hide from home page' : 'Show on home page'}
+                          >
+                            {card.active !== false ? <EyeOff size={14} /> : <Eye size={14} />}
+                            {card.active !== false ? 'Hide' : 'Show'}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditPromoCard(card)}
+                            style={{
+                              flex: 1,
+                              padding: '7px 10px',
+                              borderRadius: '8px',
+                              border: 'none',
+                              background: '#3b82f6',
+                              color: '#ffffff',
+                              fontSize: '0.76rem',
+                              fontWeight: '800',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            <Edit3 size={14} /> Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePromoCard(card.id, card.title)}
+                            style={{
+                              padding: '7px 10px',
+                              borderRadius: '8px',
+                              border: 'none',
+                              background: 'rgba(239, 68, 68, 0.12)',
+                              color: '#ef4444',
+                              fontSize: '0.76rem',
+                              fontWeight: '800',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            title="Delete Card"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+
+              {/* Add / Edit Card Modal */}
+              {isEditingPromoCard && (
+                <div style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'rgba(0, 0, 0, 0.75)',
+                  backdropFilter: 'blur(6px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 999999,
+                  padding: '20px'
+                }}>
+                  <div style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '20px',
+                    width: '100%',
+                    maxWidth: '560px',
+                    maxHeight: '92vh',
+                    overflowY: 'auto',
+                    padding: '24px',
+                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '18px'
+                  }}>
+                    {/* Modal Header */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px' }}>
+                      <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '8px', color: '#FF5500' }}>
+                        <Tag size={18} /> {promoCardForm.id ? 'Edit Promotional Card' : 'Create New Promotional Card'}
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingPromoCard(false)}
+                        style={{ border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+
+                    <form onSubmit={handleSavePromoCard} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      {/* Section Selector */}
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '6px' }}>Target Display Section</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                          <button
+                            type="button"
+                            onClick={() => setPromoCardForm({ ...promoCardForm, section: 'top_promo' })}
+                            style={{
+                              padding: '10px',
+                              borderRadius: '10px',
+                              border: promoCardForm.section === 'top_promo' ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                              background: promoCardForm.section === 'top_promo' ? 'var(--orange-light)' : 'var(--bg-input)',
+                              color: promoCardForm.section === 'top_promo' ? '#FF5500' : 'var(--text-primary)',
+                              fontWeight: '800',
+                              fontSize: '0.8rem',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Top Promo Row (3-Cards)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPromoCardForm({ ...promoCardForm, section: 'service_sell' })}
+                            style={{
+                              padding: '10px',
+                              borderRadius: '10px',
+                              border: promoCardForm.section === 'service_sell' ? '2px solid #FF5500' : '1px solid var(--border-color)',
+                              background: promoCardForm.section === 'service_sell' ? 'var(--orange-light)' : 'var(--bg-input)',
+                              color: promoCardForm.section === 'service_sell' ? '#FF5500' : 'var(--text-primary)',
+                              fontWeight: '800',
+                              fontSize: '0.8rem',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Bottom Service Row (2-Cards)
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Tag / Badge */}
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Tag / Badge Label</label>
+                        <input
+                          type="text"
+                          value={promoCardForm.tag}
+                          onChange={(e) => setPromoCardForm({ ...promoCardForm, tag: e.target.value })}
+                          placeholder="e.g. TRENDING GEAR or DOORSTEP SERVICE"
+                          style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
+                        />
+                        {/* Quick Tag Suggestions */}
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+                          {['TRENDING GEAR', '3D PRINTING', 'MEMORIES PRESERVED', 'DOORSTEP SERVICE', 'INSTANT CASH'].map(presetTag => (
+                            <button
+                              key={presetTag}
+                              type="button"
+                              onClick={() => setPromoCardForm(prev => ({ ...prev, tag: presetTag }))}
+                              style={{
+                                padding: '2px 8px',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border-color)',
+                                background: 'var(--bg-card)',
+                                color: 'var(--text-muted)',
+                                fontSize: '0.68rem',
+                                fontWeight: '700',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              + {presetTag}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Card Title */}
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Card Title *</label>
+                        <input
+                          type="text"
+                          value={promoCardForm.title}
+                          onChange={(e) => setPromoCardForm({ ...promoCardForm, title: e.target.value })}
+                          placeholder="e.g. PREMIUM ACCESSORIES or Mobile Repair & Service"
+                          style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
+                          required
+                        />
+                      </div>
+
+                      {/* Subtitle / Description */}
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Subtitle / Description</label>
+                        <textarea
+                          rows={2}
+                          value={promoCardForm.subtitle}
+                          onChange={(e) => setPromoCardForm({ ...promoCardForm, subtitle: e.target.value })}
+                          placeholder="e.g. Up to 40% OFF on chargers, cases, and tech utilities."
+                          style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none', resize: 'vertical' }}
+                        />
+                      </div>
+
+                      {/* Optional Highlight text */}
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Highlight Text (Colored Orange in Subtitle)</label>
+                        <input
+                          type="text"
+                          value={promoCardForm.highlight}
+                          onChange={(e) => setPromoCardForm({ ...promoCardForm, highlight: e.target.value })}
+                          placeholder="e.g. 40% OFF"
+                          style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
+                        />
+                      </div>
+
+                      {/* Button Text and Action */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Button Text</label>
+                          <input
+                            type="text"
+                            value={promoCardForm.btnText}
+                            onChange={(e) => setPromoCardForm({ ...promoCardForm, btnText: e.target.value })}
+                            placeholder="e.g. SHOP NOW, CUSTOMIZE, BOOK SERVICE"
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Button Click Action</label>
+                          <select
+                            value={promoCardForm.btnAction}
+                            onChange={(e) => setPromoCardForm({ ...promoCardForm, btnAction: e.target.value })}
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
+                          >
+                            <option value="shop">🛒 Open Shop / Catalog (#products)</option>
+                            <option value="custom_cover">⚡ Open 3D Phone Cover Designer</option>
+                            <option value="custom_frame">🖼️ Open Photo Frame Studio</option>
+                            <option value="repair_service">🔧 Open Doorstep Repair Modal</option>
+                            <option value="sell_phone">💵 Open Sell Old Phone Modal</option>
+                            <option value="link">🔗 Custom Web Link / Anchor</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Custom Link if action is link */}
+                      {promoCardForm.btnAction === 'link' && (
+                        <div>
+                          <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Custom Link / Anchor URL</label>
+                          <input
+                            type="text"
+                            value={promoCardForm.btnLink}
+                            onChange={(e) => setPromoCardForm({ ...promoCardForm, btnLink: e.target.value })}
+                            placeholder="e.g. #products or https://..."
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Image Upload & Presets */}
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '4px' }}>Card Image (Upload or URL)</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePromoCardImageUpload}
+                            style={{ flex: 1, fontSize: '0.78rem' }}
+                          />
+                        </div>
+
+                        <input
+                          type="text"
+                          value={promoCardForm.imgSrc}
+                          onChange={(e) => setPromoCardForm({ ...promoCardForm, imgSrc: e.target.value })}
+                          placeholder="Or enter image URL (e.g. images/banner_accessories.png)"
+                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', fontSize: '0.78rem', outline: 'none' }}
+                        />
+
+                        {/* Presets */}
+                        <div style={{ marginTop: '8px' }}>
+                          <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Quick Image Presets:</span>
+                          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {[
+                              { label: 'AirPods/Accessories', src: 'images/banner_accessories.png' },
+                              { label: 'Back Cover', src: 'images/banner_backcover.png' },
+                              { label: 'Photo Frame', src: 'images/banner_photoframe.png' },
+                              { label: 'Repair Tools', src: 'images/banner_repair_service.png' },
+                              { label: 'Sell Phone Cash', src: 'images/banner_sell_phone.png' }
+                            ].map(preset => (
+                              <button
+                                key={preset.src}
+                                type="button"
+                                onClick={() => setPromoCardForm(prev => ({ ...prev, imgSrc: preset.src }))}
+                                style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '6px',
+                                  border: promoCardForm.imgSrc === preset.src ? '1px solid #FF5500' : '1px solid var(--border-color)',
+                                  background: promoCardForm.imgSrc === preset.src ? 'var(--orange-light)' : 'var(--bg-card)',
+                                  color: promoCardForm.imgSrc === preset.src ? '#FF5500' : 'var(--text-primary)',
+                                  fontSize: '0.7rem',
+                                  fontWeight: '700',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {preset.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Image Preview */}
+                        {promoCardForm.imgSrc && (
+                          <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', borderRadius: '10px', background: 'var(--bg-input)', border: '1px solid var(--border-color)' }}>
+                            <img
+                              src={promoCardForm.imgSrc}
+                              alt="Card Preview"
+                              style={{ width: '56px', height: '56px', objectFit: 'contain', borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+                            />
+                            <div style={{ flex: 1 }}>
+                              <span style={{ fontSize: '0.76rem', fontWeight: '800', display: 'block' }}>Image Preview</span>
+                              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>{promoCardForm.imgSrc.slice(0, 50)}...</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Active Status */}
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.84rem', fontWeight: '700' }}>
+                        <input
+                          type="checkbox"
+                          checked={promoCardForm.active}
+                          onChange={(e) => setPromoCardForm({ ...promoCardForm, active: e.target.checked })}
+                          style={{ width: '16px', height: '16px', accentColor: '#FF5500', cursor: 'pointer' }}
+                        />
+                        Card is Active (Visible on Home Page)
+                      </label>
+
+                      {/* Form Buttons */}
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingPromoCard(false)}
+                          style={{
+                            flex: 1,
+                            padding: '12px',
+                            borderRadius: '10px',
+                            border: '1px solid var(--border-color)',
+                            background: 'var(--bg-input)',
+                            color: 'var(--text-primary)',
+                            fontWeight: '800',
+                            fontSize: '0.84rem',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Cancel
+                        </button>
+
+                        <button
+                          type="submit"
+                          style={{
+                            flex: 1,
+                            padding: '12px',
+                            borderRadius: '10px',
+                            border: 'none',
+                            background: 'linear-gradient(135deg, #FF5500, #ff7733)',
+                            color: '#ffffff',
+                            fontWeight: '900',
+                            fontSize: '0.86rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            boxShadow: '0 4px 14px rgba(255, 85, 0, 0.35)'
+                          }}
+                        >
+                          <Check size={16} /> {promoCardForm.id ? 'Save Changes' : 'Create Card'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

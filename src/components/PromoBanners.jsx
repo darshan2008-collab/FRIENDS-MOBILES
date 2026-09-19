@@ -1,100 +1,118 @@
 import React from 'react';
+import { DEFAULT_PROMO_CARDS } from '../data/promoCards';
 
-export default function PromoBanners({ onOpenCustomCover, onOpenCustomFrame, t = (k) => k }) {
-  const unsplashAcc = 'https://images.unsplash.com/photo-1583394838336-acd977736f90?q=80&w=600&auto=format&fit=crop';
-  const unsplashCover = 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=600&auto=format&fit=crop';
-  const unsplashFrame = 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=600&auto=format&fit=crop';
+export default function PromoBanners({ 
+  cards = DEFAULT_PROMO_CARDS,
+  onOpenCustomCover, 
+  onOpenCustomFrame, 
+  onOpenShop,
+  onOpenServiceModal,
+  onOpenSellPhoneModal,
+  t = (k) => k 
+}) {
+  const activeCards = (cards && cards.length > 0 ? cards : DEFAULT_PROMO_CARDS)
+    .filter(c => (c.section === 'top_promo' || !c.section) && c.active !== false)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-  const handleImgError = (e, fallbackUnsplash) => {
-    e.target.src = fallbackUnsplash;
+  if (!activeCards || activeCards.length === 0) {
+    return null;
+  }
+
+  const handleCardAction = (card, e) => {
+    if (e) e.stopPropagation();
+
+    const action = card.btnAction || 'shop';
+    if (action === 'custom_cover') {
+      if (onOpenCustomCover) onOpenCustomCover();
+    } else if (action === 'custom_frame') {
+      if (onOpenCustomFrame) onOpenCustomFrame();
+    } else if (action === 'repair_service') {
+      if (onOpenServiceModal) onOpenServiceModal();
+    } else if (action === 'sell_phone') {
+      if (onOpenSellPhoneModal) onOpenSellPhoneModal();
+    } else if (action === 'shop') {
+      if (onOpenShop) {
+        onOpenShop();
+      } else {
+        const el = document.getElementById('products');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        else window.location.hash = '#products';
+      }
+    } else if (card.btnLink) {
+      if (card.btnLink.startsWith('#')) {
+        const targetId = card.btnLink.substring(1);
+        const el = document.getElementById(targetId);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        else window.location.hash = card.btnLink;
+      } else {
+        window.open(card.btnLink, '_blank', 'noopener,noreferrer');
+      }
+    }
+  };
+
+  const renderSubtitle = (card) => {
+    const text = card.subtitle || '';
+    const highlight = card.highlight;
+
+    if (highlight && text.includes(highlight)) {
+      const parts = text.split(highlight);
+      return (
+        <p className="discount">
+          {parts[0]}
+          <span className="highlight">{highlight}</span>
+          {parts.slice(1).join(highlight)}
+        </p>
+      );
+    }
+
+    return <p className="sub-text">{text}</p>;
   };
 
   return (
     <section className="promo-banners">
       <div className="container promo-grid">
-        
-        <div className="promo-card">
-          <div className="promo-info">
-            <span className="promo-tag">
-              Trending Gear
-            </span>
-            <h3>
-              PREMIUM ACCESSORIES
-            </h3>
-            <p className="discount">
-              Up to <span className="highlight">40% OFF</span> on chargers, cases, and tech utilities.
-            </p>
-            <a href="#products" className="btn btn-sm btn-orange">
-              {t('shopNow') || 'SHOP NOW'}
-            </a>
-          </div>
-          <div className="promo-img-box">
-            <img 
-              src="images/banner_accessories.png" 
-              onError={(e) => handleImgError(e, unsplashAcc)} 
-              alt="Premium Accessories" 
-            />
-          </div>
-        </div>
-
-        <div style={{ display: 'none' }}></div> {/* dummy spacer */}
-
-        <div className="promo-card" id="customized-covers">
-          <div className="promo-info">
-            <span className="promo-tag">
-              3D Printing
-            </span>
-            <h3>
-              {t('navCustomCovers') || 'CUSTOM BACK COVERS'}
-            </h3>
-            <p className="sub-text">
-              Design your custom case with custom images, text, and styles.
-            </p>
-            <button 
-              onClick={onOpenCustomCover} 
-              className="btn btn-sm btn-orange"
-              style={{ cursor: 'pointer', border: 'none' }}
+        {activeCards.map((card) => (
+          <div 
+            key={card.id || card.title} 
+            className="promo-card"
+            id={card.id}
+          >
+            <div className="promo-info">
+              {card.tag && (
+                <span className="promo-tag">
+                  {card.tag}
+                </span>
+              )}
+              <h3>
+                {card.title}
+              </h3>
+              {renderSubtitle(card)}
+              <button 
+                type="button"
+                onClick={(e) => handleCardAction(card, e)}
+                className="btn btn-sm btn-orange"
+                style={{ cursor: 'pointer', border: 'none' }}
+              >
+                {card.btnText || 'EXPLORE'}
+              </button>
+            </div>
+            <div 
+              className="promo-img-box" 
+              onClick={(e) => handleCardAction(card, e)} 
+              style={{ cursor: 'pointer' }}
             >
-              {t('customize') || 'CUSTOMIZE NOW'}
-            </button>
+              <img 
+                src={card.imgSrc} 
+                onError={(e) => {
+                  if (card.fallbackImg && e.target.src !== card.fallbackImg) {
+                    e.target.src = card.fallbackImg;
+                  }
+                }} 
+                alt={card.title} 
+              />
+            </div>
           </div>
-          <div className="promo-img-box" onClick={onOpenCustomCover} style={{ cursor: 'pointer' }}>
-            <img 
-              src="images/banner_backcover.png" 
-              onError={(e) => handleImgError(e, unsplashCover)} 
-              alt="Customized Back Cover" 
-            />
-          </div>
-        </div>
-
-        <div className="promo-card" id="photo-frames">
-          <div className="promo-info">
-            <span className="promo-tag">
-              Memories Preserved
-            </span>
-            <h3>
-              {t('navPhotoFrames') || 'PREMIUM PHOTO FRAMES'}
-            </h3>
-            <p className="sub-text">
-              Create high-quality custom glass and wood frames for your special moments.
-            </p>
-            <button 
-              onClick={onOpenCustomFrame} 
-              className="btn btn-sm btn-orange"
-              style={{ cursor: 'pointer', border: 'none' }}
-            >
-              ORDER NOW
-            </button>
-          </div>
-          <div className="promo-img-box" onClick={onOpenCustomFrame} style={{ cursor: 'pointer' }}>
-            <img 
-              src="images/banner_photoframe.png" 
-              onError={(e) => handleImgError(e, unsplashFrame)} 
-              alt="Photo Frames" 
-            />
-          </div>
-        </div>
-
+        ))}
       </div>
     </section>
   );
