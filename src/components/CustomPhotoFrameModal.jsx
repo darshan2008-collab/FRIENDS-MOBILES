@@ -136,6 +136,7 @@ export default function CustomPhotoFrameModal({
       img: uploadedPhoto && !uploadedFileInfo?.isDoc ? uploadedPhoto : 'images/banner_photoframe.png',
       discount: discountStr,
       customizationDetails: {
+        productType: 'Photo Frame',
         size: displaySize,
         customWidth: isCustom ? customWidth : null,
         customHeight: isCustom ? customHeight : null,

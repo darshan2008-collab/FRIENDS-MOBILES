@@ -48,15 +48,21 @@ export default function AdminModal({
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
-      const token = sessionStorage.getItem('fm_admin_token');
+      const token = sessionStorage.getItem('fm_admin_token') || localStorage.getItem('fm_admin_token');
       return Boolean(token);
     } catch {
       return false;
     }
   });
 
-  const [authStep, setAuthStep] = useState(1); // 1: Credentials, 2: Security PIN (2FA)
-  const [adminUsername, setAdminUsername] = useState('');
+  const [authStep, setAuthStep] = useState(2); // Direct Security PIN (2FA) by default!
+  const [adminUsername, setAdminUsername] = useState(() => {
+    try {
+      return localStorage.getItem('fm_admin_username') || sessionStorage.getItem('fm_admin_username') || 'friendsmobile';
+    } catch {
+      return 'friendsmobile';
+    }
+  });
   const [adminPassword, setAdminPassword] = useState('');
   const [adminPin, setAdminPin] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
@@ -141,33 +147,65 @@ export default function AdminModal({
     return items
       .filter(item => 
         item.customizationDetails || 
-        (item.category && (item.category.includes('Custom') || item.category.includes('Photo Frame')))
+        (item.category && (item.category.includes('Custom') || item.category.includes('Photo Frame') || item.category.includes('Frame'))) ||
+        (item.title && (item.title.toLowerCase().includes('cover') || item.title.toLowerCase().includes('skin') || item.title.toLowerCase().includes('frame')))
       )
-      .map(item => ({
-        orderId: order.orderId || order.id || `ORD-${Date.now()}`,
-        orderDate: order.date || order.createdAt || 'Recent',
-        customerName: order.customer?.name || order.customerName || 'Customer',
-        customerPhone: order.customer?.phone || order.customerPhone || '+91 93445 22086',
-        customerAddress: order.customer?.address || order.address || 'Karur, Tamil Nadu',
-        orderStatus: order.status || 'Processing',
-        paymentStatus: order.paymentStatus || 'Paid',
-        title: item.title || item.name,
-        price: item.price || 399,
-        quantity: item.quantity || 1,
-        category: item.category || 'Customized Back Covers',
-        img: item.customizationDetails?.uploadedFile || item.customizationDetails?.userPhoto || item.img || 'images/prod_custom_cover.png',
-        customizationDetails: item.customizationDetails || {
-          brand: 'Apple',
-          model: 'iPhone 15 Pro',
-          caseType: 'Full 3D Hard Case',
-          finish: 'Glass Glossy Finish',
-          customText: 'FRIENDS MOBILE Custom',
-          fileName: `custom_cover_iPhone15Pro.png`
-        }
-      }));
+      .map(item => {
+        const isFrameItem = (item.category && item.category.toLowerCase().includes('frame')) || 
+                            (item.title && item.title.toLowerCase().includes('frame')) ||
+                            item.customizationDetails?.productType === 'Photo Frame' ||
+                            Boolean(item.customizationDetails?.size && !item.customizationDetails?.brand);
+
+        return {
+          orderId: order.orderId || order.id || `ORD-${Date.now()}`,
+          orderDate: order.date || order.createdAt || 'Recent',
+          customerName: order.customer?.name || order.customerName || 'Customer',
+          customerPhone: order.customer?.phone || order.customerPhone || '+91 93445 22086',
+          customerAddress: order.customer?.address || order.address || 'Karur, Tamil Nadu',
+          orderStatus: order.status || 'Processing',
+          paymentStatus: order.paymentStatus || 'Paid',
+          title: item.title || item.name,
+          price: item.price || (isFrameItem ? 449 : 399),
+          quantity: item.quantity || 1,
+          category: item.category || (isFrameItem ? 'Photo Frames' : 'Customized Back Covers'),
+          img: item.customizationDetails?.uploadedFile || item.customizationDetails?.userPhoto || item.img || (isFrameItem ? 'images/banner_photoframe.png' : 'images/prod_custom_cover.png'),
+          customizationDetails: item.customizationDetails || (isFrameItem ? {
+            productType: 'Photo Frame',
+            size: '8 x 10 inches (Medium Table / Wall)',
+            color: 'Classic Walnut Wood',
+            orientation: 'Portrait (Vertical)',
+            glass: 'Anti-Glare Premium Glass',
+            fileName: 'custom_frame_8x10.png'
+          } : {
+            brand: 'Apple',
+            model: 'iPhone 15 Pro',
+            caseType: 'Full 3D Hard Case',
+            finish: 'Glass Glossy Finish',
+            customText: 'FRIENDS MOBILE Custom',
+            fileName: `custom_cover_iPhone15Pro.png`
+          })
+        };
+      });
   });
 
-  const displayCustomizations = customCoverItems;
+  // Separate into Cover/Skin vs Photo Frame
+  const photoFrameCustomizations = customCoverItems.filter(item => {
+    const isFrame = (item.category && item.category.toLowerCase().includes('frame')) || 
+                    (item.title && item.title.toLowerCase().includes('frame')) || 
+                    item.customizationDetails?.productType === 'Photo Frame' ||
+                    Boolean(item.customizationDetails?.size && !item.customizationDetails?.brand);
+    return isFrame;
+  });
+
+  const coverAndSkinCustomizations = customCoverItems.filter(item => {
+    const isFrame = (item.category && item.category.toLowerCase().includes('frame')) || 
+                    (item.title && item.title.toLowerCase().includes('frame')) || 
+                    item.customizationDetails?.productType === 'Photo Frame' ||
+                    Boolean(item.customizationDetails?.size && !item.customizationDetails?.brand);
+    return !isFrame;
+  });
+
+  const displayCustomizations = coverAndSkinCustomizations;
 
   const handleDownloadCustomImage = (imageUrl, fileName) => {
     if (!imageUrl) {
@@ -186,18 +224,15 @@ export default function AdminModal({
   useEffect(() => {
     if (isOpen) {
       try {
-        const storedToken = sessionStorage.getItem('fm_admin_token');
+        const storedToken = sessionStorage.getItem('fm_admin_token') || localStorage.getItem('fm_admin_token');
         if (storedToken) {
           setAdminToken(storedToken);
           setIsAuthenticated(true);
         } else {
-          const isPending2FA = sessionStorage.getItem('fm_admin_pending_2fa') === 'true';
-          if (isPending2FA) {
-            setIsAuthenticated(false);
-            setAuthStep(2);
-            const savedUsername = sessionStorage.getItem('fm_admin_username') || 'friendsmobile';
-            setAdminUsername(savedUsername);
-          }
+          setIsAuthenticated(false);
+          setAuthStep(2); // Always prompt for 2FA PIN directly
+          const savedUsername = localStorage.getItem('fm_admin_username') || sessionStorage.getItem('fm_admin_username') || 'friendsmobile';
+          setAdminUsername(savedUsername);
         }
       } catch (_) {}
     }
@@ -207,7 +242,7 @@ export default function AdminModal({
   const handleAdminLogout = (reason = 'Admin session locked.') => {
     try {
       const apiHost = getApiHost();
-      const currentToken = adminToken || sessionStorage.getItem('fm_admin_token');
+      const currentToken = adminToken || sessionStorage.getItem('fm_admin_token') || localStorage.getItem('fm_admin_token');
       if (currentToken) {
         fetch(`${apiHost}/api/admin/logout`, {
           method: 'POST',
@@ -221,7 +256,7 @@ export default function AdminModal({
 
     setIsAuthenticated(false);
     setAdminToken('');
-    setAuthStep(1);
+    setAuthStep(2);
     setAdminUsername('');
     setAdminPassword('');
     setAdminPin('');
@@ -229,6 +264,8 @@ export default function AdminModal({
     try {
       sessionStorage.removeItem('fm_admin_token');
       sessionStorage.removeItem('fm_admin_auth');
+      sessionStorage.removeItem('fm_admin_pending_2fa');
+      localStorage.removeItem('fm_admin_token');
       localStorage.removeItem('fm_admin_auth');
     } catch (_) {}
 
@@ -910,7 +947,10 @@ export default function AdminModal({
     }
   };
 
-  // ─── Photo Frame Studio (Sizes & Pricing) State & Handlers ───
+  // ─── Photo Frame Studio State & Handlers ───
+  const [frameStudioSubTab, setFrameStudioSubTab] = useState('orders'); // 'orders' | 'config'
+  const [frameOrderSearchTerm, setFrameOrderSearchTerm] = useState('');
+  const [frameOrderStatusFilter, setFrameOrderStatusFilter] = useState('All');
   const [frameConfigForm, setFrameConfigForm] = useState(() => {
     return frameConfig || DEFAULT_FRAME_CONFIG;
   });
@@ -1316,6 +1356,7 @@ export default function AdminModal({
     setAuthError('');
     setIsSubmittingAuth(true);
     const cleanPin = (adminPin || '').trim();
+    const effectiveUser = (adminUsername || '').trim() || 'friendsmobile';
 
     try {
       const apiHost = getApiHost();
@@ -1323,7 +1364,7 @@ export default function AdminModal({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: adminUsername.trim(),
+          username: effectiveUser,
           pin: cleanPin
         })
       });
@@ -1339,6 +1380,7 @@ export default function AdminModal({
           sessionStorage.removeItem('fm_admin_pending_2fa');
           localStorage.setItem('fm_admin_token', data.token);
           localStorage.setItem('fm_admin_auth', 'true');
+          localStorage.setItem('fm_admin_username', effectiveUser);
         } catch (_) {}
         if (addToast) addToast('2FA Security Passed! Welcome, Super Admin.', 'success');
         return;
@@ -1358,6 +1400,7 @@ export default function AdminModal({
         sessionStorage.removeItem('fm_admin_pending_2fa');
         localStorage.setItem('fm_admin_token', token);
         localStorage.setItem('fm_admin_auth', 'true');
+        localStorage.setItem('fm_admin_username', effectiveUser);
       } catch (_) {}
       if (addToast) addToast('2FA Security Passed! Welcome, Super Admin.', 'success');
       setIsSubmittingAuth(false);
@@ -2032,12 +2075,12 @@ export default function AdminModal({
             </div>
 
             <h3 style={{ fontSize: '1.45rem', fontWeight: '800', margin: '0 0 6px 0' }}>
-              {authStep === 1 ? 'High-Security Admin Login' : '2FA Security PIN Verification'}
+              {authStep === 2 ? 'Admin Security PIN Verification' : 'High-Security Admin Login'}
             </h3>
             <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: '0 0 20px 0' }}>
-              {authStep === 1 
-                ? 'Enter your executive administrative credentials to authenticate.' 
-                : 'Enter your 6-digit Security PIN to complete two-factor authentication.'}
+              {authStep === 2 
+                ? 'Enter your 6-digit Security PIN to unlock the FRIENDS MOBILE Admin Portal.' 
+                : 'Enter your administrative username and password to authenticate.'}
             </p>
 
             {authError && (
@@ -2158,6 +2201,23 @@ export default function AdminModal({
                 >
                   {isSubmittingAuth ? 'VERIFYING CREDENTIALS...' : 'CONTINUE TO 2FA STEP'} <ArrowRight size={18} />
                 </button>
+
+                <button 
+                  type="button" 
+                  onClick={() => { setAuthStep(2); setAuthError(''); }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    textAlign: 'center',
+                    marginTop: '4px'
+                  }}
+                >
+                  ← Back to Direct 6-Digit PIN Login
+                </button>
               </form>
             ) : (
               /* Step 2: 6-Digit PIN Form */
@@ -2224,7 +2284,7 @@ export default function AdminModal({
                     marginTop: '4px'
                   }}
                 >
-                  ← Back to Username & Password Login
+                  Or Login with Username &amp; Password
                 </button>
               </form>
             )}
@@ -2273,7 +2333,7 @@ export default function AdminModal({
                 setIsAdminSidebarOpen(false);
               }}
             >
-              <Smartphone size={16} /> Cover Customizations ({displayCustomizations.length})
+              <Smartphone size={16} /> Cover &amp; Skin Customizations ({coverAndSkinCustomizations.length})
             </button>
 
             <button 
@@ -2345,7 +2405,7 @@ export default function AdminModal({
                 setIsAdminSidebarOpen(false);
               }}
             >
-              <Frame size={16} /> Photo Frame Studio ({frameConfigForm?.sizes?.length || 0} Sizes)
+              <Frame size={16} /> Photo Frame Studio ({photoFrameCustomizations.length > 0 ? `${photoFrameCustomizations.length} Orders` : `${frameConfigForm?.sizes?.length || 0} Sizes`})
             </button>
 
             <button 
@@ -5208,37 +5268,31 @@ export default function AdminModal({
               {/* KPI Summary Cards */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>TOTAL CUSTOM ORDERS</span>
-                  <h3 style={{ fontSize: '1.6rem', color: '#FF5500', margin: '6px 0 0 0', fontWeight: '900' }}>{displayCustomizations.length}</h3>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>TOTAL COVER &amp; SKIN ORDERS</span>
+                  <h3 style={{ fontSize: '1.6rem', color: '#FF5500', margin: '6px 0 0 0', fontWeight: '900' }}>{coverAndSkinCustomizations.length}</h3>
                 </div>
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>3D MOBILE COVERS</span>
                   <h3 style={{ fontSize: '1.6rem', color: 'var(--text-primary)', margin: '6px 0 0 0', fontWeight: '900' }}>
-                    {displayCustomizations.filter(c => (c.category?.includes('Cover') || c.customizationDetails?.brand) && !c.category?.includes('Skin') && c.customizationDetails?.productType !== 'Mobile Skin').length}
+                    {coverAndSkinCustomizations.filter(c => !c.category?.includes('Skin') && c.customizationDetails?.productType !== 'Mobile Skin').length}
                   </h3>
                 </div>
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>✨ MOBILE SKINS</span>
                   <h3 style={{ fontSize: '1.6rem', color: '#FF5500', margin: '6px 0 0 0', fontWeight: '900' }}>
-                    {displayCustomizations.filter(c => c.category?.includes('Skin') || c.customizationDetails?.productType === 'Mobile Skin').length}
-                  </h3>
-                </div>
-                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>PHOTO FRAMES</span>
-                  <h3 style={{ fontSize: '1.6rem', color: 'var(--text-primary)', margin: '6px 0 0 0', fontWeight: '900' }}>
-                    {displayCustomizations.filter(c => c.category?.includes('Frame') || c.customizationDetails?.size).length}
+                    {coverAndSkinCustomizations.filter(c => c.category?.includes('Skin') || c.customizationDetails?.productType === 'Mobile Skin').length}
                   </h3>
                 </div>
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>READY FOR PRODUCTION</span>
                   <h3 style={{ fontSize: '1.6rem', color: '#22c55e', margin: '6px 0 0 0', fontWeight: '900' }}>
-                    {displayCustomizations.length}
+                    {coverAndSkinCustomizations.length}
                   </h3>
                 </div>
               </div>
 
               {/* Customizations Items Grid */}
-              {displayCustomizations.length === 0 ? (
+              {coverAndSkinCustomizations.length === 0 ? (
                 <div style={{
                   background: 'var(--bg-card)',
                   border: '1px solid var(--border-color)',
@@ -5258,15 +5312,15 @@ export default function AdminModal({
                     <Smartphone size={32} />
                   </div>
                   <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-primary)' }}>
-                    No Customer Custom Cover Orders Submitted Yet
+                    No Customer Custom Cover or Skin Orders Submitted Yet
                   </h4>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '480px' }}>
-                    When real customers customize mobile back covers or photo frames on the website, their uploaded photos, WhatsApp contact numbers, phone models, and print specifications will appear here automatically for 3D printing.
+                    When real customers customize mobile back covers or vinyl skins on the website, their uploaded photos, WhatsApp contact numbers, phone models, and print specifications will appear here automatically for 3D printing.
                   </p>
                 </div>
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
-                  {displayCustomizations.map((item, index) => {
+                  {coverAndSkinCustomizations.map((item, index) => {
                   const details = item.customizationDetails || {};
                   const isFrame = item.category?.includes('Frame') || details.size;
                   const isDemo = item.orderId?.startsWith('FM-DEMO');
@@ -5441,9 +5495,474 @@ export default function AdminModal({
             </div>
           )}
 
-          {/* TAB: PHOTO FRAME STUDIO (SIZES, PRICING & FORMULA) */}
+          {/* TAB: PHOTO FRAME STUDIO (ORDERS + SIZES & PRICING) */}
           {activeTab === 'frameStudio' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+
+              {/* Photo Frame Studio Sub-Tab Switcher */}
+              <div style={{
+                display: 'flex',
+                gap: '10px',
+                background: 'var(--bg-input)',
+                padding: '6px',
+                borderRadius: '16px',
+                border: '1px solid var(--border-color)',
+                width: 'fit-content',
+                flexWrap: 'wrap'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setFrameStudioSubTab('orders')}
+                  style={{
+                    padding: '10px 22px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: frameStudioSubTab === 'orders' ? 'linear-gradient(135deg, #FF5500, #ff7733)' : 'transparent',
+                    color: frameStudioSubTab === 'orders' ? '#ffffff' : 'var(--text-primary)',
+                    fontWeight: '800',
+                    fontSize: '0.86rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: frameStudioSubTab === 'orders' ? '0 4px 12px rgba(255, 85, 0, 0.3)' : 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <Frame size={16} /> Customer Photo Frame Orders ({photoFrameCustomizations.length})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFrameStudioSubTab('config')}
+                  style={{
+                    padding: '10px 22px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: frameStudioSubTab === 'config' ? 'linear-gradient(135deg, #FF5500, #ff7733)' : 'transparent',
+                    color: frameStudioSubTab === 'config' ? '#ffffff' : 'var(--text-primary)',
+                    fontWeight: '800',
+                    fontSize: '0.86rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    boxShadow: frameStudioSubTab === 'config' ? '0 4px 12px rgba(255, 85, 0, 0.3)' : 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <Sliders size={16} /> Sizes, Rates &amp; Pricing Manager ({frameConfigForm?.sizes?.length || 0} Sizes)
+                </button>
+              </div>
+
+              {/* ─── SUB-TAB 1: RECEIVED PHOTO FRAME ORDERS & CUSTOM PRINT FILES ─── */}
+              {frameStudioSubTab === 'orders' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Header Title Banner */}
+                  <div style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '20px',
+                    padding: '24px 28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '16px',
+                    boxShadow: 'var(--shadow-sm)'
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                        <span style={{ background: 'rgba(255, 85, 0, 0.12)', border: '1px solid rgba(255, 85, 0, 0.3)', color: '#FF5500', padding: '3px 12px', borderRadius: '20px', fontSize: '0.76rem', fontWeight: '800', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <Frame size={14} /> PHOTO FRAME ORDERS
+                        </span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: '600' }}>Live Customer Customization Submissions</span>
+                      </div>
+                      <h3 style={{ margin: 0, fontSize: '1.45rem', fontWeight: '900', color: 'var(--text-primary)' }}>
+                        Received Photo Frame Orders &amp; Print Files
+                      </h3>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                        Direct customer photo frame customization details: uploaded HD photos ready for print, dimensions, frame wood/metal finishes, orientation, glass type, and customer contact information.
+                      </p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={fetchOrders}
+                        style={{
+                          padding: '10px 18px',
+                          borderRadius: '12px',
+                          border: '1px solid var(--border-color)',
+                          background: 'var(--bg-input)',
+                          color: 'var(--text-primary)',
+                          fontWeight: '700',
+                          fontSize: '0.82rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}
+                      >
+                        <RefreshCw size={14} /> Refresh Orders
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Search & Filter Controls */}
+                  <div style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '16px',
+                    padding: '16px 20px',
+                    display: 'flex',
+                    gap: '14px',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between'
+                  }}>
+                    <div style={{ position: 'relative', flex: 1, minWidth: '260px' }}>
+                      <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                      <input 
+                        type="text"
+                        placeholder="Search by customer name, phone, order ID, or frame size..."
+                        value={frameOrderSearchTerm}
+                        onChange={(e) => setFrameOrderSearchTerm(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 14px 10px 40px',
+                          borderRadius: '10px',
+                          border: '1px solid var(--border-color)',
+                          background: 'var(--bg-input)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.86rem',
+                          outline: 'none'
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      {['All', 'Paid', 'Pending'].map(status => (
+                        <button
+                          key={status}
+                          type="button"
+                          onClick={() => setFrameOrderStatusFilter(status)}
+                          style={{
+                            padding: '8px 14px',
+                            borderRadius: '8px',
+                            border: frameOrderStatusFilter === status ? '1.5px solid #FF5500' : '1px solid var(--border-color)',
+                            background: frameOrderStatusFilter === status ? 'var(--orange-light)' : 'var(--bg-input)',
+                            color: frameOrderStatusFilter === status ? '#FF5500' : 'var(--text-secondary)',
+                            fontSize: '0.8rem',
+                            fontWeight: '700',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {status}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* KPI Summary Cards */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>TOTAL FRAME ORDERS</span>
+                      <h3 style={{ fontSize: '1.6rem', color: '#FF5500', margin: '6px 0 0 0', fontWeight: '900' }}>{photoFrameCustomizations.length}</h3>
+                    </div>
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>TOTAL FRAME REVENUE</span>
+                      <h3 style={{ fontSize: '1.6rem', color: 'var(--text-primary)', margin: '6px 0 0 0', fontWeight: '900' }}>
+                        ₹{photoFrameCustomizations.reduce((acc, f) => acc + ((f.price || 0) * (f.quantity || 1)), 0).toLocaleString('en-IN')}
+                      </h3>
+                    </div>
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>PAID ORDERS</span>
+                      <h3 style={{ fontSize: '1.6rem', color: '#22c55e', margin: '6px 0 0 0', fontWeight: '900' }}>
+                        {photoFrameCustomizations.filter(f => f.paymentStatus === 'Paid').length}
+                      </h3>
+                    </div>
+                    <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: '16px', boxShadow: 'var(--shadow-sm)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '700', letterSpacing: '0.5px' }}>ACTIVE FRAME SIZES</span>
+                      <h3 style={{ fontSize: '1.6rem', color: '#FF5500', margin: '6px 0 0 0', fontWeight: '900' }}>
+                        {frameConfigForm?.sizes?.filter(s => s.active !== false)?.length || 0}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Photo Frame Orders Cards Grid */}
+                  {(() => {
+                    const filteredFrameOrders = photoFrameCustomizations.filter(f => {
+                      const matchesStatus = frameOrderStatusFilter === 'All' || f.paymentStatus === frameOrderStatusFilter;
+                      if (!matchesStatus) return false;
+                      if (!frameOrderSearchTerm.trim()) return true;
+                      const q = frameOrderSearchTerm.toLowerCase().trim();
+                      const details = f.customizationDetails || {};
+                      return (
+                        (f.orderId && f.orderId.toLowerCase().includes(q)) ||
+                        (f.customerName && f.customerName.toLowerCase().includes(q)) ||
+                        (f.customerPhone && f.customerPhone.includes(q)) ||
+                        (details.size && details.size.toLowerCase().includes(q)) ||
+                        (details.color && details.color.toLowerCase().includes(q)) ||
+                        (f.title && f.title.toLowerCase().includes(q))
+                      );
+                    });
+
+                    if (filteredFrameOrders.length === 0) {
+                      return (
+                        <div style={{
+                          background: 'var(--bg-card)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '20px',
+                          padding: '60px 20px',
+                          textAlign: 'center',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '14px'
+                        }}>
+                          <div style={{
+                            width: '64px', height: '64px', borderRadius: '50%',
+                            background: 'rgba(255, 85, 0, 0.1)', color: '#FF5500',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                          }}>
+                            <Frame size={32} />
+                          </div>
+                          <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                            No Customer Photo Frame Orders Received Yet
+                          </h4>
+                          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '480px' }}>
+                            When customers customize and order a photo frame on the store, all their custom photo uploads, frame dimensions, wood finishes, glass protection, and shipping details will arrive here automatically ready for framing &amp; printing.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setFrameStudioSubTab('config')}
+                            style={{
+                              padding: '10px 18px',
+                              borderRadius: '10px',
+                              border: '1.5px solid #FF5500',
+                              background: 'var(--orange-light)',
+                              color: '#FF5500',
+                              fontWeight: '800',
+                              fontSize: '0.82rem',
+                              cursor: 'pointer',
+                              marginTop: '8px'
+                            }}
+                          >
+                            Manage Frame Sizes &amp; Pricing Rates →
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
+                        {filteredFrameOrders.map((item, index) => {
+                          const details = item.customizationDetails || {};
+                          const frameColorName = details.color || 'Classic Walnut Wood';
+                          const frameBorderColor = frameColorName.toLowerCase().includes('black') ? '#1B1D22' : (frameColorName.toLowerCase().includes('white') ? '#F1F5F9' : (frameColorName.toLowerCase().includes('gold') ? '#D4AF37' : '#5C3A21'));
+                          const cleanPhone = (item.customerPhone || '').replace(/\D/g, '');
+
+                          return (
+                            <div 
+                              key={index}
+                              style={{
+                                background: 'var(--bg-card)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '18px',
+                                overflow: 'hidden',
+                                boxShadow: 'var(--shadow-sm)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              {/* Top Card Info Header */}
+                              <div style={{ padding: '16px 20px', background: 'var(--bg-input)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                  <div style={{ fontSize: '0.76rem', fontWeight: '800', color: '#FF5500', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <Tag size={14} /> ORDER #{item.orderId}
+                                  </div>
+                                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                    {item.orderDate}
+                                  </div>
+                                </div>
+
+                                <span style={{ 
+                                  padding: '4px 10px', borderRadius: '20px', fontSize: '0.74rem', fontWeight: '800',
+                                  background: item.paymentStatus === 'Paid' ? 'rgba(34, 197, 94, 0.12)' : 'rgba(234, 179, 8, 0.12)',
+                                  color: item.paymentStatus === 'Paid' ? '#16a34a' : '#ca8a04',
+                                  border: `1px solid ${item.paymentStatus === 'Paid' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(234, 179, 8, 0.3)'}`
+                                }}>
+                                  {item.paymentStatus === 'Paid' ? 'Paid' : 'Pending'}
+                                </span>
+                              </div>
+
+                              {/* Card Body */}
+                              <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                
+                                {/* Photo Frame Visual Container with realistic frame border */}
+                                <div style={{
+                                  position: 'relative',
+                                  width: '100%',
+                                  height: '240px',
+                                  borderRadius: '12px',
+                                  overflow: 'hidden',
+                                  border: `10px solid ${frameBorderColor}`,
+                                  boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+                                  background: '#0a0a0a'
+                                }}>
+                                  <img 
+                                    src={item.img} 
+                                    alt={item.title} 
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                  />
+
+                                  {/* Download HD Print File Overlay */}
+                                  <div style={{
+                                    position: 'absolute',
+                                    bottom: '8px',
+                                    right: '8px',
+                                    left: '8px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    background: 'rgba(0,0,0,0.75)',
+                                    backdropFilter: 'blur(8px)',
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(255,255,255,0.2)'
+                                  }}>
+                                    <span style={{ color: '#ffffff', fontSize: '0.74rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '170px' }}>
+                                      📷 {details.fileName || 'custom_frame_photo.png'}
+                                    </span>
+                                    
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDownloadCustomImage(item.img, details.fileName || `custom_frame_${item.orderId}.png`)}
+                                      style={{
+                                        padding: '5px 12px',
+                                        borderRadius: '6px',
+                                        border: 'none',
+                                        background: '#FF5500',
+                                        color: '#ffffff',
+                                        fontWeight: '800',
+                                        fontSize: '0.75rem',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        boxShadow: '0 2px 8px rgba(255,85,0,0.4)'
+                                      }}
+                                    >
+                                      <Download size={13} /> Download Print File
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Title & Price */}
+                                <div>
+                                  <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                                    {item.title}
+                                  </h4>
+                                  <span style={{ fontSize: '0.92rem', color: '#FF5500', fontWeight: '900' }}>
+                                    ₹{item.price?.toLocaleString('en-IN')} (Qty: {item.quantity})
+                                  </span>
+                                </div>
+
+                                {/* Specifications Table */}
+                                <div style={{ background: 'var(--bg-input)', borderRadius: '12px', padding: '12px 14px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.82rem' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: 'var(--text-muted)' }}>Frame Dimensions:</span>
+                                    <strong style={{ color: 'var(--text-primary)' }}>{details.size || '8 x 10 inches'}</strong>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: 'var(--text-muted)' }}>Frame Material &amp; Color:</span>
+                                    <strong style={{ color: '#FF5500', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: frameBorderColor, border: '1px solid rgba(0,0,0,0.2)' }} />
+                                      {details.color || 'Classic Walnut Wood'}
+                                    </strong>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: 'var(--text-muted)' }}>Orientation:</span>
+                                    <strong style={{ color: 'var(--text-primary)' }}>{details.orientation || 'Portrait (Vertical)'}</strong>
+                                  </div>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: 'var(--text-muted)' }}>Glass Type:</span>
+                                    <strong style={{ color: 'var(--text-primary)' }}>{details.glass || 'Anti-Glare Premium Glass'}</strong>
+                                  </div>
+                                </div>
+
+                                {/* Customer Shipping & Contact Section */}
+                                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '12px 14px', fontSize: '0.82rem' }}>
+                                  <div style={{ fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                                    👤 {item.customerName}
+                                  </div>
+                                  <div style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginBottom: '8px' }}>
+                                    📍 {item.customerAddress}
+                                  </div>
+
+                                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
+                                    {cleanPhone && (
+                                      <a 
+                                        href={`https://wa.me/91${cleanPhone}?text=${encodeURIComponent(`Hello ${item.customerName || 'Customer'}, regarding your Custom Photo Frame order #${item.orderId} (${details.size || ''}, ${details.color || ''}) from FRIENDS MOBILE:`)}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        style={{
+                                          background: '#25D366',
+                                          color: '#ffffff',
+                                          padding: '7px 12px',
+                                          borderRadius: '8px',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '6px',
+                                          fontWeight: '800',
+                                          textDecoration: 'none',
+                                          fontSize: '0.76rem',
+                                          boxShadow: '0 2px 6px rgba(37, 211, 102, 0.3)'
+                                        }}
+                                      >
+                                        <MessageSquare size={13} /> Chat on WhatsApp
+                                      </a>
+                                    )}
+
+                                    {item.customerPhone && (
+                                      <a 
+                                        href={`tel:${item.customerPhone}`}
+                                        style={{
+                                          background: 'var(--bg-input)',
+                                          border: '1px solid var(--border-color)',
+                                          color: 'var(--text-primary)',
+                                          padding: '7px 12px',
+                                          borderRadius: '8px',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '6px',
+                                          fontWeight: '700',
+                                          textDecoration: 'none',
+                                          fontSize: '0.76rem'
+                                        }}
+                                      >
+                                        <Phone size={13} /> {item.customerPhone}
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* ─── SUB-TAB 2: SIZES, RATES & PRICING MANAGER ─── */}
+              {frameStudioSubTab === 'config' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
 
               {/* Header Title Banner */}
               <div style={{
@@ -6158,6 +6677,8 @@ export default function AdminModal({
                       </div>
                     </form>
                   </div>
+                </div>
+              )}
                 </div>
               )}
 
