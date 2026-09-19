@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   X, ShieldCheck, Package, Truck, ShoppingBag, BarChart3, Plus, Trash2, Edit3, 
-  Check, RefreshCw, Lock, User, Key, ArrowRight, LogOut, CheckCircle2, Clock, 
+  Check, RefreshCw, Lock, User, Key, ArrowLeft, ArrowRight, LogOut, CheckCircle2, Clock, 
   TrendingUp, TrendingDown, Tag, Sparkles, AlertTriangle, Percent, DollarSign, Menu, MapPin, Phone, Eye, EyeOff, Upload, CreditCard, AlertCircle, MessageSquare, PhoneCall,
   Cloud, Database, HardDrive, Download, Zap, Smartphone, Image, Printer, Palette, FileText, Search, Wrench
 } from 'lucide-react';
@@ -2494,7 +2494,7 @@ export default function AdminModal({
                           cursor: 'pointer'
                         }}
                       >
-                        <ArrowLeft size={16} /> ← Back to Catalog
+                        <ArrowLeft size={16} /> Back to Catalog
                       </button>
                       <div>
                         <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '900', color: '#3b82f6', display: 'flex', alignItems: 'center', gap: '8px' }}>
