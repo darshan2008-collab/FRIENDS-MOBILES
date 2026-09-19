@@ -770,13 +770,13 @@ export default function App() {
         trackPageView('Shopping Cart & Checkout');
       } else if (isServiceModalOpen) {
         trackPageView('Mobile Repairs & Service Booking');
-      } else if (isSellModalOpen) {
+      } else if (isSellPhoneOpen) {
         trackPageView('Old Phone Buyback Studio');
       } else {
         trackPageView('Home Catalog');
       }
     } catch (_) {}
-  }, [isCustomFrameOpen, isCustomCoverOpen, isCartOpen, isServiceModalOpen, isSellModalOpen]);
+  }, [isCustomFrameOpen, isCustomCoverOpen, isCartOpen, isServiceModalOpen, isSellPhoneOpen]);
 
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
