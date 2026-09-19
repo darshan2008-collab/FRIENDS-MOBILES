@@ -5,6 +5,7 @@ import {
   Zap, Headphones, Watch, Frame, Palette, CheckCircle2, SlidersHorizontal, 
   Sparkles, ShieldCheck, ArrowUpDown, ChevronLeft, ChevronRight, Tag, RefreshCw, DollarSign, Share2
 } from 'lucide-react';
+import LoveHeart from './LoveHeart';
 import { getProductTitle } from '../data/translations';
 
 export default function ShoppingPortal({ 
@@ -510,15 +511,16 @@ function ProductCard({ product, onAddToCart, isLiked, onToggleWishlist, onSelect
             <Share2 size={15} color="#FF5500" />
           </button>
           <button 
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onToggleWishlist(product.id);
             }}
             className={`wishlist-btn ${isLiked ? 'liked' : ''}`}
             aria-label="Add to wishlist"
-            title="Add to wishlist"
+            title={isLiked ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <Heart size={16} fill={isLiked ? '#FF5500' : 'none'} color={isLiked ? '#FF5500' : 'currentColor'} />
+            <LoveHeart isLiked={isLiked} size="sm" />
           </button>
         </div>
       </div>

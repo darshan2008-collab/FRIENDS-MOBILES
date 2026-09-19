@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ShoppingBag, Heart, Star, Sparkles, User, MessageSquare, Send, Calendar, Camera, Smartphone, ChevronLeft, ChevronRight, ZoomIn, Check, Zap, ShieldCheck, Share2, Copy, CheckCircle2, ExternalLink } from 'lucide-react';
+import LoveHeart from './LoveHeart';
 import { getApiBaseUrl } from '../data/apiConfig';
 
 const API_BASE = getApiBaseUrl();
@@ -453,12 +454,14 @@ export default function ProductDetailModal({
                   <ShoppingBag size={18} /> ADD TO CART ({selectedSize})
                 </button>
                 <button 
+                  type="button"
                   className={`wishlist-icon-btn ${isLiked ? 'liked' : ''}`}
                   onClick={() => onToggleWishlist(product)}
                   style={{ width: '48px', height: '48px', border: '1px solid var(--border-color)', borderRadius: '12px', flexShrink: 0 }}
-                  title="Add to Wishlist"
+                  title={isLiked ? "Remove from Wishlist" : "Add to Wishlist"}
+                  aria-label="Wishlist"
                 >
-                  <Heart size={20} fill={isLiked ? '#FF5500' : 'none'} color={isLiked ? '#FF5500' : 'currentColor'} />
+                  <LoveHeart isLiked={isLiked} size="md" />
                 </button>
                 <button 
                   type="button"
