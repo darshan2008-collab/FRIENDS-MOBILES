@@ -1357,35 +1357,83 @@ a.nav-link.active {
     flex-shrink: 0 !important;
   }
 
-  .promo-grid {
+  .promo-grid,
+  .service-sell-grid {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
+    width: 100% !important;
   }
 
-  .promo-card {
+  .promo-card,
+  .service-sell-card {
     display: grid !important;
-    grid-template-columns: 1fr 125px !important;
+    grid-template-columns: 1fr clamp(100px, 28vw, 130px) !important;
     align-items: center !important;
-    gap: 12px !important;
-    padding: 18px 14px !important;
+    gap: 14px !important;
+    padding: 18px 16px !important;
     min-height: 150px !important;
     position: relative !important;
     overflow: hidden !important;
+    border-radius: 18px !important;
+    box-sizing: border-box !important;
   }
 
-  .promo-info {
+  .promo-info,
+  .service-sell-card .promo-info {
     max-width: 100% !important;
     width: 100% !important;
+    min-width: 0 !important;
     z-index: 2 !important;
     position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
   }
 
-  .promo-img-box {
+  .promo-info h3,
+  .service-sell-card h3 {
+    font-size: clamp(1rem, 3.8vw, 1.15rem) !important;
+    margin-bottom: 6px !important;
+    line-height: 1.25 !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .promo-info .sub-text,
+  .promo-info .discount,
+  .service-sell-card .sub-text {
+    font-size: clamp(0.74rem, 2.5vw, 0.82rem) !important;
+    line-height: 1.4 !important;
+    margin-bottom: 12px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .promo-info .btn,
+  .service-sell-card .btn {
+    padding: 7px 16px !important;
+    font-size: 0.76rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.4px !important;
+    border-radius: 20px !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .promo-img-box,
+  .service-sell-card .service-sell-img-box {
     position: relative !important;
     right: auto !important;
     bottom: auto !important;
-    width: 115px !important;
-    height: 115px !important;
+    width: clamp(100px, 28vw, 130px) !important;
+    height: clamp(100px, 28vw, 130px) !important;
+    min-width: clamp(100px, 28vw, 130px) !important;
+    min-height: clamp(100px, 28vw, 130px) !important;
     flex-shrink: 0 !important;
     margin: 0 auto !important;
     display: flex !important;
@@ -1393,11 +1441,15 @@ a.nav-link.active {
     justify-content: center !important;
   }
 
-  .promo-img-box img {
-    width: 100% !important;
-    height: 100% !important;
+  .promo-img-box img,
+  .service-sell-card .service-sell-img-box img {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    width: auto !important;
+    height: auto !important;
     object-fit: contain !important;
     border-radius: 10px !important;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.15)) !important;
   }
 
   .hero-title {

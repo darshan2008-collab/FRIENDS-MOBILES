@@ -252,10 +252,10 @@ export default function ProductDetailModal({
         </header>
 
         {/* Scrollable Details Body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '32px', maxWidth: '1100px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: 'clamp(14px, 3.5vw, 24px)', display: 'flex', flexDirection: 'column', gap: '32px', maxWidth: '1100px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
           
           {/* Main Detail Row: Amazon/Flipkart Layout */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '28px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '28px' }}>
             
              {/* Left Column: Amazon/Flipkart Multi-Image Gallery + Magnifier Lens */}
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
@@ -573,7 +573,7 @@ export default function ProductDetailModal({
               <MessageSquare size={18} /> Customer Feedback &amp; Reviews
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '24px' }}>
               
               {/* Left Form: Add Review */}
               <form onSubmit={handleReviewSubmit} style={{ background: 'var(--bg-input)', padding: '20px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '12px', height: 'fit-content' }}>

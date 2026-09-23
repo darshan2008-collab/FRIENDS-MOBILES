@@ -1060,7 +1060,7 @@ export default function UserAccountModal({
                   <h3 style={{ margin: '0 0 6px 0', fontSize: '1.3rem', fontWeight: '800' }}>Personal Account Profile</h3>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '24px' }}>Manage your verified customer profile information</p>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '20px', marginBottom: '30px' }}>
                     <div style={{ background: 'var(--bg-input)', padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <User size={22} color="#FF5500" />
@@ -1309,7 +1309,7 @@ export default function UserAccountModal({
                   <h3 style={{ margin: '0 0 6px 0', fontSize: '1.3rem', fontWeight: '800' }}>Friends Mobile Help Desk</h3>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '24px' }}>Need assistance with your order or product advice?</p>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '20px' }}>
                     <div style={{ background: 'var(--bg-input)', padding: '24px', borderRadius: '18px', border: '1px solid var(--border-color)', textAlign: 'center' }}>
                       <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(37, 211, 102, 0.15)', color: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px auto' }}>
                         <MessageCircle size={26} />

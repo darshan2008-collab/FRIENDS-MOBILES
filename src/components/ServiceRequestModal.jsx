@@ -651,7 +651,7 @@ export default function ServiceRequestModal({
                     </h4>
                     <div style={{
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))',
                       gap: '10px',
                       marginBottom: '16px'
                     }}>
@@ -731,7 +731,7 @@ export default function ServiceRequestModal({
                       4. Doorstep Pickup & Contact Details
                     </h4>
                     
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginBottom: '14px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '14px', marginBottom: '14px' }}>
                       <div>
                         <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
                           Customer Name *

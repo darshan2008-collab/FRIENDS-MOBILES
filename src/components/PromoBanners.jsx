@@ -69,25 +69,12 @@ export default function PromoBanners({
   };
 
   const cardCount = activeCards.length;
-  const dynamicGridStyle = {
-    display: 'grid',
-    gap: '24px',
-    width: '100%',
-    gridTemplateColumns:
-      cardCount === 1 ? 'minmax(280px, 640px)' :
-      cardCount === 2 ? 'repeat(2, 1fr)' :
-      cardCount === 3 ? 'repeat(3, 1fr)' :
-      cardCount === 4 ? 'repeat(2, 1fr)' :
-      'repeat(auto-fit, minmax(320px, 1fr))',
-    justifyContent: cardCount === 1 ? 'center' : 'stretch'
-  };
 
   return (
     <section className="promo-banners">
       <div 
         className="container promo-grid" 
         data-count={cardCount}
-        style={dynamicGridStyle}
       >
         {activeCards.map((card) => {
           const fallbackImage = card.fallbackImg || 'images/banner_accessories.png';
