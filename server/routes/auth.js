@@ -101,7 +101,7 @@ function isValidEmail(email) {
 // POST /api/auth/signup
 router.post('/signup', signupLimiter, async (req, res) => {
   try {
-    const { name, email, phone, password, address } = req.body;
+    const { name, email, phone, password, address, countryCode, countryIso, countryName, formattedPhone } = req.body;
 
     if (!name || !email || !phone || !password) {
       return res.status(400).json({ success: false, message: 'Full name, email address, mobile phone number, and password are required' });
@@ -112,9 +112,20 @@ router.post('/signup', signupLimiter, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please enter a valid email address with correct format (e.g. user@gmail.com)' });
     }
 
+    const selectedCountryCode = countryCode || '+91';
     const cleanPhone = normalizePhone(phone);
-    if (!cleanPhone || cleanPhone.length < 10) {
-      return res.status(400).json({ success: false, message: 'Please enter a valid 10-digit mobile phone number' });
+    if (!cleanPhone) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid mobile phone number' });
+    }
+
+    if (selectedCountryCode === '+91') {
+      if (cleanPhone.length !== 10 || !/^[6-9]\d{9}$/.test(cleanPhone)) {
+        return res.status(400).json({ success: false, message: 'Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9' });
+      }
+    } else {
+      if (cleanPhone.length < 7 || cleanPhone.length > 15) {
+        return res.status(400).json({ success: false, message: 'Please enter a valid mobile number for your country' });
+      }
     }
 
     if (password.length < 4) {
@@ -141,6 +152,9 @@ router.post('/signup', signupLimiter, async (req, res) => {
       name: cleanName,
       email: cleanEmail,
       phone: cleanPhone,
+      countryCode: selectedCountryCode,
+      countryIso: countryIso || 'IN',
+      formattedPhone: formattedPhone || `${selectedCountryCode} ${cleanPhone}`,
       password: hashPassword(password),
       address: cleanAddress,
       cart: [],
@@ -162,6 +176,8 @@ router.post('/signup', signupLimiter, async (req, res) => {
       name: newUser.name, 
       email: newUser.email, 
       phone: newUser.phone, 
+      countryCode: newUser.countryCode,
+      formattedPhone: newUser.formattedPhone,
       address: newUser.address, 
       cart: [],
       wishlist: [],

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, Eye, EyeOff, AlertCircle, Clock, RefreshCw, Zap } from 'lucide-react';
+import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, CheckCircle2, Eye, EyeOff, AlertCircle, Clock, RefreshCw, Zap, ChevronDown, Globe } from 'lucide-react';
 import { Browser } from '@capacitor/browser';
 import CompanyLogo from './CompanyLogo';
 import { getApiBaseUrl, getApiHost } from '../data/apiConfig';
+import { COUNTRY_CODES, DEFAULT_COUNTRY } from '../data/countryCodes';
 
 const API_BASE = getApiBaseUrl();
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '790719609329-17h6kuua100ndrtau0shkm71kb4b12r4.apps.googleusercontent.com';
@@ -94,6 +95,55 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     password: ''
   });
 
+  // Country code selector state
+  const [selectedCountry, setSelectedCountry] = useState(DEFAULT_COUNTRY);
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [countrySearchQuery, setCountrySearchQuery] = useState('');
+
+  // Handle phone input change with strict numeric-only sanitization and country max-length
+  const handleSignupPhoneChange = (val) => {
+    const digitsOnly = val.replace(/\D/g, '');
+    const maxLen = selectedCountry.maxDigits || 10;
+    const truncated = digitsOnly.slice(0, maxLen);
+    setSignupForm(prev => ({ ...prev, phone: truncated }));
+  };
+
+  // Real-time phone validation feedback
+  const getPhoneValidationStatus = () => {
+    const phone = signupForm.phone || '';
+    if (!phone) return { isValid: false, message: '', color: '' };
+
+    if (selectedCountry.code === 'IN') {
+      if (phone.length === 10) {
+        if (/^[6-9]\d{9}$/.test(phone)) {
+          return { isValid: true, message: 'Valid 10-digit Indian Number', color: '#22c55e' };
+        } else {
+          return { isValid: false, message: 'Must start with 6, 7, 8, or 9', color: '#ef4444' };
+        }
+      } else {
+        const remaining = 10 - phone.length;
+        if (!/^[6-9]/.test(phone)) {
+          return { isValid: false, message: 'Must start with 6, 7, 8, or 9', color: '#ef4444' };
+        }
+        return { isValid: false, message: `${phone.length}/10 digits (${remaining} left)`, color: '#f59e0b' };
+      }
+    } else {
+      const min = selectedCountry.minDigits || 8;
+      const max = selectedCountry.maxDigits || 12;
+      if (phone.length >= min && phone.length <= max) {
+        return { isValid: true, message: `Valid ${selectedCountry.name} Number`, color: '#22c55e' };
+      } else {
+        return { isValid: false, message: `${phone.length}/${max} digits (min ${min})`, color: '#f59e0b' };
+      }
+    }
+  };
+
+  const filteredCountries = COUNTRY_CODES.filter(c => 
+    c.name.toLowerCase().includes(countrySearchQuery.toLowerCase().trim()) ||
+    c.dialCode.includes(countrySearchQuery.trim()) ||
+    c.code.toLowerCase().includes(countrySearchQuery.toLowerCase().trim())
+  );
+
   // Forgot Password Form State
   const [forgotPhone, setForgotPhone] = useState('');
   const [forgotStep, setForgotStep] = useState(1); // 1: Send OTP, 2: Verify OTP, 3: Reset Password
@@ -128,6 +178,9 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     setLoginIdentity('');
     setLoginPassword('');
     setSignupForm({ name: '', phone: '', email: '', password: '' });
+    setSelectedCountry(DEFAULT_COUNTRY);
+    setIsCountryDropdownOpen(false);
+    setCountrySearchQuery('');
     setForgotPhone('');
     setForgotStep(1);
     setVerifiedName('');
@@ -380,17 +433,43 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
 
     const cleanDigits = signupForm.phone.replace(/\D/g, '');
-    if (cleanDigits.length < 10) {
-      if (addToast) addToast('Please enter a valid 10-digit mobile phone number', 'warning');
-      return;
+
+    // Strict Phone Number Security Validation
+    if (selectedCountry.code === 'IN') {
+      if (cleanDigits.length !== 10) {
+        if (addToast) addToast('Please enter an exact 10-digit Indian mobile number', 'warning');
+        return;
+      }
+      if (!/^[6-9]\d{9}$/.test(cleanDigits)) {
+        if (addToast) addToast('Invalid Indian mobile number. Must start with 6, 7, 8, or 9.', 'warning');
+        return;
+      }
+    } else {
+      const minDigits = selectedCountry.minDigits || 8;
+      const maxDigits = selectedCountry.maxDigits || 12;
+      if (cleanDigits.length < minDigits || cleanDigits.length > maxDigits) {
+        if (addToast) addToast(`Please enter a valid mobile number for ${selectedCountry.name} (${minDigits}-${maxDigits} digits)`, 'warning');
+        return;
+      }
     }
+
+    const signupPayload = {
+      name: signupForm.name.trim(),
+      email: signupForm.email.trim(),
+      phone: cleanDigits,
+      countryCode: selectedCountry.dialCode,
+      countryIso: selectedCountry.code,
+      countryName: selectedCountry.name,
+      formattedPhone: `${selectedCountry.dialCode} ${cleanDigits}`,
+      password: signupForm.password
+    };
 
     setIsSubmitting(true);
     try {
       const { data, ok } = await safeFetchApi('/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(signupForm)
+        body: JSON.stringify(signupPayload)
       });
 
       if (ok && data && data.success && data.user) {
@@ -417,6 +496,10 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       name: signupForm.name.trim(),
       email: signupForm.email.trim(),
       phone: cleanDigits,
+      countryCode: selectedCountry.dialCode,
+      countryIso: selectedCountry.code,
+      countryName: selectedCountry.name,
+      formattedPhone: `${selectedCountry.dialCode} ${cleanDigits}`,
       address: '',
       createdAt: new Date().toISOString()
     };
@@ -752,6 +835,8 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   if (!isOpen || typeof document === 'undefined') return null;
   const portalContainer = document.body || document.getElementById('root') || document.documentElement;
   if (!portalContainer) return null;
+
+  const phoneValidation = getPhoneValidationStatus();
 
   return createPortal(
     <div className="full-page-user-auth-portal">
@@ -1142,18 +1227,188 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Mobile Phone Number</label>
-                  <div className="auth-input-group">
-                    <Phone size={16} className="auth-input-icon" />
-                    <input 
-                      type="tel" 
-                      placeholder="7448578507"
-                      value={signupForm.phone}
-                      onChange={(e) => setSignupForm({...signupForm, phone: e.target.value})}
-                      required
-                      className="auth-input-field"
-                    />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', letterSpacing: '0.2px' }}>
+                      Mobile Phone Number
+                    </label>
+                    {signupForm.phone && (
+                      <span style={{ 
+                        fontSize: '0.72rem', 
+                        fontWeight: '700', 
+                        color: phoneValidation.color,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        {phoneValidation.isValid ? <CheckCircle2 size={12} color="#22c55e" /> : <AlertCircle size={12} />}
+                        {phoneValidation.message}
+                      </span>
+                    )}
                   </div>
+
+                  <div className="auth-phone-row" style={{ display: 'flex', gap: '8px', position: 'relative' }}>
+                    
+                    {/* Country Code Dropdown Trigger */}
+                    <div className="country-code-picker-wrap" style={{ position: 'relative' }}>
+                      <button
+                        type="button"
+                        onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                        className="country-picker-btn"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          height: '44px',
+                          padding: '0 10px',
+                          borderRadius: '10px',
+                          border: isCountryDropdownOpen ? '1.5px solid #FF5500' : '1.5px solid var(--border-color)',
+                          background: 'var(--bg-input)',
+                          color: 'var(--text-primary)',
+                          fontSize: '0.88rem',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.2s ease',
+                          outline: 'none',
+                          boxShadow: isCountryDropdownOpen ? '0 0 0 3px rgba(255, 85, 0, 0.18)' : 'none'
+                        }}
+                        aria-label="Select Country Code"
+                      >
+                        <span style={{ fontSize: '1.25rem', lineHeight: '1' }}>{selectedCountry.flag}</span>
+                        <span>{selectedCountry.dialCode}</span>
+                        <ChevronDown size={14} style={{ opacity: 0.7, transform: isCountryDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                      </button>
+
+                      {/* Invisible backdrop to dismiss country dropdown on click outside */}
+                      {isCountryDropdownOpen && (
+                        <div 
+                          style={{ position: 'fixed', inset: 0, zIndex: 999 }}
+                          onClick={() => setIsCountryDropdownOpen(false)}
+                        />
+                      )}
+
+                      {/* Dropdown Menu */}
+                      {isCountryDropdownOpen && (
+                        <div 
+                          className="country-picker-dropdown"
+                          style={{
+                            position: 'absolute',
+                            top: 'calc(100% + 6px)',
+                            left: 0,
+                            width: '280px',
+                            maxHeight: '280px',
+                            background: 'var(--bg-card, #ffffff)',
+                            border: '1.5px solid var(--border-color)',
+                            borderRadius: '14px',
+                            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.25)',
+                            zIndex: 1000,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            overflow: 'hidden'
+                          }}
+                        >
+                          {/* Search Input */}
+                          <div style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-input)' }}>
+                            <input
+                              type="text"
+                              placeholder="Search country or code..."
+                              value={countrySearchQuery}
+                              onChange={(e) => setCountrySearchQuery(e.target.value)}
+                              autoFocus
+                              style={{
+                                width: '100%',
+                                padding: '8px 10px',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border-color)',
+                                background: 'var(--bg-card)',
+                                color: 'var(--text-primary)',
+                                fontSize: '0.8rem',
+                                outline: 'none',
+                                boxSizing: 'border-box'
+                              }}
+                            />
+                          </div>
+
+                          {/* Country List */}
+                          <div style={{ overflowY: 'auto', flex: 1, padding: '4px' }}>
+                            {filteredCountries.length === 0 ? (
+                              <div style={{ padding: '12px', textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                                No country found
+                              </div>
+                            ) : (
+                              filteredCountries.map(c => (
+                                <button
+                                  key={c.code}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedCountry(c);
+                                    setIsCountryDropdownOpen(false);
+                                    setCountrySearchQuery('');
+                                    if (signupForm.phone) {
+                                      setSignupForm(prev => ({
+                                        ...prev,
+                                        phone: prev.phone.slice(0, c.maxDigits || 10)
+                                      }));
+                                    }
+                                  }}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    width: '100%',
+                                    padding: '8px 10px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    background: selectedCountry.code === c.code ? 'rgba(255, 85, 0, 0.12)' : 'transparent',
+                                    color: selectedCountry.code === c.code ? '#FF5500' : 'var(--text-primary)',
+                                    fontSize: '0.84rem',
+                                    fontWeight: selectedCountry.code === c.code ? '700' : '500',
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    transition: 'background 0.15s'
+                                  }}
+                                >
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '1.2rem' }}>{c.flag}</span>
+                                    <span>{c.name}</span>
+                                  </span>
+                                  <span style={{ fontWeight: '700', fontSize: '0.8rem', color: '#FF5500' }}>{c.dialCode}</span>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Phone Number Input Field */}
+                    <div className="auth-input-group" style={{ flex: 1, position: 'relative' }}>
+                      <Phone size={16} className="auth-input-icon" />
+                      <input 
+                        type="tel" 
+                        inputMode="numeric"
+                        placeholder={selectedCountry.placeholder || "98765 43210"}
+                        value={signupForm.phone}
+                        onChange={(e) => handleSignupPhoneChange(e.target.value)}
+                        maxLength={selectedCountry.maxDigits || 10}
+                        required
+                        className="auth-input-field"
+                        style={{
+                          height: '44px',
+                          paddingRight: signupForm.phone && phoneValidation.isValid ? '36px' : '14px',
+                          borderColor: signupForm.phone && phoneValidation.isValid ? '#22c55e' : undefined
+                        }}
+                      />
+                      {signupForm.phone && phoneValidation.isValid && (
+                        <CheckCircle2 size={16} color="#22c55e" style={{ position: 'absolute', right: '12px', pointerEvents: 'none' }} />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Security / Format Hint */}
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                    {selectedCountry.hint || `Enter ${selectedCountry.minDigits} to ${selectedCountry.maxDigits} digits`}
+                  </span>
                 </div>
 
                 <div>
