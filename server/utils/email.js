@@ -58,13 +58,21 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer', 
   const ports = configuredPort === 587 ? [587, 465] : [465, 587];
   let lastError = null;
 
-  const isSignup = purpose === 'signup' || purpose === 'register';
+  const cleanPurpose = (purpose || '').toString().toLowerCase().trim();
+  const isSignup = cleanPurpose === 'signup'
+    || cleanPurpose === 'register'
+    || cleanPurpose === 'account_verification'
+    || cleanPurpose.includes('signup')
+    || cleanPurpose.includes('register')
+    || cleanPurpose.includes('account')
+    || (cleanPurpose.includes('verification') && !cleanPurpose.includes('reset'));
+
   const emailSubject = isSignup
     ? `FRIENDS MOBILE - ${otpCode} is your Account Verification Code`
     : `FRIENDS MOBILE - ${otpCode} is your Password Reset Code`;
 
   const bannerSubtitle = isSignup
-    ? `Welcome to FRIENDS MOBILE • Member Registration`
+    ? `Official Account Security &amp; Member Verification`
     : `Official Member Security &amp; Password Recovery`;
 
   const greetingTitle = isSignup
@@ -72,12 +80,12 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer', 
     : `Hello, ${customerName}!`;
 
   const introText = isSignup
-    ? `Thank you for registering with FRIENDS MOBILE! Please verify your email address to activate your account and claim your <strong>150 Welcome Reward Points</strong>:`
+    ? `Thank you for choosing FRIENDS MOBILE! Use the 6-digit verification code below to verify your email address and activate your account:`
     : `We received a request to reset your account password. Use the 6-digit verification code below to set your new password:`;
 
   const boxLabel = isSignup
-    ? `Your Email Verification Code`
-    : `Your One-Time Password Reset Code`;
+    ? `YOUR ONE-TIME ACCOUNT VERIFICATION CODE`
+    : `YOUR ONE-TIME PASSWORD RESET CODE`;
 
   for (const account of accounts) {
     if (!account.user || !account.pass) continue;

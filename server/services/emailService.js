@@ -81,27 +81,63 @@ async function sendEmail({ to, subject, html, text }) {
 /**
  * Format & Send OTP Email
  */
-async function sendOTPEmail(toEmail, otpCode, purpose = 'password_reset') {
-  const subject = 'Your Verification Code';
-  const textBody = `Your One-Time Password (OTP) is:\n\n${otpCode}\n\nThis OTP is valid for 5 minutes.\n\nIf you did not request this code, ignore this email.`;
+async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer', purpose = 'password_reset') {
+  if (customerName === 'signup' || customerName === 'register' || customerName === 'password_reset') {
+    purpose = customerName;
+    customerName = 'Valued Customer';
+  }
+
+  const cleanPurpose = (purpose || '').toString().toLowerCase().trim();
+  const isSignup = cleanPurpose === 'signup'
+    || cleanPurpose === 'register'
+    || cleanPurpose === 'account_verification'
+    || cleanPurpose.includes('signup')
+    || cleanPurpose.includes('register')
+    || cleanPurpose.includes('account')
+    || (cleanPurpose.includes('verification') && !cleanPurpose.includes('reset'));
+
+  const subject = isSignup
+    ? `FRIENDS MOBILE - ${otpCode} is your Account Verification Code`
+    : `FRIENDS MOBILE - ${otpCode} is your Password Reset Code`;
+
+  const bannerSubtitle = isSignup
+    ? 'Official Account Security &amp; Member Verification'
+    : 'Official Member Security &amp; Password Recovery';
+
+  const greetingTitle = isSignup
+    ? `Welcome to FRIENDS MOBILE, ${customerName}!`
+    : `Hello, ${customerName}!`;
+
+  const introText = isSignup
+    ? 'Thank you for choosing FRIENDS MOBILE! Use the 6-digit verification code below to verify your email address and activate your account:'
+    : 'We received a request to reset your account password. Use the 6-digit verification code below to set your new password:';
+
+  const boxLabel = isSignup
+    ? 'YOUR ONE-TIME ACCOUNT VERIFICATION CODE'
+    : 'YOUR ONE-TIME PASSWORD RESET CODE';
+
+  const textBody = `Hello ${customerName},\n\nYour 6-digit verification code is: ${otpCode}\n\nPurpose: ${isSignup ? 'Account Email Verification' : 'Password Reset'}\nThis code is valid for 5 minutes.\n\nRegards,\nFriends Mobiles Store`;
   
   const htmlBody = `
     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
       <div style="text-align: center; margin-bottom: 20px;">
         <h2 style="color: #ff5500; margin: 0; font-size: 24px; font-weight: 800;">FRIENDS MOBILE</h2>
-        <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Account Security &amp; Verification</p>
+        <p style="color: #64748b; font-size: 13px; margin-top: 4px;">${bannerSubtitle}</p>
       </div>
 
-      <div style="background: #f8fafc; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #cbd5e1; margin-bottom: 20px;">
-        <p style="margin: 0 0 10px 0; font-size: 13px; color: #475569; font-weight: 600;">Your One-Time Password (OTP) is:</p>
+      <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 800; color: #0f172a;">${greetingTitle}</h3>
+      <p style="margin: 0 0 18px 0; font-size: 13.5px; color: #475569; line-height: 1.5;">${introText}</p>
+
+      <div style="background: #fff7ed; padding: 20px; border-radius: 10px; text-align: center; border: 2px dashed #ff5500; margin-bottom: 20px;">
+        <p style="margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #c2410c; font-weight: 800;">${boxLabel}</p>
         <div style="font-size: 36px; font-weight: 900; color: #ff5500; letter-spacing: 8px; font-family: monospace;">${otpCode}</div>
       </div>
 
-      <p style="font-size: 13px; color: #334155; line-height: 1.5; margin-bottom: 12px;">
+      <p style="font-size: 12.5px; color: #334155; line-height: 1.5; margin-bottom: 12px;">
         This OTP is valid for <strong>5 minutes</strong>.
       </p>
       <p style="font-size: 12px; color: #94a3b8; line-height: 1.5; margin: 0;">
-        If you did not request this code, please ignore this email.
+        ${isSignup ? 'If you did not attempt to create an account with FRIENDS MOBILE, you can safely ignore this email.' : 'If you did not request this password reset code, please ignore this email.'}
       </p>
     </div>
   `;

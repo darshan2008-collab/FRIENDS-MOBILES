@@ -43,17 +43,18 @@ app.get('/api/mail/health', (req, res) => {
 // POST /send-otp
 app.post(['/send-otp', '/api/mail/send-otp'], async (req, res) => {
   try {
-    const { toEmail, otpCode, customerName } = req.body || {};
+    const { toEmail, otpCode, customerName, purpose } = req.body || {};
 
     if (!toEmail || !otpCode) {
       return res.status(400).json({ success: false, message: 'toEmail and otpCode are required' });
     }
 
-    console.log(`[Mail Microservice] Processing OTP dispatch to: ${toEmail}`);
-    const result = await sendOTPEmail(toEmail, otpCode, customerName || 'Valued Customer');
+    const targetPurpose = purpose || 'password_reset';
+    console.log(`[Mail Microservice] Processing OTP dispatch to: ${toEmail} (Purpose: ${targetPurpose})`);
+    const result = await sendOTPEmail(toEmail, otpCode, customerName || 'Valued Customer', targetPurpose);
 
     if (result && result.success) {
-      return res.json({ success: true, messageId: result.messageId, sender: result.sender });
+      return res.json({ success: true, messageId: result.messageId, sender: result.sender, purpose: targetPurpose });
     } else {
       return res.status(500).json({ success: false, error: result?.error || 'Mail dispatch failed' });
     }
