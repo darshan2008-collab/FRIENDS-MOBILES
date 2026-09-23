@@ -46,7 +46,7 @@ const createTransporterForCreds = (user, pass, port = 465) => {
   });
 };
 
-async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') {
+async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer', purpose = 'password_reset') {
   const accounts = getSmtpAccounts();
 
   if (!nodemailer || accounts.length === 0) {
@@ -58,20 +58,41 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
   const ports = configuredPort === 587 ? [587, 465] : [465, 587];
   let lastError = null;
 
+  const isSignup = purpose === 'signup' || purpose === 'register';
+  const emailSubject = isSignup
+    ? `FRIENDS MOBILE - ${otpCode} is your Account Verification Code`
+    : `FRIENDS MOBILE - ${otpCode} is your Password Reset Code`;
+
+  const bannerSubtitle = isSignup
+    ? `Welcome to FRIENDS MOBILE • Member Registration`
+    : `Official Member Security &amp; Password Recovery`;
+
+  const greetingTitle = isSignup
+    ? `Welcome to FRIENDS MOBILE, ${customerName}!`
+    : `Hello, ${customerName}!`;
+
+  const introText = isSignup
+    ? `Thank you for registering with FRIENDS MOBILE! Please verify your email address to activate your account and claim your <strong>150 Welcome Reward Points</strong>:`
+    : `We received a request to reset your account password. Use the 6-digit verification code below to set your new password:`;
+
+  const boxLabel = isSignup
+    ? `Your Email Verification Code`
+    : `Your One-Time Password Reset Code`;
+
   for (const account of accounts) {
     if (!account.user || !account.pass) continue;
 
     for (const port of ports) {
       try {
-        console.log(`[SMTP Dispatch] Attempting send to ${toEmail} via ${account.user} on host: ${getSmtpHost()}, port: ${port}`);
+        console.log(`[SMTP Dispatch] Attempting send to ${toEmail} via ${account.user} on host: ${getSmtpHost()}, port: ${port} (Purpose: ${purpose})`);
         const transporter = createTransporterForCreds(account.user, account.pass, port);
         if (!transporter) continue;
 
         const mailOptions = {
           from: `"Friends Mobiles Store" <${account.user}>`,
           to: toEmail,
-          subject: `FRIENDS MOBILE - ${otpCode} is your Verification Code`,
-          text: `Hello ${customerName},\n\nYour 6-digit verification code is: ${otpCode}\n\nThis code is valid for 5 minutes. Please do not share this code with anyone.\n\nRegards,\nFriends Mobiles Store`,
+          subject: emailSubject,
+          text: `Hello ${customerName},\n\nYour 6-digit verification code is: ${otpCode}\n\nPurpose: ${isSignup ? 'Account Email Verification' : 'Password Reset'}\nThis code is valid for 5 minutes. Please do not share this code with anyone.\n\nRegards,\nFriends Mobiles Store`,
           headers: {
             'X-Priority': '1',
             'Importance': 'high'
@@ -80,23 +101,23 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
             <div style="font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif; max-width: 540px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 36px rgba(0,0,0,0.1);">
               <div style="background: linear-gradient(135deg, #FF5500 0%, #E03E00 100%); padding: 28px 24px; text-align: center; color: #ffffff;">
                 <div style="font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 2px;">FRIENDS <span style="color: #FFE600;">MOBILE</span></div>
-                <p style="margin: 0; font-size: 13px; opacity: 0.95; font-weight: 500;">Official Member Security &amp; Verification Portal</p>
+                <p style="margin: 0; font-size: 13px; opacity: 0.95; font-weight: 500;">${bannerSubtitle}</p>
               </div>
 
               <div style="padding: 30px 28px; color: #1e293b;">
-                <h3 style="margin: 0 0 12px 0; font-size: 19px; font-weight: 800; color: #0f172a;">Hello, ${customerName}!</h3>
+                <h3 style="margin: 0 0 12px 0; font-size: 19px; font-weight: 800; color: #0f172a;">${greetingTitle}</h3>
                 <p style="margin: 0 0 22px 0; font-size: 14px; color: #475569; line-height: 1.6;">
-                  We received a request to verify your identity. Use the 6-digit verification code below:
+                  ${introText}
                 </p>
 
                 <div style="background: #fff7ed; border: 2px dashed #ff5500; border-radius: 14px; padding: 20px 16px; text-align: center; margin-bottom: 24px;">
-                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #c2410c; font-weight: 800; margin-bottom: 6px;">Your One-Time Verification Code</div>
-                  <span style="font-size: 36px; font-weight: 900; color: #ff5500; letter-spacing: 10px; font-family: 'Courier New', Courier, monospace; display: inline-block;">${otpCode}</span>
+                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #c2410c; font-weight: 800; margin-bottom: 6px;">${boxLabel}</div>
+                  <span style="font-size: 38px; font-weight: 900; color: #ff5500; letter-spacing: 10px; font-family: 'Courier New', Courier, monospace; display: inline-block;">${otpCode}</span>
                 </div>
 
                 <div style="background: #fff7ed; border-left: 4px solid #ff5500; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
                   <p style="margin: 0; font-size: 12.5px; color: #c2410c; line-height: 1.5;">
-                    <strong>Time Sensitive:</strong> This code will expire in <strong>5 minutes</strong>. Please verify promptly.
+                    <strong>Time Sensitive:</strong> This code will expire in <strong>5 minutes</strong>. Please enter it promptly.
                   </p>
                 </div>
 
@@ -107,7 +128,7 @@ async function sendOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') 
                 </div>
 
                 <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5;">
-                  If you did not request this verification code, please ignore this message or contact support if you suspect unauthorized access.
+                  ${isSignup ? 'If you did not attempt to create an account with FRIENDS MOBILE, you can safely ignore this email.' : 'If you did not request this password reset code, please ignore this message or contact support if you suspect unauthorized access.'}
                 </p>
               </div>
 
@@ -217,7 +238,7 @@ async function sendOrderEmail(toEmail, orderDetails = {}, subjectTitle = 'FRIEND
   return { success: false, error: lastError || 'Failed to dispatch order email' };
 }
 
-async function dispatchOTPEmail(toEmail, otpCode, customerName = 'Valued Customer') {
+async function dispatchOTPEmail(toEmail, otpCode, customerName = 'Valued Customer', purpose = 'password_reset') {
   // 1. Try primary configured dedicated Mail Microservice URL first
   const primaryEndpoint = process.env.MAIL_SERVICE_URL
     ? `${process.env.MAIL_SERVICE_URL}/send-otp`
@@ -229,7 +250,7 @@ async function dispatchOTPEmail(toEmail, otpCode, customerName = 'Valued Custome
     const response = await fetch(primaryEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ toEmail, otpCode, customerName }),
+      body: JSON.stringify({ toEmail, otpCode, customerName, purpose }),
       signal: controller.signal
     });
     clearTimeout(timeout);
@@ -237,7 +258,7 @@ async function dispatchOTPEmail(toEmail, otpCode, customerName = 'Valued Custome
     if (response.ok) {
       const data = await response.json();
       if (data && data.success) {
-        console.log(`[Mail Dispatcher] OTP sent via dedicated Mail Microservice (${primaryEndpoint})`);
+        console.log(`[Mail Dispatcher] OTP sent via dedicated Mail Microservice (${primaryEndpoint}) for purpose: ${purpose}`);
         return data;
       }
     }
@@ -246,7 +267,7 @@ async function dispatchOTPEmail(toEmail, otpCode, customerName = 'Valued Custome
   }
 
   // 2. Direct local Nodemailer SMTP fallback if microservice is offline or returning errors
-  return await sendOTPEmail(toEmail, otpCode, customerName);
+  return await sendOTPEmail(toEmail, otpCode, customerName, purpose);
 }
 
 module.exports = { sendOTPEmail, dispatchOTPEmail, sendOrderEmail };

@@ -159,7 +159,17 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Countdown timer effect for OTP resend
+  // Signup Flow & Email Verification States (Strictly separated from Forgot Password)
+  const [signupStep, setSignupStep] = useState(1); // 1: Name & Email, 2: OTP Verification, 3: Phone & Password
+  const [signupOtpInput, setSignupOtpInput] = useState('');
+  const [signupOtpDigits, setSignupOtpDigits] = useState(['', '', '', '', '', '']);
+  const [focusedSignupOtpIndex, setFocusedSignupOtpIndex] = useState(null);
+  const [signupResendTimer, setSignupResendTimer] = useState(0);
+  const [signupToken, setSignupToken] = useState('');
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [signupEmailError, setSignupEmailError] = useState('');
+
+  // Countdown timer effect for Forgot Password OTP resend
   React.useEffect(() => {
     let timer;
     if (resendTimer > 0) {
@@ -167,6 +177,15 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
     return () => clearTimeout(timer);
   }, [resendTimer]);
+
+  // Countdown timer effect for Signup Email OTP resend
+  React.useEffect(() => {
+    let timer;
+    if (signupResendTimer > 0) {
+      timer = setTimeout(() => setSignupResendTimer(prev => prev - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [signupResendTimer]);
 
   // Password visibility states
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -181,6 +200,14 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     setSelectedCountry(DEFAULT_COUNTRY);
     setIsCountryDropdownOpen(false);
     setCountrySearchQuery('');
+    setSignupStep(1);
+    setSignupOtpInput('');
+    setSignupOtpDigits(['', '', '', '', '', '']);
+    setFocusedSignupOtpIndex(null);
+    setSignupResendTimer(0);
+    setSignupToken('');
+    setIsEmailVerified(false);
+    setSignupEmailError('');
     setForgotPhone('');
     setForgotStep(1);
     setVerifiedName('');
@@ -267,6 +294,70 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       if (target) target.focus();
 
       triggerAutoVerifyIfComplete(newArray);
+    }
+  };
+
+  const triggerAutoVerifySignupIfComplete = (digitsArray) => {
+    const fullCode = digitsArray.join('');
+    if (fullCode.length === 6 && !isSubmitting) {
+      setTimeout(() => {
+        executeVerifySignupOtp(fullCode);
+      }, 150);
+    }
+  };
+
+  const handleSignupDigitChange = (index, val) => {
+    const clean = val.replace(/\D/g, '');
+    const updated = [...signupOtpDigits];
+    updated[index] = clean.slice(-1);
+    setSignupOtpDigits(updated);
+    const codeStr = updated.join('');
+    setSignupOtpInput(codeStr);
+
+    if (clean && index < 5) {
+      const nextInput = document.getElementById(`signup-otp-box-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+
+    triggerAutoVerifySignupIfComplete(updated);
+  };
+
+  const handleSignupDigitKeyDown = (index, e) => {
+    if (e.key === 'Backspace') {
+      if (!signupOtpDigits[index] && index > 0) {
+        const prevInput = document.getElementById(`signup-otp-box-${index - 1}`);
+        if (prevInput) {
+          prevInput.focus();
+          const updated = [...signupOtpDigits];
+          updated[index - 1] = '';
+          setSignupOtpDigits(updated);
+          setSignupOtpInput(updated.join(''));
+        }
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      const prevInput = document.getElementById(`signup-otp-box-${index - 1}`);
+      if (prevInput) prevInput.focus();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      const nextInput = document.getElementById(`signup-otp-box-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
+
+  const handleSignupPasteOtp = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pasted) {
+      const digits = pasted.split('');
+      const newArray = ['', '', '', '', '', ''];
+      digits.forEach((d, i) => { newArray[i] = d; });
+      setSignupOtpDigits(newArray);
+      const codeStr = newArray.join('');
+      setSignupOtpInput(codeStr);
+      const lastIdx = Math.min(digits.length - 1, 5);
+      const target = document.getElementById(`signup-otp-box-${lastIdx}`);
+      if (target) target.focus();
+
+      triggerAutoVerifySignupIfComplete(newArray);
     }
   };
 
@@ -418,9 +509,114 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
   };
 
+  // Signup Step 1: Send 6-Digit Email Verification OTP
+  const handleSendSignupOtpSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setSignupEmailError('');
+
+    if (!signupForm.name || !signupForm.name.trim()) {
+      const err = 'Please enter your full name';
+      setSignupEmailError(err);
+      if (addToast) addToast(err, 'warning');
+      return;
+    }
+
+    const cleanEmail = signupForm.email ? signupForm.email.trim().toLowerCase() : '';
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!cleanEmail || !emailRegex.test(cleanEmail)) {
+      const err = 'Please enter a valid Gmail / Email address (e.g. user@gmail.com)';
+      setSignupEmailError(err);
+      if (addToast) addToast(err, 'warning');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSignupOtpDigits(['', '', '', '', '', '']);
+    setSignupOtpInput('');
+    try {
+      const { data, status, ok } = await safeFetchApi('/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: cleanEmail,
+          name: signupForm.name.trim(),
+          purpose: 'signup'
+        })
+      });
+
+      if (ok && data && data.success) {
+        setSignupEmailError('');
+        setSignupStep(2);
+        setSignupResendTimer(120);
+        if (addToast) addToast(data.message || `6-digit verification code sent to ${cleanEmail}!`, 'success');
+      } else if (status === 409) {
+        const dupMsg = (data && data.message) || 'An account with this email address already exists. Please log in or use Forgot Password.';
+        setSignupEmailError(dupMsg);
+        if (addToast) addToast(dupMsg, 'error');
+      } else {
+        const errMsg = (data && data.message) || `Failed to send verification code to ${cleanEmail}. Please try again.`;
+        setSignupEmailError(errMsg);
+        if (addToast) addToast(errMsg, 'error');
+      }
+    } catch (err) {
+      console.error("Signup Send OTP Error:", err);
+      const netErr = 'Cannot reach server. Please check your internet connection.';
+      setSignupEmailError(netErr);
+      if (addToast) addToast(netErr, 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Signup Step 2 Core: Execute Verify Gmail OTP
+  const executeVerifySignupOtp = async (codeToVerify) => {
+    if (isSubmitting) return;
+    const rawCode = codeToVerify || signupOtpInput;
+    const code = (rawCode || '').replace(/\D/g, '').trim();
+    if (!code || code.length !== 6) {
+      if (addToast) addToast('Please enter the full 6-digit OTP code sent to your Gmail inbox', 'warning');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const cleanEmail = signupForm.email.trim().toLowerCase();
+      const { data, ok } = await safeFetchApi('/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: cleanEmail,
+          otp: code,
+          purpose: 'signup'
+        })
+      });
+
+      if (ok && data && data.success && data.signupToken) {
+        setSignupToken(data.signupToken);
+        setIsEmailVerified(true);
+        setSignupStep(3);
+        if (addToast) addToast('Email verified successfully! Now enter your phone number and password.', 'success');
+      } else {
+        if (addToast) addToast((data && data.message) || 'Invalid OTP code. Please check your email and try again.', 'error');
+      }
+    } catch (err) {
+      console.error("Signup Verify OTP Error:", err);
+      if (addToast) addToast('Cannot reach server. Please check your internet connection and try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Signup Step 2: Form submit handler
+  const handleVerifySignupOtpSubmit = async (e) => {
+    if (e) e.preventDefault();
+    executeVerifySignupOtp(signupOtpInput);
+  };
+
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
+
     if (!signupForm.name || !signupForm.email || !signupForm.phone || !signupForm.password) {
       if (addToast) addToast('Full name, email address, mobile phone number, and password are required', 'warning');
       return;
@@ -429,6 +625,13 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(signupForm.email.trim())) {
       if (addToast) addToast('Please enter a valid email address with correct format (e.g. user@gmail.com)', 'warning');
+      return;
+    }
+
+    // Require verified email before signup completes
+    if (!isEmailVerified && !signupToken) {
+      setSignupStep(1);
+      if (addToast) addToast('Please verify your email address with OTP before completing registration', 'warning');
       return;
     }
 
@@ -455,13 +658,14 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
     const signupPayload = {
       name: signupForm.name.trim(),
-      email: signupForm.email.trim(),
+      email: signupForm.email.trim().toLowerCase(),
       phone: cleanDigits,
       countryCode: selectedCountry.dialCode,
       countryIso: selectedCountry.code,
       countryName: selectedCountry.name,
       formattedPhone: `${selectedCountry.dialCode} ${cleanDigits}`,
-      password: signupForm.password
+      password: signupForm.password,
+      signupToken: signupToken || undefined
     };
 
     setIsSubmitting(true);
@@ -535,7 +739,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       const { data, status, ok } = await safeFetchApi('/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: targetVal })
+        body: JSON.stringify({ email: targetVal, purpose: 'password_reset' })
       });
 
       if (ok && data && data.success) {
@@ -576,7 +780,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       const { data, ok } = await safeFetchApi('/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: targetEmail, phone: forgotPhone, otp: code })
+        body: JSON.stringify({ email: targetEmail, phone: forgotPhone, otp: code, purpose: 'password_reset' })
       });
 
       if (ok && data && data.success) {
@@ -1195,319 +1399,648 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
 
               </div>
             ) : activeTab === 'signup' ? (
-              <form onSubmit={handleSignupSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Full Name</label>
-                  <div className="auth-input-group">
-                    <User size={16} className="auth-input-icon" />
-                    <input 
-                      type="text" 
-                      placeholder="Arun Kumar"
-                      value={signupForm.name}
-                      onChange={(e) => setSignupForm({...signupForm, name: e.target.value})}
-                      required
-                      className="auth-input-field"
-                    />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+                {/* Signup Step Progression Indicator */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '2px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      background: signupStep >= 1 ? '#FF5500' : 'var(--bg-input)',
+                      color: '#ffffff',
+                      fontSize: '0.72rem',
+                      fontWeight: '800',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {signupStep > 1 ? '✓' : '1'}
+                    </div>
+                    <span style={{ fontSize: '0.76rem', fontWeight: signupStep === 1 ? '800' : '600', color: signupStep === 1 ? '#FF5500' : 'var(--text-secondary)' }}>
+                      Email
+                    </span>
+                  </div>
+
+                  <div style={{ width: '22px', height: '2px', background: signupStep >= 2 ? '#FF5500' : 'var(--border-color)', opacity: 0.8 }}></div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      background: signupStep >= 2 ? '#FF5500' : 'var(--bg-input)',
+                      color: signupStep >= 2 ? '#ffffff' : 'var(--text-muted)',
+                      fontSize: '0.72rem',
+                      fontWeight: '800',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {signupStep > 2 ? '✓' : '2'}
+                    </div>
+                    <span style={{ fontSize: '0.76rem', fontWeight: signupStep === 2 ? '800' : '600', color: signupStep === 2 ? '#FF5500' : 'var(--text-secondary)' }}>
+                      Verify OTP
+                    </span>
+                  </div>
+
+                  <div style={{ width: '22px', height: '2px', background: signupStep >= 3 ? '#FF5500' : 'var(--border-color)', opacity: 0.8 }}></div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      background: signupStep === 3 ? '#FF5500' : 'var(--bg-input)',
+                      color: signupStep === 3 ? '#ffffff' : 'var(--text-muted)',
+                      fontSize: '0.72rem',
+                      fontWeight: '800',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      3
+                    </div>
+                    <span style={{ fontSize: '0.76rem', fontWeight: signupStep === 3 ? '800' : '600', color: signupStep === 3 ? '#FF5500' : 'var(--text-secondary)' }}>
+                      Profile
+                    </span>
                   </div>
                 </div>
 
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Email Address</label>
-                  <div className="auth-input-group">
-                    <Mail size={16} className="auth-input-icon" />
-                    <input 
-                      type="email" 
-                      placeholder="arun@gmail.com"
-                      value={signupForm.email}
-                      onChange={(e) => setSignupForm({...signupForm, email: e.target.value})}
-                      required
-                      className="auth-input-field"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', letterSpacing: '0.2px' }}>
-                      Mobile Phone Number
-                    </label>
-                    {signupForm.phone && (
-                      <span style={{ 
-                        fontSize: '0.72rem', 
-                        fontWeight: '700', 
-                        color: phoneValidation.color,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}>
-                        {phoneValidation.isValid ? <CheckCircle2 size={12} color="#22c55e" /> : <AlertCircle size={12} />}
-                        {phoneValidation.message}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="auth-phone-row" style={{ display: 'flex', gap: '8px', position: 'relative' }}>
-                    
-                    {/* Country Code Dropdown Trigger */}
-                    <div className="country-code-picker-wrap" style={{ position: 'relative' }}>
-                      <button
-                        type="button"
-                        onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-                        className="country-picker-btn"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          height: '44px',
-                          padding: '0 10px',
-                          borderRadius: '10px',
-                          border: isCountryDropdownOpen ? '1.5px solid #FF5500' : '1.5px solid var(--border-color)',
-                          background: 'var(--bg-input)',
-                          color: 'var(--text-primary)',
-                          fontSize: '0.88rem',
-                          fontWeight: '700',
-                          cursor: 'pointer',
-                          whiteSpace: 'nowrap',
-                          transition: 'all 0.2s ease',
-                          outline: 'none',
-                          boxShadow: isCountryDropdownOpen ? '0 0 0 3px rgba(255, 85, 0, 0.18)' : 'none'
-                        }}
-                        aria-label="Select Country Code"
-                      >
-                        <span style={{ fontSize: '1.25rem', lineHeight: '1' }}>{selectedCountry.flag}</span>
-                        <span>{selectedCountry.dialCode}</span>
-                        <ChevronDown size={14} style={{ opacity: 0.7, transform: isCountryDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-                      </button>
-
-                      {/* Invisible backdrop to dismiss country dropdown on click outside */}
-                      {isCountryDropdownOpen && (
-                        <div 
-                          style={{ position: 'fixed', inset: 0, zIndex: 999 }}
-                          onClick={() => setIsCountryDropdownOpen(false)}
-                        />
-                      )}
-
-                      {/* Dropdown Menu */}
-                      {isCountryDropdownOpen && (
-                        <div 
-                          className="country-picker-dropdown"
-                          style={{
-                            position: 'absolute',
-                            top: 'calc(100% + 6px)',
-                            left: 0,
-                            width: '280px',
-                            maxHeight: '280px',
-                            background: 'var(--bg-card, #ffffff)',
-                            border: '1.5px solid var(--border-color)',
-                            borderRadius: '14px',
-                            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.25)',
-                            zIndex: 1000,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            overflow: 'hidden'
+                {/* STEP 1: Enter Name & Gmail to get Verification OTP */}
+                {signupStep === 1 ? (
+                  <form onSubmit={handleSendSignupOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>
+                        Full Name
+                      </label>
+                      <div className="auth-input-group">
+                        <User size={16} className="auth-input-icon" />
+                        <input 
+                          type="text" 
+                          placeholder="Arun Kumar"
+                          value={signupForm.name}
+                          onChange={(e) => {
+                            setSignupForm({ ...signupForm, name: e.target.value });
+                            if (signupEmailError) setSignupEmailError('');
                           }}
-                        >
-                          {/* Search Input */}
-                          <div style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-input)' }}>
-                            <input
-                              type="text"
-                              placeholder="Search country or code..."
-                              value={countrySearchQuery}
-                              onChange={(e) => setCountrySearchQuery(e.target.value)}
-                              autoFocus
-                              style={{
-                                width: '100%',
-                                padding: '8px 10px',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border-color)',
-                                background: 'var(--bg-card)',
-                                color: 'var(--text-primary)',
-                                fontSize: '0.8rem',
-                                outline: 'none',
-                                boxSizing: 'border-box'
-                              }}
-                            />
-                          </div>
+                          required
+                          className="auth-input-field"
+                        />
+                      </div>
+                    </div>
 
-                          {/* Country List */}
-                          <div style={{ overflowY: 'auto', flex: 1, padding: '4px' }}>
-                            {filteredCountries.length === 0 ? (
-                              <div style={{ padding: '12px', textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                                No country found
-                              </div>
-                            ) : (
-                              filteredCountries.map(c => (
-                                <button
-                                  key={c.code}
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedCountry(c);
-                                    setIsCountryDropdownOpen(false);
-                                    setCountrySearchQuery('');
-                                    if (signupForm.phone) {
-                                      setSignupForm(prev => ({
-                                        ...prev,
-                                        phone: prev.phone.slice(0, c.maxDigits || 10)
-                                      }));
-                                    }
-                                  }}
-                                  style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    width: '100%',
-                                    padding: '8px 10px',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    background: selectedCountry.code === c.code ? 'rgba(255, 85, 0, 0.12)' : 'transparent',
-                                    color: selectedCountry.code === c.code ? '#FF5500' : 'var(--text-primary)',
-                                    fontSize: '0.84rem',
-                                    fontWeight: selectedCountry.code === c.code ? '700' : '500',
-                                    cursor: 'pointer',
-                                    textAlign: 'left',
-                                    transition: 'background 0.15s'
-                                  }}
-                                >
-                                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span style={{ fontSize: '1.2rem' }}>{c.flag}</span>
-                                    <span>{c.name}</span>
-                                  </span>
-                                  <span style={{ fontWeight: '700', fontSize: '0.8rem', color: '#FF5500' }}>{c.dialCode}</span>
-                                </button>
-                              ))
-                            )}
-                          </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>
+                        Gmail / Email Address
+                      </label>
+                      <div className="auth-input-group">
+                        <Mail size={16} className="auth-input-icon" />
+                        <input 
+                          type="email" 
+                          placeholder="arun@gmail.com"
+                          value={signupForm.email}
+                          onChange={(e) => {
+                            setSignupForm({ ...signupForm, email: e.target.value });
+                            if (signupEmailError) setSignupEmailError('');
+                          }}
+                          required
+                          className="auth-input-field"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email Security Info Box */}
+                    <div style={{
+                      background: 'rgba(255, 85, 0, 0.06)',
+                      border: '1px solid rgba(255, 85, 0, 0.2)',
+                      borderRadius: '10px',
+                      padding: '10px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <ShieldCheck size={18} color="#FF5500" style={{ flexShrink: 0 }} />
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                        We'll send a 6-digit OTP code to this Gmail address to verify ownership before account creation.
+                      </span>
+                    </div>
+
+                    {/* Error Banner */}
+                    {signupEmailError && (
+                      <div style={{
+                        background: 'rgba(239, 68, 68, 0.12)',
+                        border: '1.5px solid rgba(239, 68, 68, 0.4)',
+                        borderRadius: '10px',
+                        padding: '10px 12px',
+                        color: '#ef4444',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <AlertCircle size={16} color="#ef4444" style={{ flexShrink: 0 }} />
+                        <span>{signupEmailError}</span>
+                      </div>
+                    )}
+
+                    <button 
+                      type="submit" 
+                      className="neu-btn-primary"
+                      disabled={isSubmitting}
+                      style={{
+                        width: '100%',
+                        padding: '13px 20px',
+                        borderRadius: '12px',
+                        border: 'none',
+                        background: 'linear-gradient(135deg, #FF5500 0%, #ff7700 100%)',
+                        color: '#ffffff',
+                        fontWeight: '800',
+                        fontSize: '0.96rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        boxShadow: '0 6px 20px rgba(255, 85, 0, 0.3)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {isSubmitting ? (
+                        <RefreshCw size={18} className="animate-spin" />
+                      ) : (
+                        <>Send Verification Code <ArrowRight size={16} /></>
+                      )}
+                    </button>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '2px 0' }}>
+                      <div style={{ flex: 1, height: '1px', background: 'var(--border-color, #e2e8f0)' }}></div>
+                      <span style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>OR</span>
+                      <div style={{ flex: 1, height: '1px', background: 'var(--border-color, #e2e8f0)' }}></div>
+                    </div>
+
+                    <button 
+                      type="button" 
+                      onClick={handleGoogleLogin}
+                      className="neu-btn-secondary"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        background: 'var(--bg-card, #ffffff)',
+                        border: '1.5px solid var(--border-color, #cbd5e1)',
+                        borderRadius: '12px',
+                        padding: '11px',
+                        fontSize: '0.86rem',
+                        fontWeight: '700',
+                        color: 'var(--text-primary, #1e293b)',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                      </svg>
+                      Sign Up with Google
+                    </button>
+
+                    <div style={{ textAlign: 'center', marginTop: '2px', fontSize: '0.84rem', color: '#64748B' }}>
+                      Already have an account?{' '}
+                      <button 
+                        type="button"
+                        onClick={() => setActiveTab('login')}
+                        style={{ background: 'none', border: 'none', color: '#FF5500', fontWeight: '700', cursor: 'pointer', padding: 0 }}
+                      >
+                        Sign in
+                      </button>
+                    </div>
+                  </form>
+                ) : signupStep === 2 ? (
+                  /* STEP 2: Enter & Verify 6-digit OTP */
+                  <form onSubmit={handleVerifySignupOtpSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ background: 'rgba(255, 85, 0, 0.08)', border: '1px solid rgba(255, 85, 0, 0.2)', padding: '12px 16px', borderRadius: '12px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>
+                        6-Digit Verification Code sent to
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '2px' }}>
+                        <strong style={{ fontSize: '0.95rem', color: '#FF5500' }}>{signupForm.email}</strong>
+                        <button
+                          type="button"
+                          onClick={() => setSignupStep(1)}
+                          style={{ background: 'none', border: 'none', color: '#64748B', fontSize: '0.74rem', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
+                        >
+                          Change
+                        </button>
+                      </div>
+
+                      {signupResendTimer > 0 ? (
+                        <div style={{ marginTop: '8px', fontSize: '0.78rem', color: '#FF5500', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <Clock size={14} />
+                          <span>Code expires in:</span>
+                          <span style={{ background: '#FF5500', color: '#ffffff', padding: '1px 6px', borderRadius: '4px', fontFamily: 'monospace', fontWeight: '900' }}>
+                            {Math.floor(signupResendTimer / 60)}:{(signupResendTimer % 60).toString().padStart(2, '0')}
+                          </span>
+                        </div>
+                      ) : (
+                        <div style={{ marginTop: '8px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', padding: '6px 10px', borderRadius: '8px', fontSize: '0.76rem', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                          <AlertCircle size={14} />
+                          <span>Code expired. Click "Resend Code" below.</span>
                         </div>
                       )}
                     </div>
 
-                    {/* Phone Number Input Field */}
-                    <div className="auth-input-group" style={{ flex: 1, position: 'relative' }}>
-                      <Phone size={16} className="auth-input-icon" />
-                      <input 
-                        type="tel" 
-                        inputMode="numeric"
-                        placeholder={selectedCountry.placeholder || "98765 43210"}
-                        value={signupForm.phone}
-                        onChange={(e) => handleSignupPhoneChange(e.target.value)}
-                        maxLength={selectedCountry.maxDigits || 10}
-                        required
-                        className="auth-input-field"
-                        style={{
-                          height: '44px',
-                          paddingRight: signupForm.phone && phoneValidation.isValid ? '36px' : '14px',
-                          borderColor: signupForm.phone && phoneValidation.isValid ? '#22c55e' : undefined
-                        }}
-                      />
-                      {signupForm.phone && phoneValidation.isValid && (
-                        <CheckCircle2 size={16} color="#22c55e" style={{ position: 'absolute', right: '12px', pointerEvents: 'none' }} />
-                      )}
+                    <div>
+                      <label style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-secondary)', display: 'block', marginBottom: '10px', textAlign: 'center' }}>
+                        Enter 6-Digit Verification Code
+                      </label>
+                      <div style={{ display: 'flex', gap: 'clamp(3px, 1.5vw, 8px)', justifyContent: 'center', width: '100%', boxSizing: 'border-box' }} onPaste={handleSignupPasteOtp}>
+                        {[0, 1, 2, 3, 4, 5].map((idx) => {
+                          const isFocused = focusedSignupOtpIndex === idx;
+                          const isFilled = Boolean(signupOtpDigits[idx]);
+                          const isActive = isFocused || isFilled;
+
+                          return (
+                            <input
+                              key={idx}
+                              id={`signup-otp-box-${idx}`}
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={1}
+                              value={signupOtpDigits[idx]}
+                              onFocus={() => setFocusedSignupOtpIndex(idx)}
+                              onBlur={() => setFocusedSignupOtpIndex(null)}
+                              onChange={(e) => handleSignupDigitChange(idx, e.target.value)}
+                              onKeyDown={(e) => handleSignupDigitKeyDown(idx, e)}
+                              style={{
+                                width: 'clamp(32px, 12.5vw, 46px)',
+                                height: 'clamp(42px, 13.5vw, 52px)',
+                                padding: 0,
+                                textAlign: 'center',
+                                fontSize: 'clamp(1.1rem, 5vw, 1.45rem)',
+                                fontWeight: '900',
+                                borderRadius: '10px',
+                                border: isActive ? '2.5px solid #FF5500' : '2px solid #94a3b8',
+                                background: isActive ? 'rgba(255, 85, 0, 0.08)' : 'var(--bg-card)',
+                                color: 'var(--text-primary)',
+                                boxShadow: isActive ? '0 0 14px rgba(255, 85, 0, 0.35)' : '0 2px 6px rgba(0, 0, 0, 0.08)',
+                                outline: 'none',
+                                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                boxSizing: 'border-box'
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Security / Format Hint */}
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
-                    {selectedCountry.hint || `Enter ${selectedCountry.minDigits} to ${selectedCountry.maxDigits} digits`}
-                  </span>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>Password</label>
-                  <div className="auth-input-group">
-                    <Lock size={16} className="auth-input-icon" />
-                    <input 
-                      type={showSignupPassword ? "text" : "password"} 
-                      placeholder="••••••••"
-                      value={signupForm.password}
-                      onChange={(e) => setSignupForm({...signupForm, password: e.target.value})}
-                      required
-                      className="auth-input-field"
-                      style={{ paddingRight: '40px' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowSignupPassword(!showSignupPassword)}
+                    <button 
+                      type="submit" 
+                      className="neu-btn-primary"
+                      disabled={isSubmitting || signupOtpDigits.join('').length !== 6}
                       style={{
-                        position: 'absolute',
-                        right: '12px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'none',
+                        width: '100%',
+                        padding: '13px 20px',
+                        borderRadius: '12px',
                         border: 'none',
-                        cursor: 'pointer',
-                        color: 'var(--text-muted)',
+                        background: 'linear-gradient(135deg, #FF5500 0%, #ff7700 100%)',
+                        color: '#ffffff',
+                        fontWeight: '800',
+                        fontSize: '0.96rem',
+                        cursor: isSubmitting || signupOtpDigits.join('').length !== 6 ? 'not-allowed' : 'pointer',
+                        opacity: signupOtpDigits.join('').length === 6 ? 1 : 0.7,
                         display: 'flex',
                         alignItems: 'center',
-                        padding: '4px'
+                        justifyContent: 'center',
+                        gap: '8px',
+                        boxShadow: '0 6px 20px rgba(255, 85, 0, 0.3)',
+                        transition: 'all 0.2s ease'
                       }}
-                      title={showSignupPassword ? 'Hide password' : 'Show password'}
                     >
-                      {showSignupPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {isSubmitting ? (
+                        <RefreshCw size={18} className="animate-spin" />
+                      ) : (
+                        <>Verify Email Code <ArrowRight size={16} /></>
+                      )}
                     </button>
-                  </div>
-                </div>
 
-                <button 
-                  type="submit" 
-                  className="neu-btn-primary"
-                  disabled={isSubmitting}
-                  style={{
-                    width: '100%',
-                    padding: '13px 20px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #FF5500 0%, #ff7700 100%)',
-                    color: '#ffffff',
-                    fontWeight: '800',
-                    fontSize: '0.96rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    boxShadow: '0 6px 20px rgba(255, 85, 0, 0.3)',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  {isSubmitting ? 'Creating Account...' : 'Create Account & Continue'} <ArrowRight size={16} />
-                </button>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+                      <button 
+                        type="button" 
+                        onClick={() => setSignupStep(1)}
+                        style={{ background: 'none', border: 'none', color: '#64748B', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', padding: 0 }}
+                      >
+                        ← Back to Email
+                      </button>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '2px 0' }}>
-                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color, #e2e8f0)' }}></div>
-                  <span style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>OR</span>
-                  <div style={{ flex: 1, height: '1px', background: 'var(--border-color, #e2e8f0)' }}></div>
-                </div>
+                      <button
+                        type="button"
+                        disabled={signupResendTimer > 0 || isSubmitting}
+                        onClick={handleSendSignupOtpSubmit}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: signupResendTimer > 0 ? '#94a3b8' : '#FF5500',
+                          fontSize: '0.8rem',
+                          fontWeight: '700',
+                          cursor: signupResendTimer > 0 ? 'not-allowed' : 'pointer',
+                          padding: 0
+                        }}
+                      >
+                        {signupResendTimer > 0 ? `Resend in ${signupResendTimer}s` : 'Resend Code'}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  /* STEP 3: Complete Mobile Phone & Password */
+                  <form onSubmit={handleSignupSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {/* Verified Email Banner */}
+                    <div style={{
+                      background: 'rgba(34, 197, 94, 0.08)',
+                      border: '1.5px solid rgba(34, 197, 94, 0.35)',
+                      borderRadius: '12px',
+                      padding: '10px 14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <CheckCircle2 size={18} color="#22c55e" style={{ flexShrink: 0 }} />
+                        <div>
+                          <span style={{ fontSize: '0.72rem', color: '#15803d', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>Email Verified</span>
+                          <strong style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>{signupForm.email}</strong>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSignupStep(1)}
+                        style={{ background: 'none', border: 'none', color: '#64748B', fontSize: '0.75rem', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
+                      >
+                        Change
+                      </button>
+                    </div>
 
-                <button 
-                  type="button" 
-                  onClick={handleGoogleLogin}
-                  className="neu-btn-secondary"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px',
-                    background: 'var(--bg-card, #ffffff)',
-                    border: '1.5px solid var(--border-color, #cbd5e1)',
-                    borderRadius: '12px',
-                    padding: '11px',
-                    fontSize: '0.86rem',
-                    fontWeight: '700',
-                    color: 'var(--text-primary, #1e293b)',
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                  </svg>
-                  Sign Up with Google
-                </button>
-              </form>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', letterSpacing: '0.2px' }}>
+                          Mobile Phone Number
+                        </label>
+                        {signupForm.phone && (
+                          <span style={{ 
+                            fontSize: '0.72rem', 
+                            fontWeight: '700', 
+                            color: phoneValidation.color,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            {phoneValidation.isValid ? <CheckCircle2 size={12} color="#22c55e" /> : <AlertCircle size={12} />}
+                            {phoneValidation.message}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="auth-phone-row" style={{ display: 'flex', gap: '8px', position: 'relative' }}>
+                        
+                        {/* Country Code Dropdown Trigger */}
+                        <div className="country-code-picker-wrap" style={{ position: 'relative' }}>
+                          <button
+                            type="button"
+                            onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                            className="country-picker-btn"
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              height: '44px',
+                              padding: '0 10px',
+                              borderRadius: '10px',
+                              border: isCountryDropdownOpen ? '1.5px solid #FF5500' : '1.5px solid var(--border-color)',
+                              background: 'var(--bg-input)',
+                              color: 'var(--text-primary)',
+                              fontSize: '0.88rem',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap',
+                              transition: 'all 0.2s ease',
+                              outline: 'none',
+                              boxShadow: isCountryDropdownOpen ? '0 0 0 3px rgba(255, 85, 0, 0.18)' : 'none'
+                            }}
+                            aria-label="Select Country Code"
+                          >
+                            <span style={{ fontSize: '1.25rem', lineHeight: '1' }}>{selectedCountry.flag}</span>
+                            <span>{selectedCountry.dialCode}</span>
+                            <ChevronDown size={14} style={{ opacity: 0.7, transform: isCountryDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                          </button>
+
+                          {/* Invisible backdrop to dismiss country dropdown on click outside */}
+                          {isCountryDropdownOpen && (
+                            <div 
+                              style={{ position: 'fixed', inset: 0, zIndex: 999 }}
+                              onClick={() => setIsCountryDropdownOpen(false)}
+                            />
+                          )}
+
+                          {/* Dropdown Menu */}
+                          {isCountryDropdownOpen && (
+                            <div 
+                              className="country-picker-dropdown"
+                              style={{
+                                position: 'absolute',
+                                top: 'calc(100% + 6px)',
+                                left: 0,
+                                width: '280px',
+                                maxHeight: '280px',
+                                background: 'var(--bg-card, #ffffff)',
+                                border: '1.5px solid var(--border-color)',
+                                borderRadius: '14px',
+                                boxShadow: '0 12px 30px rgba(0, 0, 0, 0.25)',
+                                zIndex: 1000,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                overflow: 'hidden'
+                              }}
+                            >
+                              {/* Search Input */}
+                              <div style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-input)' }}>
+                                <input
+                                  type="text"
+                                  placeholder="Search country or code..."
+                                  value={countrySearchQuery}
+                                  onChange={(e) => setCountrySearchQuery(e.target.value)}
+                                  autoFocus
+                                  style={{
+                                    width: '100%',
+                                    padding: '8px 10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--border-color)',
+                                    background: 'var(--bg-card)',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '0.8rem',
+                                    outline: 'none',
+                                    boxSizing: 'border-box'
+                                  }}
+                                />
+                              </div>
+
+                              {/* Country List */}
+                              <div style={{ overflowY: 'auto', flex: 1, padding: '4px' }}>
+                                {filteredCountries.length === 0 ? (
+                                  <div style={{ padding: '12px', textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                                    No country found
+                                  </div>
+                                ) : (
+                                  filteredCountries.map(c => (
+                                    <button
+                                      key={c.code}
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedCountry(c);
+                                        setIsCountryDropdownOpen(false);
+                                        setCountrySearchQuery('');
+                                        if (signupForm.phone) {
+                                          setSignupForm(prev => ({
+                                            ...prev,
+                                            phone: prev.phone.slice(0, c.maxDigits || 10)
+                                          }));
+                                        }
+                                      }}
+                                      style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        width: '100%',
+                                        padding: '8px 10px',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        background: selectedCountry.code === c.code ? 'rgba(255, 85, 0, 0.12)' : 'transparent',
+                                        color: selectedCountry.code === c.code ? '#FF5500' : 'var(--text-primary)',
+                                        fontSize: '0.84rem',
+                                        fontWeight: selectedCountry.code === c.code ? '700' : '500',
+                                        cursor: 'pointer',
+                                        textAlign: 'left',
+                                        transition: 'background 0.15s'
+                                      }}
+                                    >
+                                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ fontSize: '1.2rem' }}>{c.flag}</span>
+                                        <span>{c.name}</span>
+                                      </span>
+                                      <span style={{ fontWeight: '700', fontSize: '0.8rem', color: '#FF5500' }}>{c.dialCode}</span>
+                                    </button>
+                                  ))
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Phone Number Input Field */}
+                        <div className="auth-input-group" style={{ flex: 1, position: 'relative' }}>
+                          <Phone size={16} className="auth-input-icon" />
+                          <input 
+                            type="tel" 
+                            inputMode="numeric"
+                            placeholder={selectedCountry.placeholder || "98765 43210"}
+                            value={signupForm.phone}
+                            onChange={(e) => handleSignupPhoneChange(e.target.value)}
+                            maxLength={selectedCountry.maxDigits || 10}
+                            required
+                            className="auth-input-field"
+                            style={{
+                              height: '44px',
+                              paddingRight: signupForm.phone && phoneValidation.isValid ? '36px' : '14px',
+                              borderColor: signupForm.phone && phoneValidation.isValid ? '#22c55e' : undefined
+                            }}
+                          />
+                          {signupForm.phone && phoneValidation.isValid && (
+                            <CheckCircle2 size={16} color="#22c55e" style={{ position: 'absolute', right: '12px', pointerEvents: 'none' }} />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Security / Format Hint */}
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                        {selectedCountry.hint || `Enter ${selectedCountry.minDigits} to ${selectedCountry.maxDigits} digits`}
+                      </span>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', letterSpacing: '0.2px' }}>
+                        Password
+                      </label>
+                      <div className="auth-input-group">
+                        <Lock size={16} className="auth-input-icon" />
+                        <input 
+                          type={showSignupPassword ? "text" : "password"} 
+                          placeholder="••••••••"
+                          value={signupForm.password}
+                          onChange={(e) => setSignupForm({...signupForm, password: e.target.value})}
+                          required
+                          className="auth-input-field"
+                          style={{ paddingRight: '40px' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowSignupPassword(!showSignupPassword)}
+                          style={{
+                            position: 'absolute',
+                            right: '12px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: 'var(--text-muted)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '4px'
+                          }}
+                          title={showSignupPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showSignupPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      className="neu-btn-primary"
+                      disabled={isSubmitting}
+                      style={{
+                        width: '100%',
+                        padding: '13px 20px',
+                        borderRadius: '12px',
+                        border: 'none',
+                        background: 'linear-gradient(135deg, #FF5500 0%, #ff7700 100%)',
+                        color: '#ffffff',
+                        fontWeight: '800',
+                        fontSize: '0.96rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        boxShadow: '0 6px 20px rgba(255, 85, 0, 0.3)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {isSubmitting ? (
+                        <RefreshCw size={18} className="animate-spin" />
+                      ) : (
+                        <>Complete Registration & Continue <ArrowRight size={16} /></>
+                      )}
+                    </button>
+                  </form>
+                )}
+
+              </div>
             ) : (
               /* FORGOT PASSWORD WORKFLOW */
               <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>

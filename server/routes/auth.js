@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const { readData, writeData, sanitizeInput, normalizePhone, rateLimiter } = require('../utils/db');
 const User = require('../models/User');
 const BackupService = require('../services/backupService');
+const otpController = require('../controllers/otpController');
 
 const usersFilePath = path.join(__dirname, '../data/users.json');
 
@@ -101,7 +102,7 @@ function isValidEmail(email) {
 // POST /api/auth/signup
 router.post('/signup', signupLimiter, async (req, res) => {
   try {
-    const { name, email, phone, password, address, countryCode, countryIso, countryName, formattedPhone } = req.body;
+    const { name, email, phone, password, address, countryCode, countryIso, countryName, formattedPhone, signupToken } = req.body;
 
     if (!name || !email || !phone || !password) {
       return res.status(400).json({ success: false, message: 'Full name, email address, mobile phone number, and password are required' });
@@ -110,6 +111,18 @@ router.post('/signup', signupLimiter, async (req, res) => {
     const cleanEmail = sanitizeInput(email).toLowerCase().trim();
     if (!isValidEmail(cleanEmail)) {
       return res.status(400).json({ success: false, message: 'Please enter a valid email address with correct format (e.g. user@gmail.com)' });
+    }
+
+    // Verify email OTP verification token if supplied
+    if (signupToken) {
+      const isValidSession = otpController.verifySignupToken(cleanEmail, signupToken);
+      if (!isValidSession) {
+        return res.status(403).json({
+          success: false,
+          message: 'Email verification token is invalid or has expired. Please verify your email with OTP again.'
+        });
+      }
+      otpController.consumeSignupToken(cleanEmail);
     }
 
     const selectedCountryCode = countryCode || '+91';
@@ -400,8 +413,6 @@ setInterval(() => {
     if (v.expiresAt < now) resetTokenCache.delete(k);
   }
 }, 5 * 60 * 1000);
-
-const otpController = require('../controllers/otpController');
 
 // POST /api/auth/send-otp (Send Unique 6-Digit OTP to Registered Email ID)
 router.post('/send-otp', resetLimiter, otpController.sendOtp);

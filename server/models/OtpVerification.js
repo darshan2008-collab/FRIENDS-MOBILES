@@ -22,6 +22,10 @@ const formatOtpRecord = (row) => {
 
 const OtpVerification = {
   deleteMany: async (conditions = {}) => {
+    if (conditions.email && conditions.purpose) {
+      const res = await query('DELETE FROM otp_verifications WHERE LOWER(email) = LOWER($1) AND purpose = $2', [conditions.email.toLowerCase().trim(), conditions.purpose]);
+      return { deletedCount: res.rowCount };
+    }
     if (conditions.email) {
       const res = await query('DELETE FROM otp_verifications WHERE LOWER(email) = LOWER($1)', [conditions.email.toLowerCase().trim()]);
       return { deletedCount: res.rowCount };
@@ -34,6 +38,10 @@ const OtpVerification = {
     if (conditions._id || conditions.id) {
       const targetId = conditions._id || conditions.id;
       const res = await query('DELETE FROM otp_verifications WHERE id = $1', [targetId]);
+      return { deletedCount: res.rowCount };
+    }
+    if (conditions.email && conditions.purpose) {
+      const res = await query('DELETE FROM otp_verifications WHERE LOWER(email) = LOWER($1) AND purpose = $2', [conditions.email.toLowerCase().trim(), conditions.purpose]);
       return { deletedCount: res.rowCount };
     }
     if (conditions.email) {
@@ -60,9 +68,34 @@ const OtpVerification = {
     return formatOtpRecord(res.rows[0]);
   },
 
+  find: (conditions = {}) => {
+    const chainable = {
+      sort: async (sortOptions = {}) => {
+        if (conditions.email && conditions.purpose) {
+          const res = await query('SELECT * FROM otp_verifications WHERE LOWER(email) = LOWER($1) AND purpose = $2 ORDER BY created_at DESC', [conditions.email.toLowerCase().trim(), conditions.purpose]);
+          return (res.rows || []).map(formatOtpRecord);
+        }
+        if (conditions.email) {
+          const res = await query('SELECT * FROM otp_verifications WHERE LOWER(email) = LOWER($1) ORDER BY created_at DESC', [conditions.email.toLowerCase().trim()]);
+          return (res.rows || []).map(formatOtpRecord);
+        }
+        const res = await query('SELECT * FROM otp_verifications ORDER BY created_at DESC');
+        return (res.rows || []).map(formatOtpRecord);
+      },
+      then: function (resolve, reject) {
+        return this.sort().then(resolve, reject);
+      }
+    };
+    return chainable;
+  },
+
   findOne: (conditions = {}) => {
     const chainable = {
       sort: async (sortOptions = {}) => {
+        if (conditions.email && conditions.purpose) {
+          const res = await query('SELECT * FROM otp_verifications WHERE LOWER(email) = LOWER($1) AND purpose = $2 ORDER BY created_at DESC LIMIT 1', [conditions.email.toLowerCase().trim(), conditions.purpose]);
+          return res.rows.length > 0 ? formatOtpRecord(res.rows[0]) : null;
+        }
         if (conditions.email) {
           const res = await query('SELECT * FROM otp_verifications WHERE LOWER(email) = LOWER($1) ORDER BY created_at DESC LIMIT 1', [conditions.email.toLowerCase().trim()]);
           return res.rows.length > 0 ? formatOtpRecord(res.rows[0]) : null;
