@@ -28,7 +28,6 @@ export default function ProductDetailModal({
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const [selectedSize, setSelectedSize] = useState('Standard');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -52,27 +51,9 @@ export default function ProductDetailModal({
     setReviewsList(product.reviewsList || []);
     setSelectedPhoto(null);
     setSelectedImage(product.img || '');
-    const titleLower = String(product.title || '').toLowerCase();
-    const catLower = String(product.category || '').toLowerCase();
-    const sizes = product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0
-      ? product.sizes
-      : (catLower === 'covers' || titleLower.includes('cover') || titleLower.includes('pouch')
-          ? ['Universal (Up to 6.8")', 'Standard (5.5" - 6.1")', 'Pro / Max (6.7" - 6.9")']
-          : ['Standard Pack (1 Metre)', 'Pro Pack (2 Metres)', 'Extended Pack (3 Metres)']);
-    setSelectedSize(sizes[0] || 'Standard');
   }, [product]);
 
   if (!product) return null;
-
-  const productTitleLower = product && product.title ? String(product.title).toLowerCase() : '';
-  const productCategoryLower = product && product.category ? String(product.category).toLowerCase() : '';
-
-  const defaultSizesList = product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0
-    ? product.sizes
-    : (productCategoryLower === 'covers' || productTitleLower.includes('cover') || productTitleLower.includes('pouch') || productTitleLower.includes('water proof') || productTitleLower.includes('waterproof')
-        ? ['Universal (Up to 6.8")', 'Standard (5.5" - 6.1")', 'Pro / Max (6.7" - 6.9")']
-        : ['Standard Pack (1 Metre)', 'Pro Pack (2 Metres)', 'Extended Pack (3 Metres)']
-      );
 
   // Lock body scroll when ProductDetailModal is open
   useEffect(() => {
@@ -400,58 +381,18 @@ export default function ProductDetailModal({
                 {product.description || "Premium mobile electronics & customized studio accessories from FRIENDS MOBILE. High durability with standard local brand warranty."}
               </p>
 
-              {/* Amazon / Flipkart Style Size / Specification Selector */}
-              <div style={{ background: 'var(--bg-input)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-color)', marginBottom: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '0.82rem', fontWeight: '800', color: 'var(--text-primary)' }}>
-                    Select Size / Model Spec:
-                  </span>
-                  <span style={{ fontSize: '0.78rem', color: '#FF5500', fontWeight: '800' }}>
-                    Selected: {selectedSize}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {defaultSizesList.map((size) => (
-                    <button
-                      key={size}
-                      type="button"
-                      onClick={() => setSelectedSize(size)}
-                      style={{
-                        padding: '8px 14px',
-                        borderRadius: '10px',
-                        border: selectedSize === size ? '2px solid #FF5500' : '1px solid var(--border-color)',
-                        background: selectedSize === size ? 'rgba(255, 85, 0, 0.1)' : 'var(--bg-card)',
-                        color: selectedSize === size ? '#FF5500' : 'var(--text-primary)',
-                        fontWeight: '800',
-                        fontSize: '0.78rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        outline: 'none'
-                      }}
-                    >
-                      {size}
-                      {selectedSize === size && <Check size={14} color="#FF5500" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Action Buttons */}
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button 
                   className="btn btn-primary" 
                   style={{ flex: 1, gap: '10px', height: '48px', fontSize: '0.95rem', minWidth: '180px' }} 
                   onClick={() => {
-                    onAddToCart({ ...product, selectedSize });
+                    onAddToCart(product);
                     onClose();
                   }}
                   disabled={!product.inStock}
                 >
-                  <ShoppingBag size={18} /> ADD TO CART ({selectedSize})
+                  <ShoppingBag size={18} /> ADD TO CART
                 </button>
                 <button 
                   type="button"
