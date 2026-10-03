@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones, Wrench, Smartphone, Home, Zap, Image, Sparkles, Store, Flame } from 'lucide-react';
+import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, LogOut, Headphones, Wrench, Smartphone, Home, Zap, Image, Sparkles, Store, Flame } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
 export default function Header({ 
