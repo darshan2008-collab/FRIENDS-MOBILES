@@ -823,7 +823,7 @@ img {
    GOOEY LIQUID BUTTONS (HERO SECTION CTA ANIMATION)
    ========================================================================== */
 .c-button {
-  font-family: inherit;
+  font-family: var(--font-heading);
   font-weight: 800;
   font-size: 0.88rem;
   text-decoration: none;
@@ -833,125 +833,158 @@ img {
   justify-content: center;
   position: relative;
   z-index: 1;
-  border-radius: 12px !important;
+  border-radius: 9999px !important;
   overflow: hidden !important;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
 }
 
 .c-button--gooey {
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  border-radius: 12px !important;
+  border-radius: 9999px !important;
   position: relative;
-  transition: all 700ms ease;
   overflow: hidden !important;
 }
 
 .c-button--gooey .c-button__label {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: color 400ms ease, transform 0.3s ease;
+  transition: color 350ms cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s ease;
   pointer-events: none;
 }
 
 .c-button--gooey .c-button__blobs {
   height: 100%;
+  width: 100%;
   filter: url(#goo);
   overflow: hidden;
   position: absolute;
   top: 0;
   left: 0;
-  bottom: -3px;
-  right: -1px;
+  right: 0;
+  bottom: 0;
   z-index: 1;
-  border-radius: 10px;
+  border-radius: 9999px;
   pointer-events: none;
 }
 
 .c-button--gooey .c-button__blobs div {
-  width: 34%;
-  height: 100%;
+  width: 36%;
+  height: 135%;
   border-radius: 100%;
   position: absolute;
-  transform: scale(1.4) translateY(125%) translateZ(0);
-  transition: all 700ms ease;
+  top: 0;
+  transform: scale(1.6) translateY(145%) translateZ(0);
+  transition: transform 650ms cubic-bezier(0.19, 1, 0.22, 1);
+  background-color: #FF5500;
 }
 
 .c-button--gooey .c-button__blobs div:nth-child(1) {
-  left: -5%;
+  left: -8%;
+  transition-delay: 0ms;
 }
 
 .c-button--gooey .c-button__blobs div:nth-child(2) {
-  left: 30%;
-  transition-delay: 60ms;
+  left: 24%;
+  transition-delay: 45ms;
 }
 
 .c-button--gooey .c-button__blobs div:nth-child(3) {
-  left: 66%;
-  transition-delay: 25ms;
+  left: 54%;
+  transition-delay: 20ms;
+}
+
+.c-button--gooey .c-button__blobs div:nth-child(4) {
+  left: 82%;
+  transition-delay: 65ms;
 }
 
 .c-button--gooey:hover .c-button__blobs div,
 .c-button--gooey:active .c-button__blobs div {
-  transform: scale(1.4) translateY(0) translateZ(0);
+  transform: scale(1.6) translateY(0%) translateZ(0);
 }
 
 .c-button--gooey:active {
   transform: scale(0.97);
 }
 
-/* Primary Button (Molten Lava Liquid Blobs over Vibrant Brand Orange) */
+/* Primary CTA Button (Starts White with Orange Border & Glow, Floods into Radiant Molten Orange on Hover) */
 .c-button--primary {
   border: 2.5px solid #FF5500 !important;
-  background-color: #FF5500 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 15px rgba(255, 85, 0, 0.4);
+  background-color: #ffffff !important;
+  color: #FF5500 !important;
+  box-shadow: 0 4px 16px rgba(255, 85, 0, 0.22) !important;
+}
+
+.c-button--primary .c-button__label {
+  color: #FF5500 !important;
 }
 
 .c-button--primary .c-button__blobs div {
-  background-color: #c93600;
+  background-color: #FF5500;
 }
 
-.c-button--primary:hover {
+.c-button--primary:hover,
+.c-button--primary:active {
+  border-color: #FF5500 !important;
+  box-shadow: 0 8px 28px rgba(255, 85, 0, 0.55) !important;
+  transform: translateY(-2px);
+}
+
+.c-button--primary:hover .c-button__label,
+.c-button--primary:active .c-button__label {
   color: #ffffff !important;
-  box-shadow: 0 8px 25px rgba(255, 85, 0, 0.65) !important;
 }
 
-.c-button--primary:hover .c-button__label {
-  color: #ffffff !important;
-}
-
-/* Secondary Button (Vibrant Brand Orange Liquid Surge on Hover) */
+/* Secondary CTA Button (Starts White with Orange Border, Surges with Liquid Orange on Hover) */
 .c-button--secondary {
   border: 2.5px solid #FF5500 !important;
-  background-color: var(--bg-card, rgba(255, 255, 255, 0.95)) !important;
+  background-color: #ffffff !important;
   color: #FF5500 !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.c-button--secondary .c-button__label {
+  color: #FF5500 !important;
 }
 
 .c-button--secondary .c-button__blobs div {
   background-color: #FF5500;
 }
 
-.c-button--secondary:hover {
-  color: #ffffff !important;
-  box-shadow: 0 8px 25px rgba(255, 85, 0, 0.45) !important;
+.c-button--secondary:hover,
+.c-button--secondary:active {
+  border-color: #FF5500 !important;
+  box-shadow: 0 8px 24px rgba(255, 85, 0, 0.45) !important;
+  transform: translateY(-2px);
 }
 
-.c-button--secondary:hover .c-button__label {
+.c-button--secondary:hover .c-button__label,
+.c-button--secondary:active .c-button__label {
   color: #ffffff !important;
+}
+
+/* Dark Theme Compatibility */
+[data-theme="dark"] .c-button--primary {
+  background-color: #121418 !important;
+  color: #FF5500 !important;
+  box-shadow: 0 4px 18px rgba(255, 85, 0, 0.25) !important;
 }
 
 [data-theme="dark"] .c-button--secondary {
-  background-color: rgba(18, 20, 24, 0.85) !important;
-  color: #ffffff !important;
-  border-color: #FF5500 !important;
+  background-color: #121418 !important;
+  color: #FF5500 !important;
 }
 
-[data-theme="dark"] .c-button--secondary:hover .c-button__label {
+[data-theme="dark"] .c-button--primary:hover .c-button__label,
+[data-theme="dark"] .c-button--primary:active .c-button__label,
+[data-theme="dark"] .c-button--secondary:hover .c-button__label,
+[data-theme="dark"] .c-button--secondary:active .c-button__label {
   color: #ffffff !important;
 }
 

@@ -129,9 +129,10 @@ export default function Hero({ theme, slides, t = (k) => k }) {
             <a href={activeSlide.btnLink} className="c-button c-button--gooey c-button--primary btn">
               <span className="c-button__label">
                 {activeSlide.btnText}
-                <ArrowRight size={16} style={{ flexShrink: 0 }} />
+                <ArrowRight size={16} className="btn-arrow-icon" style={{ flexShrink: 0 }} />
               </span>
               <div className="c-button__blobs">
+                <div></div>
                 <div></div>
                 <div></div>
                 <div></div>
@@ -142,6 +143,7 @@ export default function Hero({ theme, slides, t = (k) => k }) {
                 EXPLORE STORE
               </span>
               <div className="c-button__blobs">
+                <div></div>
                 <div></div>
                 <div></div>
                 <div></div>
