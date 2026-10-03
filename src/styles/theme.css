@@ -5122,20 +5122,34 @@ img {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   cursor: pointer;
   color: #64748b;
   transition: all 0.2s ease;
   pointer-events: auto;
   backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.wishlist-btn.liked {
+  border-color: #FF5500;
+  background-color: rgba(255, 85, 0, 0.12);
+  color: #FF5500;
 }
 
 [data-theme="dark"] .wishlist-btn {
   background: rgba(18, 20, 24, 0.85);
   border-color: rgba(255, 255, 255, 0.15);
   color: #94a3b8;
+}
+
+[data-theme="dark"] .wishlist-btn.liked {
+  border-color: #FF5500;
+  background-color: rgba(255, 85, 0, 0.2);
+  color: #FF5500;
 }
 
 .wishlist-btn:hover {
