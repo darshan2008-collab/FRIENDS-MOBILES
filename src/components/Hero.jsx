@@ -126,18 +126,39 @@ export default function Hero({ theme, slides, t = (k) => k }) {
           </p>
 
           <div className="hero-buttons">
-            <a href={activeSlide.btnLink} className="btn btn-primary btn-sm">
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+            <a href={activeSlide.btnLink} className="c-button c-button--gooey c-button--primary btn">
+              <span className="c-button__label">
                 {activeSlide.btnText}
                 <ArrowRight size={16} style={{ flexShrink: 0 }} />
               </span>
+              <div className="c-button__blobs">
+                <div></div>
+                <div></div>
+                <div></div>
+              </div>
             </a>
-            <a href="#products" className="btn btn-secondary btn-sm">
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+            <a href="#products" className="c-button c-button--gooey c-button--secondary btn">
+              <span className="c-button__label">
                 EXPLORE STORE
               </span>
+              <div className="c-button__blobs">
+                <div></div>
+                <div></div>
+                <div></div>
+              </div>
             </a>
           </div>
+
+          {/* SVG Goo Filter for Liquid Blob Buttons */}
+          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display: block; height: 0; width: 0; position: absolute; pointer-events: none;">
+            <defs>
+              <filter id="goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+                <feBlend in="SourceGraphic" in2="goo" />
+              </filter>
+            </defs>
+          </svg>
 
           {/* Interactive Slide Pagination Dots */}
           <div className="slider-dots">

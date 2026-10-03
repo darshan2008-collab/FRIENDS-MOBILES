@@ -818,6 +818,142 @@ img {
   white-space: nowrap;
 }
 
+/* ==========================================================================
+   GOOEY LIQUID BUTTONS (HERO SECTION CTA ANIMATION)
+   ========================================================================== */
+.c-button {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.88rem;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-sizing: border-box;
+}
+
+.c-button--gooey {
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  border-radius: 12px !important;
+  position: relative;
+  transition: all 700ms ease;
+  overflow: hidden !important;
+}
+
+.c-button--gooey .c-button__label {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 400ms ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.c-button--gooey .c-button__blobs {
+  height: 100%;
+  filter: url(#goo);
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: -3px;
+  right: -1px;
+  z-index: 1;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.c-button--gooey .c-button__blobs div {
+  width: 34%;
+  height: 100%;
+  border-radius: 100%;
+  position: absolute;
+  transform: scale(1.4) translateY(125%) translateZ(0);
+  transition: all 700ms ease;
+}
+
+.c-button--gooey .c-button__blobs div:nth-child(1) {
+  left: -5%;
+}
+
+.c-button--gooey .c-button__blobs div:nth-child(2) {
+  left: 30%;
+  transition-delay: 60ms;
+}
+
+.c-button--gooey .c-button__blobs div:nth-child(3) {
+  left: 66%;
+  transition-delay: 25ms;
+}
+
+.c-button--gooey:hover .c-button__blobs div,
+.c-button--gooey:active .c-button__blobs div {
+  transform: scale(1.4) translateY(0) translateZ(0);
+}
+
+.c-button--gooey:active {
+  transform: scale(0.97);
+}
+
+/* Primary Button (Molten Lava Liquid Blobs over Vibrant Brand Orange) */
+.c-button--primary {
+  border: 2.5px solid #FF5500 !important;
+  background-color: #FF5500 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(255, 85, 0, 0.4);
+}
+
+.c-button--primary .c-button__blobs div {
+  background-color: #c93600;
+}
+
+.c-button--primary:hover {
+  color: #ffffff !important;
+  box-shadow: 0 8px 25px rgba(255, 85, 0, 0.65) !important;
+}
+
+.c-button--primary:hover .c-button__label {
+  color: #ffffff !important;
+}
+
+/* Secondary Button (Vibrant Brand Orange Liquid Surge on Hover) */
+.c-button--secondary {
+  border: 2.5px solid #FF5500 !important;
+  background-color: var(--bg-card, rgba(255, 255, 255, 0.95)) !important;
+  color: #FF5500 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.c-button--secondary .c-button__blobs div {
+  background-color: #FF5500;
+}
+
+.c-button--secondary:hover {
+  color: #ffffff !important;
+  box-shadow: 0 8px 25px rgba(255, 85, 0, 0.45) !important;
+}
+
+.c-button--secondary:hover .c-button__label {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .c-button--secondary {
+  background-color: rgba(18, 20, 24, 0.85) !important;
+  color: #ffffff !important;
+  border-color: #FF5500 !important;
+}
+
+[data-theme="dark"] .c-button--secondary:hover .c-button__label {
+  color: #ffffff !important;
+}
+
 .slider-dots {
   display: flex;
   align-items: center;
