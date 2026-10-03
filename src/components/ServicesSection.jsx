@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Wrench, Smartphone, RefreshCw, Image, Printer, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function ServicesSection({ 
@@ -8,7 +8,6 @@ export default function ServicesSection({
   onOpenCustomFrame
 }) {
   const scrollContainerRef = useRef(null);
-  const [isPaused, setIsPaused] = useState(false);
 
   const services = [
     { title: 'Mobile Repair', desc: 'Doorstep Pickup & 24h Delivery', icon: Wrench, action: () => onOpenServiceModal && onOpenServiceModal('Display / Screen Replacement') },
@@ -25,7 +24,7 @@ export default function ServicesSection({
   // Repeat items 4 times for continuous seamless forward marquee loop
   const displayServices = [...services, ...services, ...services, ...services];
 
-  // Continuous Fast & Smooth Forward Auto-Scrolling Loop
+  // Continuous Fast & Smooth Forward Auto-Scrolling Loop (Never stops on touch or hover)
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -40,17 +39,19 @@ export default function ServicesSection({
       const elapsed = timestamp - lastTime;
       lastTime = timestamp;
 
-      if (!isPaused && elapsed > 0) {
+      if (elapsed > 0) {
         // Disable smooth CSS physics during continuous frame updates
         container.style.scrollBehavior = 'auto';
 
         const delta = (scrollSpeed * elapsed) / 1000;
         container.scrollLeft += delta;
 
-        // Reset scroll position seamlessly when reaching end of loop
+        // Reset scroll position seamlessly when reaching end of loop in either direction
         const singleSetWidth = container.scrollWidth / 4;
         if (container.scrollLeft >= singleSetWidth * 2) {
           container.scrollLeft -= singleSetWidth;
+        } else if (container.scrollLeft <= 0) {
+          container.scrollLeft += singleSetWidth;
         }
       }
 
@@ -62,7 +63,7 @@ export default function ServicesSection({
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isPaused]);
+  }, []);
 
   const handleScrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -160,10 +161,6 @@ export default function ServicesSection({
         <div 
           ref={scrollContainerRef}
           className="services-grid"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setIsPaused(false)}
           style={{
             display: 'flex',
             gap: '16px',

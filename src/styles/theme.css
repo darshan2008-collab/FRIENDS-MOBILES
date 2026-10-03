@@ -4754,7 +4754,7 @@ img {
 }
 
 .brands-marquee-container:hover {
-  animation-play-state: paused;
+  animation-play-state: running;
 }
 
 @keyframes marqueeBrands {
