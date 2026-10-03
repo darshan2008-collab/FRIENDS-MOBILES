@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones, Wrench, Smartphone } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, ShieldCheck, LogOut, Headphones, Wrench, Smartphone, Home, Zap, Image, Sparkles, Store, Flame } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
 export default function Header({ 
@@ -22,6 +22,8 @@ export default function Header({
   onOpenServiceModal,
   onOpenSellPhoneModal
 }) {
+  const [activeNav, setActiveNav] = useState('home');
+
   return (
     <>
       {/* Main Header */}
@@ -208,61 +210,121 @@ export default function Header({
       </header>
 
       {/* Main Desktop Navigation */}
-      <nav className="main-nav">
+      <nav className="main-nav" aria-label="Desktop Primary Navigation">
         <div className="container">
           <ul className="nav-links">
-            <li><a href="#" className="nav-link active">{t('navHome')}</a></li>
             <li>
               <a 
-                href="#shop"
-                onClick={(e) => { e.preventDefault(); if (onOpenShop) onOpenShop('Mobile Phones'); }}
-                className="nav-link"
+                href="/" 
+                onClick={(e) => { e.preventDefault(); setActiveNav('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className={`nav-link ${activeNav === 'home' ? 'active' : ''}`}
+                title="Home"
               >
-                {t('navPhones')}
+                <Home size={14} className="nav-icon" />
+                <span>{t('navHome')}</span>
               </a>
             </li>
             <li>
               <a 
                 href="#shop"
-                onClick={(e) => { e.preventDefault(); if (onOpenShop) onOpenShop('Chargers & Cables'); }}
-                className="nav-link"
+                onClick={(e) => { e.preventDefault(); setActiveNav('phones'); if (onOpenShop) onOpenShop('Mobile Phones'); }}
+                className={`nav-link ${activeNav === 'phones' ? 'active' : ''}`}
+                title="Mobile Phones"
               >
-                {t('navChargers')}
+                <Smartphone size={14} className="nav-icon" />
+                <span>{t('navPhones')}</span>
               </a>
             </li>
-            <li><a href="#photo-frames" className="nav-link">{t('navPhotoFrames')}</a></li>
-            <li><a href="#customized-covers" className="nav-link">{t('navCustomCovers')}</a></li>
+            <li>
+              <a 
+                href="#shop"
+                onClick={(e) => { e.preventDefault(); setActiveNav('chargers'); if (onOpenShop) onOpenShop('Chargers & Cables'); }}
+                className={`nav-link ${activeNav === 'chargers' ? 'active' : ''}`}
+                title="Chargers & Accessories"
+              >
+                <Zap size={14} className="nav-icon" />
+                <span>{t('navChargers')}</span>
+              </a>
+            </li>
+            <li>
+              <a 
+                href="#photo-frames" 
+                onClick={() => setActiveNav('frames')}
+                className={`nav-link ${activeNav === 'frames' ? 'active' : ''}`}
+                title="Photo Frames"
+              >
+                <Image size={14} className="nav-icon" />
+                <span>{t('navPhotoFrames')}</span>
+              </a>
+            </li>
+            <li>
+              <a 
+                href="#customized-covers" 
+                onClick={() => setActiveNav('covers')}
+                className={`nav-link ${activeNav === 'covers' ? 'active' : ''}`}
+                title="Customized Back Covers"
+              >
+                <Sparkles size={14} className="nav-icon" />
+                <span>{t('navCustomCovers')}</span>
+              </a>
+            </li>
             <li>
               <a 
                 href="#services"
-                onClick={(e) => { e.preventDefault(); if (onOpenServiceModal) onOpenServiceModal(); }}
-                className="nav-link"
-                style={{ color: '#FF5500', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                onClick={(e) => { e.preventDefault(); setActiveNav('repair'); if (onOpenServiceModal) onOpenServiceModal(); }}
+                className={`nav-link nav-special-repair ${activeNav === 'repair' ? 'active' : ''}`}
+                title="Mobile Repair and Service"
               >
-                <Wrench size={14} /> {t('navRepair') || 'Repair and Service'}
+                <Wrench size={14} className="nav-icon" />
+                <span>{t('navRepair') || 'Repair and Service'}</span>
               </a>
             </li>
             <li>
               <a 
                 href="#sell-old-phone"
-                onClick={(e) => { e.preventDefault(); if (onOpenSellPhoneModal) onOpenSellPhoneModal(); }}
-                className="nav-link"
-                style={{ color: '#16a34a', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                onClick={(e) => { e.preventDefault(); setActiveNav('sell'); if (onOpenSellPhoneModal) onOpenSellPhoneModal(); }}
+                className={`nav-link nav-special-sell ${activeNav === 'sell' ? 'active' : ''}`}
+                title="Sell Your Old Mobile for Instant Cash"
               >
-                <Smartphone size={14} /> {t('navSellPhone') || 'Sell Your Mobile'}
+                <Smartphone size={14} className="nav-icon" />
+                <span>{t('navSellPhone') || 'Sell Your Mobile'}</span>
+                <span className="nav-tag nav-tag-green">Cash</span>
               </a>
             </li>
             <li>
               <a 
                 href="#shop"
-                onClick={(e) => { e.preventDefault(); if (onOpenShop) onOpenShop('All'); }}
-                className="nav-link"
+                onClick={(e) => { e.preventDefault(); setActiveNav('shop'); if (onOpenShop) onOpenShop('All'); }}
+                className={`nav-link ${activeNav === 'shop' ? 'active' : ''}`}
+                title="Shop All Store Products"
               >
-                {t('navShopAll')}
+                <Store size={14} className="nav-icon" />
+                <span>{t('navShopAll')}</span>
               </a>
             </li>
-            <li><a href="#offers" className="nav-link">{t('navOffers')}</a></li>
-            <li><a href="#contact" className="nav-link">{t('navContact')}</a></li>
+            <li>
+              <a 
+                href="#offers" 
+                onClick={() => setActiveNav('offers')}
+                className={`nav-link nav-special-offers ${activeNav === 'offers' ? 'active' : ''}`}
+                title="Exclusive Offers & Deals"
+              >
+                <Flame size={14} className="nav-icon flame-icon" />
+                <span>{t('navOffers')}</span>
+                <span className="nav-tag nav-tag-red">HOT</span>
+              </a>
+            </li>
+            <li>
+              <a 
+                href="#contact" 
+                onClick={() => setActiveNav('contact')}
+                className={`nav-link ${activeNav === 'contact' ? 'active' : ''}`}
+                title="Contact Friends Mobile Support"
+              >
+                <Headphones size={14} className="nav-icon" />
+                <span>{t('navContact')}</span>
+              </a>
+            </li>
           </ul>
         </div>
       </nav>
