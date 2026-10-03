@@ -396,9 +396,21 @@ export default function ProductDetailModal({
                 </button>
                 <button 
                   type="button"
-                  className={`wishlist-icon-btn ${isLiked ? 'liked' : ''}`}
+                  className={`wishlist-icon-btn modal-wishlist-btn ${isLiked ? 'liked' : ''}`}
                   onClick={() => onToggleWishlist(product)}
-                  style={{ width: '48px', height: '48px', border: '1px solid var(--border-color)', borderRadius: '12px', flexShrink: 0 }}
+                  style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    minWidth: '48px',
+                    minHeight: '48px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 0,
+                    border: '1px solid var(--border-color)', 
+                    borderRadius: '12px', 
+                    flexShrink: 0 
+                  }}
                   title={isLiked ? "Remove from Wishlist" : "Add to Wishlist"}
                   aria-label="Wishlist"
                 >

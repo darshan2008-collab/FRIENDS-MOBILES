@@ -1411,6 +1411,7 @@ img {
   border: none;
   cursor: pointer;
   transition: all var(--transition-fast);
+  padding: 0;
 }
 
 .wishlist-icon-btn {
@@ -1423,6 +1424,21 @@ img {
   color: var(--primary-orange);
   border-color: var(--primary-orange);
   background-color: var(--orange-light);
+}
+
+/* Modal specific Wishlist Button */
+.modal-wishlist-btn,
+.product-detail-content .wishlist-icon-btn {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
 }
 
 .add-cart-btn {
@@ -7702,7 +7718,7 @@ img {
 .love-heart {
   box-sizing: border-box;
   position: relative;
-  transform: rotate(-45deg) translate(1px, -1px) scale(1);
+  transform: translate(-6.01px, -3.16px) rotate(-45deg);
   transform-origin: center center;
   display: block;
   cursor: pointer;
@@ -7710,11 +7726,11 @@ img {
 }
 
 .love-heart-container.size-sm .love-heart {
-  transform: rotate(-45deg) translate(1px, -1px) scale(0.95);
+  transform: scale(0.92) translate(-6.01px, -3.16px) rotate(-45deg);
 }
 
 .love-heart-container.size-md .love-heart {
-  transform: rotate(-45deg) translate(1px, -1px) scale(1.2);
+  transform: scale(1.18) translate(-6.01px, -3.16px) rotate(-45deg);
 }
 
 .love-heart::after, 
