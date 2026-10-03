@@ -149,17 +149,6 @@ export default function Hero({ theme, slides, t = (k) => k }) {
             </a>
           </div>
 
-          {/* SVG Goo Filter for Liquid Blob Buttons */}
-          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display: block; height: 0; width: 0; position: absolute; pointer-events: none;">
-            <defs>
-              <filter id="goo">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
-                <feBlend in="SourceGraphic" in2="goo" />
-              </filter>
-            </defs>
-          </svg>
-
           {/* Interactive Slide Pagination Dots */}
           <div className="slider-dots">
             {heroSlides.map((slide, idx) => (
