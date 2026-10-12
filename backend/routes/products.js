@@ -90,6 +90,75 @@ router.get('/:id', (req, res) => {
   }
 });
 
+router.post('/bulk', (req, res) => {
+  try {
+    const rawList = Array.isArray(req.body) ? req.body : (req.body.products || req.body.items || []);
+    if (!Array.isArray(rawList) || rawList.length === 0) {
+      return res.status(400).json({ success: false, message: 'No valid products provided in bulk payload' });
+    }
+
+    const products = getProducts();
+    let maxId = products.length > 0 ? Math.max(...products.map(p => parseInt(p.id) || 0)) : 0;
+
+    const savedProducts = [];
+    for (const item of rawList) {
+      if (!item || !item.title) continue;
+
+      const pId = item.id ? parseInt(item.id) : ++maxId;
+      const sanitizedTitle = sanitizeInput(item.title);
+      const sanitizedDesc = sanitizeInput(item.description || 'Premium mobile accessory from FRIENDS MOBILE.');
+      const sanitizedCategory = sanitizeInput(item.category || 'Accessories');
+      const price = parseFloat(item.price) || 0;
+      const originalPrice = parseFloat(item.originalPrice) || Math.round(price * 1.25) || price;
+      const discount = item.discount || (originalPrice > price ? `-${Math.round(((originalPrice - price) / originalPrice) * 100)}%` : '0%');
+      const inStock = item.inStock !== undefined ? Boolean(item.inStock) : true;
+      const rating = parseFloat(item.rating || 5.0);
+      const reviews = parseInt(item.reviews || 0);
+      const img = item.img || item.fallback || 'images/prod_airdopes.png';
+      const fallback = item.fallback || img;
+
+      const newProduct = {
+        id: pId,
+        title: sanitizedTitle,
+        category: sanitizedCategory,
+        brand: item.brand ? sanitizeInput(item.brand) : '',
+        discount,
+        price,
+        originalPrice,
+        rating,
+        reviews,
+        inStock,
+        img,
+        fallback,
+        description: sanitizedDesc,
+        tamilTitle: item.tamilTitle || sanitizedTitle,
+        tamilDesc: item.tamilDesc || sanitizedDesc,
+        createdAt: item.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const existingIndex = products.findIndex(p => p.id === pId);
+      if (existingIndex !== -1) {
+        products[existingIndex] = newProduct;
+      } else {
+        products.push(newProduct);
+      }
+      savedProducts.push(newProduct);
+    }
+
+    saveProducts(products);
+
+    res.status(200).json({
+      success: true,
+      message: `Successfully imported ${savedProducts.length} products`,
+      count: savedProducts.length,
+      products: savedProducts
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to bulk import products', error: err.message });
+  }
+});
+
 router.post('/', (req, res) => {
   try {
     const { title, category, price, originalPrice, discount, img, fallback, description, inStock, rating, reviews } = req.body;

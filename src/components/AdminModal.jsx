@@ -5,7 +5,7 @@ import {
   Check, RefreshCw, Lock, User, Key, ArrowLeft, ArrowRight, LogOut, CheckCircle2, Clock, 
   TrendingUp, TrendingDown, Tag, Sparkles, AlertTriangle, Percent, DollarSign, Menu, MapPin, Phone, Eye, EyeOff, Upload, CreditCard, AlertCircle, MessageSquare, PhoneCall,
   Cloud, Database, HardDrive, Download, Zap, Smartphone, Image, Printer, Palette, FileText, Search, Wrench, Sliders, Shield,
-  Frame, Ruler, Maximize2, Activity, Radio, Globe, Users, Laptop, Monitor
+  Frame, Ruler, Maximize2, Activity, Radio, Globe, Users, Laptop, Monitor, FileSpreadsheet
 } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 import { autoTranslateToTamil } from '../data/translations';
@@ -14,12 +14,15 @@ import { copyToClipboard } from '../utils/clipboard';
 import { DEFAULT_PROMO_CARDS } from '../data/promoCards';
 import { DEFAULT_CUSTOM_PRICING } from '../data/customPricing';
 import { DEFAULT_FRAME_CONFIG, calculateCustomFramePrice, calculateDiscountPct } from '../data/framePricing';
+import ExcelProductImportModal from './ExcelProductImportModal';
+import { downloadSampleExcelTemplate } from '../utils/excelProductParser';
 
 export default function AdminModal({ 
   isOpen, 
   onClose, 
   products, 
   onAddProduct, 
+  onBulkAddProducts,
   onUpdateProduct, 
   onDeleteProduct, 
   shippingSettings, 
@@ -1144,6 +1147,18 @@ export default function AdminModal({
   const [editingProductId, setEditingProductId] = useState(null);
   const [editProductForm, setEditProductForm] = useState({});
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isExcelImportOpen, setIsExcelImportOpen] = useState(false);
+
+  const handleImportExcelProducts = async (importedProducts) => {
+    if (!Array.isArray(importedProducts) || importedProducts.length === 0) return;
+    if (onBulkAddProducts) {
+      await onBulkAddProducts(importedProducts);
+    } else if (onAddProduct) {
+      for (const p of importedProducts) {
+        onAddProduct(p);
+      }
+    }
+  };
 
   useEffect(() => {
     if (shippingSettings) {
@@ -2684,28 +2699,82 @@ export default function AdminModal({
                   </span>
                 </div>
 
-                <button
-                  onClick={() => {
-                    setEditingProductId(null);
-                    setIsAddProductOpen(!isAddProductOpen);
-                  }}
-                  style={{
-                    padding: '10px 18px',
-                    borderRadius: '10px',
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #FF5500 0%, #E03E00 100%)',
-                    color: '#ffffff',
-                    fontWeight: '800',
-                    fontSize: '0.86rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    boxShadow: '0 4px 15px rgba(255, 85, 0, 0.35)'
-                  }}
-                >
-                  <Plus size={16} /> {isAddProductOpen ? 'Close Form' : 'Add New Product'}
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try {
+                        downloadSampleExcelTemplate();
+                        if (addToast) addToast('Sample Excel template downloaded!', '📥');
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }}
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(16, 185, 129, 0.4)',
+                      background: 'rgba(16, 185, 129, 0.1)',
+                      color: '#10b981',
+                      fontWeight: '700',
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.2s'
+                    }}
+                    title="Download official sample Excel template (.xlsx)"
+                  >
+                    <Download size={15} /> Sample Template
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsExcelImportOpen(true)}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: '#ffffff',
+                      fontWeight: '800',
+                      fontSize: '0.84rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <FileSpreadsheet size={16} /> Import Excel / CSV
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingProductId(null);
+                      setIsAddProductOpen(!isAddProductOpen);
+                    }}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #FF5500 0%, #E03E00 100%)',
+                      color: '#ffffff',
+                      fontWeight: '800',
+                      fontSize: '0.84rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      boxShadow: '0 4px 15px rgba(255, 85, 0, 0.35)'
+                    }}
+                  >
+                    <Plus size={16} /> {isAddProductOpen ? 'Close Form' : 'Add New Product'}
+                  </button>
+                </div>
               </div>
 
               {/* Add Product Form Drawer Card */}
@@ -3460,6 +3529,17 @@ export default function AdminModal({
                   </tbody>
                 </table>
               </div>
+
+              {/* Bulk Excel / CSV Import Modal */}
+              {isExcelImportOpen && (
+                <ExcelProductImportModal
+                  isOpen={isExcelImportOpen}
+                  onClose={() => setIsExcelImportOpen(false)}
+                  onImportProducts={handleImportExcelProducts}
+                  addToast={addToast}
+                  existingCategories={Array.from(new Set((products || []).map(p => p.category).filter(Boolean)))}
+                />
+              )}
 
             </div>
           )}

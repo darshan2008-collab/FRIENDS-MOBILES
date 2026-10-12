@@ -32,6 +32,8 @@ android/app/build/
 android/.idea/
 android/captures/
 .gradle/
+*.jks
+*.keystore
 
 # Logs & Temporary Files
 *.log

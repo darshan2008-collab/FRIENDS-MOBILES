@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { 
   X, ArrowLeft, Search, Filter, ShoppingBag, Heart, Star, Smartphone, 
   Zap, Headphones, Watch, Frame, Palette, CheckCircle2, SlidersHorizontal, 
-  Sparkles, ShieldCheck, ArrowUpDown, ChevronLeft, ChevronRight, Tag, RefreshCw, DollarSign, Share2
+  Sparkles, ShieldCheck, ArrowUpDown, ChevronLeft, ChevronRight, Tag, RefreshCw, DollarSign, Share2, Speaker
 } from 'lucide-react';
 import LoveHeart from './LoveHeart';
 import { getProductTitle } from '../data/translations';
@@ -69,6 +69,8 @@ export default function ShoppingPortal({
     'Smartwatches',
     'Back Covers',
     'Photo Frames',
+    'Screen Protectors',
+    'Speakers',
     'Accessories'
   ];
 
@@ -77,21 +79,24 @@ export default function ShoppingPortal({
     new Set(['All', 'Wishlist', ...standardCategories.slice(1), ...dynamicCategories])
   );
 
-  // Helper matcher for categories
+  // Helper matcher for categories (handles standard & custom categories with high precision)
   const matchesCategoryFilter = (productCategory, selCat) => {
     if (selCat === 'All') return true;
-    const pCat = (productCategory || '').toLowerCase();
-    const c = selCat.toLowerCase();
+    const pCat = (productCategory || '').trim().toLowerCase();
+    const c = selCat.trim().toLowerCase();
 
-    if (c.includes('charger')) return pCat.includes('charger') || pCat.includes('cable');
+    if (pCat === c) return true;
+    if (c.includes('charger') || c.includes('cable')) return pCat.includes('charger') || pCat.includes('cable');
     if (c.includes('otg') || c.includes('adapter') || c.includes('usb')) return pCat.includes('otg') || pCat.includes('adapter') || pCat.includes('usb');
-    if (c.includes('mobile') || c.includes('phone')) return pCat.includes('mobile') || pCat.includes('phone') || pCat.includes('smartphone');
-    if (c.includes('earphone') || c.includes('audio')) return pCat.includes('earphone') || pCat.includes('headphone') || pCat.includes('audio') || pCat.includes('airdope');
+    if (c.includes('mobile') || c.includes('phone') || c.includes('smartphone')) return pCat.includes('mobile') || pCat.includes('phone') || pCat.includes('smartphone');
+    if (c.includes('earphone') || c.includes('audio') || c.includes('headphone')) return pCat.includes('earphone') || pCat.includes('headphone') || pCat.includes('audio') || pCat.includes('airdope') || pCat.includes('earbud');
     if (c.includes('power')) return pCat.includes('power');
     if (c.includes('frame')) return pCat.includes('frame');
     if (c.includes('cover') || c.includes('case')) return pCat.includes('cover') || pCat.includes('case');
     if (c.includes('watch')) return pCat.includes('watch') || pCat.includes('band');
-    return pCat.includes(c);
+    if (c.includes('glass') || c.includes('screen') || c.includes('protector') || c.includes('guard')) return pCat.includes('glass') || pCat.includes('screen') || pCat.includes('protector') || pCat.includes('guard');
+    if (c.includes('speaker')) return pCat.includes('speaker') || pCat.includes('sound');
+    return pCat.includes(c) || c.includes(pCat);
   };
 
   // Filter products by category, search, price range, and stock
@@ -155,10 +160,12 @@ export default function ShoppingPortal({
     const c = (cat || '').toLowerCase();
     if (c.includes('mobile') || c.includes('phone')) return <Smartphone size={16} color="#FF5500" />;
     if (c.includes('charger') || c.includes('otg') || c.includes('cable') || c.includes('usb')) return <Zap size={16} color="#FF5500" />;
-    if (c.includes('earphone') || c.includes('audio')) return <Headphones size={16} color="#FF5500" />;
+    if (c.includes('earphone') || c.includes('audio') || c.includes('headphone')) return <Headphones size={16} color="#FF5500" />;
     if (c.includes('watch')) return <Watch size={16} color="#FF5500" />;
     if (c.includes('frame')) return <Frame size={16} color="#FF5500" />;
     if (c.includes('cover') || c.includes('case')) return <Palette size={16} color="#FF5500" />;
+    if (c.includes('glass') || c.includes('screen') || c.includes('protector') || c.includes('guard')) return <ShieldCheck size={16} color="#FF5500" />;
+    if (c.includes('speaker') || c.includes('sound')) return <Speaker size={16} color="#FF5500" />;
     return <Tag size={16} color="#FF5500" />;
   };
 

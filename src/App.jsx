@@ -1096,6 +1096,50 @@ export default function App() {
       });
   };
 
+  const handleBulkAddProducts = (newProductsList) => {
+    if (!Array.isArray(newProductsList) || newProductsList.length === 0) return;
+
+    let baseId = Date.now();
+    const formattedList = newProductsList.map((p, idx) => ({
+      ...p,
+      id: p.id || (baseId + idx),
+      tamilTitle: p.tamilTitle || autoTranslateToTamil(p.title || ''),
+      tamilDesc: p.tamilDesc || autoTranslateToTamil(p.description || p.title || ''),
+      fallback: p.fallback || p.img || 'images/prod_airdopes.png'
+    }));
+
+    setProducts(prev => {
+      const safePrev = Array.isArray(prev) ? prev : [];
+      const next = [...formattedList, ...safePrev];
+      try { localStorage.setItem('fm_products', JSON.stringify(next)); } catch (_) {}
+      return next;
+    });
+
+    addToast(`Successfully imported ${formattedList.length} products to store catalog! 🎉`, '📦');
+
+    fetch(`${API_BASE}/products/bulk`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formattedList)
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+          setProducts(prev => {
+            const currentList = Array.isArray(prev) ? prev : [];
+            const updatedMap = new Map();
+            data.products.forEach(p => updatedMap.set(p.id, p));
+            const next = currentList.map(p => updatedMap.get(p.id) || p);
+            try { localStorage.setItem('fm_products', JSON.stringify(next)); } catch (_) {}
+            return next;
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn("Product API bulk POST fallback:", err);
+      });
+  };
+
   const handleUpdateProduct = (updatedProd) => {
     const autoTaTitle = updatedProd.tamilTitle || autoTranslateToTamil(updatedProd.title || '');
     const autoTaDesc = updatedProd.tamilDesc || autoTranslateToTamil(updatedProd.description || updatedProd.title || '');
@@ -1384,6 +1428,7 @@ export default function App() {
           onClose={() => setIsAdminOpen(false)}
           products={products}
           onAddProduct={handleAddProduct}
+          onBulkAddProducts={handleBulkAddProducts}
           onUpdateProduct={handleUpdateProduct}
           onDeleteProduct={handleDeleteProduct}
           shippingSettings={shippingSettings}
