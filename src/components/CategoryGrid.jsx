@@ -1,7 +1,12 @@
 import React, { useRef, useEffect } from 'react';
 import { Smartphone, Cable, Headphones, Watch, BatteryCharging, Speaker, Image, Shield, Grid, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function CategoryGrid({ onOpenShop, t = (k) => k }) {
+export default function CategoryGrid({ 
+  onOpenShop, 
+  onOpenCustomCover, 
+  onOpenCustomFrame, 
+  t = (k) => k 
+}) {
   const scrollContainerRef = useRef(null);
 
   const categories = [
@@ -147,7 +152,15 @@ export default function CategoryGrid({ onOpenShop, t = (k) => k }) {
             return (
               <div 
                 key={index} 
-                onClick={() => onOpenShop && onOpenShop(cat.name === 'More Categories' ? 'All' : cat.name)} 
+                onClick={() => {
+                  if (cat.name === 'Photo Frames' && onOpenCustomFrame) {
+                    onOpenCustomFrame();
+                  } else if ((cat.name === 'Back Covers' || cat.name === 'Customized Back Covers') && onOpenCustomCover) {
+                    onOpenCustomCover();
+                  } else if (onOpenShop) {
+                    onOpenShop(cat.name === 'More Categories' ? 'All' : cat.name);
+                  }
+                }} 
                 className="category-slide-card"
                 style={{
                   flex: '0 0 auto',

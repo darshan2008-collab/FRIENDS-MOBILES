@@ -39,93 +39,8 @@ import './styles/theme.css';
 
 const API_BASE = getApiBaseUrl();
 
-const initialProducts = [
-  {
-    id: 1,
-    title: 'boAt Airdopes 141 Bluetooth Earbuds',
-    tamilTitle: 'போட் ஏர்டோப்ஸ் 141 புளூடூத் இயர்பட்ஸ்',
-    brand: 'boAt',
-    category: 'Earphones',
-    discount: '-20%',
-    price: 1199,
-    originalPrice: 1499,
-    rating: 4.8,
-    reviews: 342,
-    inStock: true,
-    img: 'images/prod_airdopes.png',
-    fallback: 'http://localhost:5000/images/prod_airdopes.png',
-    description: 'True Wireless Earbuds with up to 42H Playtime, Beast Mode for Low Latency Gaming, and ENx Technology for crystal clear calls.',
-    tamilDesc: 'உயர் தரமான 42 மணிநேரம் இயங்கும் வயர்லெஸ் ப்ளூடூத் இயர்பட்ஸ்.'
-  },
-  {
-    id: 2,
-    title: 'Mi 20000mAh Power Bank 3i',
-    tamilTitle: 'மி 20000mAh பாஸ்ட் பவர் பேங்க் 3i',
-    brand: 'Xiaomi',
-    category: 'Power Banks',
-    discount: '-15%',
-    price: 1699,
-    originalPrice: 1999,
-    rating: 4.7,
-    reviews: 218,
-    inStock: true,
-    img: 'images/prod_powerbank.png',
-    fallback: 'http://localhost:5000/images/prod_powerbank.png',
-    description: 'High capacity 20000mAh lithium polymer battery with 18W fast charging and triple port output.',
-    tamilDesc: '20000mAh அதிவேக பவர் பேங்க் 3 போர்ட் வசதியுடன்.'
-  },
-  {
-    id: 3,
-    title: 'Portronics 20W Fast Charger',
-    tamilTitle: 'போர்ட்ரானிக்ஸ் 20W வேகமான சார்ஜர்',
-    brand: 'Portronics',
-    category: 'Chargers & Cables',
-    discount: '-25%',
-    price: 599,
-    originalPrice: 799,
-    rating: 4.6,
-    reviews: 154,
-    inStock: true,
-    img: 'images/prod_charger.png',
-    fallback: 'http://localhost:5000/images/prod_charger.png',
-    description: 'Ultra fast 20W Type-C Power Delivery wall charger compatible with iPhone, Samsung, and Android devices.',
-    tamilDesc: '20W டைப்-சி அதிவேக சார்ஜர்.'
-  },
-  {
-    id: 4,
-    title: 'Realme Wireless 2S Neckband',
-    tamilTitle: 'ரியல்மி வயர்லெஸ் 2S நெக்பேண்ட்',
-    brand: 'Realme',
-    category: 'Earphones',
-    discount: '-10%',
-    price: 1349,
-    originalPrice: 1499,
-    rating: 4.7,
-    reviews: 189,
-    inStock: true,
-    img: 'images/prod_neckband.png',
-    fallback: 'http://localhost:5000/images/prod_neckband.png',
-    description: 'Flexible neckband earphones with 11.2mm dynamic bass boost drivers, magnetic instant connect, and fast charging.',
-    tamilDesc: 'ரியல்மி ஃப்ளெக்சிபிள் வயர்லெஸ் நெக்பேண்ட்.'
-  },
-  {
-    id: 5,
-    title: 'Customized Back Cover',
-    tamilTitle: '3D கஸ்டமைஸ் பேக் கவர்',
-    brand: 'FRIENDS MOBILE',
-    category: 'Back Covers',
-    discount: '-15%',
-    price: 399,
-    originalPrice: 499,
-    rating: 4.9,
-    reviews: 520,
-    inStock: true,
-    img: 'images/prod_custom_cover.png',
-    fallback: 'http://localhost:5000/images/prod_custom_cover.png',
-    description: 'High resolution custom printed back cover with scratch-resistant coating for all mobile phone models.',
-    tamilDesc: '3D உயர்தர போட்டோ அச்சிடப்பட்ட மொபைல் கவர்.'
-  }
-];
+const initialProducts = [];
+
 
 export default function App() {
   const [theme, setTheme] = useState(() => {
@@ -639,6 +554,19 @@ export default function App() {
             setSelectedProduct(matched);
           }
         }
+
+        // 4. Custom Studios & Navigation Deep Links
+        const rawHash = (hash || '').toLowerCase();
+        const catParam = (params.get('category') || params.get('tab') || '').toLowerCase();
+        if (rawHash === '#photo-frames' || catParam === 'photo-frames' || catParam === 'frames') {
+          setIsCustomFrameOpen(true);
+        } else if (rawHash === '#customized-covers' || rawHash === '#custom-cover' || catParam === 'customized-covers' || catParam === 'covers') {
+          setIsCustomCoverOpen(true);
+        } else if (rawHash === '#services' || rawHash === '#doorstep-repair') {
+          handleOpenServiceModal();
+        } else if (rawHash === '#sell-old-phone' || rawHash === '#sell') {
+          setIsSellPhoneOpen(true);
+        }
       } catch (_) {}
     };
 
@@ -712,7 +640,15 @@ export default function App() {
           cart: Array.isArray(cart) ? cart : [],
           wishlist: Array.isArray(wishlist) ? wishlist : []
         })
-      }).catch(() => {});
+      })
+        .then(res => {
+          if (res.status === 404) {
+            // User was removed during database cleanup / reset
+            setCurrentUser(null);
+            try { localStorage.removeItem('fm_user'); } catch (_) {}
+          }
+        })
+        .catch(() => {});
     }, 1000);
 
     return () => clearTimeout(syncTimer);
@@ -723,7 +659,7 @@ export default function App() {
     fetch(`${API_BASE}/products`)
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.products && data.products.length > 0) {
+        if (data.success && Array.isArray(data.products)) {
           setProducts(data.products);
           try {
             localStorage.setItem('fm_products', JSON.stringify(data.products));
@@ -1334,6 +1270,12 @@ export default function App() {
         onOpenChatbot={() => setIsChatbotOpen(true)}
         onOpenServiceModal={handleOpenServiceModal}
         onOpenSellPhoneModal={() => setIsSellPhoneOpen(true)}
+        onOpenCustomCover={() => setIsCustomCoverOpen(true)}
+        onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+        isCustomCoverOpen={isCustomCoverOpen}
+        isCustomFrameOpen={isCustomFrameOpen}
+        isShopOpen={isShopOpen}
+        shopCategory={shopCategory}
       />
 
       <MobileDrawer 
@@ -1349,11 +1291,26 @@ export default function App() {
         onLogout={handleLogout}
         onOpenServiceModal={handleOpenServiceModal}
         onOpenSellPhoneModal={() => setIsSellPhoneOpen(true)}
+        onOpenCustomCover={() => setIsCustomCoverOpen(true)}
+        onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+        onOpenShop={handleOpenShop}
       />
 
       <main>
-        <Hero theme={theme} slides={heroSlides} t={t} />
-        <CategoryGrid onOpenShop={handleOpenShop} t={t} />
+        <Hero 
+          theme={theme} 
+          slides={heroSlides} 
+          t={t} 
+          onOpenCustomCover={() => setIsCustomCoverOpen(true)}
+          onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+          onOpenShop={handleOpenShop}
+        />
+        <CategoryGrid 
+          onOpenShop={handleOpenShop} 
+          onOpenCustomCover={() => setIsCustomCoverOpen(true)}
+          onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
+          t={t} 
+        />
         <PromoBanners 
           cards={promoCards}
           onOpenCustomCover={() => setIsCustomCoverOpen(true)}
@@ -1418,6 +1375,8 @@ export default function App() {
           initialCategory={shopCategory}
           cartCount={cartCount}
           onOpenCart={handleOpenCartClick}
+          onOpenCustomCover={() => setIsCustomCoverOpen(true)}
+          onOpenCustomFrame={() => setIsCustomFrameOpen(true)}
           t={t}
         />
       )}

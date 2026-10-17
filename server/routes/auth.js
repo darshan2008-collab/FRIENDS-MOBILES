@@ -310,6 +310,8 @@ router.get('/google/callback', async (req, res) => {
     const deepLinkUrl = `com.friendsmobile.app://auth-success?user=${userJsonStr}`;
     const intentUrl = `intent://auth-success?user=${userJsonStr}#Intent;scheme=com.friendsmobile.app;package=com.friendsmobile.app;end`;
 
+    const isApkMode = stateData.mode === 'apk' || stateData.mode === 'app';
+
     return res.send(`
       <!DOCTYPE html>
       <html>
@@ -319,21 +321,34 @@ router.get('/google/callback', async (req, res) => {
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #0f172a; color: #ffffff; text-align: center; }
           .card { background: #1e293b; padding: 32px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 360px; width: 90%; border: 1px solid #334155; }
-          .btn { display: inline-block; margin-top: 16px; padding: 12px 24px; background: #FF5500; color: #ffffff; border-radius: 12px; text-decoration: none; font-weight: 800; }
+          .btn { display: inline-block; margin-top: 16px; padding: 12px 24px; background: #FF5500; color: #ffffff; border-radius: 12px; text-decoration: none; font-weight: 800; cursor: pointer; border: none; }
         </style>
       </head>
       <body>
         <div class="card">
           <h2 style="color:#FF5500; margin-top:0;">Signed In Successfully!</h2>
           <p>Welcome, <strong>${userProfile.name}</strong>!</p>
-          <p style="font-size:0.88rem; color:#94a3b8;">Returning to FRIENDS MOBILE App...</p>
-          <a href="${intentUrl}" class="btn">Open FRIENDS MOBILE App</a>
+          <p style="font-size:0.88rem; color:#94a3b8;">${isApkMode ? 'Returning to FRIENDS MOBILE App...' : 'Redirecting to store...'}</p>
+          <a href="${isApkMode ? intentUrl : '/'}" class="btn">${isApkMode ? 'Open FRIENDS MOBILE App' : 'Continue to Store'}</a>
         </div>
         <script>
-          window.location.href = "${intentUrl}";
-          setTimeout(function() {
-            window.location.href = "${deepLinkUrl}";
-          }, 300);
+          try {
+            localStorage.setItem('fm_user', JSON.stringify(${JSON.stringify(userProfile)}));
+            if (window.opener) {
+              window.opener.postMessage({ type: 'GOOGLE_AUTH_SUCCESS', user: ${JSON.stringify(userProfile)} }, '*');
+              setTimeout(() => { try { window.close(); } catch(_) {} }, 600);
+            }
+          } catch(e) {}
+          if (${isApkMode}) {
+            window.location.href = "${intentUrl}";
+            setTimeout(function() {
+              window.location.href = "${deepLinkUrl}";
+            }, 300);
+          } else {
+            setTimeout(function() {
+              window.location.href = "/";
+            }, 800);
+          }
         </script>
       </body>
       </html>

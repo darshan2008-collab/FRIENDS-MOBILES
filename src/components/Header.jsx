@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Heart, ShoppingBag, User, Sun, Moon, Menu, LogOut, Headphones, Wrench, Smartphone, Home, Zap, Image, Sparkles, Store, Flame } from 'lucide-react';
 import CompanyLogo from './CompanyLogo';
 
@@ -20,9 +20,29 @@ export default function Header({
   onOpenShop, 
   onOpenChatbot,
   onOpenServiceModal,
-  onOpenSellPhoneModal
+  onOpenSellPhoneModal,
+  onOpenCustomCover,
+  onOpenCustomFrame,
+  isCustomCoverOpen = false,
+  isCustomFrameOpen = false,
+  isShopOpen = false,
+  shopCategory = ''
 }) {
   const [activeNav, setActiveNav] = useState('home');
+
+  useEffect(() => {
+    if (isCustomFrameOpen) {
+      setActiveNav('frames');
+    } else if (isCustomCoverOpen) {
+      setActiveNav('covers');
+    } else if (isShopOpen) {
+      if (shopCategory === 'Mobile Phones') setActiveNav('phones');
+      else if (shopCategory === 'Chargers & Cables') setActiveNav('chargers');
+      else setActiveNav('shop');
+    } else {
+      setActiveNav('home');
+    }
+  }, [isCustomFrameOpen, isCustomCoverOpen, isShopOpen, shopCategory]);
 
   return (
     <>
@@ -249,7 +269,11 @@ export default function Header({
             <li>
               <a 
                 href="#photo-frames" 
-                onClick={() => setActiveNav('frames')}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveNav('frames');
+                  if (onOpenCustomFrame) onOpenCustomFrame();
+                }}
                 className={`nav-link ${activeNav === 'frames' ? 'active' : ''}`}
                 title="Photo Frames"
               >
@@ -260,7 +284,11 @@ export default function Header({
             <li>
               <a 
                 href="#customized-covers" 
-                onClick={() => setActiveNav('covers')}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveNav('covers');
+                  if (onOpenCustomCover) onOpenCustomCover();
+                }}
                 className={`nav-link ${activeNav === 'covers' ? 'active' : ''}`}
                 title="Customized Back Covers"
               >
@@ -305,7 +333,13 @@ export default function Header({
             <li>
               <a 
                 href="#offers" 
-                onClick={() => setActiveNav('offers')}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveNav('offers');
+                  const el = document.getElementById('products');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  else if (onOpenShop) onOpenShop('All');
+                }}
                 className={`nav-link nav-special-offers ${activeNav === 'offers' ? 'active' : ''}`}
                 title="Exclusive Offers & Deals"
               >
@@ -317,7 +351,12 @@ export default function Header({
             <li>
               <a 
                 href="#contact" 
-                onClick={() => setActiveNav('contact')}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveNav('contact');
+                  const el = document.getElementById('contact') || document.querySelector('.main-footer');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className={`nav-link ${activeNav === 'contact' ? 'active' : ''}`}
                 title="Contact Friends Mobile Support"
               >

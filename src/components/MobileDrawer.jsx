@@ -11,7 +11,10 @@ export default function MobileDrawer({
   onOpenUserAccount, 
   onLogout,
   onOpenServiceModal,
-  onOpenSellPhoneModal
+  onOpenSellPhoneModal,
+  onOpenCustomCover,
+  onOpenCustomFrame,
+  onOpenShop
 }) {
   if (!isOpen) return null;
 
@@ -144,13 +147,100 @@ export default function MobileDrawer({
               <Smartphone size={18} /> {t('navSellPhone') || 'Sell Your Mobile'}
             </a>
           </li>
-          <li><a href="#products" className="drawer-link" onClick={onClose}>{t('navPhones') || 'Mobile Phones'}</a></li>
-          <li><a href="#products" className="drawer-link" onClick={onClose}>{t('navAccessories') || 'Accessories'}</a></li>
-          <li><a href="#photo-frames" className="drawer-link" onClick={onClose}>{t('navPhotoFrames') || 'Photo Frames'}</a></li>
-          <li><a href="#customized-covers" className="drawer-link" onClick={onClose}>{t('navCustomCovers') || 'Customized Back Covers'}</a></li>
-          <li><a href="#services" className="drawer-link" onClick={onClose}>{t('navServices') || 'Services'}</a></li>
-          <li><a href="#offers" className="drawer-link" onClick={onClose}>{t('navOffers') || 'Offers'}</a></li>
-          <li><a href="#contact" className="drawer-link" onClick={onClose}>{t('navContact') || 'Contact Us'}</a></li>
+          <li>
+            <a 
+              href="#products" 
+              className="drawer-link" 
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+                if (onOpenShop) onOpenShop('Mobile Phones');
+              }}
+            >
+              {t('navPhones') || 'Mobile Phones'}
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#products" 
+              className="drawer-link" 
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+                if (onOpenShop) onOpenShop('Chargers & Cables');
+              }}
+            >
+              {t('navAccessories') || 'Accessories'}
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#photo-frames" 
+              className="drawer-link" 
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+                if (onOpenCustomFrame) onOpenCustomFrame();
+              }}
+            >
+              {t('navPhotoFrames') || 'Photo Frames'}
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#customized-covers" 
+              className="drawer-link" 
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+                if (onOpenCustomCover) onOpenCustomCover();
+              }}
+            >
+              {t('navCustomCovers') || 'Customized Back Covers'}
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#services" 
+              className="drawer-link" 
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+                if (onOpenServiceModal) onOpenServiceModal();
+              }}
+            >
+              {t('navServices') || 'Services'}
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#offers" 
+              className="drawer-link" 
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+                const el = document.getElementById('products');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                else if (onOpenShop) onOpenShop('All');
+              }}
+            >
+              {t('navOffers') || 'Offers'}
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#contact" 
+              className="drawer-link" 
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+                const el = document.getElementById('contact') || document.querySelector('.main-footer');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              {t('navContact') || 'Contact Us'}
+            </a>
+          </li>
         </ul>
       </aside>
     </>

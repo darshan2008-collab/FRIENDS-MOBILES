@@ -51,9 +51,15 @@ export default function TrendingProducts({ products, wishlist, onToggleWishlist,
         </div>
 
         {filteredProducts.length === 0 ? (
-          <p style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
-            No products found matching "{searchQuery}".
-          </p>
+          <div style={{ textAlign: 'center', padding: '40px 20px', background: 'var(--bg-card)', borderRadius: '16px', border: '1px dashed var(--border-color)', margin: '10px 0' }}>
+            <ShoppingBag size={42} color="#FF5500" style={{ opacity: 0.6, marginBottom: '12px' }} />
+            <h3 style={{ margin: '0 0 8px 0', fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+              {searchQuery ? `No products found matching "${searchQuery}"` : 'Fresh Catalog Loading Soon!'}
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+              {searchQuery ? 'Try searching for other brand names or browse categories.' : 'New products are being added to our store catalog. Check back shortly!'}
+            </p>
+          </div>
         ) : (
           <div className="products-grid">
             {filteredProducts.map((prod) => {

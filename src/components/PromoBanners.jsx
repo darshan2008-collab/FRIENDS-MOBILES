@@ -78,11 +78,12 @@ export default function PromoBanners({
       >
         {activeCards.map((card) => {
           const fallbackImage = card.fallbackImg || 'images/banner_accessories.png';
+          const cardElementId = card.btnAction === 'custom_frame' ? 'photo-frames' : (card.btnAction === 'custom_cover' ? 'customized-covers' : card.id);
           return (
             <div 
               key={card.id || card.title} 
               className="promo-card heading-in-view"
-              id={card.id}
+              id={cardElementId}
               style={{
                 opacity: 1,
                 visibility: 'visible',

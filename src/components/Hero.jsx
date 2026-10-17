@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function Hero({ theme, slides, t = (k) => k }) {
+export default function Hero({ 
+  theme, 
+  slides, 
+  t = (k) => k,
+  onOpenCustomCover,
+  onOpenCustomFrame,
+  onOpenShop
+}) {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const isDark = theme === 'dark';
 
@@ -126,7 +133,26 @@ export default function Hero({ theme, slides, t = (k) => k }) {
           </p>
 
           <div className="hero-buttons">
-            <a href={activeSlide.btnLink} className="c-button c-button--gooey c-button--primary btn">
+            <a 
+              href={activeSlide.btnLink} 
+              onClick={(e) => {
+                if (activeSlide.btnLink === '#customized-covers' || activeSlide.btnAction === 'custom_cover') {
+                  e.preventDefault();
+                  if (onOpenCustomCover) onOpenCustomCover();
+                } else if (activeSlide.btnLink === '#photo-frames' || activeSlide.btnAction === 'custom_frame') {
+                  e.preventDefault();
+                  if (onOpenCustomFrame) onOpenCustomFrame();
+                } else if (activeSlide.btnLink === '#products' || activeSlide.btnAction === 'shop') {
+                  e.preventDefault();
+                  if (onOpenShop) onOpenShop('All');
+                  else {
+                    const el = document.getElementById('products');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }
+              }}
+              className="c-button c-button--gooey c-button--primary btn"
+            >
               <span className="c-button__label">
                 {activeSlide.btnText}
                 <ArrowRight size={16} className="btn-arrow-icon" style={{ flexShrink: 0 }} />
@@ -138,7 +164,18 @@ export default function Hero({ theme, slides, t = (k) => k }) {
                 <div></div>
               </div>
             </a>
-            <a href="#products" className="c-button c-button--gooey c-button--secondary btn">
+            <a 
+              href="#products" 
+              onClick={(e) => {
+                e.preventDefault();
+                if (onOpenShop) onOpenShop('All');
+                else {
+                  const el = document.getElementById('products');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="c-button c-button--gooey c-button--secondary btn"
+            >
               <span className="c-button__label">
                 EXPLORE STORE
               </span>

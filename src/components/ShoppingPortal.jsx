@@ -19,6 +19,8 @@ export default function ShoppingPortal({
   initialCategory = 'All',
   cartCount = 0,
   onOpenCart,
+  onOpenCustomCover,
+  onOpenCustomFrame,
   t = (k) => k
 }) {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
@@ -394,14 +396,158 @@ export default function ShoppingPortal({
           {/* Product Catalog Display */}
           <div className="shop-catalog-area">
 
+            {/* Custom Studio Banner for Photo Frames or Back Covers */}
+            {selectedCategory === 'Photo Frames' && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(59, 130, 246, 0.12) 100%)',
+                border: '1px solid rgba(6, 182, 212, 0.3)',
+                borderRadius: '16px',
+                padding: '16px 20px',
+                marginBottom: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '16px',
+                flexWrap: 'wrap'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '12px',
+                    background: 'rgba(6, 182, 212, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Frame size={26} color="#06b6d4" />
+                  </div>
+                  <div>
+                    <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                      Personalized Photo Frame Studio
+                    </h4>
+                    <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                      Upload your favorite photos, choose wood/acrylic frame sizes &amp; preview live in 3D!
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    onClose();
+                    if (onOpenCustomFrame) onOpenCustomFrame();
+                  }}
+                  className="btn btn-primary"
+                  style={{
+                    background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+                    border: 'none',
+                    padding: '9px 18px',
+                    borderRadius: '10px',
+                    fontWeight: '700',
+                    fontSize: '0.85rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Sparkles size={16} /> Open Frame Studio
+                </button>
+              </div>
+            )}
+
+            {selectedCategory === 'Back Covers' && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 85, 0, 0.12) 0%, rgba(255, 136, 0, 0.12) 100%)',
+                border: '1px solid rgba(255, 85, 0, 0.3)',
+                borderRadius: '16px',
+                padding: '16px 20px',
+                marginBottom: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '16px',
+                flexWrap: 'wrap'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '12px',
+                    background: 'rgba(255, 85, 0, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Smartphone size={26} color="#FF5500" />
+                  </div>
+                  <div>
+                    <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                      3D Custom Phone Case Studio
+                    </h4>
+                    <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                      Select your model (Apple, Samsung, Vivo, OnePlus &amp; more) and 3D print your photo!
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    onClose();
+                    if (onOpenCustomCover) onOpenCustomCover();
+                  }}
+                  className="btn btn-primary"
+                  style={{
+                    background: 'linear-gradient(135deg, #FF6A00 0%, #FF4500 100%)',
+                    border: 'none',
+                    padding: '9px 18px',
+                    borderRadius: '10px',
+                    fontWeight: '700',
+                    fontSize: '0.85rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Sparkles size={16} /> Open 3D Case Studio
+                </button>
+              </div>
+            )}
+
             {sortedProducts.length === 0 ? (
               <div className="empty-catalog-state">
-                <ShoppingBag size={54} color="#FF5500" style={{ opacity: 0.5 }} />
-                <h3>No products match your active filters</h3>
-                <p>Try clearing your price range or search query to view more items.</p>
-                <button className="btn btn-primary btn-sm" onClick={handleResetAllFilters}>
-                  Reset All Filters
-                </button>
+                {selectedCategory === 'Photo Frames' ? (
+                  <>
+                    <Frame size={54} color="#06b6d4" style={{ opacity: 0.8 }} />
+                    <h3>Create Your Personalized Photo Frame</h3>
+                    <p>Upload any picture from your phone or PC and craft wooden &amp; acrylic frames with 3D preview.</p>
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={() => {
+                        onClose();
+                        if (onOpenCustomFrame) onOpenCustomFrame();
+                      }}
+                      style={{ 
+                        background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <Sparkles size={16} /> Launch Photo Frame Studio
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag size={54} color="#FF5500" style={{ opacity: 0.5 }} />
+                    <h3>No products match your active filters</h3>
+                    <p>Try clearing your price range or search query to view more items.</p>
+                    <button className="btn btn-primary btn-sm" onClick={handleResetAllFilters}>
+                      Reset All Filters
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               selectedCategory !== 'All' || searchQuery.trim() !== '' || priceRange !== 'all' ? (

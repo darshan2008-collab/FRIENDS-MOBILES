@@ -44,3 +44,5 @@ pnpm-debug.log*
 
 .vercel
 .env*
+
+server/data/backups/test_archive/
