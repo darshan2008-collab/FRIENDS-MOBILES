@@ -46,3 +46,5 @@ pnpm-debug.log*
 .env*
 
 server/data/backups/test_archive/
+server/data/backups/friends_mobile_*
+server/data/backup_pre_postgres/

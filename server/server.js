@@ -493,19 +493,17 @@ app.use((err, req, res, next) => {
 
 
 // ─── Start Server ──────────────────────────────────────────────────────────────
-if (require.main === module) {
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`\n=======================================================`);
-    console.log(`  FRIENDS MOBILE — REST API Server`);
-    console.log(`  Port    : ${PORT}`);
-    console.log(`  Health  : http://localhost:${PORT}/api/health`);
-    console.log(`  Products: http://localhost:${PORT}/api/products`);
-    console.log(`  Orders  : http://localhost:${PORT}/api/orders`);
-    console.log(`  Auth    : http://localhost:${PORT}/api/auth`);
-    console.log(`  Payments: http://localhost:${PORT}/api/payments`);
-    console.log(`=======================================================\n`);
-  });
-}
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n=======================================================`);
+  console.log(`  FRIENDS MOBILE — REST API Server`);
+  console.log(`  Port    : ${PORT}`);
+  console.log(`  Health  : http://localhost:${PORT}/api/health`);
+  console.log(`  Products: http://localhost:${PORT}/api/products`);
+  console.log(`  Orders  : http://localhost:${PORT}/api/orders`);
+  console.log(`  Auth    : http://localhost:${PORT}/api/auth`);
+  console.log(`  Payments: http://localhost:${PORT}/api/payments`);
+  console.log(`=======================================================\n`);
+});
 
 
 module.exports = app;
