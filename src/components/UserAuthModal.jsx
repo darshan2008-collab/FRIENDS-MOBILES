@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, CheckCircle2, Eye, EyeOff, AlertCircle, Clock, RefreshCw, Zap, ChevronDown, Globe } from 'lucide-react';
+import { X, LogIn, UserPlus, Phone, Lock, User, MapPin, Mail, ArrowRight, ShieldCheck, Heart, ShoppingBag, Sparkles, KeyRound, CheckCircle, CheckCircle2, Eye, EyeOff, AlertCircle, Clock, RefreshCw, ChevronDown, Globe } from 'lucide-react';
 import { Browser } from '@capacitor/browser';
 import CompanyLogo from './CompanyLogo';
 import { getApiBaseUrl, getApiHost } from '../data/apiConfig';
@@ -500,7 +500,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
       } catch (_) {}
 
       if (cleanIdentity.length >= 3 && loginPassword.length >= 4) {
-        if (addToast) addToast('Invalid username/email or password. If offline, try Demo Login or Sign Up.', 'error');
+        if (addToast) addToast('Invalid username/email or password. Please try again or Sign Up.', 'error');
       } else {
         if (addToast) addToast('Please enter a valid username/email and password.', 'warning');
       }
@@ -852,18 +852,6 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
     }
   };
 
-  const handleDemoArunLogin = () => {
-    const demoUser = {
-      id: 101,
-      name: 'Arun Kumar',
-      phone: '7448578507',
-      email: 'arun@example.com',
-      address: 'Double Tank, South Gandhigramam, Karur - 639004, Tamil Nadu'
-    };
-    onLoginSuccess(demoUser);
-    if (addToast) addToast('Logged in as Arun Kumar (Demo User)', 'info');
-    onClose();
-  };
 
   const parseGoogleJwt = (token) => {
     try {
@@ -1326,26 +1314,26 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                   <div style={{ flex: 1, height: '1px', background: 'var(--border-color, #e2e8f0)', opacity: 0.6 }}></div>
                 </div>
 
-                {/* Two Secondary Buttons Side-by-Side: Google + Demo */}
-                <div style={{ display: 'flex', gap: '10px' }}>
+                {/* Secondary Button: Google Sign-In */}
+                <div>
                   <button 
                     type="button" 
                     onClick={handleGoogleLogin}
                     className="neu-btn-secondary"
                     style={{
-                      flex: 1,
+                      width: '100%',
                       padding: '11px 16px',
                       borderRadius: '12px',
                       border: '1.5px solid var(--border-color, #cbd5e1)',
                       background: 'var(--bg-card, #ffffff)',
                       color: 'var(--text-primary, #1e293b)',
                       fontWeight: '700',
-                      fontSize: '0.86rem',
+                      fontSize: '0.88rem',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '8px',
+                      gap: '10px',
                       boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)',
                       transition: 'all 0.2s ease'
                     }}
@@ -1356,32 +1344,7 @@ export default function UserAuthModal({ isOpen, onClose, onLoginSuccess, addToas
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                     </svg>
-                    Google
-                  </button>
-
-                  <button 
-                    type="button" 
-                    onClick={handleDemoArunLogin}
-                    className="neu-btn-secondary"
-                    style={{
-                      flex: 1,
-                      padding: '11px 16px',
-                      borderRadius: '12px',
-                      border: '1.5px solid rgba(255, 85, 0, 0.3)',
-                      background: 'rgba(255, 85, 0, 0.05)',
-                      color: '#FF5500',
-                      fontWeight: '700',
-                      fontSize: '0.86rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      boxShadow: '0 2px 6px rgba(255, 85, 0, 0.08)',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    <Zap size={16} /> Demo Login
+                    Continue with Google
                   </button>
                 </div>
 
