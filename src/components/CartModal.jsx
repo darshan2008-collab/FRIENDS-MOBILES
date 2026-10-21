@@ -476,23 +476,28 @@ export default function CartModal({
     return total + Math.round(itemWeight * qty);
   }, 0);
 
-  // Free shipping ONLY on orders above ₹1,000 or with explicit free shipping coupon
-  const freeThreshold = 1000;
-  const standardFee = shippingSettings?.standardShippingFee || 49;
+  // Free shipping threshold & standard fee from Admin Settings
+  const freeThreshold = shippingSettings?.freeShippingThreshold !== undefined ? parseFloat(shippingSettings.freeShippingThreshold) : 1000;
+  const standardFee = shippingSettings?.standardShippingFee !== undefined ? parseFloat(shippingSettings.standardShippingFee) : 70;
   const isFreeShipping = (appliedCoupon && appliedCoupon.isFreeShip) || (discountedSubtotal >= freeThreshold);
   const shippingFeeVal = isFreeShipping ? 0 : standardFee;
-  const grandTotal = discountedSubtotal + shippingFeeVal;
+
+  // Cash on Delivery (COD) Rules configured by Admin
+  const isCodEnabled = shippingSettings?.codEnabled !== undefined ? Boolean(shippingSettings.codEnabled) : true;
+  const codFee = (shippingSettings?.codFee !== undefined && shippingSettings?.codFee !== null) ? parseFloat(shippingSettings.codFee) : 0;
+  const codMinAmount = (shippingSettings?.codMinAmount !== undefined && shippingSettings?.codMinAmount !== null) ? parseFloat(shippingSettings.codMinAmount) : 300;
+  
+  const isCodAvailable = isCodEnabled && (discountedSubtotal >= codMinAmount);
+  const activeCodFee = (paymentMethod === 'COD' && isCodAvailable) ? codFee : 0;
+  const grandTotal = discountedSubtotal + shippingFeeVal + activeCodFee;
   const amountToFreeShipping = Math.max(0, freeThreshold - discountedSubtotal);
   const progressPercent = Math.min(100, Math.round((discountedSubtotal / freeThreshold) * 100));
 
-  // Cash on Delivery (COD) Rule: Available ONLY above ₹300
-  const isCodAvailable = discountedSubtotal >= 300;
-
   useEffect(() => {
-    if (!isCodAvailable && paymentMethod === 'COD') {
+    if ((!isCodAvailable || !isCodEnabled) && paymentMethod === 'COD') {
       setPaymentMethod('UPI');
     }
-  }, [isCodAvailable, paymentMethod]);
+  }, [isCodAvailable, isCodEnabled, paymentMethod]);
 
   function handleStartCheckout() {
     if (!currentUser) {
@@ -518,6 +523,7 @@ export default function CartModal({
         return `• ${itemTitle} (x${itemQty}) - ₹${itemPrice * itemQty}`;
       }).join('\n');
 
+      const codLine = (order.paymentMethod === 'COD' && order.codFee > 0) ? `*COD Handling Fee:* ₹${order.codFee}\n` : '';
       const whatsappMsg = `*New Order Placed - Friends Mobile Portal*\n\n` +
         `*Order ID:* ${orderIdStr}\n` +
         `*Customer Name:* ${custName}\n` +
@@ -526,11 +532,13 @@ export default function CartModal({
         `*Ordered Items:*\n` +
         itemsList +
         `\n\n*Subtotal:* ₹${order.subtotal || 0}\n` +
-        `*Shipping Fee:* ${(order.shipping === 0 || order.shipping === 'FREE') ? 'FREE' : `₹${order.shipping || 60}`}\n` +
+        `*Shipping Fee:* ${(order.shipping === 0 || order.shipping === 'FREE') ? 'FREE' : `₹${order.shipping || 70}`}\n` +
+        codLine +
         `*Total Amount:* ₹${order.total || 0}\n` +
         `*Payment Method:* ${order.paymentMethod || 'Cash On Delivery'}`;
 
-      const whatsappUrl = `https://wa.me/917448578507?text=${encodeURIComponent(whatsappMsg)}`;
+      const supportPhoneClean = (shippingSettings?.supportPhone || '919344522086').replace(/\D/g, '');
+      const whatsappUrl = `https://wa.me/${supportPhoneClean}?text=${encodeURIComponent(whatsappMsg)}`;
       window.open(whatsappUrl, '_blank');
     } catch (err) {
       console.error("WhatsApp redirect error", err);
@@ -653,6 +661,7 @@ export default function CartModal({
       totalWeight: totalCartWeightGrams,
       subtotal,
       shipping: shippingFeeVal,
+      codFee: activeCodFee,
       total: grandTotal,
       paymentMethod: paymentMethod || 'COD',
       paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Pending',
@@ -1023,9 +1032,16 @@ export default function CartModal({
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
                       <span>Delivery Charge:</span>
                       <strong style={{ color: isFreeShipping ? '#22c55e' : 'var(--text-primary)' }}>
-                        {isFreeShipping ? 'FREE (Above ₹1,000)' : `₹${shippingFeeVal}`}
+                        {isFreeShipping ? `FREE (Above ₹${freeThreshold.toLocaleString('en-IN')})` : `₹${shippingFeeVal}`}
                       </strong>
                     </div>
+
+                    {paymentMethod === 'COD' && activeCodFee > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
+                        <span>Cash on Delivery Handling:</span>
+                        <strong style={{ color: '#FF5500' }}>+₹{activeCodFee}</strong>
+                      </div>
+                    )}
 
                     <div style={{
                       display: 'flex',
@@ -1131,43 +1147,61 @@ export default function CartModal({
                     <input type="radio" name="payment" checked={paymentMethod === 'UPI'} onChange={() => setPaymentMethod('UPI')} />
                     <span style={{ fontWeight: '700', fontSize: '0.85rem' }}>Instant UPI / Google Pay / PhonePe</span>
                   </label>
-                  <label style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '10px',
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border-color)',
-                    background: !isCodAvailable ? 'var(--bg-input)' : (paymentMethod === 'COD' ? 'var(--orange-light)' : 'var(--bg-input)'),
-                    opacity: !isCodAvailable ? 0.6 : 1,
-                    cursor: !isCodAvailable ? 'not-allowed' : 'pointer'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <input 
-                        type="radio" 
-                        name="payment" 
-                        disabled={!isCodAvailable} 
-                        checked={paymentMethod === 'COD'} 
-                        onChange={() => {
-                          if (isCodAvailable) setPaymentMethod('COD');
-                        }} 
-                      />
-                      <div>
-                        <span style={{ fontWeight: '700', fontSize: '0.85rem', display: 'block' }}>Cash on Delivery (COD)</span>
-                        {!isCodAvailable && (
-                          <span style={{ fontSize: '0.74rem', color: '#ef4444', fontWeight: '600' }}>
-                            Available only on orders above ₹300 (Please pay online via UPI)
-                          </span>
-                        )}
+                  {isCodEnabled ? (
+                    <label style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '10px',
+                      padding: '12px 14px',
+                      borderRadius: '10px',
+                      border: '1.5px solid var(--border-color)',
+                      borderColor: paymentMethod === 'COD' ? '#FF5500' : 'var(--border-color)',
+                      background: !isCodAvailable ? 'var(--bg-input)' : (paymentMethod === 'COD' ? 'rgba(255, 85, 0, 0.08)' : 'var(--bg-input)'),
+                      opacity: !isCodAvailable ? 0.6 : 1,
+                      cursor: !isCodAvailable ? 'not-allowed' : 'pointer'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <input 
+                          type="radio" 
+                          name="payment" 
+                          disabled={!isCodAvailable} 
+                          checked={paymentMethod === 'COD'} 
+                          onChange={() => {
+                            if (isCodAvailable) setPaymentMethod('COD');
+                          }} 
+                        />
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontWeight: '800', fontSize: '0.88rem' }}>Cash on Delivery (COD)</span>
+                            {codFee > 0 ? (
+                              <span style={{ fontSize: '0.72rem', background: 'rgba(255, 85, 0, 0.12)', color: '#FF5500', padding: '2px 7px', borderRadius: '6px', fontWeight: '800' }}>
+                                +₹{codFee} Handling Fee
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: '0.72rem', background: 'rgba(34, 197, 94, 0.12)', color: '#16a34a', padding: '2px 7px', borderRadius: '6px', fontWeight: '800' }}>
+                                FREE COD
+                              </span>
+                            )}
+                          </div>
+                          {!isCodAvailable && (
+                            <span style={{ fontSize: '0.74rem', color: '#ef4444', fontWeight: '600', display: 'block', marginTop: '2px' }}>
+                              Available only on orders above ₹{codMinAmount} (Please pay online via UPI)
+                            </span>
+                          )}
+                        </div>
                       </div>
+                      {!isCodAvailable && (
+                        <span style={{ fontSize: '0.7rem', background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', padding: '3px 8px', borderRadius: '6px', fontWeight: '800' }}>
+                          Min ₹{codMinAmount}
+                        </span>
+                      )}
+                    </label>
+                  ) : (
+                    <div style={{ padding: '10px 14px', borderRadius: '10px', background: 'var(--bg-input)', border: '1px dashed var(--border-color)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                      ℹ️ Cash on Delivery is currently disabled by store admin. Please pay online via UPI.
                     </div>
-                    {!isCodAvailable && (
-                      <span style={{ fontSize: '0.7rem', background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', padding: '3px 8px', borderRadius: '6px', fontWeight: '800' }}>
-                        Min ₹300 Required
-                      </span>
-                    )}
-                  </label>
+                  )}
                 </div>
               </div>
 
@@ -1185,7 +1219,9 @@ export default function CartModal({
                   className="btn btn-primary"
                   style={{ flex: 1.5, padding: '12px' }}
                 >
-                  Proceed to Payment (₹{grandTotal}{!isFreeShipping && ' + Shipping'}) <ArrowRight size={16} />
+                  {paymentMethod === 'COD' 
+                    ? `Place COD Order (₹${grandTotal.toLocaleString('en-IN')})` 
+                    : `Proceed to Payment (₹${grandTotal.toLocaleString('en-IN')})`} <ArrowRight size={16} />
                 </button>
               </div>
             </form>

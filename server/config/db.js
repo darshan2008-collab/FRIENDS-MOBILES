@@ -115,10 +115,17 @@ CREATE TABLE IF NOT EXISTS settings (
   id SERIAL PRIMARY KEY,
   free_shipping_threshold NUMERIC(10,2) DEFAULT 1000,
   standard_shipping_fee NUMERIC(10,2) DEFAULT 70,
-
+  express_shipping_fee NUMERIC(10,2) DEFAULT 99,
+  cod_fee NUMERIC(10,2) DEFAULT 0,
+  cod_min_amount NUMERIC(10,2) DEFAULT 300,
+  cod_enabled BOOLEAN DEFAULT TRUE,
   store_name VARCHAR(255) DEFAULT 'FRIENDS MOBILE',
   store_city VARCHAR(255) DEFAULT 'Madurai, Tamil Nadu',
-  store_phone VARCHAR(50) DEFAULT '+91 74485 78507',
+  store_phone VARCHAR(50) DEFAULT '+91 93445 22086',
+  support_phone VARCHAR(50) DEFAULT '+91 93445 22086',
+  support_email VARCHAR(255) DEFAULT 'friendsmobile@gmail.com',
+  store_upi_id VARCHAR(255) DEFAULT 'darshankannan2008@oksbi',
+  store_payee_name VARCHAR(255) DEFAULT 'FRIENDS MOBILE',
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
@@ -214,6 +221,15 @@ const connectDB = async () => {
           ALTER TABLE users ADD COLUMN IF NOT EXISTS wishlist JSONB DEFAULT '[]'::jsonb;
           ALTER TABLE users ADD COLUMN IF NOT EXISTS reward_points INTEGER DEFAULT 150;
           ALTER TABLE products ADD COLUMN IF NOT EXISTS weight NUMERIC(10,2) DEFAULT 100;
+          ALTER TABLE settings ADD COLUMN IF NOT EXISTS cod_fee NUMERIC(10,2) DEFAULT 0;
+          ALTER TABLE settings ADD COLUMN IF NOT EXISTS cod_min_amount NUMERIC(10,2) DEFAULT 300;
+          ALTER TABLE settings ADD COLUMN IF NOT EXISTS cod_enabled BOOLEAN DEFAULT TRUE;
+          ALTER TABLE settings ADD COLUMN IF NOT EXISTS express_shipping_fee NUMERIC(10,2) DEFAULT 99;
+          ALTER TABLE settings ADD COLUMN IF NOT EXISTS support_phone VARCHAR(50) DEFAULT '+91 93445 22086';
+          ALTER TABLE settings ADD COLUMN IF NOT EXISTS support_email VARCHAR(255) DEFAULT 'friendsmobile@gmail.com';
+          ALTER TABLE settings ADD COLUMN IF NOT EXISTS store_upi_id VARCHAR(255) DEFAULT 'darshankannan2008@oksbi';
+          ALTER TABLE settings ADD COLUMN IF NOT EXISTS store_payee_name VARCHAR(255) DEFAULT 'FRIENDS MOBILE';
+          ALTER TABLE orders ADD COLUMN IF NOT EXISTS cod_fee NUMERIC(10,2) DEFAULT 0;
         `);
       } catch (_) {}
       isInitialized = true;

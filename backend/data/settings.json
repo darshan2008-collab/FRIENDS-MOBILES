@@ -1,7 +1,10 @@
 {
-  "standardShippingFee": 49,
-  "freeShippingThreshold": 499,
+  "standardShippingFee": 70,
+  "freeShippingThreshold": 1000,
   "expressShippingFee": 99,
+  "codFee": 0,
+  "codMinAmount": 300,
+  "codEnabled": true,
   "storeName": "FRIENDS MOBILE",
   "supportPhone": "+91 74485 78507",
   "supportEmail": "friendsmobile@gmail.com",

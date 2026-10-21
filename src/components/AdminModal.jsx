@@ -1134,11 +1134,14 @@ export default function AdminModal({
     tamilDesc: ''
   });
 
-  // Shipping Form State
+  // Shipping Form State (including Cash on Delivery)
   const [shippingForm, setShippingForm] = useState({
     standardShippingFee: 70,
     freeShippingThreshold: 1000,
     expressShippingFee: 99,
+    codFee: 0,
+    codMinAmount: 300,
+    codEnabled: true,
     supportPhone: '+91 93445 22086',
     supportEmail: 'friendsmobile@gmail.com',
     storeUpiId: 'darshankannan2008@oksbi',
@@ -1167,6 +1170,9 @@ export default function AdminModal({
         standardShippingFee: shippingSettings.standardShippingFee ?? 70,
         freeShippingThreshold: shippingSettings.freeShippingThreshold ?? 1000,
         expressShippingFee: shippingSettings.expressShippingFee ?? 99,
+        codFee: shippingSettings.codFee ?? 0,
+        codMinAmount: shippingSettings.codMinAmount ?? 300,
+        codEnabled: shippingSettings.codEnabled ?? true,
         supportPhone: shippingSettings.supportPhone || '+91 93445 22086',
         supportEmail: shippingSettings.supportEmail || 'friendsmobile@gmail.com',
         storeUpiId: shippingSettings.storeUpiId || 'darshankannan2008@oksbi',
@@ -1820,10 +1826,15 @@ export default function AdminModal({
       standardShippingFee: parseFloat(shippingForm.standardShippingFee) || 0,
       freeShippingThreshold: parseFloat(shippingForm.freeShippingThreshold) || 0,
       expressShippingFee: parseFloat(shippingForm.expressShippingFee) || 0,
+      codFee: parseFloat(shippingForm.codFee) >= 0 ? parseFloat(shippingForm.codFee) : 0,
+      codMinAmount: parseFloat(shippingForm.codMinAmount) || 0,
+      codEnabled: Boolean(shippingForm.codEnabled),
       supportPhone: shippingForm.supportPhone,
-      supportEmail: shippingForm.supportEmail
+      supportEmail: shippingForm.supportEmail,
+      storeUpiId: shippingForm.storeUpiId,
+      storePayeeName: shippingForm.storePayeeName
     });
-    if (addToast) addToast('Shipping settings & support info updated', '🚚');
+    if (addToast) addToast('Shipping & Cash on Delivery settings updated in database!', '🚚');
   };
 
   const startEditProduct = (prod) => {
@@ -4058,48 +4069,182 @@ export default function AdminModal({
 
           {/* TAB 4: SHIPPING & DELIVERY SETTINGS */}
           {activeTab === 'shipping' && (
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '24px', borderRadius: '18px', maxWidth: '600px' }}>
-              <h3 style={{ margin: '0 0 16px 0', fontSize: '1.15rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Truck size={20} color="#FF5500" /> Delivery &amp; Shipping Rates Settings
-              </h3>
-
-              <form onSubmit={handleSaveShipping} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', padding: '24px', borderRadius: '18px', maxWidth: '750px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
                 <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Standard Shipping Fee (₹)</label>
-                  <input 
-                    type="number" 
-                    value={shippingForm.standardShippingFee}
-                    onChange={(e) => setShippingForm({...shippingForm, standardShippingFee: e.target.value})}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
-                  />
+                  <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Truck size={22} color="#FF5500" /> Delivery &amp; Cash on Delivery Settings
+                  </h3>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    Configure Cash on Delivery charges, minimum order limits, and courier shipping thresholds.
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '0.74rem',
+                  padding: '4px 10px',
+                  borderRadius: '20px',
+                  fontWeight: '800',
+                  background: shippingForm.codEnabled ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                  color: shippingForm.codEnabled ? '#16a34a' : '#ef4444',
+                  border: `1px solid ${shippingForm.codEnabled ? '#22c55e' : '#ef4444'}`
+                }}>
+                  {shippingForm.codEnabled ? '● COD ACTIVE IN STORE' : '○ COD DISABLED'}
+                </span>
+              </div>
+
+              <form onSubmit={handleSaveShipping} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                
+                {/* 1. CASH ON DELIVERY (COD) CONTROL CARD */}
+                <div style={{
+                  background: 'var(--bg-input, rgba(0,0,0,0.2))',
+                  border: '1.5px solid #FF5500',
+                  borderRadius: '14px',
+                  padding: '18px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '1.2rem' }}>💵</span>
+                      <div>
+                        <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)', display: 'block' }}>
+                          Cash on Delivery (COD) Rules
+                        </strong>
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                          Manage handling charges and checkout conditions for COD orders
+                        </span>
+                      </div>
+                    </div>
+
+                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: 'var(--bg-card)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                      <input 
+                        type="checkbox"
+                        checked={Boolean(shippingForm.codEnabled)}
+                        onChange={(e) => setShippingForm({...shippingForm, codEnabled: e.target.checked})}
+                        style={{ width: '16px', height: '16px', accentColor: '#FF5500', cursor: 'pointer' }}
+                      />
+                      <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--text-primary)' }}>
+                        Enable COD
+                      </span>
+                    </label>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '6px', color: '#FF5500' }}>
+                        Cash on Delivery Extra Cost / Handling Fee (₹)
+                      </label>
+                      <input 
+                        type="number" 
+                        min="0"
+                        step="1"
+                        value={shippingForm.codFee}
+                        onChange={(e) => setShippingForm({...shippingForm, codFee: e.target.value})}
+                        placeholder="0 for Free COD, or e.g. 50"
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #FF5500', background: 'var(--bg-card)', color: '#FF5500', fontWeight: '900', fontSize: '0.98rem', boxSizing: 'border-box', outline: 'none' }}
+                      />
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                        {parseFloat(shippingForm.codFee) > 0 
+                          ? `💡 Customer is charged +₹${shippingForm.codFee} extra only when selecting COD.` 
+                          : '✅ ₹0 = Free Cash on Delivery (no extra charge).'}
+                      </span>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: '800', display: 'block', marginBottom: '6px' }}>
+                        Minimum Order Amount for COD (₹)
+                      </label>
+                      <input 
+                        type="number" 
+                        min="0"
+                        step="50"
+                        value={shippingForm.codMinAmount}
+                        onChange={(e) => setShippingForm({...shippingForm, codMinAmount: e.target.value})}
+                        placeholder="e.g. 300"
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontWeight: '800', fontSize: '0.95rem', boxSizing: 'border-box', outline: 'none' }}
+                      />
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                        Orders below ₹{shippingForm.codMinAmount || 300} require online payment (UPI) to stop fake orders.
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Free Shipping Minimum Amount Threshold (₹)</label>
-                  <input 
-                    type="number" 
-                    value={shippingForm.freeShippingThreshold}
-                    onChange={(e) => setShippingForm({...shippingForm, freeShippingThreshold: e.target.value})}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
-                  />
+                {/* 2. STANDARD & EXPRESS SHIPPING RATES */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: '700', display: 'block', marginBottom: '6px' }}>Standard Shipping Fee (₹)</label>
+                    <input 
+                      type="number" 
+                      min="0"
+                      value={shippingForm.standardShippingFee}
+                      onChange={(e) => setShippingForm({...shippingForm, standardShippingFee: e.target.value})}
+                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box', fontWeight: '700' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: '700', display: 'block', marginBottom: '6px' }}>Free Shipping Threshold (₹)</label>
+                    <input 
+                      type="number" 
+                      min="0"
+                      value={shippingForm.freeShippingThreshold}
+                      onChange={(e) => setShippingForm({...shippingForm, freeShippingThreshold: e.target.value})}
+                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box', fontWeight: '700' }}
+                    />
+                    <span style={{ fontSize: '0.72rem', color: '#16a34a', display: 'block', marginTop: '3px', fontWeight: '600' }}>
+                      Orders ≥ ₹{shippingForm.freeShippingThreshold} unlock FREE shipping!
+                    </span>
+                  </div>
                 </div>
 
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '700', display: 'block', marginBottom: '4px' }}>Support Phone Number</label>
-                  <input 
-                    type="text" 
-                    value={shippingForm.supportPhone}
-                    onChange={(e) => setShippingForm({...shippingForm, supportPhone: e.target.value})}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none' }}
-                  />
+                {/* 3. STORE SUPPORT & UPI SETTINGS */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: '700', display: 'block', marginBottom: '6px' }}>Customer Support Phone</label>
+                    <input 
+                      type="text" 
+                      value={shippingForm.supportPhone}
+                      onChange={(e) => setShippingForm({...shippingForm, supportPhone: e.target.value})}
+                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: '700', display: 'block', marginBottom: '6px' }}>Store UPI ID (for QR Payments)</label>
+                    <input 
+                      type="text" 
+                      value={shippingForm.storeUpiId || 'darshankannan2008@oksbi'}
+                      onChange={(e) => setShippingForm({...shippingForm, storeUpiId: e.target.value})}
+                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                </div>
+
+                {/* 4. LIVE SIMULATION PREVIEW BANNER */}
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '14px 16px' }}>
+                  <span style={{ fontSize: '0.74rem', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
+                    🔍 Live Customer Checkout Preview:
+                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    <div>• Standard Delivery: <strong style={{ color: 'var(--text-primary)' }}>₹{shippingForm.standardShippingFee}</strong> (FREE for orders above <strong style={{ color: '#16a34a' }}>₹{shippingForm.freeShippingThreshold}</strong>)</div>
+                    <div>• Cash on Delivery: {shippingForm.codEnabled ? (
+                      <>
+                        <strong style={{ color: '#16a34a' }}>Active</strong> (Min order <strong style={{ color: 'var(--text-primary)' }}>₹{shippingForm.codMinAmount}</strong>, Extra COD handling fee: <strong style={{ color: '#FF5500' }}>₹{shippingForm.codFee || 0}</strong>)
+                      </>
+                    ) : (
+                      <strong style={{ color: '#ef4444' }}>Disabled (Online payment only)</strong>
+                    )}</div>
+                  </div>
                 </div>
 
                 <button 
                   type="submit" 
                   className="btn btn-primary"
-                  style={{ marginTop: '10px', padding: '12px' }}
+                  style={{ marginTop: '6px', padding: '14px', fontSize: '0.92rem', fontWeight: '800', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 >
-                  SAVE SHIPPING SETTINGS
+                  <Check size={18} /> SAVE DELIVERY &amp; COD SETTINGS
                 </button>
               </form>
             </div>

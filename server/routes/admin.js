@@ -176,6 +176,11 @@ function requireAdminAuth(req, res, next) {
     return next();
   }
 
+  // Allow public store visitors to read store shipping and COD settings
+  if (req.method === 'GET' && (req.path === '/settings' || req.path === '/settings/')) {
+    return next();
+  }
+
   const authHeader = req.headers['authorization'];
   const tokenFromHeader = (authHeader && authHeader.startsWith('Bearer ')) ? authHeader.substring(7) : null;
   const tokenFromQuery = req.query ? req.query.token : null;
@@ -201,7 +206,19 @@ async function getSettingsAsync() {
     const dbSettings = await Setting.findOne({});
     if (dbSettings) return dbSettings;
   } catch (_) {}
-  return { freeShippingThreshold: 1000, standardShippingFee: 49 };
+  const fileSettings = readData(settingsFilePath, {});
+  return {
+    freeShippingThreshold: 1000,
+    standardShippingFee: 70,
+    expressShippingFee: 99,
+    codFee: 0,
+    codMinAmount: 300,
+    codEnabled: true,
+    storeName: 'FRIENDS MOBILE',
+    supportPhone: '+91 93445 22086',
+    supportEmail: 'friendsmobile@gmail.com',
+    ...fileSettings
+  };
 }
 
 async function saveSettingsAsync(settingsData) {

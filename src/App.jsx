@@ -196,7 +196,10 @@ export default function App() {
     standardShippingFee: 70,
     freeShippingThreshold: 1000,
     expressShippingFee: 99,
-    supportPhone: '+91 74485 78507',
+    codFee: 0,
+    codMinAmount: 300,
+    codEnabled: true,
+    supportPhone: '+91 93445 22086',
     supportEmail: 'friendsmobile@gmail.com'
   });
   const [orders, setOrders] = useState(() => {
@@ -1114,16 +1117,20 @@ export default function App() {
   };
 
   const handleUpdateShippingSettings = (newSettings) => {
+    const adminToken = sessionStorage.getItem('fm_admin_token') || localStorage.getItem('fm_admin_token') || '';
     fetch(`${API_BASE}/admin/settings`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(adminToken ? { 'Authorization': `Bearer ${adminToken}` } : {})
+      },
       body: JSON.stringify(newSettings)
     })
       .then(res => res.json())
       .then(data => {
         if (data.success && data.settings) {
           setShippingSettings(data.settings);
-          addToast('Updated Delivery & Shipping Fees!', '🚚');
+          addToast('Updated Delivery & Cash on Delivery Settings!', '🚚');
         } else {
           addToast(data.message || 'Failed to update settings in database.', 'error');
         }

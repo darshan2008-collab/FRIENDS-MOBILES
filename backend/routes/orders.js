@@ -39,8 +39,28 @@ const placeOrderHandler = (req, res) => {
 
     const settings = getSettings();
     const subtotal = clientSubtotal || items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-    const shipping = clientShipping !== undefined ? clientShipping : (subtotal >= (settings.freeShippingThreshold || 499) ? 0 : (settings.standardShippingFee || 49));
-    const total = clientTotal || (subtotal + (typeof shipping === 'number' ? shipping : 0));
+    const codMin = settings.codMinAmount !== undefined ? parseFloat(settings.codMinAmount) : 300;
+    const codFeeConfig = settings.codFee !== undefined ? parseFloat(settings.codFee) : 0;
+    const isCod = String(paymentMethod || '').toUpperCase().includes('COD') || String(paymentMethod || '').toUpperCase().includes('CASH');
+
+    if (isCod) {
+      if (settings.codEnabled === false) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Cash on Delivery is currently disabled by store admin. Please choose Online UPI Payment.' 
+        });
+      }
+      if (subtotal < codMin) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Cash on Delivery is available only on orders above ₹${codMin}. Please choose Online UPI Payment.` 
+        });
+      }
+    }
+
+    const shipping = clientShipping !== undefined ? clientShipping : (subtotal >= (settings.freeShippingThreshold || 1000) ? 0 : (settings.standardShippingFee || 70));
+    const codFee = (isCod && req.body.codFee !== undefined) ? parseFloat(req.body.codFee) : (isCod ? codFeeConfig : 0);
+    const total = clientTotal || (subtotal + (typeof shipping === 'number' ? shipping : 0) + codFee);
 
     const orders = getOrders();
     const orderId = clientOrderId || `FM-ORD-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -52,6 +72,7 @@ const placeOrderHandler = (req, res) => {
       items,
       subtotal,
       shipping,
+      codFee,
       total,
       paymentMethod: paymentMethod || 'Cash on Delivery',
       status: 'Order Placed',

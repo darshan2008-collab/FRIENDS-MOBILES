@@ -80,24 +80,37 @@ const placeOrderHandler = async (req, res) => {
 
     const subtotal = clientSubtotal || items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
 
+    const settings = await getSettingsAsync();
+    const codMin = settings.codMinAmount !== undefined ? parseFloat(settings.codMinAmount) : 300;
+    const codFeeConfig = settings.codFee !== undefined ? parseFloat(settings.codFee) : 0;
     const isCod = String(paymentMethod || '').toUpperCase().includes('COD') || String(paymentMethod || '').toUpperCase().includes('CASH');
-    if (isCod && subtotal < 300) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Cash on Delivery is available only on orders above ₹300. Please choose Online UPI Payment.' 
-      });
+
+    if (isCod) {
+      if (settings.codEnabled === false) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Cash on Delivery is currently disabled by store admin. Please choose Online UPI Payment.' 
+        });
+      }
+      if (subtotal < codMin) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Cash on Delivery is available only on orders above ₹${codMin}. Please choose Online UPI Payment.` 
+        });
+      }
     }
     
     let shipping = 0;
     if (clientShipping !== undefined) {
       shipping = clientShipping;
-    } else if (subtotal >= 1000) {
+    } else if (subtotal >= (settings.freeShippingThreshold || 1000)) {
       shipping = 0;
     } else {
-      shipping = 49;
+      shipping = settings.standardShippingFee || 70;
     }
 
-    const total = clientTotal || (subtotal + (typeof shipping === 'number' ? shipping : 0));
+    const codFee = (isCod && req.body.codFee !== undefined) ? parseFloat(req.body.codFee) : (isCod ? codFeeConfig : 0);
+    const total = clientTotal || (subtotal + (typeof shipping === 'number' ? shipping : 0) + codFee);
 
     const orderId = clientOrderId || `FM-ORD-${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -110,6 +123,7 @@ const placeOrderHandler = async (req, res) => {
       items,
       subtotal,
       shipping,
+      codFee,
       total,
       paymentMethod: paymentMethod || 'Cash on Delivery',
       paymentStatus: req.body.paymentStatus || (isUpiPayment ? 'Pending' : 'Pending'),
