@@ -11,6 +11,34 @@ import {
   getDefaultImageForCategory 
 } from '../utils/excelProductParser';
 
+const CATEGORY_ICONS = {
+  'Mobile Phones': '📱',
+  'Chargers & Cables': '⚡',
+  'Earphones': '🎧',
+  'Smartwatches': '⌚',
+  'Power Banks': '🔋',
+  'Back Covers': '🛡️',
+  'Photo Frames': '🖼️',
+  'Screen Protectors': '✨',
+  'OTG & Adapters': '🔌',
+  'Speakers': '🔊',
+  'Accessories': '📦'
+};
+
+const CATEGORY_COLORS = {
+  'Mobile Phones': { bg: 'rgba(59, 130, 246, 0.15)', text: '#60a5fa', border: 'rgba(59, 130, 246, 0.35)' },
+  'Chargers & Cables': { bg: 'rgba(245, 158, 11, 0.15)', text: '#fbbf24', border: 'rgba(245, 158, 11, 0.35)' },
+  'Earphones': { bg: 'rgba(168, 85, 247, 0.15)', text: '#c084fc', border: 'rgba(168, 85, 247, 0.35)' },
+  'Smartwatches': { bg: 'rgba(16, 185, 129, 0.15)', text: '#34d399', border: 'rgba(16, 185, 129, 0.35)' },
+  'Power Banks': { bg: 'rgba(20, 184, 166, 0.15)', text: '#2dd4bf', border: 'rgba(20, 184, 166, 0.35)' },
+  'Back Covers': { bg: 'rgba(255, 85, 0, 0.15)', text: '#ff7733', border: 'rgba(255, 85, 0, 0.35)' },
+  'Photo Frames': { bg: 'rgba(244, 63, 94, 0.15)', text: '#fb7185', border: 'rgba(244, 63, 94, 0.35)' },
+  'Screen Protectors': { bg: 'rgba(6, 182, 212, 0.15)', text: '#22d3ee', border: 'rgba(6, 182, 212, 0.35)' },
+  'OTG & Adapters': { bg: 'rgba(99, 102, 241, 0.15)', text: '#818cf8', border: 'rgba(99, 102, 241, 0.35)' },
+  'Speakers': { bg: 'rgba(236, 72, 153, 0.15)', text: '#f472b6', border: 'rgba(236, 72, 153, 0.35)' },
+  'Accessories': { bg: 'rgba(148, 163, 184, 0.15)', text: '#cbd5e1', border: 'rgba(148, 163, 184, 0.35)' }
+};
+
 export default function ExcelProductImportModal({
   isOpen,
   onClose,
@@ -28,6 +56,7 @@ export default function ExcelProductImportModal({
   const [customColumnMap, setCustomColumnMap] = useState({});
   const [showMappingSettings, setShowMappingSettings] = useState(false);
   const [searchPreview, setSearchPreview] = useState('');
+  const [previewCategoryFilter, setPreviewCategoryFilter] = useState('ALL');
   const [isImporting, setIsImporting] = useState(false);
   const [parseError, setParseError] = useState('');
 
@@ -42,6 +71,7 @@ export default function ExcelProductImportModal({
       setCustomColumnMap({});
       setShowMappingSettings(false);
       setSearchPreview('');
+      setPreviewCategoryFilter('ALL');
       setParseError('');
       setIsImporting(false);
     }
@@ -171,16 +201,50 @@ export default function ExcelProductImportModal({
     }
   };
 
-  // Filter preview products based on search
-  const previewProducts = (parsedData?.parsedProducts || []).filter(p => {
-    if (!searchPreview.trim()) return true;
-    const q = searchPreview.toLowerCase();
-    return (
-      (p.title && p.title.toLowerCase().includes(q)) ||
-      (p.category && p.category.toLowerCase().includes(q)) ||
-      (p.brand && p.brand.toLowerCase().includes(q))
-    );
-  });
+  const handleUpdateProductCategory = (prodIndex, newCat) => {
+    if (!parsedData || !parsedData.parsedProducts) return;
+    const updated = [...parsedData.parsedProducts];
+    if (updated[prodIndex]) {
+      updated[prodIndex] = {
+        ...updated[prodIndex],
+        category: newCat,
+        img: updated[prodIndex].img && !updated[prodIndex].img.startsWith('http') 
+          ? getDefaultImageForCategory(newCat) 
+          : updated[prodIndex].img,
+        fallback: updated[prodIndex].fallback && !updated[prodIndex].fallback.startsWith('http') 
+          ? getDefaultImageForCategory(newCat) 
+          : updated[prodIndex].fallback
+      };
+      setParsedData({
+        ...parsedData,
+        parsedProducts: updated
+      });
+      if (addToast) addToast(`Category updated to "${newCat}" for "${updated[prodIndex].title}"`, 'info');
+    }
+  };
+
+  // Group category counts for quick inspection
+  const categoryCounts = (parsedData?.parsedProducts || []).reduce((acc, p) => {
+    const c = p.category || 'Accessories';
+    acc[c] = (acc[c] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Filter preview products based on search & category filter
+  const previewProducts = (parsedData?.parsedProducts || [])
+    .map((p, originalIndex) => ({ ...p, originalIndex }))
+    .filter(p => {
+      if (previewCategoryFilter !== 'ALL' && p.category !== previewCategoryFilter) {
+        return false;
+      }
+      if (!searchPreview.trim()) return true;
+      const q = searchPreview.toLowerCase();
+      return (
+        (p.title && p.title.toLowerCase().includes(q)) ||
+        (p.category && p.category.toLowerCase().includes(q)) ||
+        (p.brand && p.brand.toLowerCase().includes(q))
+      );
+    });
 
   const availableCategories = Array.from(new Set([...STANDARD_CATEGORIES, ...existingCategories]));
 
@@ -676,6 +740,89 @@ export default function ExcelProductImportModal({
                   </div>
                 </div>
 
+                {/* Category Filter Pills Bar - Click to verify how products settled */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  overflowX: 'auto',
+                  paddingBottom: '4px',
+                  scrollbarWidth: 'thin'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewCategoryFilter('ALL')}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: '8px',
+                      border: previewCategoryFilter === 'ALL' ? '1.5px solid #FF5500' : '1px solid var(--border-color, #444)',
+                      background: previewCategoryFilter === 'ALL' ? 'rgba(255, 85, 0, 0.18)' : 'rgba(255, 255, 255, 0.03)',
+                      color: previewCategoryFilter === 'ALL' ? '#FF5500' : 'var(--text-muted, #94a3b8)',
+                      fontWeight: '800',
+                      fontSize: '0.74rem',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <span>All Products</span>
+                    <span style={{
+                      background: previewCategoryFilter === 'ALL' ? '#FF5500' : 'rgba(255,255,255,0.1)',
+                      color: previewCategoryFilter === 'ALL' ? '#fff' : 'inherit',
+                      padding: '1px 6px',
+                      borderRadius: '10px',
+                      fontSize: '0.68rem',
+                      fontWeight: '800'
+                    }}>
+                      {parsedData?.parsedProducts?.length || 0}
+                    </span>
+                  </button>
+
+                  {Object.entries(categoryCounts).map(([catName, count]) => {
+                    const isSelected = previewCategoryFilter === catName;
+                    const catStyle = CATEGORY_COLORS[catName] || CATEGORY_COLORS['Accessories'];
+                    const icon = CATEGORY_ICONS[catName] || '🏷️';
+                    return (
+                      <button
+                        key={catName}
+                        type="button"
+                        onClick={() => setPreviewCategoryFilter(isSelected ? 'ALL' : catName)}
+                        style={{
+                          padding: '5px 12px',
+                          borderRadius: '8px',
+                          border: isSelected ? `1.5px solid ${catStyle.text}` : `1px solid ${catStyle.border}`,
+                          background: isSelected ? catStyle.bg.replace('0.15', '0.3') : catStyle.bg,
+                          color: catStyle.text,
+                          fontWeight: '800',
+                          fontSize: '0.74rem',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: isSelected ? `0 2px 8px ${catStyle.border}` : 'none',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <span>{icon} {catName}</span>
+                        <span style={{
+                          background: isSelected ? catStyle.text : 'rgba(0,0,0,0.25)',
+                          color: isSelected ? '#000' : catStyle.text,
+                          padding: '1px 6px',
+                          borderRadius: '10px',
+                          fontSize: '0.68rem',
+                          fontWeight: '900'
+                        }}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
                 {/* Preview Table */}
                 <div style={{
                   border: '1px solid var(--border-color, #333)',
@@ -727,18 +874,36 @@ export default function ExcelProductImportModal({
                               </div>
                             )}
                           </td>
-                          <td style={{ padding: '10px 12px' }}>
-                            <span style={{
-                              padding: '3px 8px',
-                              borderRadius: '6px',
-                              background: 'rgba(255, 85, 0, 0.12)',
-                              color: '#FF5500',
-                              fontWeight: '700',
-                              fontSize: '0.72rem',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              {prod.category}
-                            </span>
+                          <td style={{ padding: '10px 12px', minWidth: '160px' }}>
+                            {(() => {
+                              const catStyle = CATEGORY_COLORS[prod.category] || CATEGORY_COLORS['Accessories'];
+                              const icon = CATEGORY_ICONS[prod.category] || '🏷️';
+                              return (
+                                <select
+                                  value={prod.category}
+                                  onChange={(e) => handleUpdateProductCategory(prod.originalIndex, e.target.value)}
+                                  title="Click to change category for this product"
+                                  style={{
+                                    padding: '4px 8px',
+                                    borderRadius: '6px',
+                                    border: `1.5px solid ${catStyle.border}`,
+                                    background: catStyle.bg,
+                                    color: catStyle.text,
+                                    fontWeight: '800',
+                                    fontSize: '0.74rem',
+                                    cursor: 'pointer',
+                                    outline: 'none',
+                                    maxWidth: '180px'
+                                  }}
+                                >
+                                  {availableCategories.map((c) => (
+                                    <option key={c} value={c} style={{ background: '#1e1e24', color: '#ffffff' }}>
+                                      {CATEGORY_ICONS[c] || '🏷️'} {c}
+                                    </option>
+                                  ))}
+                                </select>
+                              );
+                            })()}
                           </td>
                           <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

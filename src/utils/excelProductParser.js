@@ -19,16 +19,16 @@ export const STANDARD_CATEGORIES = [
 // Curated Category Image Presets
 export const CATEGORY_IMAGE_PRESETS = {
   'Mobile Phones': 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=600&auto=format&fit=crop',
-  'Chargers & Cables': 'images/prod_charger.png',
-  'Earphones': 'images/prod_airdopes.png',
+  'Chargers & Cables': 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=600&auto=format&fit=crop',
+  'Earphones': 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=600&auto=format&fit=crop',
   'Smartwatches': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop',
-  'Power Banks': 'images/prod_powerbank.png',
-  'Back Covers': 'images/prod_custom_cover.png',
+  'Power Banks': 'https://images.unsplash.com/photo-1609592424009-f80640857380?q=80&w=600&auto=format&fit=crop',
+  'Back Covers': 'images/banner_backcover.png',
   'Photo Frames': 'images/banner_photoframe.png',
   'Screen Protectors': 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?q=80&w=600&auto=format&fit=crop',
   'OTG & Adapters': 'https://images.unsplash.com/photo-1622434641406-a158123450f9?q=80&w=600&auto=format&fit=crop',
   'Speakers': 'https://images.unsplash.com/photo-1545454675-3531b543be5d?q=80&w=600&auto=format&fit=crop',
-  'Accessories': 'images/prod_airdopes.png'
+  'Accessories': 'images/banner_accessories.png'
 };
 
 // Column Synonyms mapping (handles all formats, case-insensitive, with/without spaces/underscores)
@@ -206,45 +206,101 @@ export function parseNumericValue(val, fallback = 0) {
 }
 
 /**
- * Normalize category or infer from title
+ * Normalize category or infer from title with 100% precision.
+ * 
+ * Strict Classification Hierarchy:
+ * 1. Checks specific accessory categories first (Photo Frames, Power Banks, Speakers, Back Covers,
+ *    Screen Protectors, Earphones, Smartwatches, OTG & Adapters, Chargers & Cables).
+ * 2. If ANY accessory indicator (cover, case, glass, protector, cable, charger, earphone, neckband,
+ *    holder, stand, etc.) is found, the product is STRICTLY BLOCKED from being classified as 'Mobile Phones',
+ *    even if it mentions iPhone, Samsung Galaxy, OnePlus, Redmi, etc.
+ * 3. Mobile Phones: Only assigned when the product is genuinely a smartphone (has phone brand, model,
+ *    RAM/storage specs, or smartphone keywords) AND has NO accessory indicators.
+ * 4. Supports English and Tamil product titles & categories seamlessly.
  */
 export function normalizeCategory(rawCat, title = '') {
   const catClean = (rawCat || '').toString().trim().toLowerCase();
   const titleClean = (title || '').toString().trim().toLowerCase();
 
-  // 1. Explicit Category matching
+  // ACCESSORY INDICATOR SIGNALS
+  const isPhotoFrame = /\b(photo\s*frames?|photoframe(s)?|picture\s*frames?|wall\s*frames?|wooden\s*frames?|acrylic\s*frames?|memory\s*frames?|table\s*frames?|collage\s*frames?|personalized\s*frames?|custom\s*frames?|போட்டோ\s*பிரேம்|பிரேம்)\b/i.test(titleClean);
+
+  const isPowerBank = /\b(power\s*banks?|powerbank(s)?|portable\s*charger|battery\s*pack|external\s*battery|\b(10000|20000|30000)\s*mah\b|பவர்\s*பேங்க்)\b/i.test(titleClean);
+
+  const isSpeaker = /\b(speakers?|bluetooth\s*speakers?|soundbars?|sound\s*bars?|party\s*speakers?|wireless\s*speakers?|boombox|subwoofers?|ஸ்பீக்கர்)\b/i.test(titleClean);
+
+  const isBackCover = /\b(back\s*cover|backcover|phone\s*cover|mobile\s*cover|\bcovers?\b|\bcases?\b|phone\s*case|mobile\s*case|hard\s*case|soft\s*case|silicone\s*case|silicon\s*case|tpu\s*case|matte\s*case|smoke\s*case|smoke\s*cover|magnetic\s*case|mag-?safe\s*(case|cover)|flip\s*cover|wallet\s*case|leather\s*case|\bpouch(es)?\b|mobile\s*pouch|bumper\s*case|armor\s*case|rugged\s*case|clear\s*case|clear\s*cover|transparent\s*(case|cover)|printed\s*cover|3d\s*cover|custom\s*cover|\bskins?\b|mobile\s*skin|phone\s*skin|பேக்\s*கவர்|கவர்|கேஸ்)\b/i.test(titleClean);
+
+  const isScreenProtector = /\b(tempered\s*glass|tempered|screen\s*guard|screenguard|screen\s*protector|screenprotector|glass\s*guard|privacy\s*glass|privacy\s*tempered|matte\s*glass|matte\s*tempered|uv\s*glass|uv\s*tempered|camera\s*lens\s*protector|lens\s*protector|camera\s*protector|lens\s*guard|camera\s*guard|hydrogel\s*film|membrane\s*guard|edge\s*to\s*edge\s*tempered|full\s*glue\s*tempered|\b(11d|9d|21d|5d|6d|10d)\b|டெம்பர்டு\s*கிளாஸ்|ஸ்கிரீன்\s*கார்டு|கிளாஸ்)\b/i.test(titleClean);
+
+  const isEarphone = /\b(earphones?|earbuds?|airpods?|airdopes?|earpods?|headphones?|headsets?|neckbands?|tws|true\s*wireless|wireless\s*buds|buds\s*(pro|air|\d+)?|bassheads|in-?ear|over-?ear|handsfree|hands-free|bluetooth\s*earphones?|anc\s*earbuds?|இயர்போன்|இயர்பட்ஸ்|ஹெட்போன்|நெக்பேண்ட்)\b/i.test(titleClean);
+
+  const isSmartwatch = /\b(smart\s*watch(es)?|smartwatch(es)?|fitness\s*bands?|smart\s*bands?|fitness\s*trackers?|activity\s*trackers?|calling\s*watch(es)?|colorfit|watch\s*straps?|ஸ்மார்ட்வாட்ச்|வாட்ச்)\b/i.test(titleClean);
+
+  const isOtgAdapter = /\b(otg(\s*adapter)?|type-?c\s*to\s*usb|usb\s*to\s*type-?c|usb\s*hub|type-?c\s*hub|card\s*reader|sd\s*card\s*reader|audio\s*jack\s*adapter|lightning\s*to\s*3\.5|type-?c\s*to\s*3\.5|ஓடிஜி|கன்வெர்ட்டர்)\b/i.test(titleClean);
+
+  const isChargerOrCable = !isOtgAdapter && !isSpeaker && !isPowerBank && /\b(chargers?|fast\s*charger|super\s*fast\s*charger|wall\s*charger|car\s*charger|wireless\s*charger|charging\s*pad|charging\s*dock|power\s*adapter|cables?|data\s*cable|charging\s*cable|type-?c\s*cable|usb-?c\s*cable|lightning\s*cable|micro\s*usb\s*cable|braided\s*cable|pd\s*cable|power\s*delivery|pd\s*charger|warp\s*charge|vooc|dash\s*charger|dart\s*charger|turbo\s*charger|gan\s*charger|\b(18w|20w|25w|30w|33w|45w|65w|67w|80w|100w|120w)\b|சார்ஜர்|கேபிள்|அடாப்டர்)\b/i.test(titleClean);
+
+  const hasAnyAccessoryIndicator = isBackCover || isScreenProtector || isOtgAdapter || isChargerOrCable || isEarphone || isSmartwatch || isPowerBank || isPhotoFrame || isSpeaker || /\b(holder|stand|tripod|mount|ring\s*light|selfie\s*stick|stylus|sim\s*ejector|cleaning\s*kit)\b/i.test(titleClean);
+
+  // Phone Signals
+  const isExplicitPhoneWord = /\b(smartphones?|smart\s*phones?|mobile\s*phones?|cell\s*phones?|cellphones?|handsets?|5g\s*mobile|4g\s*mobile|5g\s*phone|4g\s*phone|android\s*phone|மொபைல்\s*போன்|ஸ்மார்ட்போன்|செல்போன்)\b/i.test(titleClean);
+
+  const isPhoneBrandModel = /\b(iphone(\s*(16|15|14|13|12|11|x|xr|xs|se|8|7|plus|pro|max|mini))?|apple\s*iphone|samsung\s*galaxy|galaxy\s*(s24|s23|s22|s21|s20|a55|a35|a25|a15|a14|a54|a34|m34|m14|m54|f54|f14|z\s*fold|z\s*flip|note\s*\d+)|redmi\s*note|redmi\s*(13|12|11|10|a3|a2|k\d+)|poco\s*(x6|m6|f6|c65|x5|m5)|xiaomi\s*(14|13|12)|oneplus\s*(12|11|10|9|nord|open|12r|11r)|vivo\s*(v30|v29|v27|y200|y28|y17|t3|t2|x100|x90)|iqoo\s*(z9|neo|12|11)|oppo\s*(reno|find|a79|a59|a18|f25|f23)|realme\s*(12|11|10|narzo|c67|c53|p1|gt)|google\s*pixel|pixel\s*(9|8|7|6|5|4|a|pro)|moto\s*(g\d+|edge|razr)|motorola|nothing\s*phone|cmf\s*phone|infinix|tecno|lava\s*(agni|yuva|blaze)|nokia|honor\s*(90|200|magic))\b/i.test(titleClean);
+
+  // 1. Explicit Category matching (with intelligent title disambiguation)
   if (catClean) {
-    if (catClean.includes('phone') || catClean.includes('mobile') || catClean.includes('smartphone') || catClean.includes('cell')) {
-      return 'Mobile Phones';
-    }
-    if (catClean.includes('charger') || catClean.includes('cable') || catClean.includes('adapter') || catClean.includes('wire') || catClean.includes('type c') || catClean.includes('type-c')) {
-      return 'Chargers & Cables';
-    }
-    if (catClean.includes('earphone') || catClean.includes('earbud') || catClean.includes('airdope') || catClean.includes('airpod') || catClean.includes('headphone') || catClean.includes('neckband') || catClean.includes('tws') || catClean.includes('audio')) {
-      return 'Earphones';
-    }
-    if (catClean.includes('watch') || catClean.includes('band')) {
-      return 'Smartwatches';
-    }
-    if (catClean.includes('power') || catClean.includes('battery')) {
-      return 'Power Banks';
-    }
-    if (catClean.includes('cover') || catClean.includes('case') || catClean.includes('pouch') || catClean.includes('skin')) {
+    if (catClean.includes('cover') || catClean.includes('case') || catClean.includes('pouch') || catClean.includes('skin') || catClean.includes('கவர்') || catClean.includes('கேஸ்')) {
       return 'Back Covers';
     }
-    if (catClean.includes('frame') || catClean.includes('photo')) {
-      return 'Photo Frames';
-    }
-    if (catClean.includes('glass') || catClean.includes('screen') || catClean.includes('guard') || catClean.includes('tempered') || catClean.includes('protector')) {
+    if (catClean.includes('glass') || catClean.includes('screen') || catClean.includes('guard') || catClean.includes('tempered') || catClean.includes('protector') || catClean.includes('கிளாஸ்') || catClean.includes('கார்டு')) {
       return 'Screen Protectors';
     }
-    if (catClean.includes('otg') || catClean.includes('hub') || catClean.includes('converter')) {
+    if (catClean.includes('earphone') || catClean.includes('earbud') || catClean.includes('airdope') || catClean.includes('airpod') || catClean.includes('headphone') || catClean.includes('neckband') || catClean.includes('tws') || catClean.includes('audio') || catClean.includes('இயர்போன்') || catClean.includes('ஹெட்போன்')) {
+      return 'Earphones';
+    }
+    if (catClean.includes('charger') || catClean.includes('cable') || catClean.includes('adapter') || catClean.includes('wire') || catClean.includes('type c') || catClean.includes('type-c') || catClean.includes('சார்ஜர்') || catClean.includes('கேபிள்')) {
+      return 'Chargers & Cables';
+    }
+    if (catClean.includes('watch') || catClean.includes('band') || catClean.includes('வாட்ச்')) {
+      return 'Smartwatches';
+    }
+    if (catClean.includes('power') || catClean.includes('battery') || catClean.includes('பவர்')) {
+      return 'Power Banks';
+    }
+    if (catClean.includes('frame') || catClean.includes('photo') || catClean.includes('பிரேம்')) {
+      return 'Photo Frames';
+    }
+    if (catClean.includes('otg') || catClean.includes('hub') || catClean.includes('converter') || catClean.includes('ஓடிஜி')) {
       return 'OTG & Adapters';
     }
-    if (catClean.includes('speaker') || catClean.includes('soundbar') || catClean.includes('sound')) {
+    if (catClean.includes('speaker') || catClean.includes('soundbar') || catClean.includes('sound') || catClean.includes('ஸ்பீக்கர்')) {
       return 'Speakers';
     }
+    if (catClean.includes('phone') || catClean.includes('mobile') || catClean.includes('smartphone') || catClean.includes('cell') || catClean.includes('மொபைல்') || catClean.includes('போன்')) {
+      // Disambiguate: if the user categorized as "Mobile" but the title is actually an accessory, prioritize the title accessory!
+      if (isBackCover) return 'Back Covers';
+      if (isScreenProtector) return 'Screen Protectors';
+      if (isOtgAdapter) return 'OTG & Adapters';
+      if (isChargerOrCable) return 'Chargers & Cables';
+      if (isEarphone) return 'Earphones';
+      if (isSmartwatch) return 'Smartwatches';
+      if (isPowerBank) return 'Power Banks';
+      if (isPhotoFrame) return 'Photo Frames';
+      if (isSpeaker) return 'Speakers';
+      return 'Mobile Phones';
+    }
     if (catClean.includes('accessori') || catClean.includes('gadget')) {
+      // If categorized as general accessories, inspect title for precise department
+      if (isBackCover) return 'Back Covers';
+      if (isScreenProtector) return 'Screen Protectors';
+      if (isOtgAdapter) return 'OTG & Adapters';
+      if (isChargerOrCable) return 'Chargers & Cables';
+      if (isEarphone) return 'Earphones';
+      if (isSmartwatch) return 'Smartwatches';
+      if (isPowerBank) return 'Power Banks';
+      if (isPhotoFrame) return 'Photo Frames';
+      if (isSpeaker) return 'Speakers';
       return 'Accessories';
     }
 
@@ -255,50 +311,21 @@ export function normalizeCategory(rawCat, title = '') {
     }
   }
 
-  // 2. Infer Category from Product Title if category was blank
-  if (titleClean) {
-    if (titleClean.includes('iphone') || titleClean.includes('samsung galaxy') || titleClean.includes('oneplus') || 
-        titleClean.includes('realme') || titleClean.includes('redmi') || titleClean.includes('vivo') || 
-        titleClean.includes('oppo') || titleClean.includes('smartphone') || titleClean.includes('pixel') || 
-        titleClean.includes('poco') || titleClean.includes('mobile 5g') || titleClean.includes('5g phone')) {
+  // 2. High-Precision Title-Based Classification
+  if (isPhotoFrame) return 'Photo Frames';
+  if (isPowerBank) return 'Power Banks';
+  if (isSpeaker) return 'Speakers';
+  if (isBackCover) return 'Back Covers';
+  if (isScreenProtector) return 'Screen Protectors';
+  if (isEarphone) return 'Earphones';
+  if (isSmartwatch) return 'Smartwatches';
+  if (isOtgAdapter) return 'OTG & Adapters';
+  if (isChargerOrCable) return 'Chargers & Cables';
+
+  // 3. Mobile Phones check (Guaranteed NO accessory indicator)
+  if (!hasAnyAccessoryIndicator) {
+    if (isExplicitPhoneWord || isPhoneBrandModel) {
       return 'Mobile Phones';
-    }
-    if (titleClean.includes('charger') || titleClean.includes('cable') || titleClean.includes('type-c') || 
-        titleClean.includes('type c') || titleClean.includes('lightning') || titleClean.includes('watt') || 
-        titleClean.includes('20w') || titleClean.includes('25w') || titleClean.includes('33w') || 
-        titleClean.includes('65w') || titleClean.includes('80w') || titleClean.includes('120w') || 
-        titleClean.includes('fast charge') || titleClean.includes('power delivery') || titleClean.includes('pd charger')) {
-      return 'Chargers & Cables';
-    }
-    if (titleClean.includes('earbuds') || titleClean.includes('airdopes') || titleClean.includes('airpods') || 
-        titleClean.includes('neckband') || titleClean.includes('headphone') || titleClean.includes('earphone') || 
-        titleClean.includes('tws') || titleClean.includes('bassheads') || titleClean.includes('anc')) {
-      return 'Earphones';
-    }
-    if (titleClean.includes('smartwatch') || titleClean.includes('smart watch') || titleClean.includes('fitness band') || 
-        titleClean.includes('colorfit') || titleClean.includes('fire-boltt') || titleClean.includes('wave call')) {
-      return 'Smartwatches';
-    }
-    if (titleClean.includes('power bank') || titleClean.includes('powerbank') || titleClean.includes('mah') || 
-        titleClean.includes('10000mah') || titleClean.includes('20000mah')) {
-      return 'Power Banks';
-    }
-    if (titleClean.includes('back cover') || titleClean.includes('phone case') || titleClean.includes('matte case') || 
-        titleClean.includes('silicone case') || titleClean.includes('smoke cover') || titleClean.includes('magnetic cover')) {
-      return 'Back Covers';
-    }
-    if (titleClean.includes('photo frame') || titleClean.includes('acrylic frame') || titleClean.includes('wooden frame')) {
-      return 'Photo Frames';
-    }
-    if (titleClean.includes('tempered glass') || titleClean.includes('screen guard') || titleClean.includes('screen protector') || 
-        titleClean.includes('11d') || titleClean.includes('9d') || titleClean.includes('matte glass') || titleClean.includes('uv glass')) {
-      return 'Screen Protectors';
-    }
-    if (titleClean.includes('otg') || titleClean.includes('type c to usb') || titleClean.includes('converter')) {
-      return 'OTG & Adapters';
-    }
-    if (titleClean.includes('speaker') || titleClean.includes('soundbar') || titleClean.includes('party speaker')) {
-      return 'Speakers';
     }
   }
 
@@ -310,7 +337,7 @@ export function normalizeCategory(rawCat, title = '') {
  */
 export function getDefaultImageForCategory(cat) {
   const norm = normalizeCategory(cat);
-  return CATEGORY_IMAGE_PRESETS[norm] || 'images/prod_airdopes.png';
+  return CATEGORY_IMAGE_PRESETS[norm] || 'images/banner_accessories.png';
 }
 
 /**
@@ -530,14 +557,44 @@ export function downloadSampleExcelTemplate() {
       'Description'
     ],
     [
-      'boAt Airdopes 141 Bluetooth Earbuds', 
-      'Earphones', 
-      1199, 
-      1499, 
+      'Apple iPhone 15 (128 GB) - Black', 
+      'Mobile Phones', 
+      69999, 
+      79900, 
       'Yes', 
-      'boAt', 
-      'images/prod_airdopes.png', 
-      'True Wireless Earbuds with 42H Playtime, Beast Mode for Low Latency Gaming.'
+      'Apple', 
+      'https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=600&auto=format&fit=crop', 
+      'Dynamic Island, 48MP main camera, USB-C connectivity and all-day battery life.'
+    ],
+    [
+      'Samsung Galaxy S24 5G (8GB RAM, 128GB Storage)', 
+      'Mobile Phones', 
+      64999, 
+      74999, 
+      'Yes', 
+      'Samsung', 
+      'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=600&auto=format&fit=crop', 
+      'Galaxy AI powered smartphone with 50MP triple camera setup and Dynamic AMOLED 2X display.'
+    ],
+    [
+      'iPhone 15 Matte Finish Smoke Back Cover', 
+      'Back Covers', 
+      349, 
+      499, 
+      'Yes', 
+      'FRIENDS MOBILE', 
+      'images/banner_backcover.png', 
+      'Shockproof translucent matte case with raised camera bezel and anti-fingerprint coating.'
+    ],
+    [
+      'Samsung Galaxy S24 11D Curved Tempered Glass Guard', 
+      'Screen Protectors', 
+      199, 
+      499, 
+      'Yes', 
+      'FRIENDS MOBILE', 
+      '', 
+      'Edge-to-edge 9H hardness tempered glass with oleophobic coating.'
     ],
     [
       'Samsung 25W Type-C Super Fast Wall Charger', 
@@ -546,48 +603,38 @@ export function downloadSampleExcelTemplate() {
       1699, 
       'Yes', 
       'Samsung', 
-      'images/prod_charger.png', 
+      '', 
       'Original 25W PD fast wall adapter compatible with Galaxy devices and Type-C phones.'
     ],
     [
-      'Mi 20000mAh Power Bank 3i 18W Fast Charging', 
-      'Power Banks', 
-      1699, 
-      1999, 
+      'OnePlus Nord Buds 2 TWS Bluetooth Earbuds', 
+      'Earphones', 
+      2499, 
+      2999, 
       'Yes', 
-      'Xiaomi', 
-      'images/prod_powerbank.png', 
-      'High capacity lithium polymer battery with dual input and triple output ports.'
+      'OnePlus', 
+      '', 
+      'Active Noise Cancellation, 12.4mm dynamic drivers and up to 36 hours total battery.'
     ],
     [
-      'Noise ColorFit Pulse 2 Max Smartwatch', 
+      'Mi 20000mAh Power Bank 3i Fast Charging', 
+      'Power Banks', 
+      1899, 
+      2199, 
+      'Yes', 
+      'Xiaomi', 
+      '', 
+      'High capacity lithium polymer battery with triple port output and fast charging.'
+    ],
+    [
+      'Noise ColorFit Pulse 2 Max Bluetooth Calling Smartwatch', 
       'Smartwatches', 
       1799, 
       3999, 
       'Yes', 
       'Noise', 
       '', 
-      '1.85 inch TFT display with Bluetooth calling, 550 nits brightness & 100 sports modes.'
-    ],
-    [
-      '11D Premium Curved Tempered Glass Screen Guard', 
-      'Screen Protectors', 
-      199, 
-      499, 
-      'Yes', 
-      'FRIENDS MOBILE', 
-      '', 
-      'Edge-to-edge 9H hardness tempered glass with oleophobic anti-fingerprint coating.'
-    ],
-    [
-      'Customized 3D Photo Printed Mobile Back Cover', 
-      'Back Covers', 
-      399, 
-      499, 
-      'Yes', 
-      'FRIENDS MOBILE', 
-      'images/prod_custom_cover.png', 
-      'Personalized hard matte back cover with fade-proof vibrant sublimation photo print.'
+      '1.85 inch high resolution display with Bluetooth calling and 100 sports modes.'
     ]
   ];
 

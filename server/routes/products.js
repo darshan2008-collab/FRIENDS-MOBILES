@@ -143,7 +143,7 @@ router.post('/bulk', async (req, res) => {
       const inStock = item.inStock !== undefined ? Boolean(item.inStock) : true;
       const rating = parseFloat(item.rating || 5.0);
       const reviews = parseInt(item.reviews || 0);
-      const img = item.img || item.fallback || 'images/prod_airdopes.png';
+      const img = item.img || item.fallback || 'images/banner_accessories.png';
       const fallback = item.fallback || img;
 
       const newProduct = {
@@ -208,8 +208,8 @@ router.post('/', async (req, res) => {
       rating: parseFloat(rating || 5.0),
       reviews: parseInt(reviews || 0),
       inStock: inStock !== undefined ? Boolean(inStock) : true,
-      img: img || 'images/prod_airdopes.png',
-      fallback: fallback || img || 'images/prod_airdopes.png',
+      img: img || 'images/banner_accessories.png',
+      fallback: fallback || img || 'images/banner_accessories.png',
       description: sanitizedDesc,
       createdAt: new Date().toISOString()
     };

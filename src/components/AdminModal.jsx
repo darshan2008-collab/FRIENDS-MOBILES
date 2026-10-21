@@ -15,7 +15,7 @@ import { DEFAULT_PROMO_CARDS } from '../data/promoCards';
 import { DEFAULT_CUSTOM_PRICING } from '../data/customPricing';
 import { DEFAULT_FRAME_CONFIG, calculateCustomFramePrice, calculateDiscountPct } from '../data/framePricing';
 import ExcelProductImportModal from './ExcelProductImportModal';
-import { downloadSampleExcelTemplate } from '../utils/excelProductParser';
+import { downloadSampleExcelTemplate, normalizeCategory, getDefaultImageForCategory } from '../utils/excelProductParser';
 
 export default function AdminModal({ 
   isOpen, 
@@ -1780,7 +1780,7 @@ export default function AdminModal({
     const discountStr = `-${pctNum}%`;
 
     const validImages = (newProduct.images || []).filter(url => url.trim() !== '');
-    const primaryImg = validImages[0] || newProduct.img || 'images/prod_airdopes.png';
+    const primaryImg = validImages[0] || newProduct.img || getDefaultImageForCategory(newProduct.category);
 
     const productToAdd = {
       ...newProduct,
@@ -1803,8 +1803,8 @@ export default function AdminModal({
       price: '1199',
       discount: '-20%',
       inStock: true,
-      img: 'images/prod_airdopes.png',
-      images: ['images/prod_airdopes.png'],
+      img: '',
+      images: [],
       description: 'High quality mobile accessory from FRIENDS MOBILE.'
     });
     setIsAddProductOpen(false);
@@ -1841,7 +1841,7 @@ export default function AdminModal({
   const saveEditProduct = (e) => {
     e.preventDefault();
     const validImages = (editProductForm.images || []).filter(url => url.trim() !== '');
-    const primaryImg = validImages[0] || editProductForm.img || 'images/prod_airdopes.png';
+    const primaryImg = validImages[0] || editProductForm.img || getDefaultImageForCategory(editProductForm.category);
 
     const updated = {
       ...editProductForm,
@@ -2814,10 +2814,12 @@ export default function AdminModal({
                           onChange={e => {
                             const val = e.target.value;
                             const autoTa = autoTranslateToTamil(val);
+                            const detectedCat = normalizeCategory(newProduct.category === 'Accessories' ? '' : newProduct.category, val);
                             setNewProduct({
                               ...newProduct, 
                               title: val,
-                              tamilTitle: autoTa
+                              tamilTitle: autoTa,
+                              category: detectedCat || newProduct.category
                             });
                           }}
                           required 
