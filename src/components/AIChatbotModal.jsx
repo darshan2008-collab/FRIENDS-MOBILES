@@ -5,6 +5,9 @@ import {
   Volume2, VolumeX, Sparkles, Package, RefreshCw, CreditCard, 
   Palette, Wrench, Gift, AlertTriangle, Search, Frame
 } from 'lucide-react';
+import { getApiBaseUrl } from '../data/apiConfig';
+
+const API_BASE = getApiBaseUrl();
 
 export default function AIChatbotModal({ 
   isOpen, 
@@ -172,7 +175,7 @@ export default function AIChatbotModal({
     if (!textOverride) setInputQuery('');
     setIsTyping(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       let botResponseText = '';
       let actionButtons = null;
       let quickReplies = [];
@@ -201,29 +204,120 @@ export default function AIChatbotModal({
         quickReplies = ['Track My Order', 'Returns & Cancellation', 'Main Support Chart'];
 
       } else {
-        // FIXED SUPPORT CHART CATEGORIES MATCHING
+        // Consolidated Order List across props, currentUser and localStorage
+        const localOrders = [
+          ...(Array.isArray(orders) ? orders : []),
+          ...(currentUser && Array.isArray(currentUser.orders) ? currentUser.orders : []),
+          ...(() => {
+            try {
+              const s = localStorage.getItem('fm_user_orders');
+              return s ? JSON.parse(s) : [];
+            } catch { return []; }
+          })()
+        ];
 
-        // Order ID Matching
-        const orderMatch = queryLower.match(/(fm-?\d{3,6}|\b\d{4}\b)/i);
+        // Flexible Order ID Matching (e.g. FM-ORD-876371, ORD-876371, FM-1001, or 4-8 digits)
+        const orderMatch = queryLower.match(/(fm(?:-?ord)?-?\d{3,8}|\bord-?\d{3,8}\b|\b\d{4,8}\b)/i);
 
-        if (orderMatch || queryLower.includes('track_order') || queryLower.includes('track')) {
+        if (orderMatch || queryLower.includes('track_order') || queryLower.includes('track') || queryLower.includes('parcel')) {
           if (orderMatch) {
-            const orderIdClean = orderMatch[0].toUpperCase();
-            const foundOrder = orders.find(o => 
-              (o.orderId && o.orderId.toUpperCase().includes(orderIdClean)) ||
-              (o.id && o.id.toString().includes(orderIdClean))
-            );
+            const orderIdRaw = orderMatch[0].toUpperCase();
+            const cleanDigitsOrChars = orderIdRaw.replace(/[^A-Z0-9]/gi, '');
+
+            let foundOrder = localOrders.find(o => {
+              if (!o) return false;
+              const oId = String(o.orderId || o.id || '').toUpperCase();
+              const oClean = oId.replace(/[^A-Z0-9]/gi, '');
+              return (
+                oId === orderIdRaw ||
+                oClean === cleanDigitsOrChars ||
+                oId.includes(orderIdRaw) ||
+                (cleanDigitsOrChars.length >= 4 && oClean.endsWith(cleanDigitsOrChars)) ||
+                (cleanDigitsOrChars.length >= 4 && oClean.includes(cleanDigitsOrChars))
+              );
+            });
+
+            // If not found locally, fetch from backend tracking endpoint
+            if (!foundOrder && cleanDigitsOrChars.length >= 4) {
+              try {
+                const res = await fetch(`${API_BASE}/orders/track/${encodeURIComponent(orderIdRaw)}`);
+                if (res.ok) {
+                  const data = await res.json();
+                  if (data.success && data.order) {
+                    foundOrder = data.order;
+                  }
+                }
+              } catch (err) {
+                console.warn('API order tracking lookup fallback:', err);
+              }
+            }
 
             if (foundOrder) {
-              botResponseText = `**Order Details Found**\n\n• Item: **${foundOrder.title || 'Mobile Accessory'}**\n• Order ID: **${foundOrder.orderId || orderIdClean}**\n• Status: **${foundOrder.status || 'Dispatched via Express Courier'}**\n• Customer: ${foundOrder.customerName || 'Valued Customer'}\n• Amount: **₹${foundOrder.total || foundOrder.amount || '1,499'}**\n• Estimated Delivery: **Tomorrow Evening**`;
+              const itemsList = Array.isArray(foundOrder.items) && foundOrder.items.length > 0
+                ? foundOrder.items.map(i => `${i.title || i.name || 'Mobile Item'} (x${i.quantity || 1})`).join(', ')
+                : (foundOrder.title || 'Mobile Accessories');
+              const customerName = foundOrder.customer?.name || foundOrder.customerName || currentUser?.name || 'Valued Customer';
+              const orderStatus = foundOrder.status || 'Order Placed';
+              const totalAmount = foundOrder.total || foundOrder.amount || foundOrder.subtotal || 0;
+              const payMethod = foundOrder.paymentMethod || 'COD';
+              const deliveryAddress = foundOrder.customer?.address || currentUser?.address || 'Delivery Address Provided';
+              const displayOrderId = foundOrder.orderId || orderIdRaw;
+
+              botResponseText = `**Order Details Found** 📦\n\n• **Order ID**: **${displayOrderId}**\n• **Status**: **${orderStatus}**\n• **Items**: ${itemsList}\n• **Total Amount**: **₹${totalAmount}** (${payMethod})\n• **Customer**: ${customerName}\n• **Delivery Address**: ${deliveryAddress}\n• **Estimated Delivery**: **2-3 Business Days via Express Courier**`;
+
+              actionButtons = [
+                { 
+                  label: 'Track on WhatsApp', 
+                  href: `https://wa.me/919344522086?text=Hello%20FRIENDS%20MOBILE%20Track%20Order%20${encodeURIComponent(displayOrderId)}`, 
+                  type: 'whatsapp', 
+                  IconComponent: MessageSquare 
+                },
+                { 
+                  label: 'Call +91 93445 22086', 
+                  href: 'tel:+919344522086', 
+                  type: 'call', 
+                  IconComponent: Phone 
+                }
+              ];
             } else {
-              botResponseText = `**Order ID ${orderIdClean} Status**\n\nYour order has been safely packed at FRIENDS MOBILE hub and is ready for dispatch. It will be delivered via Express Shipping.`;
+              botResponseText = `**Order Status Lookup: ${orderIdRaw}** 📦\n\nYour order details are recorded. If newly placed, our warehouse team is packing it at the FRIENDS MOBILE hub for dispatch.\n\nFor real-time parcel dispatch updates or questions, connect with our care desk directly:`;
+
+              actionButtons = [
+                { 
+                  label: 'Track on WhatsApp', 
+                  href: `https://wa.me/919344522086?text=Hello%20FRIENDS%20MOBILE%20Track%20Order%20${encodeURIComponent(orderIdRaw)}`, 
+                  type: 'whatsapp', 
+                  IconComponent: MessageSquare 
+                },
+                { 
+                  label: 'Call +91 93445 22086', 
+                  href: 'tel:+919344522086', 
+                  type: 'call', 
+                  IconComponent: Phone 
+                }
+              ];
             }
           } else {
-            botResponseText = `**Order Tracking Care (Fixed Chart Step 1)**\n\nPlease select your active order or enter your Order ID (e.g. **FM-1001**) to get live parcel status.`;
+            // User requested tracking without entering an ID
+            const recentOrder = localOrders[0];
+            if (recentOrder) {
+              const recentId = recentOrder.orderId || recentOrder.id;
+              const recentStatus = recentOrder.status || 'Order Placed';
+              const recentItems = Array.isArray(recentOrder.items) && recentOrder.items.length > 0
+                ? recentOrder.items.map(i => `${i.title || i.name || 'Item'} (x${i.quantity || 1})`).join(', ')
+                : (recentOrder.title || 'Mobile Items');
+
+              botResponseText = `**Live Order Tracking (24/7 Care)** 📦\n\nFound your recent order:\n• **Order ID**: **${recentId}**\n• **Status**: **${recentStatus}**\n• **Items**: ${recentItems}\n• **Total**: ₹${recentOrder.total || recentOrder.amount || 0}\n\nEnter your Order ID below (e.g. **${recentId}**) or type any other Tracking Number to track live:`;
+              quickReplies = [`Track ${recentId}`, 'Returns & Cancellation', 'Report Complaint'];
+            } else {
+              botResponseText = `**Order Tracking Care (24/7 Care)** 📦\n\nPlease enter your **Order ID** (e.g. **FM-ORD-876371** or last 6 digits) to view live parcel status.`;
+              quickReplies = ['Returns & Cancellation', 'Payments & Refund', 'Report Complaint'];
+            }
           }
 
-          quickReplies = ['Returns & Cancellation', 'Payments & Refund', 'Report Complaint'];
+          if (!quickReplies.length) {
+            quickReplies = ['Returns & Cancellation', 'Payments & Refund', 'Report Complaint'];
+          }
 
         } else if (queryLower.includes('returns_cancel') || queryLower.includes('return') || queryLower.includes('cancel')) {
           botResponseText = `**Returns & 7-Day Replacement Policy (Fixed Chart Step 2)**\n\n1. **Cancellation**: Orders can be cancelled before dispatch directly from your 'My Account' area.\n2. **7-Day Replacement**: We offer 100% free replacement for any wrong or defective items within 7 days.\n3. Received a damaged product? Click below to contact management immediately.`;
@@ -269,8 +363,8 @@ export default function AIChatbotModal({
 
           quickReplies = ['Report Complaint', 'Track My Order', 'Main Support Chart'];
 
-        } else if (queryLower.includes('offers_rewards') || queryLower.includes('offer') || queryLower.includes('coupon')) {
-          botResponseText = `**Offers & Reward Points (Fixed Chart Step 6)**\n\n• Use code **FRIENDS100** for ₹100 instant discount on orders above ₹999!\n• Earn 10 reward points on every purchase in your FRIENDS MOBILE account.`;
+        } else if (queryLower.includes('offers_rewards') || queryLower.includes('offer') || queryLower.includes('coupon') || queryLower.includes('reward')) {
+          botResponseText = `**Offers & Reward Points Care (Fixed Chart Step 6)**\n\n• **Earn Reward Points**: Earn 1 Friends Reward Point for every ₹10 spent on all purchases automatically!\n• **Claim Redeem Codes**: Open 'My Account' → 'Rewards & Points' tab to redeem your points for discount coupons (e.g. FM-10OFF-XXXX, FM-SAVE100-XXXX).\n• **Apply at Checkout**: Paste your claimed code or click 'Apply' in Cart to enjoy instant discounts!\n• **Promo Codes**: Use code **WELCOME50** or **FRIENDS100** during checkout for instant savings!`;
 
           quickReplies = ['Track My Order', 'Custom Covers', 'Main Support Chart'];
 
