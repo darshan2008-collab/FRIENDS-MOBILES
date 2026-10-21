@@ -223,6 +223,23 @@ export default function ExcelProductImportModal({
     }
   };
 
+  const handleUpdateProductWeight = (prodIndex, newWeight) => {
+    if (!parsedData || !parsedData.parsedProducts) return;
+    const updated = [...parsedData.parsedProducts];
+    if (updated[prodIndex]) {
+      const parsedWt = Math.max(1, Math.round(parseFloat(newWeight) || 0));
+      updated[prodIndex] = {
+        ...updated[prodIndex],
+        weight: parsedWt,
+        weightFormatted: `${parsedWt}g`
+      };
+      setParsedData({
+        ...parsedData,
+        parsedProducts: updated
+      });
+    }
+  };
+
   // Group category counts for quick inspection
   const categoryCounts = (parsedData?.parsedProducts || []).reduce((acc, p) => {
     const c = p.category || 'Accessories';
@@ -675,6 +692,7 @@ export default function ExcelProductImportModal({
                             <option value="discount">🔥 Discount %</option>
                             <option value="inStock">📦 In Stock (Status/Qty)</option>
                             <option value="brand">🏢 Brand</option>
+                            <option value="weight">⚖️ Weight / Grams (Delivery)</option>
                             <option value="img">🖼️ Image URL</option>
                             <option value="description">📝 Description</option>
                             <option value="tamilTitle">🇮🇳 Tamil Title</option>
@@ -839,6 +857,7 @@ export default function ExcelProductImportModal({
                         <th style={{ padding: '10px 12px' }}>Product Title</th>
                         <th style={{ padding: '10px 12px' }}>Category</th>
                         <th style={{ padding: '10px 12px' }}>Pricing &amp; Discount</th>
+                        <th style={{ padding: '10px 12px', width: '105px' }}>Weight (g)</th>
                         <th style={{ padding: '10px 12px' }}>Stock</th>
                         <th style={{ padding: '10px 12px' }}>Brand</th>
                       </tr>
@@ -925,6 +944,36 @@ export default function ExcelProductImportModal({
                                   {prod.discount}
                                 </span>
                               )}
+                            </div>
+                          </td>
+                          <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                            <div style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: 'var(--bg-input, rgba(0,0,0,0.3))',
+                              border: '1px solid var(--border-color, #444)',
+                              borderRadius: '6px',
+                              padding: '3px 6px'
+                            }}>
+                              <input
+                                type="number"
+                                min="1"
+                                value={prod.weight || 100}
+                                onChange={(e) => handleUpdateProductWeight(prod.originalIndex, e.target.value)}
+                                title="Courier / delivery weight in grams (e.g. 185g)"
+                                style={{
+                                  width: '50px',
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#10b981',
+                                  fontSize: '0.78rem',
+                                  fontWeight: '800',
+                                  outline: 'none',
+                                  textAlign: 'right'
+                                }}
+                              />
+                              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted, #94a3b8)', fontWeight: '700' }}>g</span>
                             </div>
                           </td>
                           <td style={{ padding: '10px 12px' }}>

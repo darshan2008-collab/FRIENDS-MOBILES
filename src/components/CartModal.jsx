@@ -469,6 +469,13 @@ export default function CartModal({
 
   const discountedSubtotal = Math.max(0, subtotal - couponDiscount);
 
+  // Total Estimated Parcel Weight (in grams) for courier shipping calculation
+  const totalCartWeightGrams = (cart || []).reduce((total, item) => {
+    const itemWeight = parseFloat(item?.weight) || (item?.category === 'Back Covers' ? 35 : item?.category === 'Mobile Phones' ? 185 : 100);
+    const qty = item?.quantity || 1;
+    return total + Math.round(itemWeight * qty);
+  }, 0);
+
   // Free shipping ONLY on orders above ₹1,000 or with explicit free shipping coupon
   const freeThreshold = 1000;
   const standardFee = shippingSettings?.standardShippingFee || 49;
@@ -643,6 +650,7 @@ export default function CartModal({
         address: fullDeliveryAddress
       },
       items: [...cart],
+      totalWeight: totalCartWeightGrams,
       subtotal,
       shipping: shippingFeeVal,
       total: grandTotal,
@@ -998,6 +1006,17 @@ export default function CartModal({
                       <div style={{ display: 'flex', justifyContent: 'space-between', color: '#22c55e', fontWeight: '700' }}>
                         <span>Coupon Discount ({appliedCoupon?.code}):</span>
                         <span>-₹{couponDiscount.toLocaleString('en-IN')}</span>
+                      </div>
+                    )}
+
+                    {totalCartWeightGrams > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', fontSize: '0.84rem' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          ⚖️ Parcel Weight:
+                        </span>
+                        <strong style={{ color: '#10b981' }}>
+                          {totalCartWeightGrams >= 1000 ? `${(totalCartWeightGrams / 1000).toFixed(2)} kg` : `${totalCartWeightGrams}g`}
+                        </strong>
                       </div>
                     )}
 

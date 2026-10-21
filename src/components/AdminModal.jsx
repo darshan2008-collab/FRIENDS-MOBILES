@@ -1126,6 +1126,7 @@ export default function AdminModal({
     discountPct: '20',
     price: '1199',
     discount: '-20%',
+    weight: 100,
     inStock: true,
     img: '',
     images: [],
@@ -1787,6 +1788,7 @@ export default function AdminModal({
       price: priceNum,
       originalPrice: origPriceNum,
       discount: discountStr,
+      weight: parseFloat(newProduct.weight) || 100,
       rating: 5.0,
       reviews: 1,
       img: primaryImg,
@@ -1802,6 +1804,7 @@ export default function AdminModal({
       discountPct: '20',
       price: '1199',
       discount: '-20%',
+      weight: 100,
       inStock: true,
       img: '',
       images: [],
@@ -1829,6 +1832,7 @@ export default function AdminModal({
     const pct = Math.round(((orig - prod.price) / orig) * 100);
     setEditProductForm({ 
       ...prod, 
+      weight: prod.weight !== undefined ? prod.weight : 100,
       originalPrice: orig, 
       discountPct: pct > 0 ? pct : 10,
       images: prod.images && prod.images.length > 0 ? [...prod.images] : [prod.img || '']
@@ -1845,6 +1849,7 @@ export default function AdminModal({
 
     const updated = {
       ...editProductForm,
+      weight: parseFloat(editProductForm.weight) || 100,
       images: validImages.length > 0 ? validImages : [primaryImg],
       img: primaryImg,
       fallback: primaryImg
@@ -2933,8 +2938,8 @@ export default function AdminModal({
                       </div>
                     </div>
 
-                    {/* Discount % + Selling Price row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    {/* Discount % + Selling Price + Weight row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
                       <div>
                         <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px', color: '#FF5500' }}>Discount (%)</label>
                         <input 
@@ -2954,6 +2959,18 @@ export default function AdminModal({
                           onChange={e => setNewProduct({...newProduct, price: e.target.value})} 
                           required 
                           style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: '#FF5500', fontWeight: '900', fontSize: '0.88rem', boxSizing: 'border-box' }} 
+                        />
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '0.74rem', fontWeight: '700', display: 'block', marginBottom: '4px', color: '#10b981' }}>Weight (g) *</label>
+                        <input 
+                          type="number" 
+                          min="1"
+                          placeholder="e.g. 185" 
+                          value={newProduct.weight !== undefined ? newProduct.weight : 100} 
+                          onChange={e => setNewProduct({...newProduct, weight: parseFloat(e.target.value) || 0})} 
+                          title="Courier weight in grams (e.g. 185g)"
+                          style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: '#10b981', fontWeight: '800', fontSize: '0.88rem', boxSizing: 'border-box' }} 
                         />
                       </div>
                     </div>
@@ -3290,8 +3307,8 @@ export default function AdminModal({
                         </div>
                       </div>
 
-                      {/* Discount + Final Price */}
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                      {/* Discount + Final Price + Weight */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px' }}>
                         <div>
                           <label style={{ fontSize: '0.78rem', fontWeight: '800', display: 'block', marginBottom: '6px', color: '#3b82f6' }}>Discount (%)</label>
                           <input 
@@ -3309,6 +3326,17 @@ export default function AdminModal({
                             onChange={e => setEditProductForm({...editProductForm, price: parseFloat(e.target.value) || 0})} 
                             required 
                             style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: '#FF5500', fontWeight: '900', fontSize: '0.96rem', boxSizing: 'border-box' }} 
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '0.78rem', fontWeight: '800', display: 'block', marginBottom: '6px', color: '#10b981' }}>Weight (Grams) ⚖️</label>
+                          <input 
+                            type="number" 
+                            min="1"
+                            value={editProductForm.weight !== undefined ? editProductForm.weight : 100} 
+                            onChange={e => setEditProductForm({...editProductForm, weight: parseFloat(e.target.value) || 0})} 
+                            title="Courier shipping weight in grams (e.g. 185g)"
+                            style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--bg-input)', color: '#10b981', fontWeight: '800', fontSize: '0.96rem', boxSizing: 'border-box' }} 
                           />
                         </div>
                       </div>
@@ -3477,6 +3505,9 @@ export default function AdminModal({
                           </td>
                           <td style={{ padding: '12px 10px', verticalAlign: 'middle', fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: '600', whiteSpace: 'nowrap' }}>
                             {prod.category || 'Accessories'}
+                            <span style={{ fontSize: '0.70rem', color: '#10b981', fontWeight: '700', display: 'block', marginTop: '2px' }}>
+                              ⚖️ {prod.weight || 100}g
+                            </span>
                           </td>
                           <td style={{ padding: '12px 10px', verticalAlign: 'middle' }}>
                             <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>₹{orig.toLocaleString('en-IN')}</div>

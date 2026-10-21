@@ -146,6 +146,8 @@ router.post('/bulk', async (req, res) => {
       const img = item.img || item.fallback || 'images/banner_accessories.png';
       const fallback = item.fallback || img;
 
+      const weight = parseFloat(item.weight) || 100;
+
       const newProduct = {
         id: pId,
         title: sanitizedTitle,
@@ -159,6 +161,7 @@ router.post('/bulk', async (req, res) => {
         inStock,
         img,
         fallback,
+        weight,
         description: sanitizedDesc,
         tamilTitle: item.tamilTitle || sanitizedTitle,
         tamilDesc: item.tamilDesc || sanitizedDesc,
@@ -185,7 +188,7 @@ router.post('/bulk', async (req, res) => {
 // POST /api/products (Add New Product)
 router.post('/', async (req, res) => {
   try {
-    const { title, category, price, originalPrice, discount, img, fallback, description, inStock, rating, reviews } = req.body;
+    const { title, category, price, originalPrice, discount, img, fallback, description, inStock, rating, reviews, weight } = req.body;
 
     if (!title || price === undefined || isNaN(price)) {
       return res.status(400).json({ success: false, message: 'Valid product title and numeric price are required' });
@@ -210,6 +213,7 @@ router.post('/', async (req, res) => {
       inStock: inStock !== undefined ? Boolean(inStock) : true,
       img: img || 'images/banner_accessories.png',
       fallback: fallback || img || 'images/banner_accessories.png',
+      weight: parseFloat(weight) || 100,
       description: sanitizedDesc,
       createdAt: new Date().toISOString()
     };
@@ -246,6 +250,7 @@ router.put('/:id', async (req, res) => {
       category: req.body.category ? sanitizeInput(req.body.category) : products[index].category,
       price: req.body.price !== undefined ? parseFloat(req.body.price) : products[index].price,
       originalPrice: req.body.originalPrice !== undefined ? parseFloat(req.body.originalPrice) : products[index].originalPrice,
+      weight: req.body.weight !== undefined ? parseFloat(req.body.weight) : (products[index].weight || 100),
       updatedAt: new Date().toISOString()
     };
 

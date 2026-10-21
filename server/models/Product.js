@@ -18,6 +18,7 @@ const formatProduct = (row) => {
     description: row.description || '',
     brand: row.brand || '',
     badge: row.badge || '',
+    weight: parseFloat(row.weight || 100),
     isTrending: Boolean(row.is_trending),
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -83,11 +84,12 @@ const Product = {
     const description = data.description !== undefined ? data.description : existing?.description || '';
     const brand = data.brand !== undefined ? data.brand : existing?.brand || '';
     const badge = data.badge !== undefined ? data.badge : existing?.badge || '';
+    const weight = data.weight !== undefined ? parseFloat(data.weight) : existing?.weight || 100;
     const isTrending = data.isTrending !== undefined ? Boolean(data.isTrending) : existing?.isTrending || false;
 
     const res = await query(`
-      INSERT INTO products (id, title, category, discount, price, original_price, rating, reviews, in_stock, stock, img, fallback, description, brand, badge, is_trending, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW())
+      INSERT INTO products (id, title, category, discount, price, original_price, rating, reviews, in_stock, stock, img, fallback, description, brand, badge, weight, is_trending, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW())
       ON CONFLICT (id) DO UPDATE SET
         title = EXCLUDED.title,
         category = EXCLUDED.category,
@@ -103,10 +105,11 @@ const Product = {
         description = EXCLUDED.description,
         brand = EXCLUDED.brand,
         badge = EXCLUDED.badge,
+        weight = EXCLUDED.weight,
         is_trending = EXCLUDED.is_trending,
         updated_at = NOW()
       RETURNING *;
-    `, [pId, title, category, discount, price, originalPrice, rating, reviews, inStock, stock, img, fallback, description, brand, badge, isTrending]);
+    `, [pId, title, category, discount, price, originalPrice, rating, reviews, inStock, stock, img, fallback, description, brand, badge, weight, isTrending]);
 
     return { matchedCount: 1, modifiedCount: 1, product: formatProduct(res.rows[0]) };
   },

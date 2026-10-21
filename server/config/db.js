@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS products (
   description TEXT DEFAULT '',
   brand VARCHAR(100) DEFAULT '',
   badge VARCHAR(100) DEFAULT '',
+  weight NUMERIC(10,2) DEFAULT 100,
   is_trending BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
@@ -212,6 +213,7 @@ const connectDB = async () => {
           ALTER TABLE users ADD COLUMN IF NOT EXISTS cart JSONB DEFAULT '[]'::jsonb;
           ALTER TABLE users ADD COLUMN IF NOT EXISTS wishlist JSONB DEFAULT '[]'::jsonb;
           ALTER TABLE users ADD COLUMN IF NOT EXISTS reward_points INTEGER DEFAULT 150;
+          ALTER TABLE products ADD COLUMN IF NOT EXISTS weight NUMERIC(10,2) DEFAULT 100;
         `);
       } catch (_) {}
       isInitialized = true;

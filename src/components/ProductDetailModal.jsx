@@ -481,7 +481,8 @@ export default function ProductDetailModal({
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', padding: '14px 16px', gap: '12px', fontSize: '0.8rem' }}>
                 <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>Category:</span><strong style={{ color: 'var(--text-primary)' }}>{product.category}</strong></div>
-                <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>Brand:</span><strong style={{ color: 'var(--text-primary)' }}>FRIENDS MOBILE Original</strong></div>
+                <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>Brand:</span><strong style={{ color: 'var(--text-primary)' }}>{product.brand || 'FRIENDS MOBILE Original'}</strong></div>
+                <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>Item Weight:</span><strong style={{ color: '#10b981' }}>{product.weight ? `${product.weight}g` : '100g'}</strong></div>
                 <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>Warranty:</span><strong style={{ color: 'var(--text-primary)' }}>6 Months Showroom Warranty</strong></div>
                 <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>Compatibility:</span><strong style={{ color: 'var(--text-primary)' }}>Universal Android &amp; iOS</strong></div>
                 <div><span style={{ color: 'var(--text-muted)', display: 'block' }}>In The Box:</span><strong style={{ color: 'var(--text-primary)' }}>1x {product.title}, Tax Invoice</strong></div>

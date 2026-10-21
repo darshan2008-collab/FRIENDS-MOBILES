@@ -85,6 +85,12 @@ const COLUMN_SYNONYMS = {
   ],
   tamilDesc: [
     'tamil_desc', 'tamil desc', 'tamil_description', 'tamil description', 'தமிழ் விவரம்'
+  ],
+  weight: [
+    'weight', 'weight_grams', 'weight_gram', 'weight_g', 'weight(g)', 'weight (g)', 
+    'weight_gm', 'weight(gm)', 'weight (gm)', 'grams', 'gram', 'gms', 'gm', 'g', 'wt', 
+    'item_weight', 'product_weight', 'net_weight', 'package_weight', 'courier_weight', 
+    'delivery_weight', 'எடை', 'கிராம்', 'பொருளின் எடை'
   ]
 };
 
@@ -127,6 +133,9 @@ export function identifyColumnField(rawHeader) {
   }
   if (clean.includes('brand') || clean.includes('make') || clean.includes('vendor') || clean.includes('company') || clean.includes('manufacturer') || clean.includes('பிராண்ட்')) {
     return 'brand';
+  }
+  if (clean.includes('weight') || clean.includes('gram') || clean.includes(' gm') || clean.endsWith('gm') || clean.endsWith(' g') || clean.includes('எடை') || clean.includes('கிராம்')) {
+    return 'weight';
   }
   if (clean.includes('mrp') || clean.includes('original') || clean.includes('list price') || clean.includes('regular price') || clean.includes('retail price') || clean.includes('market price') || clean.includes('actual price') || clean.includes('base price') || clean.includes('old price') || clean.includes('அசல் விலை')) {
     return 'originalPrice';
@@ -505,6 +514,28 @@ export function parseExcelProducts(fileBuffer, options = {}) {
     const rating = Math.min(5.0, Math.max(1.0, parseNumericValue(rowObj.rating, 4.8)));
     const reviews = Math.max(0, parseInt(parseNumericValue(rowObj.reviews, Math.floor(Math.random() * 50) + 12)));
 
+    // Product Weight in Grams (used for delivery & courier shipping calculation)
+    const defaultWeightsByCategory = {
+      'Mobile Phones': 185,
+      'Power Banks': 420,
+      'Speakers': 380,
+      'Photo Frames': 350,
+      'Chargers & Cables': 75,
+      'Smartwatches': 50,
+      'Earphones': 45,
+      'Back Covers': 35,
+      'Screen Protectors': 25,
+      'OTG & Adapters': 20,
+      'Accessories': 100
+    };
+
+    let weight = parseNumericValue(rowObj.weight, 0);
+    if (weight <= 0) {
+      weight = defaultWeightsByCategory[finalCategory] || 100;
+    } else {
+      weight = Math.round(weight);
+    }
+
     parsedProducts.push({
       title: rawTitle,
       tamilTitle,
@@ -517,6 +548,8 @@ export function parseExcelProducts(fileBuffer, options = {}) {
       img: rawImg,
       images: [rawImg],
       fallback: rawImg,
+      weight,
+      weightFormatted: `${weight}g`,
       description,
       tamilDesc,
       brand,
@@ -551,6 +584,7 @@ export function downloadSampleExcelTemplate() {
       'Category', 
       'Selling Price', 
       'Original MRP', 
+      'Weight (Grams)',
       'In Stock', 
       'Brand', 
       'Image URL', 
@@ -561,6 +595,7 @@ export function downloadSampleExcelTemplate() {
       'Mobile Phones', 
       69999, 
       79900, 
+      171,
       'Yes', 
       'Apple', 
       'https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=600&auto=format&fit=crop', 
@@ -571,6 +606,7 @@ export function downloadSampleExcelTemplate() {
       'Mobile Phones', 
       64999, 
       74999, 
+      167,
       'Yes', 
       'Samsung', 
       'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=600&auto=format&fit=crop', 
@@ -581,6 +617,7 @@ export function downloadSampleExcelTemplate() {
       'Back Covers', 
       349, 
       499, 
+      35,
       'Yes', 
       'FRIENDS MOBILE', 
       'images/banner_backcover.png', 
@@ -591,6 +628,7 @@ export function downloadSampleExcelTemplate() {
       'Screen Protectors', 
       199, 
       499, 
+      25,
       'Yes', 
       'FRIENDS MOBILE', 
       '', 
@@ -601,6 +639,7 @@ export function downloadSampleExcelTemplate() {
       'Chargers & Cables', 
       1299, 
       1699, 
+      65,
       'Yes', 
       'Samsung', 
       '', 
@@ -611,6 +650,7 @@ export function downloadSampleExcelTemplate() {
       'Earphones', 
       2499, 
       2999, 
+      45,
       'Yes', 
       'OnePlus', 
       '', 
@@ -621,6 +661,7 @@ export function downloadSampleExcelTemplate() {
       'Power Banks', 
       1899, 
       2199, 
+      430,
       'Yes', 
       'Xiaomi', 
       '', 
@@ -631,6 +672,7 @@ export function downloadSampleExcelTemplate() {
       'Smartwatches', 
       1799, 
       3999, 
+      48,
       'Yes', 
       'Noise', 
       '', 
@@ -646,6 +688,7 @@ export function downloadSampleExcelTemplate() {
     { wch: 22 }, // Category
     { wch: 15 }, // Selling Price
     { wch: 15 }, // Original MRP
+    { wch: 16 }, // Weight (Grams)
     { wch: 12 }, // In Stock
     { wch: 16 }, // Brand
     { wch: 30 }, // Image URL
@@ -659,22 +702,27 @@ export function downloadSampleExcelTemplate() {
     ['FRIENDS MOBILE - EXCEL PRODUCT IMPORT GUIDE'],
     [''],
     ['1. ANY FORMAT SUPPORTED:'],
-    ['- Column names can be in English or Tamil (e.g. Title, Name, Product Name, Category, Price, MRP, Stock).'],
+    ['- Column names can be in English or Tamil (e.g. Title, Name, Product Name, Category, Price, MRP, Weight, Stock).'],
     ['- Order of columns does not matter. The system intelligently detects each column.'],
     ['- You can upload .xlsx, .xls, or .csv files.'],
     [''],
-    ['2. AUTOMATIC CATEGORY MATCHING:'],
+    ['2. PRODUCT WEIGHT (GRAMS) FOR COURIER & DELIVERY CHARGES:'],
+    ['- Weight (Grams) specifies the product weight in grams for calculating courier and delivery shipping fees.'],
+    ['- Examples: 170-190 for smartphones, 30-40 for phone covers, 60-80 for wall chargers, 400-450 for power banks.'],
+    ['- If the Weight column is left blank, the system automatically assigns accurate standard weights based on category!'],
+    [''],
+    ['3. AUTOMATIC CATEGORY MATCHING:'],
     ['- Standard categories: Mobile Phones, Chargers & Cables, Earphones, Smartwatches, Power Banks, Back Covers, Photo Frames, Screen Protectors, OTG & Adapters, Speakers, Accessories.'],
     ['- If you write "Airpods", "Headphones", or "Neckband", it automatically maps to Earphones.'],
     ['- If you write "Charger" or "Type-C Cable", it automatically maps to Chargers & Cables.'],
     ['- If the category column is left blank, the system automatically detects the category from the Product Title!'],
     ['- Custom categories (e.g. "Gaming Gear") are also fully supported and will appear in the store.'],
     [''],
-    ['3. PRICING & DISCOUNTS:'],
+    ['4. PRICING & DISCOUNTS:'],
     ['- Selling Price is the actual checkout price.'],
     ['- Original MRP is optional. If left blank, MRP will automatically be calculated with a 20-25% discount markup.'],
     [''],
-    ['4. IMAGES:'],
+    ['5. IMAGES:'],
     ['- Image URL can be a full web link (https://...) or left blank.'],
     ['- If left blank, a beautiful high-resolution category photo will be assigned automatically.'],
     [''],
