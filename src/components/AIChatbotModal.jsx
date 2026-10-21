@@ -394,6 +394,46 @@ export default function AIChatbotModal({
     }, 450);
   };
 
+  const formatChatMessage = (text) => {
+    if (!text) return null;
+
+    const lines = text.split('\n');
+    return lines.map((line, lineIdx) => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        return <div key={lineIdx} style={{ height: '6px' }} />;
+      }
+
+      // Helper to parse **bold** text
+      const parseBold = (content) => {
+        const parts = content.split(/(\*\*[^*]+\*\*)/g);
+        return parts.map((part, pIdx) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            const boldText = part.slice(2, -2);
+            return <strong key={pIdx} style={{ fontWeight: 700 }}>{boldText}</strong>;
+          }
+          return part;
+        });
+      };
+
+      if (trimmed.startsWith('•') || trimmed.startsWith('-')) {
+        const bulletContent = line.replace(/^\s*[•-]\s*/, '');
+        return (
+          <div key={lineIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', margin: '3px 0' }}>
+            <span style={{ color: '#FF5500', fontWeight: 900, lineHeight: '1.4', userSelect: 'none' }}>•</span>
+            <span style={{ flex: 1, lineHeight: '1.4' }}>{parseBold(bulletContent)}</span>
+          </div>
+        );
+      }
+
+      return (
+        <div key={lineIdx} style={{ margin: '2px 0', lineHeight: '1.45' }}>
+          {parseBold(line)}
+        </div>
+      );
+    });
+  };
+
   const portalContainer = document.body || document.getElementById('root') || document.documentElement;
   if (!portalContainer) return null;
 
@@ -515,7 +555,9 @@ export default function AIChatbotModal({
 
               <div className="ai-msg-content-wrap">
                 <div className={`ai-msg-bubble ${msg.sender}`}>
-                  <p style={{ whiteSpace: 'pre-line', margin: 0 }}>{msg.text}</p>
+                  <div className="ai-msg-text-content" style={{ margin: 0 }}>
+                    {formatChatMessage(msg.text)}
+                  </div>
 
                   {/* Render Action Buttons inside bubble if available */}
                   {msg.actionButtons && msg.actionButtons.length > 0 && (

@@ -25,31 +25,41 @@ export default function CategoryGrid({
   // Double array to create seamless infinite loop
   const displayCategories = [...categories, ...categories];
 
-  // Continuous Non-Stop Smooth Auto-Scrolling Loop
+  // Continuous Non-Stop Smooth Auto-Scrolling Loop with Hover Pause
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     let animationFrameId;
     let lastTime = performance.now();
-    let halfWidth = container.scrollWidth / 2;
-    let accumulatedScroll = halfWidth;
+    let accumulatedScroll = container.scrollLeft || 0;
+    let isPaused = false;
 
-    const scrollSpeed = 40; // Pixels per second (smooth forward sliding)
+    const scrollSpeed = 35; // Pixels per second (gentle, readable sliding)
+
+    const handleMouseEnter = () => { isPaused = true; };
+    const handleMouseLeave = () => { isPaused = false; };
+    const handleTouchStart = () => { isPaused = true; };
+    const handleTouchEnd = () => { isPaused = false; };
+
+    container.addEventListener('mouseenter', handleMouseEnter);
+    container.addEventListener('mouseleave', handleMouseLeave);
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     const autoScroll = (timestamp) => {
       if (!container) return;
 
       const elapsed = timestamp - lastTime;
-      if (elapsed > 0) {
+      if (elapsed > 0 && !isPaused) {
         const delta = (scrollSpeed * elapsed) / 1000;
-        halfWidth = container.scrollWidth / 2 || 1;
+        const halfWidth = container.scrollWidth / 2 || 1;
 
-        accumulatedScroll -= delta;
-        if (accumulatedScroll <= 0) {
-          accumulatedScroll = halfWidth;
+        accumulatedScroll += delta;
+        if (accumulatedScroll >= halfWidth) {
+          accumulatedScroll = 0;
         }
-        container.scrollLeft = Math.round(accumulatedScroll);
+        container.scrollLeft = accumulatedScroll;
       }
 
       lastTime = timestamp;
@@ -60,6 +70,10 @@ export default function CategoryGrid({
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      container.removeEventListener('mouseenter', handleMouseEnter);
+      container.removeEventListener('mouseleave', handleMouseLeave);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchend', handleTouchEnd);
     };
   }, []);
 
@@ -142,7 +156,7 @@ export default function CategoryGrid({
             gap: '14px',
             overflowX: 'auto',
             whiteSpace: 'nowrap',
-            paddingBottom: '8px',
+            padding: '4px 6px 12px 6px',
             msOverflowStyle: 'none',
             scrollbarWidth: 'none'
           }}

@@ -517,7 +517,34 @@ export default function ShoppingPortal({
 
             {sortedProducts.length === 0 ? (
               <div className="empty-catalog-state">
-                {selectedCategory === 'Photo Frames' ? (
+                {selectedCategory === 'Wishlist' ? (
+                  <>
+                    <div style={{
+                      width: '72px',
+                      height: '72px',
+                      borderRadius: '50%',
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto 16px auto',
+                      border: '1px solid rgba(239, 68, 68, 0.25)'
+                    }}>
+                      <Heart size={36} color="#ef4444" fill="rgba(239, 68, 68, 0.3)" />
+                    </div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '8px' }}>Your Wishlist is Empty</h3>
+                    <p style={{ maxWidth: '420px', margin: '0 auto 18px auto', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                      Save your favorite mobiles, custom back covers, designer frames, and premium accessories here for quick checkout later!
+                    </p>
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={() => setSelectedCategory('All')}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                    >
+                      <ShoppingBag size={17} /> Explore All Products
+                    </button>
+                  </>
+                ) : selectedCategory === 'Photo Frames' ? (
                   <>
                     <Frame size={54} color="#06b6d4" style={{ opacity: 0.8 }} />
                     <h3>Create Your Personalized Photo Frame</h3>
