@@ -4,13 +4,12 @@ const path = require('path');
 const currentBrainDir = 'C:\\Users\\ELCOT\\.gemini\\antigravity-ide\\brain\\bf1f9e73-c00a-4822-a487-499e48615418';
 const prevBrainDir = 'C:\\Users\\ELCOT\\.gemini\\antigravity-ide\\brain\\ba8b3a89-250d-4b65-8e8f-b487e5311105';
 
+const rootDir = path.resolve(__dirname, '..');
 const targetDirs = [
-  path.join(__dirname, 'public/images'),
-  path.join(__dirname, 'images'),
-  path.join(__dirname, 'frontend/images'),
-  path.join(__dirname, 'server/public/images'),
-  path.join(__dirname, 'backend/public/images'),
-  path.join(__dirname, 'src/assets')
+  path.join(rootDir, 'public/images'),
+  path.join(rootDir, 'images'),
+  path.join(rootDir, 'server/public/images'),
+  path.join(rootDir, 'src/assets')
 ];
 
 const mappings = [

@@ -1,7 +1,8 @@
 import os
 from PIL import Image, ImageDraw
 
-LOGO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'public', 'logo.png')
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LOGO_PATH = os.path.join(ROOT_DIR, 'public', 'logo.png')
 
 def get_logo_image(size, emblem_scale=1.0):
     logo = Image.open(LOGO_PATH).convert('RGBA')
@@ -49,7 +50,7 @@ def create_splash_screen(width, height):
     return Image.new('RGBA', (width, height), '#FFFFFF')
 
 def main():
-    res_base = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'android', 'app', 'src', 'main', 'res')
+    res_base = os.path.join(ROOT_DIR, 'android', 'app', 'src', 'main', 'res')
     
     densities = {
         'mipmap-mdpi': (48, 108),

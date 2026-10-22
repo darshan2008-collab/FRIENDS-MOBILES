@@ -3,7 +3,8 @@ const path = require('path');
 
 const lightImgPath = 'C:\\Users\\ELCOT\\.gemini\\antigravity-ide\\brain\\bf1f9e73-c00a-4822-a487-499e48615418\\hero_showcase_ai_1784640427247.png';
 const darkImgPath = 'C:\\Users\\ELCOT\\.gemini\\antigravity-ide\\brain\\bf1f9e73-c00a-4822-a487-499e48615418\\hero_showcase_dark_ai_1784640456103.png';
-const targetJsPath = path.join(__dirname, 'src/assets/heroDeviceBase64.js');
+const rootDir = path.resolve(__dirname, '..');
+const targetJsPath = path.join(rootDir, 'src/assets/heroDeviceBase64.js');
 
 try {
   const cjsApiPath = path.join(__dirname, 'api/index.cjs');

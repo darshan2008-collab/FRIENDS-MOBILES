@@ -17,7 +17,8 @@ ORANGE_PRIMARY = (255, 85, 0)
 ORANGE_GLOW = (255, 120, 30)
 
 # Load Logo
-LOGO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'public', 'logo.png')
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LOGO_PATH = os.path.join(ROOT_DIR, 'public', 'logo.png')
 orig_logo = Image.open(LOGO_PATH).convert('RGBA')
 
 # Pre-render clean circular cropped logo
@@ -41,7 +42,7 @@ font_sub = ImageFont.truetype(font_path, 72)
 artifact_dir = r"C:\Users\ELCOT\.gemini\antigravity-ide\brain\212308cb-5dba-460a-b10b-3657195b3505"
 os.makedirs(artifact_dir, exist_ok=True)
 output_artifact_mp4 = os.path.join(artifact_dir, "friends_mobile_splash.mp4")
-output_public_mp4 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public", "friends_mobile_splash.mp4")
+output_public_mp4 = os.path.join(ROOT_DIR, "public", "friends_mobile_splash.mp4")
 
 # Precompute static background gradient
 bg_img = Image.new('RGB', (WIDTH, HEIGHT), BG_COLOR)
