@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Header">
+   <Font ss:Bold="1" ss:Color="#FFFFFF"/>
+   <Interior ss:Color="#FF5500" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+  </Style>
+ </Styles>
+
+ <Worksheet ss:Name="Customer Orders History">
+  <Table>
+   <Row ss:StyleID="Header">
+    <Cell><Data ss:Type="String">Order ID</Data></Cell>
+    <Cell><Data ss:Type="String">Date &amp; Time</Data></Cell>
+    <Cell><Data ss:Type="String">Customer Name</Data></Cell>
+    <Cell><Data ss:Type="String">Phone Number</Data></Cell>
+    <Cell><Data ss:Type="String">Delivery Address</Data></Cell>
+    <Cell><Data ss:Type="String">Purchased Items</Data></Cell>
+    <Cell><Data ss:Type="String">Subtotal</Data></Cell>
+    <Cell><Data ss:Type="String">Shipping</Data></Cell>
+    <Cell><Data ss:Type="String">Grand Total</Data></Cell>
+    <Cell><Data ss:Type="String">Payment Method</Data></Cell>
+    <Cell><Data ss:Type="String">Payment Status</Data></Cell>
+    <Cell><Data ss:Type="String">Order Status</Data></Cell>
+    <Cell><Data ss:Type="String">Cancellation Reason</Data></Cell>
+   </Row>
+   
+  </Table>
+ </Worksheet>
+
+ <Worksheet ss:Name="User Accounts &amp; Members">
+  <Table>
+   <Row ss:StyleID="Header">
+    <Cell><Data ss:Type="String">User ID</Data></Cell>
+    <Cell><Data ss:Type="String">Customer Name</Data></Cell>
+    <Cell><Data ss:Type="String">Email Address</Data></Cell>
+    <Cell><Data ss:Type="String">Phone Number</Data></Cell>
+    <Cell><Data ss:Type="String">Reward Points</Data></Cell>
+    <Cell><Data ss:Type="String">Auth Provider</Data></Cell>
+    <Cell><Data ss:Type="String">Total Orders</Data></Cell>
+    <Cell><Data ss:Type="String">Joined Date</Data></Cell>
+   </Row>
+   
+  </Table>
+ </Worksheet>
+
+ <Worksheet ss:Name="Product Catalog">
+  <Table>
+   <Row ss:StyleID="Header">
+    <Cell><Data ss:Type="String">Product ID</Data></Cell>
+    <Cell><Data ss:Type="String">Product Title</Data></Cell>
+    <Cell><Data ss:Type="String">Category</Data></Cell>
+    <Cell><Data ss:Type="String">Price (INR)</Data></Cell>
+    <Cell><Data ss:Type="String">Original Price</Data></Cell>
+    <Cell><Data ss:Type="String">Stock Status</Data></Cell>
+    <Cell><Data ss:Type="String">Rating</Data></Cell>
+    <Cell><Data ss:Type="String">Description</Data></Cell>
+   </Row>
+   
+  </Table>
+ </Worksheet>
+
+ <Worksheet ss:Name="Cover Customizations">
+  <Table>
+   <Row ss:StyleID="Header">
+    <Cell><Data ss:Type="String">Order ID</Data></Cell>
+    <Cell><Data ss:Type="String">Customer Name</Data></Cell>
+    <Cell><Data ss:Type="String">Phone Number</Data></Cell>
+    <Cell><Data ss:Type="String">Product Category</Data></Cell>
+    <Cell><Data ss:Type="String">Phone Model / Size</Data></Cell>
+    <Cell><Data ss:Type="String">Case Type &amp; Finish</Data></Cell>
+    <Cell><Data ss:Type="String">Printed Custom Text</Data></Cell>
+    <Cell><Data ss:Type="String">Image Filename</Data></Cell>
+   </Row>
+   
+  </Table>
+ </Worksheet>
+</Workbook>

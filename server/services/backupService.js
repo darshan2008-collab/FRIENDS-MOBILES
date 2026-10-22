@@ -251,16 +251,19 @@ const BackupService = {
         console.error('[Excel Auto-Backup Error]', err.message);
       }
 
-      // Upload Product Data Catalog Backup ONLY to Google Drive
-      const driveResult = await GoogleDriveService.uploadBackupSnapshot(productsFilePath, productsFilename).catch(() => null);
+      // Upload Complete Master Database Backup & Dedicated Snapshots to Google Drive
+      const driveMasterResult = await GoogleDriveService.uploadBackupSnapshot(filePath, filename).catch(() => null);
+      const driveProductsResult = await GoogleDriveService.uploadBackupSnapshot(productsFilePath, productsFilename).catch(() => null);
+      const isDriveSynced = Boolean((driveMasterResult && driveMasterResult.success) || (driveProductsResult && driveProductsResult.success));
 
       return {
         success: true,
-        message: driveResult && driveResult.success
-          ? `Real Data Backup "${filename}" and dedicated Users/Orders files uploaded to Google Drive!`
+        message: isDriveSynced
+          ? `Real Data Backup "${filename}" and dedicated Users/Orders files successfully uploaded to Google Drive!`
           : `Real Data Backup "${filename}" saved locally!`,
         filename,
-        gdriveSynced: Boolean(driveResult && driveResult.success),
+        gdriveSynced: isDriveSynced,
+        driveFileId: driveMasterResult?.fileId || driveProductsResult?.fileId,
         timestamp: dumpPayload.meta.createdAt,
         totalRecords: dumpPayload.meta.totalRecords
       };

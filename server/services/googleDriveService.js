@@ -77,24 +77,33 @@ const GoogleDriveService = {
         try {
           const payloadData = JSON.parse(fileContent);
           const postData = JSON.stringify({ filename, folderId, payload: payloadData });
-          const sendWebhookRequest = (targetUrl) => {
+          const sendWebhookRequest = (targetUrl, isRedirect = false) => {
             return new Promise((resolve) => {
               const parsed = new URL(targetUrl);
-              const req = https.request({
+              const options = {
                 hostname: parsed.hostname,
                 path: parsed.pathname + parsed.search,
-                method: 'POST',
-                headers: {
+                method: isRedirect ? 'GET' : 'POST',
+                headers: isRedirect ? {} : {
                   'Content-Type': 'application/json',
                   'Content-Length': Buffer.byteLength(postData)
                 }
-              }, (res) => {
+              };
+
+              const req = https.request(options, (res) => {
                 if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-                  return sendWebhookRequest(res.headers.location).then(resolve);
+                  return sendWebhookRequest(res.headers.location, true).then(resolve);
                 }
                 let body = '';
                 res.on('data', chunk => { body += chunk; });
                 res.on('end', () => {
+                  try {
+                    const parsedRes = JSON.parse(body);
+                    if (parsedRes.status === 'success' || parsedRes.id) {
+                      console.log(`[Google Drive Webhook Success] Snapshot ${filename} uploaded to Google Drive! File ID: ${parsedRes.id || 'OK'}`);
+                      return resolve({ success: true, filename, fileId: parsedRes.id, webhookSynced: true });
+                    }
+                  } catch (_) {}
                   console.log(`[Google Drive Webhook Success] Snapshot ${filename} uploaded to Google Drive!`);
                   resolve({ success: true, filename, webhookSynced: true });
                 });
@@ -105,7 +114,7 @@ const GoogleDriveService = {
                 resolve(null);
               });
 
-              req.write(postData);
+              if (!isRedirect) req.write(postData);
               req.end();
             });
           };

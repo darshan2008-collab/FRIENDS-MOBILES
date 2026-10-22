@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "app": "FRIENDS MOBILE",
+    "backupType": "Master JSON Database Backup",
+    "version": "2.0.0",
+    "databaseEngine": "PostgreSQL + Persistent Storage",
+    "createdAt": "2026-10-21T09:13:21.155Z",
+    "totalRecords": {
+      "users": 0,
+      "products": 0,
+      "orders": 0,
+      "complaints": 0,
+      "subscribers": 1
+    }
+  },
+  "data": {
+    "users": [],
+    "products": [],
+    "orders": [],
+    "complaints": [],
+    "banners": [],
+    "settings": {
+      "freeShippingThreshold": 1000,
+      "standardShippingFee": 70,
+      "expressShippingFee": 99,
+      "codFee": 0,
+      "codMinAmount": 300,
+      "codEnabled": true,
+      "storeName": "FRIENDS MOBILE",
+      "storeCity": "Madurai, Tamil Nadu",
+      "storePhone": "+91 93445 22086",
+      "supportPhone": "+91 93445 22086",
+      "supportEmail": "friendsmobile@gmail.com",
+      "storeUpiId": "darshankannan2008@oksbi",
+      "storePayeeName": "FRIENDS MOBILE",
+      "updatedAt": "2026-10-21T06:32:52.038Z"
+    },
+    "subscribers": [
+      {
+        "id": 1,
+        "email": "friendsmobile@gmail.com",
+        "subscribedAt": "2026-07-24T14:43:54.246Z"
+      }
+    ]
+  }
+}
